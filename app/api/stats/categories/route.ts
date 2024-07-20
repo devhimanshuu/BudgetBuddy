@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { TransactionType } from "@/lib/type";
 import { OverviewQuerySchema } from "@/schema/overview";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -25,9 +26,15 @@ export async function GET(request: Request) {
   return Response.json(stats);
 }
 
-export type GetCategoriesStatsResponseType = Awaited<
-  ReturnType<typeof getCategoriesStats>
->;
+// export type GetCategoriesStatsResponseType = Awaited<
+//   ReturnType<typeof getCategoriesStats>
+// >;
+export type GetCategoriesStatsResponseType = Array<{
+  type: TransactionType;
+  _sum: { amount: number | null };
+  category: string;
+  categoryIcon: React.ReactNode;
+}>;
 
 async function getCategoriesStats(userId: string, from: Date, to: Date) {
   const stats = await prisma.transaction.groupBy({
