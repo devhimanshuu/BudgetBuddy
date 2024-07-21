@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const paramType = searchParams.get("type");
 
-  const validator = z.enum(["expense", "income"]);
+  const validator = z.enum(["expense", "income"]).nullable();
   const queryParams = validator.safeParse(paramType);
   if (!queryParams.success) {
     return Response.json(queryParams.error, {
@@ -31,4 +31,5 @@ export async function GET(request: Request) {
       name: "asc",
     },
   });
+  return Response.json(categories);
 }
