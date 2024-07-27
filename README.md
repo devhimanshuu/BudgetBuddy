@@ -101,4 +101,15 @@ We welcome contributions! Please follow these steps:
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
+## Contact
+Connect with me on social media:
+- Twitter: [@devhimanshuu](https://twitter.com/devhimanshuu)
+- LinkedIn: [Himanshu Gupta](https://www.linkedin.com/in/himanshu-guptaa/)
+- Email: devhimanshuu@gmail.com
+- Hashnode: [TechSphere](https://techsphere.hashnode.dev/)
+
+Feel free to reach out if you have questions, suggestions, or just want to chat about BudgetBuddy
+
+Happy coding! 🚀
+
 
