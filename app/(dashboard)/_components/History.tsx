@@ -35,7 +35,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
     queryKey: ["overview", "history", timeframe, period],
     queryFn: () =>
       fetch(
-        `/api/histoy-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`
+        `/api/history-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`
       ).then((res) => res.json()),
   });
 
@@ -122,7 +122,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                       const { year, month, day } = data;
                       const date = new Date(year, month, day || 1);
                       if (timeframe === "year") {
-                        return date.toLocaleDateString("dafault", {
+                        return date.toLocaleDateString("default", {
                           month: "long",
                         });
                       }
@@ -200,10 +200,10 @@ function CustomTooltip({ active, payload, formatter }: any) {
       />
       <TooltipRow
         formatter={formatter}
-        label="Expense"
+        label="Balance"
         value={income - expense}
         bgColor="bg-gray-100"
-        textColor="text-forground"
+        textColor="text-foreground"
       />
     </div>
   );
@@ -232,7 +232,7 @@ function TooltipRow({
       <div className={cn("h-4 w-4 rounded-full", bgColor)} />
       <div className="flex w-full justify-between">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <div className={(cn("text-sm font-bold"), textColor)}>
+        <div className={cn("text-sm font-bold", textColor)}>
           <CountUp
             duration={0.5}
             preserveValue

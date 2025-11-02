@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { Period, TimeFrame } from "@/lib/type";
 import { currentUser } from "@clerk/nextjs/server";
-import { error } from "console";
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -57,6 +56,8 @@ async function getHistoryData(
       return await getYearHistoryData(userId, period.year);
     case "month":
       return await getMonthHistoryData(userId, period.year, period.month);
+    default:
+      throw new Error(`Invalid timeframe: ${timeframe}`);
   }
 }
 
@@ -96,8 +97,8 @@ async function getYearHistoryData(userId: string, year: number) {
 
     const month = result.find((row) => row.month === i);
     if (month) {
-      expense = month._sum.expense || 0;
-      income = month._sum.income || 0;
+      expense = month._sum.expense != null ? Number(month._sum.expense) : 0;
+      income = month._sum.income != null ? Number(month._sum.income) : 0;
     }
 
     history.push({
@@ -144,8 +145,8 @@ async function getMonthHistoryData(
 
     const day = result.find((row) => row.day === i);
     if (day) {
-      expense = day._sum.expense || 0;
-      income = day._sum.income || 0;
+      expense = day._sum.expense != null ? Number(day._sum.expense) : 0;
+      income = day._sum.income != null ? Number(day._sum.income) : 0;
     }
 
     history.push({

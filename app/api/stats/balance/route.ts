@@ -47,8 +47,11 @@ async function getBalanceStats(userId: string, from: Date, to: Date) {
       amount: true,
     },
   });
+  // Ensure numbers are properly converted (handle null values)
+  const expense = totals.find((t) => t.type === "expense")?._sum.amount;
+  const income = totals.find((t) => t.type === "income")?._sum.amount;
   return {
-    expense: totals.find((t) => t.type === "expense")?._sum.amount || 0,
-    income: totals.find((t) => t.type === "income")?._sum.amount || 0,
+    expense: expense != null ? Number(expense) : 0,
+    income: income != null ? Number(income) : 0,
   };
 }

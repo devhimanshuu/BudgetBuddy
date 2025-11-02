@@ -55,6 +55,8 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
     resolver: zodResolver(CreateCategorySchema),
     defaultValues: {
       type,
+      name: "",
+      icon: "",
     },
   });
 

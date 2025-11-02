@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -56,6 +57,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     defaultValues: {
       type,
       date: new Date(),
+      description: "",
+      amount: 0,
+      category: "",
     },
   });
 
@@ -81,7 +85,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
         description: "",
         amount: 0,
         date: new Date(),
-        category: undefined,
+        category: "",
       });
 
       //After creating a transaction , we need to invalidate the overview query which will refresh data in the homepage
@@ -122,6 +126,9 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
             </span>
             transaction
           </DialogTitle>
+          <DialogDescription>
+            Add a new {type} transaction to track your finances
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
@@ -132,7 +139,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} />
+                    <Input {...field} value={field.value || ""} />
                   </FormControl>
                   <FormDescription>
                     Transaction Description (optional)
@@ -147,7 +154,16 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input defaultValue={0} type="number" {...field} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value === "" ? 0 : Number(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
                   </FormControl>
                   <FormDescription>
                     Transaction Amount (required)
@@ -206,7 +222,6 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                           selected={field.value}
                           onSelect={(value) => {
                             if (!value) return;
-                            console.log("@@Calender", value);
                             field.onChange(value);
                           }}
                           initialFocus
@@ -236,7 +251,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               Cancel
             </Button>
           </DialogClose>
-          <Button disabled={isPending}>
+          <Button type="submit" disabled={isPending} onClick={form.handleSubmit(onSubmit)}>
             {!isPending && "Create"}
             {isPending && <Loader2 className="animate-spin" />}
           </Button>

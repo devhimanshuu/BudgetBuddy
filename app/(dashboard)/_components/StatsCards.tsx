@@ -20,7 +20,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
     queryKey: ["overview", "stats", from, to],
     queryFn: () =>
       fetch(
-        `/api/state/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`
+        `/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`
       ).then((res) => res.json()),
   });
 

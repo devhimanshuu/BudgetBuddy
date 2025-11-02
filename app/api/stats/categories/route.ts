@@ -15,7 +15,9 @@ export async function GET(request: Request) {
 
   const queryParams = OverviewQuerySchema.safeParse({ from, to });
   if (!queryParams.success) {
-    throw new Error(queryParams.error.message);
+    return Response.json({ error: queryParams.error.message }, {
+      status: 400,
+    });
   }
 
   const stats = await getCategoriesStats(
@@ -33,7 +35,7 @@ export type GetCategoriesStatsResponseType = Array<{
   type: TransactionType;
   _sum: { amount: number | null };
   category: string;
-  categoryIcon: React.ReactNode;
+  categoryIcon: string;
 }>;
 
 async function getCategoriesStats(userId: string, from: Date, to: Date) {
@@ -55,4 +57,11 @@ async function getCategoriesStats(userId: string, from: Date, to: Date) {
       },
     },
   });
+  // Convert null values to 0 for JSON serialization
+  return stats.map((stat) => ({
+    ...stat,
+    _sum: {
+      amount: stat._sum.amount ?? 0,
+    },
+  }));
 }
