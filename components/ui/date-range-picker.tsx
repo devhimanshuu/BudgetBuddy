@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 "use client";
 
-import React, { type FC, useState, useEffect, useRef } from "react";
+import React, { type FC, useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Calendar } from "./calendar";
@@ -226,7 +226,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     }
   };
 
-  const checkPreset = (): void => {
+  const checkPreset = useCallback((): void => {
     for (const preset of PRESETS) {
       const presetRange = getPresetRange(preset.name);
 
@@ -252,7 +252,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
     }
 
     setSelectedPreset(undefined);
-  };
+  },[range]);
 
   const resetValues = (): void => {
     setRange({

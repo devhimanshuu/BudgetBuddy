@@ -101,7 +101,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       toast.loading("Creating transaction...", { id: "create-transaction" });
       mutate({
         ...values,
-        date: DateToUTCDate(values.date),
+        // date: DateToUTCDate(values.date),
         name: "",
         icon: "",
       });
