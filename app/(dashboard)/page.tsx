@@ -10,7 +10,7 @@ import History from "./_components/History";
 async function page() {
   const user = await currentUser();
   if (!user) {
-    redirect("sign-in");
+    redirect("/sign-in");
   }
 
   const userSettings = await prisma.userSettings.findUnique({

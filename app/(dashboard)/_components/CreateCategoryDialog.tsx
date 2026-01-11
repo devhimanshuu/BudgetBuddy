@@ -18,6 +18,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -198,6 +199,7 @@ function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
                   <FormDescription>
                     This is how your category will appear in the app
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />

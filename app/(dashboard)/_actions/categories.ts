@@ -19,14 +19,19 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
     redirect("/sign-in");
   }
   const { name, icon, type } = parsedBody.data;
-  return await prisma.category.create({
-    data: {
-      userId: user.id,
-      name,
-      icon,
-      type,
-    },
-  });
+  try {
+    return await prisma.category.create({
+      data: {
+        userId: user.id,
+        name,
+        icon,
+        type,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating category:", error);
+    throw error;
+  }
 }
 
 export async function DeleteCategory(form: DeleteCategorySchemaType) {

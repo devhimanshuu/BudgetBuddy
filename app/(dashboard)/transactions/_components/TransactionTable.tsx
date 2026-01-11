@@ -138,7 +138,7 @@ const TransactionTable = ({ from, to }: Props) => {
     queryKey: ["transactions", "history", from, to],
     queryFn: () =>
       fetch(
-        `/api/transactions-history?from=${DateToUTCDate(
+        `/api/transaction-history?from=${DateToUTCDate(
           from
         )}&to=${DateToUTCDate(to)}`
       ).then((res) => res.json()),
@@ -307,7 +307,7 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
         transactionId={transaction.id}
       />
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild>
           <Button variant={"ghost"} className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
