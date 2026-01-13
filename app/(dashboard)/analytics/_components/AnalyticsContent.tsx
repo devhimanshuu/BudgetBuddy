@@ -10,6 +10,10 @@ import TrendsChart from "./TrendsChart";
 import HeatmapChart from "./HeatmapChart";
 import ComparisonChart from "./ComparisonChart";
 import { UserSettings } from "@prisma/client";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import { exportAnalyticsToPDF } from "@/lib/pdf-export";
+import { useQuery } from "@tanstack/react-query";
 
 interface AnalyticsContentProps {
   userSettings: UserSettings;
@@ -20,6 +24,40 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
     from: startOfMonth(new Date()),
     to: new Date(),
   });
+
+  // Fetch category breakdown data for expense
+  const categoryDataQuery = useQuery({
+    queryKey: ["analytics", "category-breakdown", "expense", dataRange.from, dataRange.to],
+    queryFn: () =>
+      fetch(
+        `/api/analytics/category-breakdown?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}&type=expense`
+      ).then((res) => res.json()),
+  });
+
+  // Fetch trends data
+  const trendsDataQuery = useQuery({
+    queryKey: ["analytics", "trends", dataRange.from, dataRange.to],
+    queryFn: () =>
+      fetch(
+        `/api/analytics/trends?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}`
+      ).then((res) => res.json()),
+  });
+
+  const handleExportPDF = () => {
+    if (!categoryDataQuery.data || !trendsDataQuery.data) {
+      toast.error("Please wait for data to load before exporting");
+      return;
+    }
+
+    exportAnalyticsToPDF(categoryDataQuery.data, trendsDataQuery.data, {
+      title: "Analytics Report",
+      dateRange: dataRange,
+      currency: userSettings.currency,
+    });
+
+    toast.success("Analytics report exported successfully!");
+  };
+
 
   return (
     <>
@@ -50,6 +88,14 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
                 setDataRange({ from, to });
               }}
             />
+            <Button
+              variant="outline"
+              onClick={handleExportPDF}
+              disabled={categoryDataQuery.isFetching || trendsDataQuery.isFetching}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Export PDF
+            </Button>
           </div>
         </div>
       </div>

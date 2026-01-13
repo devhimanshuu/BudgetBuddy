@@ -30,7 +30,7 @@ import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import { DataTableViewOptions } from "@/components/datatable/ColumnToggle";
 import { Button } from "@/components/ui/button";
 import { download, generateCsv, mkConfig } from "export-to-csv";
-import { DownloadIcon, MoreHorizontal, TrashIcon } from "lucide-react";
+import { DownloadIcon, MoreHorizontal, TrashIcon, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
+import { exportTransactionsToPDF } from "@/lib/pdf-export";
 
 interface Props {
   from: Date;
@@ -144,10 +145,36 @@ const TransactionTable = ({ from, to }: Props) => {
       ).then((res) => res.json()),
   });
 
+  const userSettings = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+
   const handleExportCSV = (data: any[]) => {
     const csv = generateCsv(csvConfig)(data);
     download(csvConfig)(csv);
   };
+
+  const handleExportPDF = () => {
+    if (!history.data || !userSettings.data) return;
+    
+    const filteredData = table.getFilteredRowModel().rows.map((row) => ({
+      id: row.original.id,
+      date: row.original.date,
+      description: row.original.description,
+      amount: row.original.amount,
+      type: row.original.type,
+      category: row.original.category,
+      categoryIcon: row.original.categoryIcon,
+    }));
+
+    exportTransactionsToPDF(filteredData, {
+      title: "Transaction History",
+      dateRange: { from, to },
+      currency: userSettings.data.currency,
+    });
+  };
+
   const table = useReactTable({
     data: history.data || emptyData,
     columns,
@@ -217,6 +244,16 @@ const TransactionTable = ({ from, to }: Props) => {
           >
             <DownloadIcon className="mr-2 h-4 w-4" />
             Export CSV
+          </Button>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className="h-8 lg:flex"
+            onClick={handleExportPDF}
+            disabled={!userSettings.data}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Export PDF
           </Button>
           <DataTableViewOptions table={table} />
         </div>
