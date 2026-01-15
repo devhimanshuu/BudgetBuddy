@@ -41,10 +41,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 import { exportTransactionsToPDF } from "@/lib/pdf-export";
+import { SearchFilters } from "../../_components/AdvancedSearch";
 
 interface Props {
   from: Date;
   to: Date;
+  searchFilters?: SearchFilters;
 }
 const emptyData: any[] = [];
 type TransactionHistoryRow = getTransactionHistoryResponseType[0];
@@ -132,17 +134,45 @@ const csvConfig = mkConfig({
   decimalSeparator: ",",
   useKeysAsHeaders: true,
 });
-const TransactionTable = ({ from, to }: Props) => {
+const TransactionTable = ({ from, to, searchFilters }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const history = useQuery<getTransactionHistoryResponseType>({
-    queryKey: ["transactions", "history", from, to],
-    queryFn: () =>
-      fetch(
+    queryKey: ["transactions", "history", from, to, searchFilters],
+    queryFn: async () => {
+      // If search filters are active (and have at least one criteria set), use search API
+      const hasSearchFilters = searchFilters && Object.values(searchFilters).some(val => 
+        val !== "" && (Array.isArray(val) ? val.length > 0 : true)
+      );
+
+      if (hasSearchFilters) {
+        const params = new URLSearchParams();
+        if (searchFilters.query) params.append("query", searchFilters.query);
+        if (searchFilters.category) params.append("category", searchFilters.category);
+        if (searchFilters.type) params.append("type", searchFilters.type);
+        if (searchFilters.minAmount) params.append("minAmount", searchFilters.minAmount);
+        if (searchFilters.maxAmount) params.append("maxAmount", searchFilters.maxAmount);
+        if (searchFilters.tags && searchFilters.tags.length > 0) {
+          params.append("tags", searchFilters.tags.map(t => t.id).join(","));
+        }
+        // Use search filter dates if provided, otherwise fallback to page dates
+        if (searchFilters.from) params.append("from", searchFilters.from);
+        else params.append("from", DateToUTCDate(from).toISOString());
+        
+        if (searchFilters.to) params.append("to", searchFilters.to);
+        else params.append("to", DateToUTCDate(to).toISOString());
+
+        const response = await fetch(`/api/transactions/search?${params.toString()}`);
+        const data = await response.json();
+        return data.transactions;
+      }
+
+      return fetch(
         `/api/transaction-history?from=${DateToUTCDate(
           from
         )}&to=${DateToUTCDate(to)}`
-      ).then((res) => res.json()),
+      ).then((res) => res.json());
+    },
   });
 
   const userSettings = useQuery({

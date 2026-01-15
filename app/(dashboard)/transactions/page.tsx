@@ -6,11 +6,21 @@ import { differenceInDays, startOfMonth } from "date-fns";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import TransactionTable from "./_components/TransactionTable";
+import AdvancedSearch, { SearchFilters } from "../_components/AdvancedSearch";
+import { useQuery } from "@tanstack/react-query";
 
 const TransactionPage = () => {
   const [dataRange, setDataRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
     to: new Date(),
+  });
+  const [searchFilters, setSearchFilters] = useState<SearchFilters | undefined>(
+    undefined
+  );
+
+  const categoriesQuery = useQuery({
+    queryKey: ["categories", "all"],
+    queryFn: () => fetch("/api/categories").then((res) => res.json()),
   });
   return (
     <>
@@ -20,27 +30,37 @@ const TransactionPage = () => {
             <p className="text-3xl font-bold ">Transactions history</p>
           </div>
 
-          <DateRangePicker
-            initialDateFrom={dataRange.from}
-            initialDateTo={dataRange.to}
-            showCompare={false}
-            onUpdate={(values) => {
-              const { from, to } = values.range;
+          <div className="flex items-center gap-2">
+            <AdvancedSearch
+              onSearch={setSearchFilters}
+              categories={categoriesQuery.data?.map((c: any) => c.name) || []}
+            />
+            <DateRangePicker
+              initialDateFrom={dataRange.from}
+              initialDateTo={dataRange.to}
+              showCompare={false}
+              onUpdate={(values) => {
+                const { from, to } = values.range;
 
-              if (!from || !to) return;
-              if (differenceInDays(to, from) > MAX_DATE_RANGE_DAYS) {
-                toast.error(
-                  `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE_DAYS} days`
-                );
-                return;
-              }
-              setDataRange({ from, to });
-            }}
-          />
+                if (!from || !to) return;
+                if (differenceInDays(to, from) > MAX_DATE_RANGE_DAYS) {
+                  toast.error(
+                    `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE_DAYS} days`
+                  );
+                  return;
+                }
+                setDataRange({ from, to });
+              }}
+            />
+          </div>
         </div>
       </div>
       <div className="container">
-        <TransactionTable from={dataRange.from} to={dataRange.to} />
+        <TransactionTable
+          from={dataRange.from}
+          to={dataRange.to}
+          searchFilters={searchFilters}
+        />
       </div>
     </>
   );

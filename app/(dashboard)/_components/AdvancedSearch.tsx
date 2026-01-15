@@ -22,13 +22,13 @@ import {
 } from "@/components/ui/select";
 import TagSelector from "./TagSelector";
 
-interface Tag {
+export interface Tag {
   id: string;
   name: string;
   color: string;
 }
 
-interface SearchFilters {
+export interface SearchFilters {
   query: string;
   tags: Tag[];
   category: string;
