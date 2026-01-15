@@ -7,6 +7,11 @@ import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import Overview from "./_components/Overview";
 import History from "./_components/History";
 import BudgetOverview from "./_components/BudgetOverview";
+import NetWorthCard from "./_components/NetWorthCard";
+import SpendingTrends from "./_components/SpendingTrends";
+import TopCategories from "./_components/TopCategories";
+import SavingsRate from "./_components/SavingsRate";
+import SavingsGoals from "./_components/SavingsGoals";
 
 async function page() {
   const user = await currentUser();
@@ -14,7 +19,7 @@ async function page() {
     redirect("/sign-in");
   }
 
-  const userSettings = await prisma.userSettings.findUnique({
+  const userSettings: Awaited<ReturnType<typeof prisma.userSettings.findUnique>> = await prisma.userSettings.findUnique({
     where: {
       userId: user.id,
     },
@@ -26,15 +31,15 @@ async function page() {
   return (
     <div className="h-full bg-background ">
       <div className="border-b bg-card">
-        <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
-          <p className="text-3xl font-bold ">Hello, {user.firstName}</p>
+        <div className="container flex flex-wrap items-center justify-between gap-6 py-8 3xl:gap-8">
+          <p className="text-3xl font-bold 3xl:text-4xl">Hello, {user.firstName}</p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 3xl:gap-4">
             <CreateTransactionDialog
               trigger={
                 <Button
                   variant={"outline"}
-                  className="border-emerald-500 bg-emerald-950 text-white hover:bg-emerald-700 hover:text-white"
+                  className="border-emerald-500 bg-emerald-950 text-white hover:bg-emerald-700 hover:text-white 3xl:text-base"
                 >
                   New Income
                 </Button>
@@ -45,7 +50,7 @@ async function page() {
               trigger={
                 <Button
                   variant={"outline"}
-                  className="border-rose-500 bg-rose-950 text-white hover:bg-rose-700 hover:text-white"
+                  className="border-rose-500 bg-rose-950 text-white hover:bg-rose-700 hover:text-white 3xl:text-base"
                 >
                   New Expense
                 </Button>
@@ -56,9 +61,32 @@ async function page() {
         </div>
       </div>
       <Overview userSettings={userSettings} />
-      <div className="container py-6">
+      
+      {/* Dashboard Widgets */}
+      <div className="container py-6 3xl:py-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 3xl:gap-6">
+          <div className="md:col-span-2">
+            <NetWorthCard userSettings={userSettings} />
+          </div>
+          <div className="md:col-span-2">
+            <SavingsRate userSettings={userSettings} />
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2 3xl:mt-6 3xl:gap-6">
+          <SpendingTrends userSettings={userSettings} />
+          <TopCategories userSettings={userSettings} />
+        </div>
+      </div>
+
+      <div className="container py-6 3xl:py-8">
         <BudgetOverview userSettings={userSettings} />
       </div>
+
+      <div className="container py-6 3xl:py-8">
+        <SavingsGoals userSettings={userSettings} />
+      </div>
+
       <History userSettings={userSettings} />
     </div>
   );

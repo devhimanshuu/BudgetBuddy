@@ -19,7 +19,17 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
     redirect("/sign-in");
   }
 
-  const { amount, category, date, description, type } = parsedBody.data;
+  const {
+    amount,
+    category,
+    date,
+    description,
+    notes,
+    type,
+    tags,
+    attachments,
+    splits,
+  } = parsedBody.data;
   const categoryRow = await prisma.category.findFirst({
     where: {
       userId: user.id,
@@ -32,22 +42,59 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
   //NOTE: dont make confusion between transaction (prisma) and prisma.transaction (table)
 
-  await prisma.$transaction([
+  await prisma.$transaction(async (tx) => {
     //create user transaction
-    prisma.transaction.create({
+    const transaction = await tx.transaction.create({
       data: {
         userId: user.id,
         amount,
         date,
         description: description || "",
+        notes: notes || null,
         type,
         category: categoryRow.name,
         categoryIcon: categoryRow.icon,
       },
-    }),
+    });
+
+    // Create tag associations if tags provided
+    if (tags && tags.length > 0) {
+      await tx.transactionTag.createMany({
+        data: tags.map((tagId) => ({
+          transactionId: transaction.id,
+          tagId,
+        })),
+      });
+    }
+
+    // Create attachments if provided
+    if (attachments && attachments.length > 0) {
+      await tx.attachment.createMany({
+        data: attachments.map((att) => ({
+          transactionId: transaction.id,
+          fileName: att.fileName,
+          fileUrl: att.fileUrl,
+          fileSize: att.fileSize,
+          fileType: att.fileType,
+        })),
+      });
+    }
+
+    // Create splits if provided
+    if (splits && splits.length > 0) {
+      await tx.transactionSplit.createMany({
+        data: splits.map((split) => ({
+          transactionId: transaction.id,
+          category: split.category,
+          categoryIcon: split.categoryIcon,
+          amount: split.amount,
+          percentage: split.percentage,
+        })),
+      });
+    }
 
     //Update aggregates table
-    prisma.monthlyHistory.upsert({
+    await tx.monthlyHistory.upsert({
       where: {
         day_month_year_userId: {
           userId: user.id,
@@ -72,10 +119,10 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
           increment: type === "income" ? amount : 0,
         },
       },
-    }),
+    });
 
     //update year Aggregate
-    prisma.yearHistory.upsert({
+    await tx.yearHistory.upsert({
       where: {
         month_year_userId: {
           userId: user.id,
@@ -98,6 +145,6 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
           increment: type === "income" ? amount : 0,
         },
       },
-    }),
-  ]);
+    });
+  });
 }

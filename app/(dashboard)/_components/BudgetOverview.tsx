@@ -58,77 +58,77 @@ export default function BudgetOverview({ userSettings }: BudgetOverviewProps) {
 
   return (
     <Card className="col-span-12">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Budget Overview
-          </CardTitle>
-          <Link href="/budgets">
-            <Button variant="ghost" size="sm">
-              View All
-            </Button>
-          </Link>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <SkeletonWrapper isLoading={isFetching}>
-          <div className="space-y-4">
-            {alertBudgets && alertBudgets.length > 0 && (
-              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950/20">
-                <div className="flex items-center gap-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                  <AlertTriangle className="h-4 w-4" />
-                  {alertBudgets.length} budget{alertBudgets.length > 1 ? "s" : ""}{" "}
-                  need attention
-                </div>
-              </div>
-            )}
+       <CardHeader className="3xl:p-8">
+         <div className="flex items-center justify-between">
+           <CardTitle className="flex items-center gap-2 3xl:text-2xl 3xl:gap-3">
+             <TrendingUp className="h-5 w-5 3xl:h-6 3xl:w-6" />
+             Budget Overview
+           </CardTitle>
+           <Link href="/budgets">
+             <Button variant="ghost" size="sm" className="3xl:text-base">
+               View All
+             </Button>
+           </Link>
+         </div>
+       </CardHeader>
+       <CardContent className="3xl:p-8 3xl:pt-0">
+         <SkeletonWrapper isLoading={isFetching}>
+           <div className="space-y-4 3xl:space-y-6">
+             {alertBudgets && alertBudgets.length > 0 && (
+               <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950/20 3xl:p-4">
+                 <div className="flex items-center gap-2 text-sm font-medium text-yellow-800 dark:text-yellow-200 3xl:text-base">
+                   <AlertTriangle className="h-4 w-4 3xl:h-5 3xl:w-5" />
+                   {alertBudgets.length} budget{alertBudgets.length > 1 ? "s" : ""}{" "}
+                   need attention
+                 </div>
+               </div>
+             )}
 
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {budgetProgress?.slice(0, 6).map((budget) => (
-                <div
-                  key={budget.id}
-                  className={cn(
-                    "rounded-lg border p-3",
-                    budget.isOverBudget &&
-                      "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20",
-                    budget.isNearLimit &&
-                      !budget.isOverBudget &&
-                      "border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/20"
-                  )}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium flex items-center gap-1">
-                      <span>{budget.categoryIcon}</span>
-                      <span>{budget.category}</span>
-                    </span>
-                    {budget.isOverBudget && (
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                    )}
-                  </div>
-                  <Progress
-                    value={budget.percentage}
-                    className={cn(
-                      "h-1.5 mb-2",
-                      budget.isOverBudget && "[&>div]:bg-red-500",
-                      budget.isNearLimit &&
-                        !budget.isOverBudget &&
-                        "[&>div]:bg-yellow-500"
-                    )}
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>
-                      {formatter.format(budget.spent)} /{" "}
-                      {formatter.format(budget.budgetAmount)}
-                    </span>
-                    <span>{budget.percentage.toFixed(0)}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </SkeletonWrapper>
-      </CardContent>
+             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 3xl:gap-4">
+               {budgetProgress?.slice(0, 6).map((budget) => (
+                 <div
+                   key={budget.id}
+                   className={cn(
+                     "rounded-lg border p-3 3xl:p-4",
+                     budget.isOverBudget &&
+                       "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20",
+                     budget.isNearLimit &&
+                       !budget.isOverBudget &&
+                       "border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/20"
+                   )}
+                 >
+                   <div className="flex items-center justify-between mb-2 3xl:mb-3">
+                     <span className="text-sm font-medium flex items-center gap-1 3xl:text-base 3xl:gap-2">
+                       <span className="text-xl 3xl:text-2xl">{budget.categoryIcon}</span>
+                       <span>{budget.category}</span>
+                     </span>
+                     {budget.isOverBudget && (
+                       <AlertTriangle className="h-4 w-4 text-red-500 3xl:h-5 3xl:w-5" />
+                     )}
+                   </div>
+                   <Progress
+                     value={budget.percentage}
+                     className={cn(
+                       "h-1.5 mb-2 3xl:h-2.5 3xl:mb-3",
+                       budget.isOverBudget && "[&>div]:bg-red-500",
+                       budget.isNearLimit &&
+                         !budget.isOverBudget &&
+                         "[&>div]:bg-yellow-500"
+                     )}
+                   />
+                   <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
+                     <span>
+                       {formatter.format(budget.spent)} /{" "}
+                       {formatter.format(budget.budgetAmount)}
+                     </span>
+                     <span>{budget.percentage.toFixed(0)}%</span>
+                   </div>
+                 </div>
+               ))}
+             </div>
+           </div>
+         </SkeletonWrapper>
+       </CardContent>
     </Card>
   );
 }

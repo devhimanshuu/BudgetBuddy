@@ -33,7 +33,7 @@ function CategoriesStats({ userSettings, from, to }: Props) {
   }, [userSettings.currency]);
 
   return (
-    <div className="flex w-full flex-wrap gap-2 md:flex-nowrap">
+    <div className="flex w-full flex-wrap gap-2 md:flex-nowrap 3xl:gap-4">
       <SkeletonWrapper isLoading={statsQuery.isFetching}>
         <CategoriesCard
           formatter={formatter}
@@ -70,9 +70,9 @@ function CategoriesCard({
   );
 
   return (
-    <Card className="h-80 w-full col-span-6">
-      <CardHeader>
-        <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flow-col">
+    <Card className="h-80 w-full col-span-6 3xl:h-96">
+      <CardHeader className="3xl:pb-4">
+        <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flow-col 3xl:text-lg">
           {type === "income" ? "Incomes" : "Expenses"} by category
         </CardTitle>
       </CardHeader>
@@ -89,8 +89,8 @@ function CategoriesCard({
         )}
 
         {filteredData.length > 0 && (
-          <ScrollArea className="h-60 w-full px-4">
-            <div className="flex w-full flex-col gap-4 p-4">
+          <ScrollArea className="h-60 w-full px-4 3xl:h-72">
+            <div className="flex w-full flex-col gap-4 p-4 3xl:gap-5">
               {filteredData.map((item) => {
                 const amount = item._sum.amount || 0;
                 const percentage = (amount * 100) / (total || amount);
@@ -98,14 +98,14 @@ function CategoriesCard({
                 return (
                   <div key={item.category} className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center text-gray-400">
+                      <span className="flex items-center text-gray-400 3xl:text-base">
                         {item.categoryIcon} {item.category}
-                        <span className="ml-2 text-xs text-muted-foreground">
+                        <span className="ml-2 text-xs text-muted-foreground 3xl:text-sm">
                           ({percentage.toFixed(0)}%)
                         </span>
                       </span>
 
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-400 3xl:text-base">
                         {formatter.format(amount)}
                       </span>
                     </div>
