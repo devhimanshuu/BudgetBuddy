@@ -6,6 +6,7 @@ import React from "react";
 import CreateTransactionDialog from "./_components/CreateTransactionDialog";
 import Overview from "./_components/Overview";
 import History from "./_components/History";
+import BudgetOverview from "./_components/BudgetOverview";
 
 async function page() {
   const user = await currentUser();
@@ -55,6 +56,9 @@ async function page() {
         </div>
       </div>
       <Overview userSettings={userSettings} />
+      <div className="container py-6">
+        <BudgetOverview userSettings={userSettings} />
+      </div>
       <History userSettings={userSettings} />
     </div>
   );

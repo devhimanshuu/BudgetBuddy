@@ -20,8 +20,18 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
   }
   const { name, icon, type } = parsedBody.data;
   try {
-    return await prisma.category.create({
-      data: {
+    return await prisma.category.upsert({
+      where: {
+        name_userId_type: {
+          name,
+          userId: user.id,
+          type,
+        },
+      },
+      update: {
+        icon,
+      },
+      create: {
         userId: user.id,
         name,
         icon,
