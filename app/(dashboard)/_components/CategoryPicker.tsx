@@ -37,6 +37,14 @@ function CategoryPicker({ type, onChange }: Props) {
       fetch(`/api/categories?type=${type}`).then((res) => res.json()),
   });
 
+  // Fetch recent categories
+  const recentCategoriesQuery = useQuery({
+    queryKey: ["categories", "recent", type],
+    queryFn: () =>
+      fetch(`/api/categories/recent?type=${type}`).then((res) => res.json()),
+    enabled: !!type,
+  });
+
   useEffect(() => {
     if (!value) return;
     // when the value changes, call onChange callback
@@ -59,6 +67,20 @@ function CategoryPicker({ type, onChange }: Props) {
     },
     [setValue, setOpen]
   );
+
+  // Get recent category names for filtering
+  const recentCategoryNames = new Set(
+    recentCategoriesQuery.data?.map((cat: any) => cat.name) || []
+  );
+
+  // Split categories into recent and other
+  const recentCategories = categoriesQuery.data?.filter((cat: Category) =>
+    recentCategoryNames.has(cat.name)
+  ) || [];
+
+  const otherCategories = categoriesQuery.data?.filter((cat: Category) =>
+    !recentCategoryNames.has(cat.name)
+  ) || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -91,10 +113,12 @@ function CategoryPicker({ type, onChange }: Props) {
               Tip: Create a new category
             </p>
           </CommandEmpty>
-          <CommandGroup>
-            <CommandList>
-              {categoriesQuery.data &&
-                categoriesQuery.data.map((category: Category) => (
+          
+          {/* Recent Categories */}
+          {recentCategories.length > 0 && (
+            <CommandGroup heading="Recent">
+              <CommandList>
+                {recentCategories.map((category: Category) => (
                   <CommandItem
                     key={category.name}
                     onSelect={() => {
@@ -111,8 +135,34 @@ function CategoryPicker({ type, onChange }: Props) {
                     />
                   </CommandItem>
                 ))}
-            </CommandList>
-          </CommandGroup>
+              </CommandList>
+            </CommandGroup>
+          )}
+
+          {/* All Categories */}
+          {otherCategories.length > 0 && (
+            <CommandGroup heading={recentCategories.length > 0 ? "All Categories" : undefined}>
+              <CommandList>
+                {otherCategories.map((category: Category) => (
+                  <CommandItem
+                    key={category.name}
+                    onSelect={() => {
+                      setValue(category.name);
+                      setOpen((prev) => !prev);
+                    }}
+                  >
+                    <CategoryRow category={category} />
+                    <Check
+                      className={cn(
+                        "mr-2 w-4 h-4 opacity-0",
+                        value === category.name && "opacity-100"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandList>
+            </CommandGroup>
+          )}
         </Command>
       </PopoverContent>
     </Popover>

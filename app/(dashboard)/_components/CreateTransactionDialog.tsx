@@ -51,6 +51,9 @@ import { CreateTransaction } from "../_actions/transaction";
 import { toast } from "sonner";
 import { DateToUTCDate } from "@/lib/helper";
 import { Category } from "@prisma/client";
+import TagSelector from "./TagSelector";
+import FileUpload from "./FileUpload";
+import { Textarea } from "@/components/ui/textarea";
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const form = useForm<CreateTransactionSchemaType>({
@@ -65,6 +68,17 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   });
 
   const [open, setOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<
+    { id: string; name: string; color: string }[]
+  >([]);
+  const [attachments, setAttachments] = useState<
+    {
+      fileName: string;
+      fileUrl: string;
+      fileSize: number;
+      fileType: string;
+    }[]
+  >([]);
 
   const handleCategoryChange = useCallback(
     (value: Category) => {
@@ -84,10 +98,13 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       form.reset({
         type,
         description: "",
+        notes: "",
         amount: 0,
         date: new Date(),
         category: "",
       });
+      setSelectedTags([]);
+      setAttachments([]);
 
       //After creating a transaction , we need to invalidate the overview query which will refresh data in the homepage
 
@@ -103,9 +120,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       mutate({
         ...values,
         date: DateToUTCDate(values.date),
+        tags: selectedTags.map((tag) => tag.id),
+        attachments: attachments,
       });
     },
-    [mutate]
+    [mutate, selectedTags, attachments]
   );
 
   return (
@@ -146,6 +165,45 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 </FormItem>
               )}
             />
+            <FormField
+              name="notes"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value || ""}
+                      placeholder="Add additional notes or details..."
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Optional notes about this transaction
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <FormLabel>Tags</FormLabel>
+              <TagSelector
+                selectedTags={selectedTags}
+                onTagsChange={setSelectedTags}
+              />
+              <FormDescription>
+                Add tags to organize this transaction
+              </FormDescription>
+            </div>
+
+            {/* Attachments */}
+            <FileUpload
+              attachments={attachments}
+              onAttachmentsChange={setAttachments}
+            />
+
             <FormField
               name="amount"
               control={form.control}

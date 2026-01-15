@@ -44,9 +44,9 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
 
   return (
     <div className="container">
-      <h2 className="mt-12 text-3xl font-bold ">History</h2>
-      <Card className="col-span-12 mt-2 w-full">
-        <CardHeader className="gap-2">
+      <h2 className="mt-12 text-3xl font-bold 3xl:mt-16 3xl:text-4xl">History</h2>
+      <Card className="col-span-12 mt-2 w-full 3xl:mt-4">
+        <CardHeader className="gap-2 3xl:gap-3">
           <CardTitle className="grid grid-flow-row justify-between gap-2 md:grid-flow-col">
             <HistoryPeriodSelector
               period={period}
@@ -54,17 +54,17 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
               timeframe={timeframe}
               setTimeframe={setTimeFrame}
             />
-            <div className="flex h-10 gap-2">
+            <div className="flex h-10 gap-2 3xl:h-12 3xl:gap-3">
               <Badge
                 variant={"outline"}
-                className="flex items-center gap-2 text-sm"
+                className="flex items-center gap-2 text-sm 3xl:text-base"
               >
                 <div className="h-4 w-4 rounded-full bg-emerald-500"></div>
                 Income
               </Badge>
               <Badge
                 variant={"outline"}
-                className="flex items-center gap-2 text-sm"
+                className="flex items-center gap-2 text-sm 3xl:text-base"
               >
                 <div className="h-4 w-4 rounded-full bg-red-500"></div>
                 Expense
@@ -75,7 +75,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
         <CardContent>
           <SkeletonWrapper isLoading={historyDataQuery.isFetching}>
             {dataAvailable && (
-              <ResponsiveContainer width={"100%"} height={300}>
+              <ResponsiveContainer width={"100%"} height={300} className="3xl:!h-[400px]">
                 <BarChart
                   height={300}
                   data={historyDataQuery.data}

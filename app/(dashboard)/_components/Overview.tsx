@@ -16,8 +16,8 @@ const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
   });
   return (
     <>
-      <div className="container flex flex-wrap items-end justify-between gap-2 py-6">
-        <h2 className="text-3xl font-bold ">Overview</h2>
+      <div className="container flex flex-wrap items-end justify-between gap-2 py-6 3xl:gap-4 3xl:py-8">
+        <h2 className="text-3xl font-bold 3xl:text-4xl">Overview</h2>
         <div className="flex items-center gap-3">
           <DateRangePicker
             initialDateFrom={dataRange.from}
@@ -38,7 +38,7 @@ const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
           />
         </div>
       </div>
-      <div className="container flex w-full flex-col gap-2">
+      <div className="container flex w-full flex-col gap-2 3xl:gap-4">
         <StatsCards
           userSettings={userSettings}
           from={dataRange.from}
