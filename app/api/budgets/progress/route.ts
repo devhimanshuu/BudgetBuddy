@@ -1,0 +1,83 @@
+import prisma from "@/lib/prisma";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+
+export async function GET(request: Request) {
+  const user = await currentUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  const { searchParams } = new URL(request.url);
+  const month = searchParams.get("month");
+  const year = searchParams.get("year");
+
+  const querySchema = z.object({
+    month: z.string(),
+    year: z.string(),
+  });
+
+  const queryParams = querySchema.safeParse({ month, year });
+
+  if (!queryParams.success) {
+    return Response.json(queryParams.error, { status: 400 });
+  }
+
+  const monthNum = parseInt(queryParams.data.month);
+  const yearNum = parseInt(queryParams.data.year);
+
+  // Get all budgets for the month
+  const budgets = await prisma.budget.findMany({
+    where: {
+      userId: user.id,
+      month: monthNum,
+      year: yearNum,
+    },
+  });
+
+  // Get actual spending for each category in the month
+  const startDate = new Date(yearNum, monthNum, 1);
+  const endDate = new Date(yearNum, monthNum + 1, 0, 23, 59, 59);
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      userId: user.id,
+      type: "expense",
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  });
+
+  // Calculate spending per category
+  const spendingByCategory: { [key: string]: number } = {};
+  transactions.forEach((transaction) => {
+    if (!spendingByCategory[transaction.category]) {
+      spendingByCategory[transaction.category] = 0;
+    }
+    spendingByCategory[transaction.category] += transaction.amount;
+  });
+
+  // Combine budgets with actual spending
+  const budgetProgress = budgets.map((budget) => {
+    const spent = spendingByCategory[budget.category] || 0;
+    const remaining = budget.amount - spent;
+    const percentage = (spent / budget.amount) * 100;
+
+    return {
+      id: budget.id,
+      category: budget.category,
+      categoryIcon: budget.categoryIcon,
+      budgetAmount: budget.amount,
+      spent,
+      remaining,
+      percentage: Math.min(percentage, 100),
+      isOverBudget: spent > budget.amount,
+      isNearLimit: percentage >= 80 && percentage < 100,
+    };
+  });
+
+  return Response.json(budgetProgress);
+}
