@@ -24,24 +24,29 @@ import React, { useCallback, useEffect, useState } from "react";
 
 interface Props {
   type: TransactionType;
-  onChange: (value: string) => void;
+  onChange: (value: Category) => void;
 }
 
 function CategoryPicker({ type, onChange }: Props) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  useEffect(() => {
-    if (!value) return;
-    // when the value changes, call onChange callback
-    onChange(value);
-  }, [onChange, value]);
-
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
     queryFn: () =>
       fetch(`/api/categories?type=${type}`).then((res) => res.json()),
   });
+
+  useEffect(() => {
+    if (!value) return;
+    // when the value changes, call onChange callback
+    const category = categoriesQuery.data?.find(
+      (cat: Category) => cat.name === value
+    );
+    if (category) {
+      onChange(category);
+    }
+  }, [onChange, value, categoriesQuery.data]);
 
   const selectedCategory = categoriesQuery.data?.find(
     (category: Category) => category.name === value
