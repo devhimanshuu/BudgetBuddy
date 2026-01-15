@@ -89,6 +89,57 @@ export async function POST(request: Request) {
   return Response.json(budget, { status: 201 });
 }
 
+export async function PATCH(request: Request) {
+  const user = await currentUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return Response.json({ error: "Budget ID is required" }, { status: 400 });
+  }
+
+  const body = await request.json();
+
+  const bodySchema = z.object({
+    amount: z.number().positive(),
+    categoryIcon: z.string().optional(),
+  });
+
+  const parsedBody = bodySchema.safeParse(body);
+
+  if (!parsedBody.success) {
+    return Response.json(parsedBody.error, { status: 400 });
+  }
+
+  // Verify ownership before updating
+  const existingBudget = await prisma.budget.findUnique({
+    where: { id },
+  });
+
+  if (!existingBudget || existingBudget.userId !== user.id) {
+    return Response.json({ error: "Budget not found" }, { status: 404 });
+  }
+
+  const updateData: { amount: number; categoryIcon?: string } = {
+    amount: parsedBody.data.amount,
+  };
+
+  if (parsedBody.data.categoryIcon) {
+    updateData.categoryIcon = parsedBody.data.categoryIcon;
+  }
+
+  const budget = await prisma.budget.update({
+    where: { id },
+    data: updateData,
+  });
+
+  return Response.json(budget);
+}
+
 export async function DELETE(request: Request) {
   const user = await currentUser();
   if (!user) {
