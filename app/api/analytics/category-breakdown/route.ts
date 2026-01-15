@@ -46,6 +46,11 @@ export async function GET(request: Request) {
     },
   });
 
+  // If no transactions found, return empty array
+  if (transactions.length === 0) {
+    return Response.json([]);
+  }
+
   const categoryBreakdown = transactions.map((transaction) => ({
     category: transaction.category,
     categoryIcon: transaction.categoryIcon,
