@@ -38,12 +38,57 @@ model Transaction {
 
   amount Float 
   description String 
+  notes String? // Optional notes field
   date DateTime
   userId String
   type String  @default("income")
 
   category String 
   categoryIcon String 
+  
+  tags TransactionTag[]
+  attachments Attachment[]
+  splits TransactionSplit[]
+  
+  @@index([userId, date])
+  @@index([userId, category])
+}
+
+model Tag {
+  id String @id @default(uuid())
+  name String
+  color String @default("#3b82f6") // Default blue color
+  userId String
+  createdAt DateTime @default(now())
+  
+  transactions TransactionTag[]
+  
+  @@unique([name, userId])
+  @@index([userId])
+}
+
+model TransactionTag {
+  transactionId String
+  tagId String
+  
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([transactionId, tagId])
+}
+
+model Attachment {
+  id String @id @default(uuid())
+  transactionId String
+  fileName String
+  fileUrl String
+  fileSize Int
+  fileType String
+  uploadedAt DateTime @default(now())
+  
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  @@index([transactionId])
 }
 
 model MonthlyHistory {
@@ -80,4 +125,36 @@ model Budget {
 
   @@unique([userId, category, month, year])
   @@index([userId, month, year])
+}
+
+model SavingsGoal {
+  id String @id @default(uuid())
+  userId String
+  name String
+  description String?
+  targetAmount Float
+  currentAmount Float @default(0)
+  targetDate DateTime
+  category String @default("General")
+  icon String @default("🎯")
+  color String @default("#3b82f6")
+  isCompleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, isCompleted])
+}
+
+model TransactionSplit {
+  id String @id @default(uuid())
+  transactionId String
+  category String
+  categoryIcon String
+  amount Float
+  percentage Float
+  
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  @@index([transactionId])
 }
