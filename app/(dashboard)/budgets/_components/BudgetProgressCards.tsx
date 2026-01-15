@@ -6,9 +6,12 @@ import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { AlertTriangle, TrendingDown } from "lucide-react";
+import { AlertTriangle, TrendingDown, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import EditBudgetDialog from "./EditBudgetDialog";
+import DeleteBudgetDialog from "./DeleteBudgetDialog";
+import { Button } from "@/components/ui/button";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -70,12 +73,51 @@ export default function BudgetProgressCards({
                       <span className="text-2xl">{budget.categoryIcon}</span>
                       <span>{budget.category}</span>
                     </span>
-                    {budget.isOverBudget && (
-                      <AlertTriangle className="h-5 w-5 text-red-500" />
-                    )}
-                    {budget.isNearLimit && !budget.isOverBudget && (
-                      <TrendingDown className="h-5 w-5 text-yellow-500" />
-                    )}
+                    <div className="flex items-center gap-1">
+                      {budget.isOverBudget && (
+                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                      )}
+                      {budget.isNearLimit && !budget.isOverBudget && (
+                        <TrendingDown className="h-5 w-5 text-yellow-500" />
+                      )}
+                      <EditBudgetDialog
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        }
+                        budget={{
+                          id: budget.id,
+                          category: budget.category,
+                          categoryIcon: budget.categoryIcon,
+                          budgetAmount: budget.budgetAmount,
+                        }}
+                        month={month}
+                        year={year}
+                      />
+                      <DeleteBudgetDialog
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        }
+                        budget={{
+                          id: budget.id,
+                          category: budget.category,
+                          categoryIcon: budget.categoryIcon,
+                        }}
+                        month={month}
+                        year={year}
+                      />
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">

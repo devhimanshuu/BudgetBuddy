@@ -69,8 +69,8 @@ function MobileNavbar() {
 function DesktopNavbar() {
   return (
     <div className="hidden border-separate border-b bg-background md:block">
-      <nav className="container flex items-center justify-between px-8">
-        <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
+      <nav className="container flex items-center justify-between px-8 3xl:px-12">
+        <div className="flex h-[80px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6">
           <Logo />
           <div className="flex h-full ">
             {items.map((items) => (
@@ -82,7 +82,7 @@ function DesktopNavbar() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 3xl:gap-3">
           <ThemeSwitcherBtn />
           <UserButton afterSignOutUrl="/sign-in" />
         </div>
@@ -109,7 +109,7 @@ function NavbarItem({
         href={link}
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "w-full justify-start text-lg text-muted-foreground hover:text-foreground",
+          "w-full justify-start text-lg text-muted-foreground hover:text-foreground 3xl:text-xl",
           isActive && "text-foreground"
         )}
         onClick={() => {
