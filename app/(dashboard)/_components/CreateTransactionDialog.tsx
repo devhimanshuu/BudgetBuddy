@@ -50,6 +50,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreateTransaction } from "../_actions/transaction";
 import { toast } from "sonner";
 import { DateToUTCDate } from "@/lib/helper";
+import { Category } from "@prisma/client";
 
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const form = useForm<CreateTransactionSchemaType>({
@@ -66,8 +67,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const [open, setOpen] = useState(false);
 
   const handleCategoryChange = useCallback(
-    (value: string) => {
-      form.setValue("category", value);
+    (value: Category) => {
+      form.setValue("category", value.name);
     },
     [form]
   );
