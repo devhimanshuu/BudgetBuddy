@@ -28,18 +28,10 @@ export async function GET(request: Request) {
   const fromDate = new Date(queryParams.data.from);
   const toDate = new Date(queryParams.data.to);
 
-  // Get daily aggregated data
+  // Get daily aggregated data - query all data and filter in memory
   const stats = await prisma.monthlyHistory.findMany({
     where: {
       userId: user.id,
-      year: {
-        gte: fromDate.getFullYear(),
-        lte: toDate.getFullYear(),
-      },
-      month: {
-        gte: fromDate.getMonth(),
-        lte: toDate.getMonth(),
-      },
     },
     orderBy: [{ year: "asc" }, { month: "asc" }, { day: "asc" }],
   });
@@ -49,6 +41,11 @@ export async function GET(request: Request) {
     const statDate = new Date(stat.year, stat.month, stat.day);
     return statDate >= fromDate && statDate <= toDate;
   });
+
+  // If no data found, return empty array
+  if (filteredStats.length === 0) {
+    return Response.json([]);
+  }
 
   const trends = filteredStats.map((stat) => ({
     date: new Date(stat.year, stat.month, stat.day).toISOString(),
