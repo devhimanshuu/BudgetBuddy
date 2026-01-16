@@ -125,14 +125,14 @@ export default function AdvancedSearch({
             <Select
               value={filters.category}
               onValueChange={(value) =>
-                setFilters({ ...filters, category: value })
+                setFilters({ ...filters, category: value === "all_categories" ? "" : value })
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All categories</SelectItem>
+                <SelectItem value="all_categories">All categories</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
@@ -147,13 +147,13 @@ export default function AdvancedSearch({
             <Label htmlFor="type">Type</Label>
             <Select
               value={filters.type}
-              onValueChange={(value) => setFilters({ ...filters, type: value })}
+              onValueChange={(value) => setFilters({ ...filters, type: value === "all_types" ? "" : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All types</SelectItem>
+                <SelectItem value="all_types">All types</SelectItem>
                 <SelectItem value="income">Income</SelectItem>
                 <SelectItem value="expense">Expense</SelectItem>
               </SelectContent>

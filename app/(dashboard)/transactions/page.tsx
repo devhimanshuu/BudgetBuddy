@@ -1,8 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { MAX_DATE_RANGE_DAYS } from "@/lib/constants";
 import { differenceInDays, startOfMonth } from "date-fns";
+import { X } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import TransactionTable from "./_components/TransactionTable";
@@ -31,6 +33,21 @@ const TransactionPage = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {searchFilters &&
+              Object.values(searchFilters).some(
+                (val) =>
+                  val !== "" && (Array.isArray(val) ? val.length > 0 : true)
+              ) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchFilters(undefined)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Clear Filters
+                </Button>
+              )}
             <AdvancedSearch
               onSearch={setSearchFilters}
               categories={categoriesQuery.data?.map((c: any) => c.name) || []}
