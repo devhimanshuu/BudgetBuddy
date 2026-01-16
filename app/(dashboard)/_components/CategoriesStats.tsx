@@ -2,7 +2,7 @@
 
 import { GetCategoriesStatsResponseType } from "@/app/api/stats/categories/route";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
@@ -10,6 +10,7 @@ import { TransactionType } from "@/lib/type";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
+import GlassCard from "@/components/GlassCard";
 
 interface Props {
   userSettings: UserSettings;
@@ -70,7 +71,7 @@ function CategoriesCard({
   );
 
   return (
-    <Card className="h-80 w-full col-span-6 3xl:h-96">
+    <GlassCard className="h-80 w-full col-span-6 3xl:h-96">
       <CardHeader className="3xl:pb-4">
         <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flow-col 3xl:text-lg">
           {type === "income" ? "Incomes" : "Expenses"} by category
@@ -123,6 +124,6 @@ function CategoriesCard({
           </ScrollArea>
         )}
       </div>
-    </Card>
+    </GlassCard>
   );
 }

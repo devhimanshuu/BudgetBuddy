@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -52,50 +53,50 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
 
   return (
     <SkeletonWrapper isLoading={savingsQuery.isFetching}>
-      <Card className="h-full">
-        <CardHeader className="3xl:p-8">
+      <GlassCard className="h-full">
+        <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2 3xl:text-2xl 3xl:gap-3">
-              <PiggyBank className="h-5 w-5 text-emerald-500 3xl:h-6 3xl:w-6" />
+            <div className="flex items-center gap-2">
+              <PiggyBank className="h-5 w-5 text-emerald-500" />
               Savings Rate
             </div>
             {rateChange !== 0 && (
               <div
                 className={cn(
-                  "flex items-center gap-1 text-sm 3xl:text-base",
+                  "flex items-center gap-1 text-sm",
                   rateChange > 0 ? "text-emerald-500" : "text-red-500"
                 )}
               >
                 {rateChange > 0 ? (
-                  <TrendingUp className="h-4 w-4 3xl:h-5 3xl:w-5" />
+                  <TrendingUp className="h-4 w-4" />
                 ) : (
-                  <TrendingDown className="h-4 w-4 3xl:h-5 3xl:w-5" />
+                  <TrendingDown className="h-4 w-4" />
                 )}
                 <span>{Math.abs(rateChange).toFixed(1)}%</span>
               </div>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 3xl:space-y-6 3xl:p-8 3xl:pt-0">
+        <CardContent className="space-y-4">
           {/* Savings Rate Display */}
           <div className="text-center">
-            <p className={cn("text-5xl font-bold 3xl:text-6xl", health.color)}>
+            <p className={cn("text-5xl font-bold", health.color)}>
               {savingsRate.toFixed(1)}%
             </p>
-            <p className="mt-1 text-sm text-muted-foreground 3xl:text-base">
+            <p className="mt-1 text-sm text-muted-foreground">
               of income saved
             </p>
-            <p className={cn("mt-2 text-sm font-medium 3xl:text-base", health.color)}>
+            <p className={cn("mt-2 text-sm font-medium", health.color)}>
               {health.label} Savings Rate
             </p>
           </div>
 
           {/* Progress Bar */}
-          <div className="space-y-2 3xl:space-y-3">
+          <div className="space-y-2">
             <Progress
               value={Math.min(savingsRate, 100)}
               className={cn(
-                "h-3 3xl:h-4",
+                "h-3",
                 savingsRate >= 20 && "[&>div]:bg-emerald-500",
                 savingsRate >= 10 &&
                   savingsRate < 20 &&
@@ -105,7 +106,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
                 savingsRate <= 0 && "[&>div]:bg-red-500"
               )}
             />
-            <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span>
               <span>20% (Recommended)</span>
               <span>50%+</span>
@@ -113,12 +114,12 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
           </div>
 
           {/* Breakdown */}
-          <div className="space-y-2 rounded-lg bg-muted p-3 3xl:space-y-3 3xl:p-4">
-            <div className="flex justify-between text-sm 3xl:text-base">
+          <div className="space-y-2 rounded-lg bg-muted p-3">
+            <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Income</span>
               <span className="font-medium">{formatter.format(income)}</span>
             </div>
-            <div className="flex justify-between text-sm 3xl:text-base">
+            <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Amount Saved</span>
               <span
                 className={cn(
@@ -133,18 +134,18 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
 
           {/* Tips */}
           {savingsRate < 20 && income > 0 && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950/20 3xl:p-4">
-              <p className="text-sm font-medium text-blue-900 dark:text-blue-100 3xl:text-base">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950/20">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                 💡 Tip
               </p>
-              <p className="mt-1 text-xs text-blue-800 dark:text-blue-200 3xl:text-sm">
+              <p className="mt-1 text-xs text-blue-800 dark:text-blue-200">
                 Financial experts recommend saving at least 20% of your income.
                 Try to reduce expenses or increase income to reach this goal.
               </p>
             </div>
           )}
         </CardContent>
-      </Card>
+      </GlassCard>
     </SkeletonWrapper>
   );
 }

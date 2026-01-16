@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
@@ -33,7 +34,7 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
 
   return (
     <SkeletonWrapper isLoading={statsQuery.isFetching}>
-      <Card className="relative overflow-hidden h-full">
+      <GlassCard className="h-full">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10" />
 
@@ -100,7 +101,7 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </GlassCard>
     </SkeletonWrapper>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import GlassCard from "@/components/GlassCard";
+
 import { GetBalanceStatsResponseType } from "@/app/api/stats/balance/route";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
@@ -90,7 +92,7 @@ function StatCard({
   );
 
   return (
-    <Card className="group relative flex h-24 w-full items-center gap-2 overflow-hidden p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg 3xl:h-28 3xl:gap-3 3xl:p-6">
+    <GlassCard className="group flex h-24 w-full items-center gap-2 p-4">
       {/* Animated background gradient */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       
@@ -98,17 +100,17 @@ function StatCard({
         {icon}
       </div>
       <div className="relative z-10 flex flex-col items-start gap-0">
-        <p className="text-muted-foreground 3xl:text-base">{title}</p>
+        <p className="text-muted-foreground">{title}</p>
         <CountUp
           preserveValue
           redraw={false}
           end={value}
           decimals={2}
           formattingFn={formatfn}
-          className="text-2xl font-bold 3xl:text-3xl"
+          className="text-2xl font-bold"
           duration={2}
         />
       </div>
-    </Card>
+    </GlassCard>
   );
 }
