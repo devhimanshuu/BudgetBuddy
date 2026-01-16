@@ -85,6 +85,7 @@ export async function GET(request: Request) {
         },
       },
       attachments: true,
+      splits: true,
     },
     orderBy: {
       date: "desc",
@@ -136,6 +137,13 @@ export async function GET(request: Request) {
       fileUrl: att.fileUrl,
       fileSize: att.fileSize,
       fileType: att.fileType,
+    })),
+    splits: transaction.splits.map((s) => ({
+      id: s.id,
+      category: s.category,
+      categoryIcon: s.categoryIcon,
+      amount: s.amount,
+      percentage: s.percentage,
     })),
   }));
 
