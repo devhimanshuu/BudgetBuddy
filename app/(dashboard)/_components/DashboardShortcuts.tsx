@@ -69,14 +69,14 @@ export default function DashboardShortcuts() {
       />
 
       <CreateTransactionDialog
-        isOpen={showIncomeDialog}
-        setIsOpen={setShowIncomeDialog}
+        open={showIncomeDialog}
+        onOpenChange={setShowIncomeDialog}
         type="income"
         trigger={null}
       />
       <CreateTransactionDialog
-        isOpen={showExpenseDialog}
-        setIsOpen={setShowExpenseDialog}
+        open={showExpenseDialog}
+        onOpenChange={setShowExpenseDialog}
         type="expense"
         trigger={null}
       />

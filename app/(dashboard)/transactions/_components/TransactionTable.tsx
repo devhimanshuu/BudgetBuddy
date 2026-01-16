@@ -121,16 +121,16 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     accessorKey: "notes",
     header: "Notes",
     cell: ({ row }) => (
-       <div className="max-w-[150px] truncate" title={row.original.notes || ""}>
-          {row.original.notes ? (
-            <div className="flex items-center gap-1 text-muted-foreground">
-               <StickyNote className="h-3 w-3" />
-               <span className="text-xs">{row.original.notes}</span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground/50 text-xs">-</span>
-          )}
-       </div>
+      <div className="max-w-[150px] truncate" title={row.original.notes || ""}>
+        {row.original.notes ? (
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <StickyNote className="h-3 w-3" />
+            <span className="text-xs">{row.original.notes}</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground/50 text-xs">-</span>
+        )}
+      </div>
     ),
   },
   {
@@ -139,19 +139,23 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     cell: ({ row }) => (
       <div className="flex flex-wrap gap-1">
         {row.original.tags && row.original.tags.length > 0 ? (
-          row.original.tags.map(({ tag }) => (
-            <span
-              key={tag.id}
-              className="inline-flex items-center rounded-sm px-1 text-[10px] font-medium ring-1 ring-inset"
-              style={{
-                backgroundColor: tag.color + "15",
-                color: tag.color,
-                "--tw-ring-color": tag.color + "30",
-              } as React.CSSProperties}
-            >
-              #{tag.name}
-            </span>
-          ))
+          row.original.tags.map((item) => {
+            if (!item || !item.tag) return null;
+            const { tag } = item;
+            return (
+              <span
+                key={tag.id}
+                className="inline-flex items-center rounded-sm px-1 text-[10px] font-medium ring-1 ring-inset"
+                style={{
+                  backgroundColor: tag.color + "15",
+                  color: tag.color,
+                  "--tw-ring-color": tag.color + "30",
+                } as React.CSSProperties}
+              >
+                #{tag.name}
+              </span>
+            );
+          })
         ) : (
           <span className="text-muted-foreground/50 text-xs">-</span>
         )}
@@ -162,18 +166,18 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     accessorKey: "splits",
     header: "Splits",
     cell: ({ row }) => (
-       <div className="flex items-center">
-          {row.original.splits && row.original.splits.length > 0 ? (
-             <div className="flex items-center gap-1" title={`${row.original.splits.length} splits`}>
-                <Split className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                   {row.original.splits.length}
-                </span>
-             </div>
-          ) : (
-             <span className="text-muted-foreground/50 text-xs">-</span>
-          )}
-       </div>
+      <div className="flex items-center">
+        {row.original.splits && row.original.splits.length > 0 ? (
+          <div className="flex items-center gap-1" title={`${row.original.splits.length} splits`}>
+            <Split className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">
+              {row.original.splits.length}
+            </span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground/50 text-xs">-</span>
+        )}
+      </div>
     ),
   },
   {
@@ -203,7 +207,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         className={cn(
           "capitalize rounded-lg text-center p-2",
           row.original.type === "income" &&
-            "bg-emerald-400/10 text-emerald-500",
+          "bg-emerald-400/10 text-emerald-500",
           row.original.type === "expense" && "bg-red-400/10 text-red-500"
         )}
       >
@@ -247,7 +251,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
     queryKey: ["transactions", "history", from, to, searchFilters],
     queryFn: async () => {
       // If search filters are active (and have at least one criteria set), use search API
-      const hasSearchFilters = searchFilters && Object.values(searchFilters).some(val => 
+      const hasSearchFilters = searchFilters && Object.values(searchFilters).some(val =>
         val !== "" && (Array.isArray(val) ? val.length > 0 : true)
       );
 
@@ -264,7 +268,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
         // Use search filter dates if provided, otherwise fallback to page dates
         if (searchFilters.from) params.append("from", searchFilters.from);
         else params.append("from", DateToUTCDate(from).toISOString());
-        
+
         if (searchFilters.to) params.append("to", searchFilters.to);
         else params.append("to", DateToUTCDate(to).toISOString());
 
@@ -293,7 +297,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
 
   const handleExportPDF = () => {
     if (!history.data || !userSettings.data) return;
-    
+
     const filteredData = table.getFilteredRowModel().rows.map((row) => ({
       id: row.original.id,
       date: row.original.date,
@@ -335,7 +339,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
   const handleBulkDelete = async () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     const ids = selectedRows.map((r) => r.original.id);
-    
+
     if (ids.length === 0) return;
 
     toast.loading(`Deleting ${ids.length} transactions...`, { id: "bulk-delete" });
@@ -419,22 +423,22 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
           <DataTableViewOptions table={table} />
         </div>
       </div>
-       {/* Bulk Actions Toolbar */}
+      {/* Bulk Actions Toolbar */}
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="mb-4 flex items-center justify-between rounded-md border border-dashed bg-muted/50 p-2">
-           <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground ml-2">
-                {table.getFilteredSelectedRowModel().rows.length} selected
+              {table.getFilteredSelectedRowModel().rows.length} selected
             </span>
-           </div>
-           <Button 
-             size="sm" 
-             variant="destructive" 
-             onClick={handleBulkDelete}
-           >
-              <TrashIcon className="mr-2 h-4 w-4" />
-              Delete Selected
-           </Button>
+          </div>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleBulkDelete}
+          >
+            <TrashIcon className="mr-2 h-4 w-4" />
+            Delete Selected
+          </Button>
         </div>
       )}
       <SkeletonWrapper isLoading={history.isFetching}>
@@ -449,9 +453,9 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                       </TableHead>
                     );
                   })}
@@ -549,7 +553,7 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
 
 function AttachmentCell({ transaction }: { transaction: TransactionHistoryRow }) {
   const [open, setOpen] = useState(false);
-  
+
   if (!transaction.attachments || transaction.attachments.length === 0) {
     return <div className="w-8" />; // Placeholder to keep alignment if needed, or null
   }

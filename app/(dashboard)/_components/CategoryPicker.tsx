@@ -45,16 +45,7 @@ function CategoryPicker({ type, onChange }: Props) {
     enabled: !!type,
   });
 
-  useEffect(() => {
-    if (!value) return;
-    // when the value changes, call onChange callback
-    const category = categoriesQuery.data?.find(
-      (cat: Category) => cat.name === value
-    );
-    if (category) {
-      onChange(category);
-    }
-  }, [onChange, value, categoriesQuery.data]);
+  // Removed useEffect that caused infinite loop
 
   const selectedCategory = categoriesQuery.data?.find(
     (category: Category) => category.name === value
@@ -64,8 +55,9 @@ function CategoryPicker({ type, onChange }: Props) {
     (category: Category) => {
       setValue(category.name);
       setOpen((prev) => !prev);
+      onChange(category);
     },
-    [setValue, setOpen]
+    [setValue, setOpen, onChange]
   );
 
   // Get recent category names for filtering
@@ -113,7 +105,7 @@ function CategoryPicker({ type, onChange }: Props) {
               Tip: Create a new category
             </p>
           </CommandEmpty>
-          
+
           {/* Recent Categories */}
           {recentCategories.length > 0 && (
             <CommandGroup heading="Recent">
@@ -124,6 +116,7 @@ function CategoryPicker({ type, onChange }: Props) {
                     onSelect={() => {
                       setValue(category.name);
                       setOpen((prev) => !prev);
+                      onChange(category);
                     }}
                   >
                     <CategoryRow category={category} />
@@ -149,6 +142,7 @@ function CategoryPicker({ type, onChange }: Props) {
                     onSelect={() => {
                       setValue(category.name);
                       setOpen((prev) => !prev);
+                      onChange(category);
                     }}
                   >
                     <CategoryRow category={category} />
