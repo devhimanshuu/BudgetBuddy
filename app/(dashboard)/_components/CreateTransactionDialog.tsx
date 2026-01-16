@@ -54,11 +54,16 @@ import { Textarea } from "@/components/ui/textarea";
 interface Props {
   trigger?: ReactNode;
   type: TransactionType;
-  isOpen?: boolean; // Optional prop for controlled state
-  setIsOpen?: (open: boolean) => void; // Optional prop for controlled state
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const CreateTransactionDialog = ({ trigger, type, isOpen, setIsOpen }: Props) => {
+const CreateTransactionDialog = ({
+  trigger,
+  type,
+  open: externalOpen,
+  onOpenChange,
+}: Props) => {
   const form = useForm<CreateTransactionSchemaType>({
     resolver: zodResolver(CreateTransactionSchema),
     defaultValues: {
@@ -77,8 +82,8 @@ const CreateTransactionDialog = ({ trigger, type, isOpen, setIsOpen }: Props) =>
   const [isSplitMode, setIsSplitMode] = useState(false);
 
   const [internalOpen, setInternalOpen] = useState(false);
-  const open = isOpen !== undefined ? isOpen : internalOpen;
-  const setOpen = setIsOpen || setInternalOpen;
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
   const [selectedTags, setSelectedTags] = useState<
     { id: string; name: string; color: string }[]
