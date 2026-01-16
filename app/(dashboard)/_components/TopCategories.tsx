@@ -1,7 +1,6 @@
 "use client";
 
-import GlassCard from "@/components/GlassCard";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -37,7 +36,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
 
   return (
     <SkeletonWrapper isLoading={categoriesQuery.isFetching}>
-      <GlassCard className="h-full">
+      <Card className="h-full">
         <CardHeader className="3xl:p-8">
           <CardTitle className="flex items-center gap-2 3xl:text-2xl 3xl:gap-3">
             <PieChart className="h-5 w-5 text-purple-500 3xl:h-6 3xl:w-6" />
@@ -110,7 +109,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
             </div>
           )}
         </CardContent>
-      </GlassCard>
+      </Card>
     </SkeletonWrapper>
   );
 }

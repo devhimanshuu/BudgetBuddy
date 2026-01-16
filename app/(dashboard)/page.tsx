@@ -60,27 +60,25 @@ async function page() {
           </div>
         </div>
       </div>
-      {/* Dashboard Widgets - Top Section */}
+      {/* Dashboard Widgets */}
       <div className="container py-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 3xl:col-span-1">
             <NetWorthCard userSettings={userSettings} />
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 3xl:col-span-1">
             <SavingsRate userSettings={userSettings} />
+          </div>
+          <div className="md:col-span-2 3xl:col-span-1">
+            <SpendingTrends userSettings={userSettings} />
+          </div>
+          <div className="md:col-span-2 3xl:col-span-1">
+            <TopCategories userSettings={userSettings} />
           </div>
         </div>
       </div>
 
       <Overview userSettings={userSettings} />
-      
-      {/* Dashboard Widgets - Bottom Section */}
-      <div className="container py-6">
-        <div className="grid gap-4 md:grid-cols-2">
-          <SpendingTrends userSettings={userSettings} />
-          <TopCategories userSettings={userSettings} />
-        </div>
-      </div>
 
       <div className="container py-6">
         <BudgetOverview userSettings={userSettings} />
