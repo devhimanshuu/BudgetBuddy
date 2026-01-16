@@ -60,11 +60,9 @@ async function page() {
           </div>
         </div>
       </div>
-      <Overview userSettings={userSettings} />
-      
-      {/* Dashboard Widgets */}
-      <div className="container py-6 3xl:py-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 3xl:gap-6">
+      {/* Dashboard Widgets - Top Section */}
+      <div className="container py-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="md:col-span-2">
             <NetWorthCard userSettings={userSettings} />
           </div>
@@ -72,14 +70,19 @@ async function page() {
             <SavingsRate userSettings={userSettings} />
           </div>
         </div>
+      </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2 3xl:mt-6 3xl:gap-6">
+      <Overview userSettings={userSettings} />
+      
+      {/* Dashboard Widgets - Bottom Section */}
+      <div className="container py-6">
+        <div className="grid gap-4 md:grid-cols-2">
           <SpendingTrends userSettings={userSettings} />
           <TopCategories userSettings={userSettings} />
         </div>
       </div>
 
-      <div className="container py-6 3xl:py-8">
+      <div className="container py-6">
         <BudgetOverview userSettings={userSettings} />
       </div>
 
