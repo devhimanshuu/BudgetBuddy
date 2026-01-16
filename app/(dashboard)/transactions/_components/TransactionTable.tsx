@@ -2,7 +2,7 @@
 
 import { getTransactionHistoryResponseType } from "@/app/api/transaction-history/route";
 import { DateToUTCDate } from "@/lib/helper";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
   flexRender,
@@ -30,7 +30,7 @@ import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import { DataTableViewOptions } from "@/components/datatable/ColumnToggle";
 import { Button } from "@/components/ui/button";
 import { download, generateCsv, mkConfig } from "export-to-csv";
-import { DownloadIcon, MoreHorizontal, TrashIcon, FileText } from "lucide-react";
+import { DownloadIcon, MoreHorizontal, TrashIcon, FileText, Split, StickyNote } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +42,11 @@ import {
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 import { exportTransactionsToPDF } from "@/lib/pdf-export";
 import { SearchFilters } from "../../_components/AdvancedSearch";
+import { Checkbox } from "@/components/ui/checkbox";
+import AttachmentDialog from "./AttachmentDialog";
+import { Tag, Paperclip } from "lucide-react";
+import { toast } from "sonner";
+import { DeleteTransaction } from "../_actions/deleteTransaction";
 
 interface Props {
   from: Date;
@@ -49,9 +54,45 @@ interface Props {
   searchFilters?: SearchFilters;
 }
 const emptyData: any[] = [];
-type TransactionHistoryRow = getTransactionHistoryResponseType[0];
+type TransactionHistoryRow = getTransactionHistoryResponseType[0] & {
+  tags: { tag: { id: string; name: string; color: string } }[];
+  attachments: {
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    fileSize: number;
+    fileType: string;
+  }[];
+  splits: {
+    id: string;
+    category: string;
+    categoryIcon: string;
+    amount: number;
+    percentage: number;
+  }[];
+  notes?: string;
+};
 
 const columns: ColumnDef<TransactionHistoryRow>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "category",
     header: ({ column }) => (
@@ -73,7 +114,66 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => (
-      <div className="flex gap-2 capitalize">{row.original.description}</div>
+      <div className="capitalize">{row.original.description}</div>
+    ),
+  },
+  {
+    accessorKey: "notes",
+    header: "Notes",
+    cell: ({ row }) => (
+       <div className="max-w-[150px] truncate" title={row.original.notes || ""}>
+          {row.original.notes ? (
+            <div className="flex items-center gap-1 text-muted-foreground">
+               <StickyNote className="h-3 w-3" />
+               <span className="text-xs">{row.original.notes}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground/50 text-xs">-</span>
+          )}
+       </div>
+    ),
+  },
+  {
+    accessorKey: "tags",
+    header: "Tags",
+    cell: ({ row }) => (
+      <div className="flex flex-wrap gap-1">
+        {row.original.tags && row.original.tags.length > 0 ? (
+          row.original.tags.map(({ tag }) => (
+            <span
+              key={tag.id}
+              className="inline-flex items-center rounded-sm px-1 text-[10px] font-medium ring-1 ring-inset"
+              style={{
+                backgroundColor: tag.color + "15",
+                color: tag.color,
+                "--tw-ring-color": tag.color + "30",
+              } as React.CSSProperties}
+            >
+              #{tag.name}
+            </span>
+          ))
+        ) : (
+          <span className="text-muted-foreground/50 text-xs">-</span>
+        )}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "splits",
+    header: "Splits",
+    cell: ({ row }) => (
+       <div className="flex items-center">
+          {row.original.splits && row.original.splits.length > 0 ? (
+             <div className="flex items-center gap-1" title={`${row.original.splits.length} splits`}>
+                <Split className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                   {row.original.splits.length}
+                </span>
+             </div>
+          ) : (
+             <span className="text-muted-foreground/50 text-xs">-</span>
+          )}
+       </div>
     ),
   },
   {
@@ -112,6 +212,11 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     ),
   },
   {
+    accessorKey: "attachments",
+    header: "Attachments",
+    cell: ({ row }) => <AttachmentCell transaction={row.original} />,
+  },
+  {
     accessorKey: "amount",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount" />
@@ -137,6 +242,7 @@ const csvConfig = mkConfig({
 const TransactionTable = ({ from, to, searchFilters }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({}); // Row selection state
   const history = useQuery<getTransactionHistoryResponseType>({
     queryKey: ["transactions", "history", from, to, searchFilters],
     queryFn: async () => {
@@ -205,21 +311,44 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
     });
   };
 
-  const table = useReactTable({
-    data: history.data || emptyData,
+  const table = useReactTable<TransactionHistoryRow>({
+    data: (history.data || emptyData) as TransactionHistoryRow[],
     columns,
     getCoreRowModel: getCoreRowModel(),
 
     state: {
       sorting,
       columnFilters,
+      rowSelection,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const queryClient = useQueryClient(); // For invalidating queries
+
+  const handleBulkDelete = async () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const ids = selectedRows.map((r) => r.original.id);
+    
+    if (ids.length === 0) return;
+
+    toast.loading(`Deleting ${ids.length} transactions...`, { id: "bulk-delete" });
+
+    try {
+      await Promise.all(ids.map((id) => DeleteTransaction(id)));
+      toast.success("Transactions deleted", { id: "bulk-delete" });
+      setRowSelection({});
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    } catch (e) {
+      toast.error("Failed to delete some transactions", { id: "bulk-delete" });
+    }
+  };
 
   const categoriesOptions = useMemo(() => {
     const categoriesMap = new Map();
@@ -268,6 +397,8 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
                 amount: row.original.amount,
                 formattedAmount: row.original.formattedAmount,
                 date: row.original.date,
+                notes: row.original.notes || "",
+                tags: row.original.tags.map((t) => t.tag.name).join(", "),
               }));
               handleExportCSV(data);
             }}
@@ -288,6 +419,24 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
           <DataTableViewOptions table={table} />
         </div>
       </div>
+       {/* Bulk Actions Toolbar */}
+      {table.getFilteredSelectedRowModel().rows.length > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded-md border border-dashed bg-muted/50 p-2">
+           <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground ml-2">
+                {table.getFilteredSelectedRowModel().rows.length} selected
+            </span>
+           </div>
+           <Button 
+             size="sm" 
+             variant="destructive" 
+             onClick={handleBulkDelete}
+           >
+              <TrashIcon className="mr-2 h-4 w-4" />
+              Delete Selected
+           </Button>
+        </div>
+      )}
       <SkeletonWrapper isLoading={history.isFetching}>
         <div className="rounded-md border">
           <Table>
@@ -394,6 +543,32 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+    </>
+  );
+}
+
+function AttachmentCell({ transaction }: { transaction: TransactionHistoryRow }) {
+  const [open, setOpen] = useState(false);
+  
+  if (!transaction.attachments || transaction.attachments.length === 0) {
+    return <div className="w-8" />; // Placeholder to keep alignment if needed, or null
+  }
+
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 hover:bg-muted"
+        onClick={() => setOpen(true)}
+      >
+        <Paperclip className="h-4 w-4 text-muted-foreground" />
+      </Button>
+      <AttachmentDialog
+        open={open}
+        setOpen={setOpen}
+        attachments={transaction.attachments}
+      />
     </>
   );
 }

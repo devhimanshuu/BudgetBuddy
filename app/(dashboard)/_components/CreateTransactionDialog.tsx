@@ -19,7 +19,7 @@ import {
 import { ReactNode, useCallback, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -32,7 +32,9 @@ import {
 import { Input } from "@/components/ui/input";
 import CategoryPicker from "./CategoryPicker";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Plus, Trash } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -52,16 +54,11 @@ import { Textarea } from "@/components/ui/textarea";
 interface Props {
   trigger?: ReactNode;
   type: TransactionType;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  isOpen?: boolean; // Optional prop for controlled state
+  setIsOpen?: (open: boolean) => void; // Optional prop for controlled state
 }
 
-const CreateTransactionDialog = ({
-  trigger,
-  type,
-  open: externalOpen,
-  onOpenChange,
-}: Props) => {
+const CreateTransactionDialog = ({ trigger, type, isOpen, setIsOpen }: Props) => {
   const form = useForm<CreateTransactionSchemaType>({
     resolver: zodResolver(CreateTransactionSchema),
     defaultValues: {
@@ -73,10 +70,15 @@ const CreateTransactionDialog = ({
     },
   });
 
-  const [internalOpen, setInternalOpen] = useState(false);
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "splits",
+  });
+  const [isSplitMode, setIsSplitMode] = useState(false);
 
-  const open = externalOpen !== undefined ? externalOpen : internalOpen;
-  const setOpen = onOpenChange || setInternalOpen;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isOpen !== undefined ? isOpen : internalOpen;
+  const setOpen = setIsOpen || setInternalOpen;
 
   const [selectedTags, setSelectedTags] = useState<
     { id: string; name: string; color: string }[]
@@ -125,15 +127,27 @@ const CreateTransactionDialog = ({
 
   const onSubmit = useCallback(
     (values: CreateTransactionSchemaType) => {
+      if (isSplitMode) {
+        const total = values.amount;
+        const splitTotal = values.splits?.reduce((a, b) => a + b.amount, 0) || 0;
+        if (Math.abs(total - splitTotal) > 0.01) {
+          toast.error(`Split amounts ($${splitTotal}) must equal total amount ($${total})`);
+          return;
+        }
+      } else {
+        values.splits = undefined;
+      }
+
       toast.loading("Creating transaction...", { id: "create-transaction" });
       mutate({
         ...values,
         date: DateToUTCDate(values.date),
         tags: selectedTags.map((tag) => tag.id),
         attachments: attachments,
+        splits: isSplitMode ? values.splits : undefined,
       });
     },
-    [mutate, selectedTags, attachments]
+    [mutate, selectedTags, attachments, isSplitMode]
   );
 
   return (
@@ -239,6 +253,62 @@ const CreateTransactionDialog = ({
                   </FormItem>
                 )}
               />
+
+              <div className="flex items-center space-x-2 py-4 border-t border-b border-muted/50 my-4">
+                <Switch
+                  id="split-mode"
+                  checked={isSplitMode}
+                  onCheckedChange={(checked) => {
+                    setIsSplitMode(checked);
+                    if (checked && fields.length === 0) {
+                      append({ category: "", categoryIcon: "", amount: 0, percentage: 0 });
+                      append({ category: "", categoryIcon: "", amount: 0, percentage: 0 });
+                    }
+                    if (!checked) {
+                      form.setValue("splits", []);
+                    }
+                  }}
+                />
+                <Label htmlFor="split-mode" className="font-semibold">Split Transaction</Label>
+              </div>
+
+              {isSplitMode && (
+                <div className="space-y-4 mb-4">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="flex gap-2 items-end">
+                      <FormItem className="flex-1">
+                        <FormLabel className={index !== 0 ? "sr-only" : ""}>Category</FormLabel>
+                        <FormControl>
+                          <CategoryPicker type={type} onChange={(cat) => {
+                            form.setValue(`splits.${index}.category`, cat.name);
+                            form.setValue(`splits.${index}.categoryIcon`, cat.icon);
+                          }} />
+                        </FormControl>
+                      </FormItem>
+                      <FormItem className="w-32">
+                        <FormLabel className={index !== 0 ? "sr-only" : ""}>Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...form.register(`splits.${index}.amount`, { valueAsNumber: true })}
+                          />
+                        </FormControl>
+                      </FormItem>
+                      <Button variant="ghost" size="icon" onClick={() => remove(index)}>
+                        <Trash className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" size="sm" type="button" onClick={() => append({ category: "", categoryIcon: "", amount: 0, percentage: 0 })}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Split
+                  </Button>
+                  <div className="text-sm text-muted-foreground mt-2">
+                    Total Split: {form.watch("splits")?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0} / {form.watch("amount")}
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between gap-2">
                 {" "}
                 <FormField

@@ -12,6 +12,7 @@ import SpendingTrends from "./_components/SpendingTrends";
 import TopCategories from "./_components/TopCategories";
 import SavingsRate from "./_components/SavingsRate";
 import SavingsGoals from "./_components/SavingsGoals";
+import RecentTransactions from "./_components/RecentTransactions";
 
 async function page() {
   const user = await currentUser();
@@ -76,6 +77,10 @@ async function page() {
             <TopCategories userSettings={userSettings} />
           </div>
         </div>
+      </div>
+
+      <div className="container py-0 mb-6">
+        <RecentTransactions />
       </div>
 
       <Overview userSettings={userSettings} />
