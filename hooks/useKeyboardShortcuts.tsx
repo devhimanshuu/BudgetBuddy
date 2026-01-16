@@ -25,6 +25,14 @@ export function useKeyboardShortcuts(shortcuts: Shortcut[]) {
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       // Show help dialog with ?
       if (e.key === "?" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
