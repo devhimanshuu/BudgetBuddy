@@ -74,7 +74,7 @@ const CreateTransactionDialog = ({
   });
 
   const [internalOpen, setInternalOpen] = useState(false);
-  
+
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
@@ -139,8 +139,8 @@ const CreateTransactionDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>
             Create a new
             <span
@@ -157,156 +157,158 @@ const CreateTransactionDialog = ({
             Add a new {type} transaction to track your finances
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              name="description"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input {...field} value={field.value || ""} />
-                  </FormControl>
-                  <FormDescription>
-                    Transaction Description (optional)
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="notes"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      value={field.value || ""}
-                      placeholder="Add additional notes or details..."
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Optional notes about this transaction
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <FormLabel>Tags</FormLabel>
-              <TagSelector
-                selectedTags={selectedTags}
-                onTagsChange={setSelectedTags}
-              />
-              <FormDescription>
-                Add tags to organize this transaction
-              </FormDescription>
-            </div>
-
-            {/* Attachments */}
-            <FileUpload
-              attachments={attachments}
-              onAttachmentsChange={setAttachments}
-            />
-
-            <FormField
-              name="amount"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === "" ? 0 : Number(e.target.value);
-                        field.onChange(value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Transaction Amount (required)
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center justify-between gap-2">
-              {" "}
+        <div className="flex-1 overflow-y-auto px-6 py-2">
+          <Form {...form}>
+            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
-                name="category"
+                name="description"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Category</FormLabel>
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <CategoryPicker
-                        type={type}
-                        onChange={handleCategoryChange}
+                      <Input {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormDescription>
+                      Transaction Description (optional)
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="notes"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={field.value || ""}
+                        placeholder="Add additional notes or details..."
+                        rows={3}
                       />
                     </FormControl>
                     <FormDescription>
-                      Select a category for this transaction
+                      Optional notes about this transaction
                     </FormDescription>
                   </FormItem>
                 )}
               />
+
+              {/* Tags */}
+              <div className="space-y-2">
+                <FormLabel>Tags</FormLabel>
+                <TagSelector
+                  selectedTags={selectedTags}
+                  onTagsChange={setSelectedTags}
+                />
+                <FormDescription>
+                  Add tags to organize this transaction
+                </FormDescription>
+              </div>
+
+              {/* Attachments */}
+              <FileUpload
+                attachments={attachments}
+                onAttachmentsChange={setAttachments}
+              />
+
               <FormField
-                name="date"
+                name="amount"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Transaction Date </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[200px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span> Pick a date </span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={(value) => {
-                            if (!value) return;
-                            field.onChange(value);
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-
+                  <FormItem>
+                    <FormLabel>Amount</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const value =
+                            e.target.value === "" ? 0 : Number(e.target.value);
+                          field.onChange(value);
+                        }}
+                      />
+                    </FormControl>
                     <FormDescription>
-                      Select a date for this Transaction{" "}
+                      Transaction Amount (required)
                     </FormDescription>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-          </form>
-        </Form>
-        <DialogFooter>
+              <div className="flex items-center justify-between gap-2">
+                {" "}
+                <FormField
+                  name="category"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <CategoryPicker
+                          type={type}
+                          onChange={handleCategoryChange}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Select a category for this transaction
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="date"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Transaction Date </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[200px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span> Pick a date </span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={(value) => {
+                              if (!value) return;
+                              field.onChange(value);
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      <FormDescription>
+                        Select a date for this Transaction{" "}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </form>
+          </Form>
+        </div>
+        <DialogFooter className="px-6 pb-6 pt-2">
           <DialogClose asChild>
             <Button
               type="button"
