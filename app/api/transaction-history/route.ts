@@ -60,6 +60,15 @@ async function getTransactionHistory(userId: string, from: Date, to: Date) {
     orderBy: {
       date: "desc",
     },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+      attachments: true,
+      splits: true,
+    },
   });
   return transactions.map((transaction) => ({
     ...transaction,
