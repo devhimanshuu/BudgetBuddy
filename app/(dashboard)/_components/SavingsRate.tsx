@@ -1,7 +1,6 @@
 "use client";
 
-import GlassCard from "@/components/GlassCard";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -53,7 +52,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
 
   return (
     <SkeletonWrapper isLoading={savingsQuery.isFetching}>
-      <GlassCard className="h-full">
+      <Card className="h-full">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -145,7 +144,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
             </div>
           )}
         </CardContent>
-      </GlassCard>
+      </Card>
     </SkeletonWrapper>
   );
 }
