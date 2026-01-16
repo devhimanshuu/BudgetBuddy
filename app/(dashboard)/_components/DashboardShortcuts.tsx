@@ -7,6 +7,7 @@ import {
   KeyboardShortcutsHelp,
 } from "@/hooks/useKeyboardShortcuts";
 import QuickAddWidget from "@/components/QuickAddWidget";
+import CreateTransactionDialog from "@/app/(dashboard)/_components/CreateTransactionDialog";
 
 export default function DashboardShortcuts() {
   const router = useRouter();
@@ -55,7 +56,22 @@ export default function DashboardShortcuts() {
 
   return (
     <>
-      <QuickAddWidget />
+      <QuickAddWidget
+        onIncomeClick={() => setShowIncomeDialog(true)}
+        onExpenseClick={() => setShowExpenseDialog(true)}
+      />
+
+      <CreateTransactionDialog
+        open={showIncomeDialog}
+        onOpenChange={setShowIncomeDialog}
+        type="income"
+      />
+      <CreateTransactionDialog
+        open={showExpenseDialog}
+        onOpenChange={setShowExpenseDialog}
+        type="expense"
+      />
+
       <KeyboardShortcutsHelp
         shortcuts={shortcuts}
         open={showHelp}

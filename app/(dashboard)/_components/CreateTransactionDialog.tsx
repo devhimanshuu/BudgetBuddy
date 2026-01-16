@@ -18,12 +18,6 @@ import {
 } from "@/schema/transaction";
 import { ReactNode, useCallback, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-interface Props {
-  trigger: ReactNode;
-  type: TransactionType;
-}
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -55,7 +49,19 @@ import TagSelector from "./TagSelector";
 import FileUpload from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
 
-const CreateTransactionDialog = ({ trigger, type }: Props) => {
+interface Props {
+  trigger?: ReactNode;
+  type: TransactionType;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const CreateTransactionDialog = ({
+  trigger,
+  type,
+  open: externalOpen,
+  onOpenChange,
+}: Props) => {
   const form = useForm<CreateTransactionSchemaType>({
     resolver: zodResolver(CreateTransactionSchema),
     defaultValues: {
@@ -67,7 +73,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     },
   });
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
+
   const [selectedTags, setSelectedTags] = useState<
     { id: string; name: string; color: string }[]
   >([]);
@@ -106,14 +116,13 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
       setSelectedTags([]);
       setAttachments([]);
 
-      //After creating a transaction , we need to invalidate the overview query which will refresh data in the homepage
-
       queryClient.invalidateQueries({
         queryKey: ["overview"],
       });
-      setOpen((prev) => !prev);
+      setOpen(false);
     },
   });
+
   const onSubmit = useCallback(
     (values: CreateTransactionSchemaType) => {
       toast.loading("Creating transaction...", { id: "create-transaction" });
@@ -129,7 +138,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -217,7 +226,8 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                       {...field}
                       value={field.value || ""}
                       onChange={(e) => {
-                        const value = e.target.value === "" ? 0 : Number(e.target.value);
+                        const value =
+                          e.target.value === "" ? 0 : Number(e.target.value);
                         field.onChange(value);
                       }}
                     />
@@ -308,7 +318,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
               Cancel
             </Button>
           </DialogClose>
-          <Button type="submit" disabled={isPending} onClick={form.handleSubmit(onSubmit)}>
+          <Button
+            type="submit"
+            disabled={isPending}
+            onClick={form.handleSubmit(onSubmit)}
+          >
             {!isPending && "Create"}
             {isPending && <Loader2 className="animate-spin" />}
           </Button>
