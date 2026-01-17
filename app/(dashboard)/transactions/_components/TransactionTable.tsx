@@ -30,7 +30,7 @@ import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import { DataTableViewOptions } from "@/components/datatable/ColumnToggle";
 import { Button } from "@/components/ui/button";
 import { download, generateCsv, mkConfig } from "export-to-csv";
-import { DownloadIcon, MoreHorizontal, TrashIcon, FileText, Split, StickyNote } from "lucide-react";
+import { DownloadIcon, MoreHorizontal, TrashIcon, FileText, StickyNote } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +44,9 @@ import { exportTransactionsToPDF } from "@/lib/pdf-export";
 import { SearchFilters } from "../../_components/AdvancedSearch";
 import { Checkbox } from "@/components/ui/checkbox";
 import AttachmentDialog from "./AttachmentDialog";
+import SplitDetailsPopover from "./SplitDetailsPopover";
+import NoteDetailsPopover from "./NoteDetailsPopover";
+import TagsPopover from "./TagsPopover";
 import { Tag, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteTransaction } from "../_actions/deleteTransaction";
@@ -121,12 +124,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     accessorKey: "notes",
     header: "Notes",
     cell: ({ row }) => (
-      <div className="max-w-[150px] truncate" title={row.original.notes || ""}>
+      <div className="max-w-[150px]">
         {row.original.notes ? (
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <StickyNote className="h-3 w-3" />
-            <span className="text-xs">{row.original.notes}</span>
-          </div>
+          <NoteDetailsPopover note={row.original.notes} />
         ) : (
           <span className="text-muted-foreground/50 text-xs">-</span>
         )}
@@ -139,23 +139,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     cell: ({ row }) => (
       <div className="flex flex-wrap gap-1">
         {row.original.tags && row.original.tags.length > 0 ? (
-          row.original.tags.map((item) => {
-            if (!item || !item.tag) return null;
-            const { tag } = item;
-            return (
-              <span
-                key={tag.id}
-                className="inline-flex items-center rounded-sm px-1 text-[10px] font-medium ring-1 ring-inset"
-                style={{
-                  backgroundColor: tag.color + "15",
-                  color: tag.color,
-                  "--tw-ring-color": tag.color + "30",
-                } as React.CSSProperties}
-              >
-                #{tag.name}
-              </span>
-            );
-          })
+          <TagsPopover tags={row.original.tags} />
         ) : (
           <span className="text-muted-foreground/50 text-xs">-</span>
         )}
@@ -168,12 +152,10 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     cell: ({ row }) => (
       <div className="flex items-center">
         {row.original.splits && row.original.splits.length > 0 ? (
-          <div className="flex items-center gap-1" title={`${row.original.splits.length} splits`}>
-            <Split className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">
-              {row.original.splits.length}
-            </span>
-          </div>
+          <SplitDetailsPopover
+            splits={row.original.splits}
+            transactionType={row.original.type}
+          />
         ) : (
           <span className="text-muted-foreground/50 text-xs">-</span>
         )}
