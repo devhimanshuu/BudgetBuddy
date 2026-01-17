@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { exportAnalyticsToPDF } from "@/lib/pdf-export";
 import { useQuery } from "@tanstack/react-query";
+import TagFilter from "./TagFilter";
+
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
 
 interface AnalyticsContentProps {
   userSettings: UserSettings;
@@ -24,22 +31,27 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
     from: startOfMonth(new Date()),
     to: new Date(),
   });
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
+  // Get tag IDs for API calls
+  const tagIds = selectedTags.map(tag => tag.id);
+  const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
 
   // Fetch category breakdown data for expense
   const categoryDataQuery = useQuery({
-    queryKey: ["analytics", "category-breakdown", "expense", dataRange.from, dataRange.to],
+    queryKey: ["analytics", "category-breakdown", "expense", dataRange.from, dataRange.to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/category-breakdown?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}&type=expense`
+        `/api/analytics/category-breakdown?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}&type=expense${tagQueryParam}`
       ).then((res) => res.json()),
   });
 
   // Fetch trends data
   const trendsDataQuery = useQuery({
-    queryKey: ["analytics", "trends", dataRange.from, dataRange.to],
+    queryKey: ["analytics", "trends", dataRange.from, dataRange.to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/trends?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}`
+        `/api/analytics/trends?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
 
@@ -70,7 +82,11 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <TagFilter
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+            />
             <DateRangePicker
               initialDateFrom={dataRange.from}
               initialDateTo={dataRange.to}
@@ -108,12 +124,14 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             from={dataRange.from}
             to={dataRange.to}
             type="expense"
+            tagIds={tagIds}
           />
           <CategoryBreakdownChart
             userSettings={userSettings}
             from={dataRange.from}
             to={dataRange.to}
             type="income"
+            tagIds={tagIds}
           />
 
           {/* Line Chart - Trends */}
@@ -121,13 +139,22 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             userSettings={userSettings}
             from={dataRange.from}
             to={dataRange.to}
+            tagIds={tagIds}
           />
 
           {/* Heatmap */}
-          <HeatmapChart from={dataRange.from} to={dataRange.to} />
+          <HeatmapChart
+            from={dataRange.from}
+            to={dataRange.to}
+            userSettings={userSettings}
+            tagIds={tagIds}
+          />
 
           {/* Year-over-Year Comparison */}
-          <ComparisonChart userSettings={userSettings} />
+          <ComparisonChart
+            userSettings={userSettings}
+            tagIds={tagIds}
+          />
         </div>
       </div>
     </>

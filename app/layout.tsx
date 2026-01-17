@@ -19,7 +19,12 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
+      <html
+        lang="en"
+        className="dark"
+        style={{ colorScheme: "dark" }}
+        suppressHydrationWarning
+      >
         <body className={inter.className}>
           <Toaster richColors position="bottom-right" />
           <RootProvider>{children}</RootProvider>
