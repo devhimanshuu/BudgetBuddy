@@ -219,7 +219,7 @@ export default function TagSelector({
                       Create new tag
                       {searchValue && (
                         <span className="ml-auto text-xs text-muted-foreground">
-                          "{searchValue}"
+                          &ldquo;{searchValue}&rdquo;
                         </span>
                       )}
                     </CommandItem>

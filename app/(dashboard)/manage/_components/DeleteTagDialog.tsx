@@ -36,7 +36,7 @@ export default function DeleteTagDialog({
                     <AlertDialogTitle>Delete Tag?</AlertDialogTitle>
                     <AlertDialogDescription>
                         Are you sure you want to delete the tag{" "}
-                        <span className="font-semibold text-foreground">"{tagName}"</span>?
+                        <span className="font-semibold text-foreground">&ldquo;{tagName}&rdquo;</span>?
                         {transactionCount > 0 && (
                             <>
                                 <br />

@@ -5,12 +5,14 @@ import { z } from "zod";
 
 export async function PATCH(
 	request: Request,
-	{ params }: { params: { id: string } },
+	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const { id } = await params;
 
 	const body = await request.json();
 
@@ -32,7 +34,7 @@ export async function PATCH(
 
 	// Verify tag exists and user owns it
 	const existingTag = await prisma.tag.findUnique({
-		where: { id: params.id },
+		where: { id },
 	});
 
 	if (!existingTag || existingTag.userId !== user.id) {
@@ -60,7 +62,7 @@ export async function PATCH(
 
 	// Update tag
 	const updatedTag = await prisma.tag.update({
-		where: { id: params.id },
+		where: { id },
 		data: {
 			...(name && { name }),
 			...(color && { color }),
