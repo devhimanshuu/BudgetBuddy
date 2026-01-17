@@ -13,6 +13,7 @@ interface CategoryBreakdownProps {
   from: Date;
   to: Date;
   type: "income" | "expense";
+  tagIds?: string[];
 }
 
 const COLORS = [
@@ -33,16 +34,19 @@ export default function CategoryBreakdownChart({
   from,
   to,
   type,
+  tagIds = [],
 }: CategoryBreakdownProps) {
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
+  const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
+
   const categoryBreakdownQuery = useQuery({
-    queryKey: ["analytics", "category-breakdown", type, from, to],
+    queryKey: ["analytics", "category-breakdown", type, from, to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/category-breakdown?from=${from.toISOString()}&to=${to.toISOString()}&type=${type}`
+        `/api/analytics/category-breakdown?from=${from.toISOString()}&to=${to.toISOString()}&type=${type}${tagQueryParam}`
       ).then((res) => res.json()),
   });
 

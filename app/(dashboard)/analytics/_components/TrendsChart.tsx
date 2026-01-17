@@ -22,18 +22,21 @@ interface TrendsChartProps {
   userSettings: UserSettings;
   from: Date;
   to: Date;
+  tagIds?: string[];
 }
 
-export default function TrendsChart({ userSettings, from, to }: TrendsChartProps) {
+export default function TrendsChart({ userSettings, from, to, tagIds = [] }: TrendsChartProps) {
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
+  const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
+
   const trendsQuery = useQuery({
-    queryKey: ["analytics", "trends", from, to],
+    queryKey: ["analytics", "trends", from, to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/trends?from=${from.toISOString()}&to=${to.toISOString()}`
+        `/api/analytics/trends?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
 
@@ -108,9 +111,8 @@ export default function TrendsChart({ userSettings, from, to }: TrendsChartProps
                               Balance:
                             </span>
                             <span
-                              className={`font-semibold ${
-                                data.balance >= 0 ? "text-emerald-500" : "text-red-500"
-                              }`}
+                              className={`font-semibold ${data.balance >= 0 ? "text-emerald-500" : "text-red-500"
+                                }`}
                             >
                               {formatter.format(data.balance)}
                             </span>
