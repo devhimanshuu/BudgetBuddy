@@ -19,7 +19,9 @@ interface TransactionHistoryPopoverProps {
     currentAmount: number;
     currentDescription: string;
     currentCategory: string;
+    currentCategoryIcon: string;
     currentDate: Date;
+    currentTagIds: string[];
 }
 
 interface HistoryVersion {
@@ -40,7 +42,9 @@ const TransactionHistoryPopover = ({
     currentAmount,
     currentDescription,
     currentCategory,
+    currentCategoryIcon,
     currentDate,
+    currentTagIds,
 }: TransactionHistoryPopoverProps) => {
     const [open, setOpen] = useState(false);
 
@@ -146,9 +150,53 @@ const TransactionHistoryPopover = ({
                                         </div>
                                         <div className="text-xs text-muted-foreground space-y-0.5">
                                             <div>Amount: ${currentAmount.toFixed(2)}</div>
-                                            <div>Category: {currentCategory}</div>
+                                            <div>Category: {currentCategoryIcon} {currentCategory}</div>
                                             <div>Date: {format(currentDate, "PPP")}</div>
+                                            {currentTagIds.length > 0 && (
+                                                <div>Tags: {currentTagIds.join(", ")}</div>
+                                            )}
                                         </div>
+
+                                        {/* Show changes between latest history and current */}
+                                        {history && history.length > 0 && (() => {
+                                            const latestHistory = history[0];
+                                            const changes: string[] = [];
+                                            
+                                            if (currentAmount !== latestHistory.amount) {
+                                                changes.push(`Amount: ${latestHistory.amount} → ${currentAmount}`);
+                                            }
+                                            if (currentDescription !== latestHistory.description) {
+                                                changes.push("Description changed");
+                                            }
+                                            if (currentCategory !== latestHistory.category) {
+                                                changes.push(`Category: ${latestHistory.category} → ${currentCategory}`);
+                                            }
+                                            if (new Date(currentDate).getTime() !== new Date(latestHistory.date).getTime()) {
+                                                changes.push("Date changed");
+                                            }
+                                            if (JSON.stringify(currentTagIds.sort()) !== JSON.stringify(latestHistory.tags.sort())) {
+                                                changes.push("Tags changed");
+                                            }
+
+                                            if (changes.length > 0) {
+                                                return (
+                                                    <div className="mt-2 pt-2 border-t border-dashed">
+                                                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                                                            Last Edit Changes:
+                                                        </p>
+                                                        <ul className="text-xs text-muted-foreground space-y-0.5">
+                                                            {changes.map((change, i) => (
+                                                                <li key={i} className="flex items-start gap-1">
+                                                                    <span className="text-amber-500 mt-0.5">•</span>
+                                                                    <span>{change}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                     </div>
                                 </div>
                             </div>
