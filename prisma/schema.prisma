@@ -49,6 +49,7 @@ model Transaction {
   tags TransactionTag[]
   attachments Attachment[]
   splits TransactionSplit[]
+  history TransactionHistory[]
   
   @@index([userId, date])
   @@index([userId, category])
@@ -156,5 +157,25 @@ model TransactionSplit {
   
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   
+
+  
+  @@index([transactionId])
+}
+
+model TransactionHistory {
+  id            String   @id @default(uuid())
+  transactionId String
+  amount        Float
+  description   String
+  notes         String?
+  date          DateTime
+  category      String
+  categoryIcon  String
+  type          String
+  tags          String[] // Storing tag IDs as array of strings
+  changedAt     DateTime @default(now())
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
   @@index([transactionId])
 }
