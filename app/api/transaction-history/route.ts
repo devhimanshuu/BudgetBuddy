@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   const transaction = await getTransactionHistory(
     user.id,
     queryParams.data.from,
-    queryParams.data.to
+    queryParams.data.to,
   );
   return Response.json(transaction);
 }
@@ -68,6 +68,11 @@ async function getTransactionHistory(userId: string, from: Date, to: Date) {
       },
       attachments: true,
       splits: true,
+      _count: {
+        select: {
+          history: true,
+        },
+      },
     },
   });
   return transactions.map((transaction) => ({

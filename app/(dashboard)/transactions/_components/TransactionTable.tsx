@@ -76,6 +76,9 @@ type TransactionHistoryRow = getTransactionHistoryResponseType[0] & {
     percentage: number;
   }[];
   notes?: string;
+  _count: {
+    history: number;
+  };
 };
 
 const columns: ColumnDef<TransactionHistoryRow>[] = [
@@ -119,18 +122,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <div className="capitalize">{row.original.description}</div>
-        <TransactionHistoryPopover
-          transactionId={row.original.id}
-          currentAmount={row.original.amount}
-          currentDescription={row.original.description}
-          currentCategory={row.original.category}
-          currentCategoryIcon={row.original.categoryIcon}
-          currentDate={new Date(row.original.date)}
-          currentTagIds={row.original.tags?.map((t) => t.tag.name) || []}
-        />
-      </div>
+      <div className="capitalize">{row.original.description}</div>
     ),
   },
   {
@@ -178,7 +170,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
   {
     accessorKey: "date",
     header: "Date",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const date = new Date(row.original.date);
       const formattedDate = date.toLocaleDateString("default", {
         timeZone: "UTC",
@@ -186,7 +178,26 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         month: "2-digit",
         day: "2-digit",
       });
-      return <div className="text-muted-foreground">{formattedDate}</div>;
+      // @ts-ignore
+      const currency = table.options.meta?.userSettings?.currency || "USD";
+
+      return (
+        <div className="flex items-center gap-2">
+          <div className="text-muted-foreground">{formattedDate}</div>
+          {row.original._count.history > 0 && (
+            <TransactionHistoryPopover
+              transactionId={row.original.id}
+              currentAmount={row.original.amount}
+              currentDescription={row.original.description}
+              currentCategory={row.original.category}
+              currentCategoryIcon={row.original.categoryIcon}
+              currentDate={new Date(row.original.date)}
+              currentTagIds={row.original.tags?.map((t) => t.tag.name) || []}
+              currency={currency}
+            />
+          )}
+        </div>
+      );
     },
   },
   {
@@ -327,6 +338,9 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    meta: {
+      userSettings: userSettings.data,
+    },
   });
 
   const queryClient = useQueryClient(); // For invalidating queries

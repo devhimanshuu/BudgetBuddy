@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { GetFormatterForCurrency } from "@/lib/helper";
 import {
     Popover,
     PopoverContent,
@@ -22,6 +23,7 @@ interface TransactionHistoryPopoverProps {
     currentCategoryIcon: string;
     currentDate: Date;
     currentTagIds: string[];
+    currency: string;
 }
 
 interface HistoryVersion {
@@ -45,8 +47,10 @@ const TransactionHistoryPopover = ({
     currentCategoryIcon,
     currentDate,
     currentTagIds,
+    currency,
 }: TransactionHistoryPopoverProps) => {
     const [open, setOpen] = useState(false);
+    const formatter = GetFormatterForCurrency(currency);
 
     const { data: history, isLoading } = useQuery<HistoryVersion[]>({
         queryKey: ["transaction-history", transactionId],
@@ -149,7 +153,7 @@ const TransactionHistoryPopover = ({
                                             <span className="font-medium">{currentDescription}</span>
                                         </div>
                                         <div className="text-xs text-muted-foreground space-y-0.5">
-                                            <div>Amount: ${currentAmount.toFixed(2)}</div>
+                                            <div>Amount: {formatter.format(currentAmount)}</div>
                                             <div>Category: {currentCategoryIcon} {currentCategory}</div>
                                             <div>Date: {format(currentDate, "PPP")}</div>
                                             {currentTagIds.length > 0 && (
@@ -163,7 +167,7 @@ const TransactionHistoryPopover = ({
                                             const changes: string[] = [];
                                             
                                             if (currentAmount !== latestHistory.amount) {
-                                                changes.push(`Amount: ${latestHistory.amount} → ${currentAmount}`);
+                                                changes.push(`Amount: ${formatter.format(latestHistory.amount)} → ${formatter.format(currentAmount)}`);
                                             }
                                             if (currentDescription !== latestHistory.description) {
                                                 changes.push("Description changed");
@@ -235,7 +239,7 @@ const TransactionHistoryPopover = ({
                                                     <span className="font-medium">{version.description}</span>
                                                 </div>
                                                 <div className="text-xs text-muted-foreground space-y-0.5">
-                                                    <div>Amount: ${version.amount.toFixed(2)}</div>
+                                                    <div>Amount: {formatter.format(version.amount)}</div>
                                                     <div>Category: {version.categoryIcon} {version.category}</div>
                                                     <div>Date: {format(new Date(version.date), "PPP")}</div>
                                                     {version.tags && version.tags.length > 0 && (
