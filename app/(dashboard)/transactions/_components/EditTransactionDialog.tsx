@@ -152,9 +152,17 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
                 const splitTotal = values.splits?.reduce((a, b) => a + b.amount, 0) || 0;
                 if (Math.abs(total - splitTotal) > 0.01) {
                     toast.error(
-                        `Split amounts ($${splitTotal}) must equal total amount ($${total})`
+                        `Split amounts ($${splitTotal.toFixed(2)}) must equal total amount ($${total.toFixed(2)})`
                     );
                     return;
+                }
+
+                // Calculate percentages
+                if (values.splits) {
+                    values.splits = values.splits.map(split => ({
+                        ...split,
+                        percentage: total > 0 ? (split.amount / total) * 100 : 0
+                    }));
                 }
             } else {
                 values.splits = undefined;
@@ -346,6 +354,9 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
                                                         })}
                                                     />
                                                 </FormControl>
+                                                <div className="text-[10px] text-muted-foreground mt-0.5 px-1">
+                                                    {((form.watch(`splits.${index}.amount`) || 0) / (form.watch("amount") || 1) * 100).toFixed(1)}%
+                                                </div>
                                             </FormItem>
                                             <Button
                                                 variant="ghost"
