@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, LayoutDashboard, PiggyBank, Settings, Wallet, LineChart } from "lucide-react";
+import { Menu, LayoutDashboard, PiggyBank, Settings, Wallet, LineChart, Calendar } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
@@ -24,6 +24,7 @@ const items = [
   { label: "Dashboard", link: "/", icon: <LayoutDashboard className="h-4 w-4" /> },
   { label: "Transactions", link: "/transactions", icon: <Wallet className="h-4 w-4" /> },
   { label: "Budgets", link: "/budgets", icon: <PiggyBank className="h-4 w-4" /> },
+  { label: "Calendar", link: "/calendar", icon: <Calendar className="h-4 w-4" /> },
   { label: "Analytics", link: "/analytics", icon: <LineChart className="h-4 w-4" /> },
   { label: "Manage", link: "/manage", icon: <Settings className="h-4 w-4" /> },
 ];

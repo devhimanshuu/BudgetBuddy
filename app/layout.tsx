@@ -25,7 +25,7 @@ export default function RootLayout({
         style={{ colorScheme: "dark" }}
         suppressHydrationWarning
       >
-        <body className={inter.className}>
+        <body className={inter.className} suppressHydrationWarning>
           <Toaster richColors position="bottom-right" />
           <RootProvider>{children}</RootProvider>
         </body>

@@ -15,6 +15,7 @@ import { Pencil, PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-
 import React from "react";
 import { toast } from "sonner";
 import CreateCategoryDialog from "../_components/CreateCategoryDialog";
+import EditCategoryDialog from "../_components/EditCategoryDialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,10 @@ const page = () => {
 
 export default page;
 
+
 function CategoryList({ type }: { type: TransactionType }) {
+  const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
+
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
     queryFn: () =>
@@ -68,6 +72,26 @@ function CategoryList({ type }: { type: TransactionType }) {
   });
 
   const dataAvailable = categoriesQuery.data && categoriesQuery.data.length > 0;
+
+  // Sort categories based on selected option
+  const sortedCategories = React.useMemo(() => {
+    if (!categoriesQuery.data) return [];
+
+    const categoriesCopy = [...categoriesQuery.data];
+
+    if (sortBy === "name") {
+      return categoriesCopy.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      return categoriesCopy.sort((a, b) =>
+        (b._count?.transactions || 0) - (a._count?.transactions || 0)
+      );
+    }
+  }, [categoriesQuery.data, sortBy]);
+
+  const totalCategories = categoriesQuery.data?.length || 0;
+  const totalUsage = categoriesQuery.data?.reduce((acc: number, category: any) =>
+    acc + (category._count?.transactions || 0), 0
+  ) || 0;
 
   return (
     <SkeletonWrapper isLoading={categoriesQuery.isFetching}>
@@ -83,7 +107,7 @@ function CategoryList({ type }: { type: TransactionType }) {
               <div>
                 {type === "income" ? "Incomes" : "Expenses"} categories
                 <div className="text-sm text-muted-foreground">
-                  Sorted by name
+                  {totalCategories} {totalCategories === 1 ? "category" : "categories"} • {totalUsage} {totalUsage === 1 ? "transaction" : "transactions"}
                 </div>
               </div>
             </div>
@@ -101,6 +125,29 @@ function CategoryList({ type }: { type: TransactionType }) {
           </CardTitle>
         </CardHeader>
         <Separator />
+
+        {dataAvailable && (
+          <div className="p-4 border-b">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <Button
+                variant={sortBy === "name" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("name")}
+              >
+                Name
+              </Button>
+              <Button
+                variant={sortBy === "usage" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("usage")}
+              >
+                Usage
+              </Button>
+            </div>
+          </div>
+        )}
+
         {!dataAvailable && (
           <div className="flex h-40 w-full flex-col items-center justify-center">
             <p>
@@ -122,7 +169,7 @@ function CategoryList({ type }: { type: TransactionType }) {
         )}
         {dataAvailable && (
           <div className="grid grid-flow-row gap-2 p-2 sm:grid-flow-row sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {categoriesQuery.data.map((category: Category) => (
+            {sortedCategories.map((category: any) => (
               <CategoryCard category={category} key={category.name} />
             ))}
           </div>
@@ -132,27 +179,46 @@ function CategoryList({ type }: { type: TransactionType }) {
   );
 }
 
-function CategoryCard({ category }: { category: Category }) {
+function CategoryCard({ category }: { category: any }) {
   return (
     <div className="flex border-separate flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]">
-      <div className="flex flex-col item-center gap-2 p-4 ">
-        <span className="text-3xl " role="img">
+      <div className="flex flex-col items-center gap-2 p-4">
+        <span className="text-3xl" role="img">
           {category.icon}
         </span>
         <span>{category.name}</span>
+        <span className="text-xs text-muted-foreground">
+          {category._count?.transactions || 0} transactions
+        </span>
       </div>
-      <DeleteCategoryDialog
-        category={category}
-        trigger={
-          <Button
-            className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-red-500/20"
-            variant={"secondary"}
-          >
-            <TrashIcon className="h-4 w-4" />
-            Remove
-          </Button>
-        }
-      />
+      <div className="flex w-full gap-2 p-2">
+        <EditCategoryDialog
+          category={category}
+          trigger={
+            <Button
+              className="flex-1 gap-2 text-muted-foreground hover:bg-blue-500/20"
+              variant={"secondary"}
+              size="sm"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Button>
+          }
+        />
+        <DeleteCategoryDialog
+          category={category}
+          trigger={
+            <Button
+              className="flex-1 gap-2 text-muted-foreground hover:bg-red-500/20"
+              variant={"secondary"}
+              size="sm"
+            >
+              <TrashIcon className="h-4 w-4" />
+              Remove
+            </Button>
+          }
+        />
+      </div>
     </div>
   );
 }
