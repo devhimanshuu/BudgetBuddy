@@ -9,6 +9,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +30,7 @@ import {
   Check,
   Trash2,
   Edit,
+  AlertTriangle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -49,6 +60,8 @@ interface SavingsGoal {
 export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
   const [selectedGoal, setSelectedGoal] = useState<SavingsGoal | null>(null);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<SavingsGoal | null>(null);
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
@@ -81,6 +94,19 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
   const handleUpdateClick = (goal: SavingsGoal) => {
     setSelectedGoal(goal);
     setUpdateDialogOpen(true);
+  };
+
+  const handleDeleteClick = (goal: SavingsGoal) => {
+    setGoalToDelete(goal);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (goalToDelete) {
+      deleteMutation.mutate(goalToDelete.id);
+      setDeleteDialogOpen(false);
+      setGoalToDelete(null);
+    }
   };
 
   const activeGoals = goalsQuery.data?.filter((g) => !g.isCompleted) || [];
@@ -129,7 +155,7 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                           goal={goal}
                           formatter={formatter}
                           onUpdate={() => handleUpdateClick(goal)}
-                          onDelete={() => deleteMutation.mutate(goal.id)}
+                          onDelete={() => handleDeleteClick(goal)}
                         />
                       ))}
                     </div>
@@ -149,7 +175,7 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                           goal={goal}
                           formatter={formatter}
                           onUpdate={() => handleUpdateClick(goal)}
-                          onDelete={() => deleteMutation.mutate(goal.id)}
+                          onDelete={() => handleDeleteClick(goal)}
                         />
                       ))}
                     </div>
@@ -166,8 +192,63 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
           goal={selectedGoal}
           open={updateDialogOpen}
           onOpenChangeAction={setUpdateDialogOpen}
+          userSettings={userSettings}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-red-100 p-3 dark:bg-red-900/20">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <AlertDialogTitle>Delete Savings Goal</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this goal?
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+
+          {goalToDelete && (
+            <div className="my-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/20">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{goalToDelete.icon}</span>
+                <div>
+                  <p className="font-semibold text-red-900 dark:text-red-100">
+                    {goalToDelete.name}
+                  </p>
+                  {goalToDelete.description && (
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                      {goalToDelete.description}
+                    </p>
+                  )}
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    Progress: {formatter.format(goalToDelete.currentAmount)} / {formatter.format(goalToDelete.targetAmount)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <AlertDialogDescription className="text-muted-foreground">
+            This action cannot be undone. This will permanently delete your savings goal and remove all associated data.
+          </AlertDialogDescription>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete Goal
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

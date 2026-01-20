@@ -13,10 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 import { triggerGoalConfetti } from "@/lib/confetti";
+import { UserSettings } from "@prisma/client";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 interface UpdateGoalDialogProps {
   goal: {
@@ -28,16 +30,22 @@ interface UpdateGoalDialogProps {
   };
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
+  userSettings: UserSettings;
 }
 
 export default function UpdateGoalDialog({
   goal,
   open,
   onOpenChangeAction,
+  userSettings,
 }: UpdateGoalDialogProps) {
   const [currentAmount, setCurrentAmount] = useState(
     goal.currentAmount.toString()
   );
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(userSettings.currency);
+  }, [userSettings.currency]);
 
   useEffect(() => {
     setCurrentAmount(goal.currentAmount.toString());
@@ -137,7 +145,7 @@ export default function UpdateGoalDialog({
                   size="sm"
                   onClick={() => handleAddAmount(amount)}
                 >
-                  +${amount}
+                  +{formatter.format(amount)}
                 </Button>
               ))}
             </div>
