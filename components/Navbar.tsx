@@ -8,7 +8,7 @@ import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { Menu, LayoutDashboard, PiggyBank, Settings, Wallet, LineChart, Calendar } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
-import { ThemeSwitcherBtn } from "./ThemeSwitcherBtn";
+import { ThemeCustomizer } from "./ThemeCustomizer";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 const Navbar = () => {
@@ -61,7 +61,7 @@ function MobileNavbar() {
           <LogoMobile />
         </div>
         <div className="flex items-center gap-2">
-          <ThemeSwitcherBtn />
+          <ThemeCustomizer />
           <UserButton afterSignOutUrl="/sign-in" />
         </div>
       </nav>
@@ -86,7 +86,7 @@ function DesktopNavbar() {
           </div>
         </div>
         <div className="flex items-center gap-2 3xl:gap-3">
-          <ThemeSwitcherBtn />
+          <ThemeCustomizer />
           <UserButton afterSignOutUrl="/sign-in" />
         </div>
       </nav>
