@@ -30,7 +30,7 @@ import { DataTableFacetedFilter } from "@/components/datatable/FacetedFilters";
 import { DataTableViewOptions } from "@/components/datatable/ColumnToggle";
 import { Button } from "@/components/ui/button";
 import { download, generateCsv, mkConfig } from "export-to-csv";
-import { DownloadIcon, MoreHorizontal, TrashIcon, FileText, StickyNote } from "lucide-react";
+import { DownloadIcon, MoreHorizontal, TrashIcon, FileText, StickyNote, Pencil } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
+import EditTransactionDialog from "./EditTransactionDialog";
 import { exportTransactionsToPDF } from "@/lib/pdf-export";
 import { SearchFilters } from "../../_components/AdvancedSearch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,6 +51,7 @@ import TagsPopover from "./TagsPopover";
 import { Tag, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteTransaction } from "../_actions/deleteTransaction";
+import TransactionHistoryPopover from "./TransactionHistoryPopover";
 
 interface Props {
   from: Date;
@@ -74,6 +76,9 @@ type TransactionHistoryRow = getTransactionHistoryResponseType[0] & {
     percentage: number;
   }[];
   notes?: string;
+  _count: {
+    history: number;
+  };
 };
 
 const columns: ColumnDef<TransactionHistoryRow>[] = [
@@ -165,7 +170,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
   {
     accessorKey: "date",
     header: "Date",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const date = new Date(row.original.date);
       const formattedDate = date.toLocaleDateString("default", {
         timeZone: "UTC",
@@ -173,7 +178,26 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         month: "2-digit",
         day: "2-digit",
       });
-      return <div className="text-muted-foreground">{formattedDate}</div>;
+      // @ts-ignore
+      const currency = table.options.meta?.userSettings?.currency || "USD";
+
+      return (
+        <div className="flex items-center gap-2">
+          <div className="text-muted-foreground">{formattedDate}</div>
+          {row.original._count.history > 0 && (
+            <TransactionHistoryPopover
+              transactionId={row.original.id}
+              currentAmount={row.original.amount}
+              currentDescription={row.original.description}
+              currentCategory={row.original.category}
+              currentCategoryIcon={row.original.categoryIcon}
+              currentDate={new Date(row.original.date)}
+              currentTagIds={row.original.tags?.map((t) => t.tag.name) || []}
+              currency={currency}
+            />
+          )}
+        </div>
+      );
     },
   },
   {
@@ -314,6 +338,9 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    meta: {
+      userSettings: userSettings.data,
+    },
   });
 
   const queryClient = useQueryClient(); // For invalidating queries
@@ -501,8 +528,14 @@ export default TransactionTable;
 
 function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   return (
     <>
+      <EditTransactionDialog
+        open={showEditDialog}
+        setOpen={setShowEditDialog}
+        transaction={transaction}
+      />
       <DeleteTransactionDialog
         open={showDeleteDialog}
         setOpen={setShowDeleteDialog}
@@ -518,6 +551,15 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="flex items-center gap-2"
+            onSelect={() => {
+              setShowEditDialog((prev) => !prev);
+            }}
+          >
+            <Pencil className="h-4 w-4 text-muted-foreground" />
+            Edit
+          </DropdownMenuItem>
           <DropdownMenuItem
             className="flex items-center gap-2"
             onSelect={() => {

@@ -114,7 +114,6 @@ export default function BulkTagDialog({
                         <TagSelector
                             selectedTags={selectedTags}
                             onTagsChange={setSelectedTags}
-                            allowCreation={false}
                         />
                     </div>
                 </div>

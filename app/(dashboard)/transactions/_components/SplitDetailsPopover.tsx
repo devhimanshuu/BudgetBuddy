@@ -67,15 +67,20 @@ function SplitDetailsPopover({ splits, transactionType }: Props) {
                                     </span>
                                     <span className="text-sm capitalize">{split.category}</span>
                                 </div>
-                                <div
-                                    className={cn(
-                                        "font-medium",
-                                        transactionType === "expense"
-                                            ? "text-red-500"
-                                            : "text-emerald-500"
-                                    )}
-                                >
-                                    {formatter.format(split.amount)}
+                                <div className="flex flex-col items-end">
+                                    <div
+                                        className={cn(
+                                            "font-medium",
+                                            transactionType === "expense"
+                                                ? "text-red-500"
+                                                : "text-emerald-500"
+                                        )}
+                                    >
+                                        {formatter.format(split.amount)}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground">
+                                        {split.percentage.toFixed(1)}%
+                                    </div>
                                 </div>
                             </div>
                         ))}

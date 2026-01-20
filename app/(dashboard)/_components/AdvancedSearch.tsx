@@ -116,6 +116,7 @@ export default function AdvancedSearch({
             <TagSelector
               selectedTags={filters.tags}
               onTagsChange={(tags) => setFilters({ ...filters, tags })}
+              allowCreation={false}
             />
           </div>
 

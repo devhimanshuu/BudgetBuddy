@@ -25,11 +25,12 @@ import React, { useCallback, useEffect, useState } from "react";
 interface Props {
   type: TransactionType;
   onChange: (value: Category) => void;
+  defaultValue?: string;
 }
 
-function CategoryPicker({ type, onChange }: Props) {
+function CategoryPicker({ type, onChange, defaultValue }: Props) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(defaultValue || "");
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
@@ -45,7 +46,12 @@ function CategoryPicker({ type, onChange }: Props) {
     enabled: !!type,
   });
 
-  // Removed useEffect that caused infinite loop
+  // Initialize value from defaultValue if it changes
+  useEffect(() => {
+    if (defaultValue) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue]);
 
   const selectedCategory = categoriesQuery.data?.find(
     (category: Category) => category.name === value

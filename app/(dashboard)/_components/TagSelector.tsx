@@ -32,6 +32,7 @@ interface Tag {
 interface TagSelectorProps {
   selectedTags: Tag[];
   onTagsChange: (tags: Tag[]) => void;
+  allowCreation?: boolean;
 }
 
 const PRESET_COLORS = [
@@ -50,6 +51,7 @@ const PRESET_COLORS = [
 export default function TagSelector({
   selectedTags,
   onTagsChange,
+  allowCreation = true,
 }: TagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -206,24 +208,28 @@ export default function TagSelector({
                       );
                     })}
                   </CommandGroup>
-                  <CommandSeparator />
-                  <CommandGroup>
-                    <CommandItem
-                      onSelect={() => {
-                        setIsCreating(true);
-                        setNewTagName(searchValue);
-                      }}
-                      className="gap-2 text-primary"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      Create new tag
-                      {searchValue && (
-                        <span className="ml-auto text-xs text-muted-foreground">
-                          &ldquo;{searchValue}&rdquo;
-                        </span>
-                      )}
-                    </CommandItem>
-                  </CommandGroup>
+                  {allowCreation && (
+                    <>
+                      <CommandSeparator />
+                      <CommandGroup>
+                        <CommandItem
+                          onSelect={() => {
+                            setIsCreating(true);
+                            setNewTagName(searchValue);
+                          }}
+                          className="gap-2 text-primary"
+                        >
+                          <Sparkles className="h-4 w-4" />
+                          Create new tag
+                          {searchValue && (
+                            <span className="ml-auto text-xs text-muted-foreground">
+                              &ldquo;{searchValue}&rdquo;
+                            </span>
+                          )}
+                        </CommandItem>
+                      </CommandGroup>
+                    </>
+                  )}
                 </CommandList>
               </>
             )}

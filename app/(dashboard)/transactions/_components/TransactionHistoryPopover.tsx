@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { GetFormatterForCurrency } from "@/lib/helper";
 import {
     Popover,
     PopoverContent,
@@ -19,7 +20,10 @@ interface TransactionHistoryPopoverProps {
     currentAmount: number;
     currentDescription: string;
     currentCategory: string;
+    currentCategoryIcon: string;
     currentDate: Date;
+    currentTagIds: string[];
+    currency: string;
 }
 
 interface HistoryVersion {
@@ -40,9 +44,13 @@ const TransactionHistoryPopover = ({
     currentAmount,
     currentDescription,
     currentCategory,
+    currentCategoryIcon,
     currentDate,
+    currentTagIds,
+    currency,
 }: TransactionHistoryPopoverProps) => {
     const [open, setOpen] = useState(false);
+    const formatter = GetFormatterForCurrency(currency);
 
     const { data: history, isLoading } = useQuery<HistoryVersion[]>({
         queryKey: ["transaction-history", transactionId],
@@ -145,10 +153,54 @@ const TransactionHistoryPopover = ({
                                             <span className="font-medium">{currentDescription}</span>
                                         </div>
                                         <div className="text-xs text-muted-foreground space-y-0.5">
-                                            <div>Amount: ${currentAmount.toFixed(2)}</div>
-                                            <div>Category: {currentCategory}</div>
+                                            <div>Amount: {formatter.format(currentAmount)}</div>
+                                            <div>Category: {currentCategoryIcon} {currentCategory}</div>
                                             <div>Date: {format(currentDate, "PPP")}</div>
+                                            {currentTagIds.length > 0 && (
+                                                <div>Tags: {currentTagIds.join(", ")}</div>
+                                            )}
                                         </div>
+
+                                        {/* Show changes between latest history and current */}
+                                        {history && history.length > 0 && (() => {
+                                            const latestHistory = history[0];
+                                            const changes: string[] = [];
+                                            
+                                            if (currentAmount !== latestHistory.amount) {
+                                                changes.push(`Amount: ${formatter.format(latestHistory.amount)} → ${formatter.format(currentAmount)}`);
+                                            }
+                                            if (currentDescription !== latestHistory.description) {
+                                                changes.push("Description changed");
+                                            }
+                                            if (currentCategory !== latestHistory.category) {
+                                                changes.push(`Category: ${latestHistory.category} → ${currentCategory}`);
+                                            }
+                                            if (new Date(currentDate).getTime() !== new Date(latestHistory.date).getTime()) {
+                                                changes.push("Date changed");
+                                            }
+                                            if (JSON.stringify(currentTagIds.sort()) !== JSON.stringify(latestHistory.tags.sort())) {
+                                                changes.push("Tags changed");
+                                            }
+
+                                            if (changes.length > 0) {
+                                                return (
+                                                    <div className="mt-2 pt-2 border-t border-dashed">
+                                                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                                                            Last Edit Changes:
+                                                        </p>
+                                                        <ul className="text-xs text-muted-foreground space-y-0.5">
+                                                            {changes.map((change, i) => (
+                                                                <li key={i} className="flex items-start gap-1">
+                                                                    <span className="text-amber-500 mt-0.5">•</span>
+                                                                    <span>{change}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                     </div>
                                 </div>
                             </div>
@@ -187,7 +239,7 @@ const TransactionHistoryPopover = ({
                                                     <span className="font-medium">{version.description}</span>
                                                 </div>
                                                 <div className="text-xs text-muted-foreground space-y-0.5">
-                                                    <div>Amount: ${version.amount.toFixed(2)}</div>
+                                                    <div>Amount: {formatter.format(version.amount)}</div>
                                                     <div>Category: {version.categoryIcon} {version.category}</div>
                                                     <div>Date: {format(new Date(version.date), "PPP")}</div>
                                                     {version.tags && version.tags.length > 0 && (
