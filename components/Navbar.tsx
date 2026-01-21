@@ -62,7 +62,14 @@ function MobileNavbar() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeCustomizer />
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton 
+            afterSignOutUrl="/sign-in" 
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-8 h-8",
+              },
+            }}
+          />
         </div>
       </nav>
     </div>
@@ -73,7 +80,7 @@ function DesktopNavbar() {
   return (
     <div className="hidden border-separate border-b bg-background md:block">
       <nav className="container flex items-center justify-between px-8 3xl:px-12">
-        <div className="flex h-[80px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6">
+        <div className="flex h-[25px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6">
           <Logo />
           <div className="flex h-full ">
             {items.map((item) => (
@@ -87,7 +94,14 @@ function DesktopNavbar() {
         </div>
         <div className="flex items-center gap-2 3xl:gap-3">
           <ThemeCustomizer />
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton
+            afterSignOutUrl="/sign-in"
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-8 h-8",
+              },
+            }}
+          />
         </div>
       </nav>
     </div>

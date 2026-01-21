@@ -34,6 +34,8 @@ function SplitDetailsPopover({ splits, transactionType }: Props) {
     const currency = userSettings.data?.currency || "USD";
     const formatter = GetFormatterForCurrency(currency);
 
+    const totalAmount = splits.reduce((sum, split) => sum + split.amount, 0);
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -55,35 +57,38 @@ function SplitDetailsPopover({ splits, transactionType }: Props) {
                         </p>
                     </div>
                     <div className="grid gap-2">
-                        {splits.map((split) => (
-                            <div key={split.id} className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <span
-                                        role="img"
-                                        aria-label={split.category}
-                                        className="text-lg"
-                                    >
-                                        {split.categoryIcon}
-                                    </span>
-                                    <span className="text-sm capitalize">{split.category}</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <div
-                                        className={cn(
-                                            "font-medium",
-                                            transactionType === "expense"
-                                                ? "text-red-500"
-                                                : "text-emerald-500"
-                                        )}
-                                    >
-                                        {formatter.format(split.amount)}
+                        {splits.map((split) => {
+                            const percent = totalAmount > 0 ? (split.amount / totalAmount) * 100 : 0;
+                            return (
+                                <div key={split.id} className="flex items-start justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span
+                                            role="img"
+                                            aria-label={split.category}
+                                            className="text-lg"
+                                        >
+                                            {split.categoryIcon}
+                                        </span>
+                                        <span className="text-sm capitalize">{split.category}</span>
                                     </div>
-                                    <div className="text-[10px] text-muted-foreground">
-                                        {split.percentage.toFixed(1)}%
+                                    <div className="flex flex-col items-end">
+                                        <div
+                                            className={cn(
+                                                "font-medium text-sm",
+                                                transactionType === "expense"
+                                                    ? "text-red-500"
+                                                    : "text-emerald-500"
+                                            )}
+                                        >
+                                            {formatter.format(split.amount)}
+                                        </div>
+                                        <div className="text-[10px] text-muted-foreground">
+                                            {percent.toFixed(1)}%
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </PopoverContent>

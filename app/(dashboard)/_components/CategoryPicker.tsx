@@ -26,9 +26,10 @@ interface Props {
   type: TransactionType;
   onChange: (value: Category) => void;
   defaultValue?: string;
+  className?: string;
 }
 
-function CategoryPicker({ type, onChange, defaultValue }: Props) {
+function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(defaultValue || "");
 
@@ -87,7 +88,7 @@ function CategoryPicker({ type, onChange, defaultValue }: Props) {
           variant={"outline"}
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className={cn("w-[200px] justify-between", className)}
         >
           {selectedCategory ? (
             <CategoryRow category={selectedCategory} />

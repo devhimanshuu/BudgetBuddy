@@ -49,7 +49,7 @@ export function ThemeCustomizer() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
                     <Paintbrush className="h-[1.2rem] w-[1.2rem]" />
                     <span className="sr-only">Customize Theme</span>
                 </Button>

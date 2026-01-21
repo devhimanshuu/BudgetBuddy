@@ -74,7 +74,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
   return (
     <>
       <div className="border-b bg-card">
-        <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
+        <div className="container flex flex-wrap items-center justify-between gap-6 py-4">
           <div>
             <p className="text-3xl font-bold">Analytics & Insights</p>
             <p className="text-muted-foreground">

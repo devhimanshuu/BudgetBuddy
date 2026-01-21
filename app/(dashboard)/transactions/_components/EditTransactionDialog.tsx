@@ -317,14 +317,20 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
 
                             {isSplitMode && (
                                 <div className="space-y-4 mb-4">
+                                    <div className="flex gap-2 px-1">
+                                        <Label className="flex-1 ml-1">Category</Label>
+                                        <Label className="w-32 ml-1">Amount</Label>
+                                        <div className="w-8"></div>
+                                    </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="flex gap-2 items-end">
-                                            <FormItem className="flex-1">
-                                                <FormLabel className={index !== 0 ? "sr-only" : ""}>
+                                        <div key={field.id} className="flex gap-2 items-start">
+                                            <FormItem className="flex-1 space-y-0">
+                                                <FormLabel className="sr-only">
                                                     Category
                                                 </FormLabel>
                                                 <FormControl>
                                                     <CategoryPicker
+                                                        className="w-full"
                                                         type={type}
                                                         defaultValue={form.getValues(`splits.${index}.category`)}
                                                         onChange={(cat) => {
@@ -340,8 +346,8 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
                                                     />
                                                 </FormControl>
                                             </FormItem>
-                                            <FormItem className="w-32">
-                                                <FormLabel className={index !== 0 ? "sr-only" : ""}>
+                                            <FormItem className="w-32 space-y-0">
+                                                <FormLabel className="sr-only">
                                                     Amount
                                                 </FormLabel>
                                                 <FormControl>
@@ -358,13 +364,20 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
                                                     {((form.watch(`splits.${index}.amount`) || 0) / (form.watch("amount") || 1) * 100).toFixed(1)}%
                                                 </div>
                                             </FormItem>
+
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                onClick={() => remove(index)}
+                                                onClick={() => {
+                                                    remove(index);
+                                                    if (fields.length === 1) {
+                                                        setIsSplitMode(false);
+                                                    }
+                                                }}
                                             >
                                                 <Trash className="h-4 w-4 text-destructive" />
                                             </Button>
+
                                         </div>
                                     ))}
                                     <Button
