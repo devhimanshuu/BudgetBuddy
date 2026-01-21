@@ -33,7 +33,7 @@ function MobileNavbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="block border-separate bg-background md:hidden">
+    <div className="block border-separate bg-background/80 backdrop-blur-md md:hidden fixed top-0 left-0 right-0 z-50 border-b shadow-sm">
       <nav className="container flex items-center justify-between px-8">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -62,8 +62,8 @@ function MobileNavbar() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeCustomizer />
-          <UserButton 
-            afterSignOutUrl="/sign-in" 
+          <UserButton
+            afterSignOutUrl="/sign-in"
             appearance={{
               elements: {
                 userButtonAvatarBox: "w-8 h-8",
@@ -78,7 +78,7 @@ function MobileNavbar() {
 
 function DesktopNavbar() {
   return (
-    <div className="hidden border-separate border-b bg-background md:block">
+    <div className="hidden border-separate border-b bg-background/80 backdrop-blur-md md:block fixed top-0 left-0 right-0 z-50 shadow-sm">
       <nav className="container flex items-center justify-between px-8 3xl:px-12">
         <div className="flex h-[25px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6">
           <Logo />

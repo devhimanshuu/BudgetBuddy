@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import CategoryPicker from "./CategoryPicker";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Loader2, Plus, Trash } from "lucide-react";
+import { CalendarIcon, Loader2, Plus, Trash, AlertTriangle, TrendingDown } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -50,6 +50,8 @@ import { Category } from "@prisma/client";
 import TagSelector from "./TagSelector";
 import FileUpload from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
+import { useCheckBudgetAlert } from "@/lib/useCheckBudgetAlert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Props {
   trigger?: ReactNode;
@@ -104,6 +106,17 @@ const CreateTransactionDialog = ({
     [form]
   );
 
+  // Watch form values for budget alert checking
+  const watchedCategory = form.watch("category");
+  const watchedAmount = form.watch("amount");
+
+  // Check budget alerts in real-time (only for expenses)
+  const { data: budgetAlertData } = useCheckBudgetAlert(
+    watchedCategory,
+    watchedAmount,
+    type === "expense" && !!watchedCategory && watchedAmount > 0
+  );
+
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -112,6 +125,25 @@ const CreateTransactionDialog = ({
       toast.success("Transaction created Successfully", {
         id: "create-transaction",
       });
+
+      // Show budget alert toast if there was a warning
+      if (budgetAlertData?.hasAlert && budgetAlertData.alert) {
+        const alert = budgetAlertData.alert;
+        if (alert.level === "danger") {
+          toast.error(alert.message, {
+            id: "budget-alert",
+            duration: 5000,
+            description: `You've spent $${alert.spent.toFixed(2)} of your $${alert.budgetAmount.toFixed(2)} budget`,
+          });
+        } else if (alert.level === "warning") {
+          toast.warning(alert.message, {
+            id: "budget-alert",
+            duration: 5000,
+            description: `You've used ${alert.percentage.toFixed(0)}% of your budget`,
+          });
+        }
+      }
+
       form.reset({
         type,
         description: "",
@@ -125,6 +157,9 @@ const CreateTransactionDialog = ({
 
       queryClient.invalidateQueries({
         queryKey: ["overview"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["budget-progress"],
       });
       setOpen(false);
     },
@@ -266,6 +301,47 @@ const CreateTransactionDialog = ({
                   </FormItem>
                 )}
               />
+
+              {/* Budget Alert Display */}
+              {budgetAlertData?.hasAlert && budgetAlertData.alert && (
+                <Alert
+                  variant={
+                    budgetAlertData.alert.level === "danger"
+                      ? "destructive"
+                      : "default"
+                  }
+                  className={cn(
+                    "border-2",
+                    budgetAlertData.alert.level === "danger"
+                      ? "border-red-500 bg-red-50 dark:bg-red-950/20"
+                      : "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
+                  )}
+                >
+                  <div className="flex items-start gap-2">
+                    {budgetAlertData.alert.level === "danger" ? (
+                      <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+                    ) : (
+                      <TrendingDown className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                    )}
+                    <div className="flex-1">
+                      <AlertTitle className="text-sm font-semibold mb-1">
+                        {budgetAlertData.alert.level === "danger"
+                          ? "🚨 Budget Exceeded!"
+                          : "⚠️ Budget Warning"}
+                      </AlertTitle>
+                      <AlertDescription className="text-sm">
+                        {budgetAlertData.alert.message}
+                      </AlertDescription>
+                      <div className="mt-2 text-xs opacity-80">
+                        Budget: ${budgetAlertData.alert.budgetAmount.toFixed(2)} |
+                        Will spend: ${budgetAlertData.alert.spent.toFixed(2)} (
+                        {budgetAlertData.alert.percentage.toFixed(0)}%)
+                      </div>
+                    </div>
+                  </div>
+                </Alert>
+              )}
+
 
               <div className="flex items-center space-x-2 py-4 border-t border-b border-muted/50 my-4">
                 <Switch
