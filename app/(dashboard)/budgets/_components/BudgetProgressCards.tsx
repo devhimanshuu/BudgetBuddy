@@ -12,6 +12,7 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import EditBudgetDialog from "./EditBudgetDialog";
 import DeleteBudgetDialog from "./DeleteBudgetDialog";
 import { Button } from "@/components/ui/button";
+import BudgetSummaryCard from "./BudgetSummaryCard";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -50,8 +51,24 @@ export default function BudgetProgressCards({
 
   const dataAvailable = budgetProgress && budgetProgress.length > 0;
 
+  // Calculate days remaining in current month
+  const now = new Date();
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const daysRemaining = Math.max(
+    1,
+    Math.ceil((lastDayOfMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  );
+
   return (
     <div className="space-y-4">
+      {/* Summary Card */}
+      <BudgetSummaryCard
+        userSettings={userSettings}
+        budgetProgress={budgetProgress}
+        isLoading={isFetching}
+      />
+
+      {/* Individual Budget Cards */}
       <SkeletonWrapper isLoading={isFetching}>
         {dataAvailable ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -173,6 +190,15 @@ export default function BudgetProgressCards({
                   <div className="text-center text-xs text-muted-foreground">
                     {budget.percentage.toFixed(0)}% of budget used
                   </div>
+
+                  {/* Daily Safe-to-Spend for this category */}
+                  {!budget.isOverBudget && budget.remaining > 0 && (
+                    <div className="mt-2 rounded border border-emerald-500/30 bg-emerald-50 px-2 py-1 text-center dark:bg-emerald-950/20">
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                        {formatter.format(budget.remaining / daysRemaining)}/day
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

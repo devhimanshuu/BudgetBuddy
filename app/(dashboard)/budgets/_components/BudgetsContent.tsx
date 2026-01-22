@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { UserSettings } from "@prisma/client";
-import { PlusCircle } from "lucide-react";
+import { Copy, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import CreateBudgetDialog from "./CreateBudgetDialog";
 import BudgetProgressCards from "./BudgetProgressCards";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -22,6 +24,37 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
+  const queryClient = useQueryClient();
+
+  const copyPreviousMonthMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/budgets/copy-previous", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          targetMonth: selectedMonth,
+          targetYear: selectedYear,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to copy budgets");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ["budget-progress"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
 
   const months = [
     "January",
@@ -83,6 +116,15 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                 ))}
               </SelectContent>
             </Select>
+
+            <Button
+              variant="outline"
+              onClick={() => copyPreviousMonthMutation.mutate()}
+              disabled={copyPreviousMonthMutation.isPending}
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy Previous"}
+            </Button>
 
             <CreateBudgetDialog
               trigger={
