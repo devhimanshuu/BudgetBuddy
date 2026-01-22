@@ -245,7 +245,7 @@ export default function BudgetSummaryCard({
                   ⚠️ Budget Exceeded
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  You've spent {formatter.format(Math.abs(summary.totalRemaining))} more than your budget
+                  You&apos;ve spent {formatter.format(Math.abs(summary.totalRemaining))} more than your budget
                 </p>
               </div>
             </div>

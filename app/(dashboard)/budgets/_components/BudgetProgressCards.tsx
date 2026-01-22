@@ -5,14 +5,16 @@ import { Progress } from "@/components/ui/progress";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { AlertTriangle, TrendingDown, Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, TrendingDown, Pencil, Trash2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import EditBudgetDialog from "./EditBudgetDialog";
 import DeleteBudgetDialog from "./DeleteBudgetDialog";
 import { Button } from "@/components/ui/button";
 import BudgetSummaryCard from "./BudgetSummaryCard";
+import CreateTransactionDialog from "../../_components/CreateTransactionDialog";
+import BudgetHistory from "./BudgetHistory";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -30,6 +32,11 @@ interface BudgetProgress {
   percentage: number;
   isOverBudget: boolean;
   isNearLimit: boolean;
+  projectedSpending: number;
+  projectedOverspend: number;
+  isProjectedToOverspend: boolean;
+  dailySpendingRate: number;
+  daysRemaining: number;
 }
 
 export default function BudgetProgressCards({
@@ -97,6 +104,23 @@ export default function BudgetProgressCards({
                       {budget.isNearLimit && !budget.isOverBudget && (
                         <TrendingDown className="h-5 w-5 text-yellow-500" />
                       )}
+                      
+                      {/* Quick-Add Expense Button */}
+                      <CreateTransactionDialog
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        }
+                        type="expense"
+                        initialCategory={budget.category}
+                        initialCategoryIcon={budget.categoryIcon}
+                      />
+
                       <EditBudgetDialog
                         trigger={
                           <Button
@@ -199,6 +223,35 @@ export default function BudgetProgressCards({
                       </p>
                     </div>
                   )}
+
+                  {/* Spending Projection */}
+                  {!budget.isOverBudget && budget.spent > 0 && (
+                    <div className="mt-2">
+                      {budget.isProjectedToOverspend ? (
+                        <div className="rounded border border-orange-500/30 bg-orange-50 px-2 py-1 dark:bg-orange-950/20">
+                          <p className="text-xs font-medium text-orange-700 dark:text-orange-300">
+                            ⚠️ Projected: {formatter.format(budget.projectedSpending)}
+                          </p>
+                          <p className="text-xs text-orange-600 dark:text-orange-400">
+                            May overspend by {formatter.format(budget.projectedOverspend)}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="rounded border border-blue-500/30 bg-blue-50 px-2 py-1 dark:bg-blue-950/20">
+                          <p className="text-xs text-blue-700 dark:text-blue-300">
+                            ✅ On track to save {formatter.format(budget.budgetAmount - budget.projectedSpending)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Historical Context */}
+                  <BudgetHistory
+                    category={budget.category}
+                    currentSpent={budget.spent}
+                    userSettings={userSettings}
+                  />
                 </CardContent>
               </Card>
             ))}

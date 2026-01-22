@@ -103,7 +103,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                 timestamp: new Date().toISOString(),
             });
         }
-    }, [calendarQuery.isError, calendarQuery.error, calendarQuery.refetch, currentMonth, multiplier]);
+    }, [calendarQuery, currentMonth, multiplier]);
 
     // Handle success after error
     useEffect(() => {

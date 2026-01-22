@@ -58,6 +58,8 @@ interface Props {
   type: TransactionType;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  initialCategory?: string;
+  initialCategoryIcon?: string;
 }
 
 const CreateTransactionDialog = ({
@@ -65,6 +67,8 @@ const CreateTransactionDialog = ({
   type,
   open: externalOpen,
   onOpenChange,
+  initialCategory,
+  initialCategoryIcon,
 }: Props) => {
   const form = useForm<CreateTransactionSchemaType>({
     resolver: zodResolver(CreateTransactionSchema),
@@ -73,7 +77,7 @@ const CreateTransactionDialog = ({
       date: new Date(),
       description: "",
       amount: 0,
-      category: "",
+      category: initialCategory || "",
     },
   });
 
