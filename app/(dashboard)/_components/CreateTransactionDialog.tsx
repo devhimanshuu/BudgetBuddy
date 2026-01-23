@@ -16,7 +16,7 @@ import {
   CreateTransactionSchema,
   CreateTransactionSchemaType,
 } from "@/schema/transaction";
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback, useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -109,6 +109,13 @@ const CreateTransactionDialog = ({
     },
     [form]
   );
+
+  // Set initial category when dialog opens
+  useEffect(() => {
+    if (open && initialCategory) {
+      form.setValue("category", initialCategory);
+    }
+  }, [open, initialCategory, form]);
 
   // Watch form values for budget alert checking
   const watchedCategory = form.watch("category");
@@ -432,6 +439,7 @@ const CreateTransactionDialog = ({
                         <CategoryPicker
                           type={type}
                           onChange={handleCategoryChange}
+                          defaultValue={watchedCategory}
                         />
                       </FormControl>
                       <FormDescription>

@@ -136,6 +136,12 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
             queryClient.invalidateQueries({
                 queryKey: ["overview"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["budget-progress"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["calendar"],
+            });
             setOpen(false);
         },
         onError: (error: any) => {

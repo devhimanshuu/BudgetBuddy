@@ -69,7 +69,7 @@ export default function BudgetSummaryCard({
       1,
       Math.ceil((lastDayOfMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     );
-    
+
     // Calculate daily safe-to-spend amount
     const dailySafeToSpend = totalRemaining > 0 ? totalRemaining / daysRemaining : 0;
 
@@ -140,8 +140,8 @@ export default function BudgetSummaryCard({
                 isOverBudget
                   ? "text-red-600 dark:text-red-400"
                   : isNearLimit
-                  ? "text-yellow-600 dark:text-yellow-400"
-                  : "text-emerald-600 dark:text-emerald-400"
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-emerald-600 dark:text-emerald-400"
               )}
             >
               {formatter.format(Math.abs(summary.totalRemaining))}
@@ -171,16 +171,15 @@ export default function BudgetSummaryCard({
                     strokeWidth="6"
                     fill="transparent"
                     strokeDasharray={`${2 * Math.PI * 28}`}
-                    strokeDashoffset={`${
-                      2 * Math.PI * 28 * (1 - Math.min(summary.overallPercentage, 100) / 100)
-                    }`}
+                    strokeDashoffset={`${2 * Math.PI * 28 * (1 - Math.min(summary.overallPercentage, 100) / 100)
+                      }`}
                     className={cn(
                       "transition-all duration-500",
                       isOverBudget
                         ? "text-red-500"
                         : isNearLimit
-                        ? "text-yellow-500"
-                        : "text-emerald-500"
+                          ? "text-yellow-500"
+                          : "text-emerald-500"
                     )}
                     strokeLinecap="round"
                   />
