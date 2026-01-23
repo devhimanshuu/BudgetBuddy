@@ -25,11 +25,13 @@ import React, { useCallback, useEffect, useState } from "react";
 interface Props {
   type: TransactionType;
   onChange: (value: Category) => void;
+  defaultValue?: string;
+  className?: string;
 }
 
-function CategoryPicker({ type, onChange }: Props) {
+function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(defaultValue || "");
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
@@ -45,16 +47,12 @@ function CategoryPicker({ type, onChange }: Props) {
     enabled: !!type,
   });
 
+  // Initialize value from defaultValue if it changes
   useEffect(() => {
-    if (!value) return;
-    // when the value changes, call onChange callback
-    const category = categoriesQuery.data?.find(
-      (cat: Category) => cat.name === value
-    );
-    if (category) {
-      onChange(category);
+    if (defaultValue) {
+      setValue(defaultValue);
     }
-  }, [onChange, value, categoriesQuery.data]);
+  }, [defaultValue]);
 
   const selectedCategory = categoriesQuery.data?.find(
     (category: Category) => category.name === value
@@ -64,8 +62,9 @@ function CategoryPicker({ type, onChange }: Props) {
     (category: Category) => {
       setValue(category.name);
       setOpen((prev) => !prev);
+      onChange(category);
     },
-    [setValue, setOpen]
+    [setValue, setOpen, onChange]
   );
 
   // Get recent category names for filtering
@@ -89,7 +88,7 @@ function CategoryPicker({ type, onChange }: Props) {
           variant={"outline"}
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className={cn("w-[200px] justify-between", className)}
         >
           {selectedCategory ? (
             <CategoryRow category={selectedCategory} />
@@ -113,7 +112,7 @@ function CategoryPicker({ type, onChange }: Props) {
               Tip: Create a new category
             </p>
           </CommandEmpty>
-          
+
           {/* Recent Categories */}
           {recentCategories.length > 0 && (
             <CommandGroup heading="Recent">
@@ -124,6 +123,7 @@ function CategoryPicker({ type, onChange }: Props) {
                     onSelect={() => {
                       setValue(category.name);
                       setOpen((prev) => !prev);
+                      onChange(category);
                     }}
                   >
                     <CategoryRow category={category} />
@@ -149,6 +149,7 @@ function CategoryPicker({ type, onChange }: Props) {
                     onSelect={() => {
                       setValue(category.name);
                       setOpen((prev) => !prev);
+                      onChange(category);
                     }}
                   >
                     <CategoryRow category={category} />

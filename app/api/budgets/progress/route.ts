@@ -66,6 +66,23 @@ export async function GET(request: Request) {
     const remaining = budget.amount - spent;
     const percentage = (spent / budget.amount) * 100;
 
+    // Calculate spending projection
+    const now = new Date();
+    const firstDayOfMonth = new Date(yearNum, monthNum, 1);
+    const lastDayOfMonth = new Date(yearNum, monthNum + 1, 0);
+    const totalDaysInMonth = lastDayOfMonth.getDate();
+    const daysPassed = Math.max(
+      1,
+      now.getDate() - firstDayOfMonth.getDate() + 1,
+    );
+    const daysRemaining = Math.max(0, totalDaysInMonth - daysPassed);
+
+    // Project spending based on current pace
+    const dailySpendingRate = spent / daysPassed;
+    const projectedSpending = dailySpendingRate * totalDaysInMonth;
+    const projectedOverspend = Math.max(0, projectedSpending - budget.amount);
+    const isProjectedToOverspend = projectedSpending > budget.amount;
+
     return {
       id: budget.id,
       category: budget.category,
@@ -76,6 +93,11 @@ export async function GET(request: Request) {
       percentage: Math.min(percentage, 100),
       isOverBudget: spent > budget.amount,
       isNearLimit: percentage >= 80 && percentage < 100,
+      projectedSpending,
+      projectedOverspend,
+      isProjectedToOverspend,
+      dailySpendingRate,
+      daysRemaining,
     };
   });
 

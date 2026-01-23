@@ -64,6 +64,142 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
   }
+
+  /* Theme: Midnight */
+  .midnight {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 6.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
+  /* Theme: Solaris (Solarized Dark inspired) */
+  .solaris {
+    --background: 192 100% 5%;
+    --foreground: 45 20% 90%;
+
+    --card: 192 80% 8%;
+    --card-foreground: 45 20% 90%;
+
+    --popover: 192 100% 5%;
+    --popover-foreground: 45 20% 90%;
+
+    --primary: 175 60% 40%;
+    --primary-foreground: 192 100% 98%;
+
+    --secondary: 192 60% 15%;
+    --secondary-foreground: 45 20% 90%;
+
+    --muted: 192 60% 12%;
+    --muted-foreground: 45 15% 60%;
+
+    --accent: 192 60% 15%;
+    --accent-foreground: 45 20% 90%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 192 60% 20%;
+    --input: 192 60% 20%;
+    --ring: 175 60% 40%;
+  }
+
+  /* Theme: Cyberpunk */
+  .cyberpunk {
+    --background: 280 80% 5%;
+    --foreground: 300 100% 95%;
+
+    --card: 280 60% 8%;
+    --card-foreground: 300 100% 95%;
+
+    --popover: 280 80% 5%;
+    --popover-foreground: 300 100% 95%;
+
+    --primary: 300 100% 50%; /* Neon Pink */
+    --primary-foreground: 280 80% 5%;
+
+    --secondary: 180 100% 50%; /* Neon Cyan */
+    --secondary-foreground: 280 80% 5%;
+
+    --muted: 280 50% 20%;
+    --muted-foreground: 300 50% 70%;
+
+    --accent: 50 100% 50%; /* Neon Yellow */
+    --accent-foreground: 280 80% 5%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 280 80% 5%;
+
+    --border: 300 100% 50%;
+    --input: 300 100% 50%;
+    --ring: 180 100% 50%;
+  }
+
+  /* Accent Overrides */
+  .accent-yellow {
+    --primary: 47.9 95.8% 53.1%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --ring: 47.9 95.8% 53.1%;
+  }
+  
+  .accent-green {
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --ring: 142.1 76.2% 36.3%;
+  }
+
+  .accent-blue {
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 221.2 83.2% 53.3%;
+  }
+
+  .accent-violet {
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+    --ring: 262.1 83.3% 57.8%;
+  }
+
+  .accent-orange {
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --ring: 24.6 95% 53.1%;
+  }
+
+  .accent-rose {
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --ring: 346.8 77.2% 49.8%;
+  }
+  
+  .accent-emerald {
+      --primary: 142.1 70.6% 45.3%;
+      --primary-foreground: 144.9 80.4% 10%;
+      --ring: 142.1 70.6% 45.3%;
+  }
 }
 
 @layer base {

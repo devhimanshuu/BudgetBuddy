@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import RootProvider from "@/components/providers/RootProvider";
 import { Toaster } from "@/components/ui/sonner";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +20,16 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
-        <body className={inter.className}>
+      <html
+        lang="en"
+        className="dark"
+        style={{ colorScheme: "dark" }}
+        suppressHydrationWarning
+      >
+        <body className={inter.className} suppressHydrationWarning>
           <Toaster richColors position="bottom-right" />
           <RootProvider>{children}</RootProvider>
+          <OfflineIndicator />
         </body>
       </html>
     </ClerkProvider>

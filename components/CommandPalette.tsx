@@ -9,6 +9,7 @@ import {
   LineChart,
   Wallet,
   TrendingDown,
+  Calendar,
 } from "lucide-react"
 
 import {
@@ -76,6 +77,11 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick }:
             <LineChart className="mr-2 h-4 w-4" />
             <span>Analytics</span>
             <CommandShortcut>⌘A</CommandShortcut>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/calendar"))}>
+            <Calendar className="mr-2 h-4 w-4" />
+            <span>Calendar</span>
+            <CommandShortcut>⌘C</CommandShortcut>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push("/manage"))}>
             <Settings className="mr-2 h-4 w-4" />

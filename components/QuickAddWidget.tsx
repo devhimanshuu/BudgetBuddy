@@ -18,7 +18,7 @@ export default function QuickAddWidget({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 3xl:bottom-8 3xl:right-8">
+    <div className="fixed bottom-4 right-4 z-40 3xl:bottom-8 3xl:right-8">
       <AnimatePresence>
         {isOpen && (
           <motion.div

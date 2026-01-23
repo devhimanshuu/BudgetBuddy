@@ -20,9 +20,10 @@ import { Button } from "@/components/ui/button";
 
 interface ComparisonChartProps {
   userSettings: UserSettings;
+  tagIds?: string[];
 }
 
-export default function ComparisonChart({ userSettings }: ComparisonChartProps) {
+export default function ComparisonChart({ userSettings, tagIds = [] }: ComparisonChartProps) {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
@@ -30,10 +31,12 @@ export default function ComparisonChart({ userSettings }: ComparisonChartProps) 
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
+  const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
+
   const comparisonQuery = useQuery({
-    queryKey: ["analytics", "comparison", selectedYear],
+    queryKey: ["analytics", "comparison", selectedYear, tagIds],
     queryFn: () =>
-      fetch(`/api/analytics/comparison?year=${selectedYear}`).then((res) =>
+      fetch(`/api/analytics/comparison?year=${selectedYear}${tagQueryParam}`).then((res) =>
         res.json()
       ),
   });
@@ -126,20 +129,19 @@ export default function ComparisonChart({ userSettings }: ComparisonChartProps) 
                                   Change:{" "}
                                 </span>
                                 <span
-                                  className={`font-semibold ${
-                                    data.currentYearExpense >
-                                    data.previousYearExpense
+                                  className={`font-semibold ${data.currentYearExpense >
+                                      data.previousYearExpense
                                       ? "text-red-500"
                                       : "text-emerald-500"
-                                  }`}
+                                    }`}
                                 >
                                   {data.previousYearExpense > 0
                                     ? (
-                                        ((data.currentYearExpense -
-                                          data.previousYearExpense) /
-                                          data.previousYearExpense) *
-                                        100
-                                      ).toFixed(1)
+                                      ((data.currentYearExpense -
+                                        data.previousYearExpense) /
+                                        data.previousYearExpense) *
+                                      100
+                                    ).toFixed(1)
                                     : "N/A"}
                                   %
                                 </span>
@@ -210,20 +212,19 @@ export default function ComparisonChart({ userSettings }: ComparisonChartProps) 
                                   Change:{" "}
                                 </span>
                                 <span
-                                  className={`font-semibold ${
-                                    data.currentYearIncome >
-                                    data.previousYearIncome
+                                  className={`font-semibold ${data.currentYearIncome >
+                                      data.previousYearIncome
                                       ? "text-emerald-500"
                                       : "text-red-500"
-                                  }`}
+                                    }`}
                                 >
                                   {data.previousYearIncome > 0
                                     ? (
-                                        ((data.currentYearIncome -
-                                          data.previousYearIncome) /
-                                          data.previousYearIncome) *
-                                        100
-                                      ).toFixed(1)
+                                      ((data.currentYearIncome -
+                                        data.previousYearIncome) /
+                                        data.previousYearIncome) *
+                                      100
+                                    ).toFixed(1)
                                     : "N/A"}
                                   %
                                 </span>

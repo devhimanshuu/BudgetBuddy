@@ -11,23 +11,26 @@ import {
 } from "@/components/ui/card";
 import { TransactionType } from "@/lib/type";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
+import { Pencil, PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import CreateCategoryDialog from "../_components/CreateCategoryDialog";
+import EditCategoryDialog from "../_components/EditCategoryDialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Category } from "@prisma/client";
 import DeleteCategoryDialog from "../_components/DeleteCategoryDialog";
 import CreateTagDialog from "./_components/CreateTagDialog";
+import EditTagDialog from "./_components/EditTagDialog";
+import DeleteTagDialog from "./_components/DeleteTagDialog";
 import { Tag } from "lucide-react";
 
 const page = () => {
   return (
     <>
       <div className="border-b bg-card">
-        <div className="container flex flex-wrap items-center justify-between gap-6 py-8">
+        <div className="container flex flex-wrap items-center justify-between gap-6 py-3">
           <div>
             <p className="text-3xl font-bold">Manage</p>
             <p className="text-muted-foreground">
@@ -58,7 +61,10 @@ const page = () => {
 
 export default page;
 
+
 function CategoryList({ type }: { type: TransactionType }) {
+  const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
+
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
     queryFn: () =>
@@ -66,6 +72,26 @@ function CategoryList({ type }: { type: TransactionType }) {
   });
 
   const dataAvailable = categoriesQuery.data && categoriesQuery.data.length > 0;
+
+  // Sort categories based on selected option
+  const sortedCategories = React.useMemo(() => {
+    if (!categoriesQuery.data) return [];
+
+    const categoriesCopy = [...categoriesQuery.data];
+
+    if (sortBy === "name") {
+      return categoriesCopy.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      return categoriesCopy.sort((a, b) =>
+        (b._count?.transactions || 0) - (a._count?.transactions || 0)
+      );
+    }
+  }, [categoriesQuery.data, sortBy]);
+
+  const totalCategories = categoriesQuery.data?.length || 0;
+  const totalUsage = categoriesQuery.data?.reduce((acc: number, category: any) =>
+    acc + (category._count?.transactions || 0), 0
+  ) || 0;
 
   return (
     <SkeletonWrapper isLoading={categoriesQuery.isFetching}>
@@ -81,7 +107,7 @@ function CategoryList({ type }: { type: TransactionType }) {
               <div>
                 {type === "income" ? "Incomes" : "Expenses"} categories
                 <div className="text-sm text-muted-foreground">
-                  Sorted by name
+                  {totalCategories} {totalCategories === 1 ? "category" : "categories"} • {totalUsage} {totalUsage === 1 ? "transaction" : "transactions"}
                 </div>
               </div>
             </div>
@@ -99,6 +125,29 @@ function CategoryList({ type }: { type: TransactionType }) {
           </CardTitle>
         </CardHeader>
         <Separator />
+
+        {dataAvailable && (
+          <div className="p-4 border-b">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <Button
+                variant={sortBy === "name" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("name")}
+              >
+                Name
+              </Button>
+              <Button
+                variant={sortBy === "usage" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("usage")}
+              >
+                Usage
+              </Button>
+            </div>
+          </div>
+        )}
+
         {!dataAvailable && (
           <div className="flex h-40 w-full flex-col items-center justify-center">
             <p>
@@ -120,7 +169,7 @@ function CategoryList({ type }: { type: TransactionType }) {
         )}
         {dataAvailable && (
           <div className="grid grid-flow-row gap-2 p-2 sm:grid-flow-row sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {categoriesQuery.data.map((category: Category) => (
+            {sortedCategories.map((category: any) => (
               <CategoryCard category={category} key={category.name} />
             ))}
           </div>
@@ -130,38 +179,80 @@ function CategoryList({ type }: { type: TransactionType }) {
   );
 }
 
-function CategoryCard({ category }: { category: Category }) {
+function CategoryCard({ category }: { category: any }) {
   return (
     <div className="flex border-separate flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]">
-      <div className="flex flex-col item-center gap-2 p-4 ">
-        <span className="text-3xl " role="img">
+      <div className="flex flex-col items-center gap-2 p-4">
+        <span className="text-3xl" role="img">
           {category.icon}
         </span>
         <span>{category.name}</span>
+        <span className="text-xs text-muted-foreground">
+          {category._count?.transactions || 0} transactions
+        </span>
       </div>
-      <DeleteCategoryDialog
-        category={category}
-        trigger={
-          <Button
-            className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-red-500/20"
-            variant={"secondary"}
-          >
-            <TrashIcon className="h-4 w-4" />
-            Remove
-          </Button>
-        }
-      />
+      <div className="flex w-full gap-2 p-2">
+        <EditCategoryDialog
+          category={category}
+          trigger={
+            <Button
+              className="flex-1 gap-2 text-muted-foreground hover:bg-blue-500/20"
+              variant={"secondary"}
+              size="sm"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Button>
+          }
+        />
+        <DeleteCategoryDialog
+          category={category}
+          trigger={
+            <Button
+              className="flex-1 gap-2 text-muted-foreground hover:bg-red-500/20"
+              variant={"secondary"}
+              size="sm"
+            >
+              <TrashIcon className="h-4 w-4" />
+              Remove
+            </Button>
+          }
+        />
+      </div>
     </div>
   );
 }
 
+
 function TagList() {
+  const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
+
   const tagsQuery = useQuery({
     queryKey: ["tags"],
     queryFn: () => fetch("/api/tags").then((res) => res.json()),
   });
 
   const dataAvailable = tagsQuery.data && tagsQuery.data.length > 0;
+
+  // Sort tags based on selected option
+  const sortedTags = React.useMemo(() => {
+    if (!tagsQuery.data) return [];
+
+    const tagsCopy = [...tagsQuery.data];
+
+    if (sortBy === "name") {
+      return tagsCopy.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      return tagsCopy.sort((a, b) =>
+        (b._count?.transactions || 0) - (a._count?.transactions || 0)
+      );
+    }
+  }, [tagsQuery.data, sortBy]);
+
+  const totalTags = tagsQuery.data?.length || 0;
+  const totalUsage = tagsQuery.data?.reduce((acc: number, tag: any) =>
+    acc + (tag._count?.transactions || 0), 0
+  ) || 0;
 
   return (
     <SkeletonWrapper isLoading={tagsQuery.isFetching}>
@@ -173,7 +264,7 @@ function TagList() {
               <div>
                 Tags
                 <div className="text-sm text-muted-foreground">
-                  Organize your transactions
+                  {totalTags} {totalTags === 1 ? "tag" : "tags"} • {totalUsage} {totalUsage === 1 ? "transaction" : "transactions"}
                 </div>
               </div>
             </div>
@@ -189,6 +280,29 @@ function TagList() {
           </CardTitle>
         </CardHeader>
         <Separator />
+
+        {dataAvailable && (
+          <div className="p-4 border-b">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <Button
+                variant={sortBy === "name" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("name")}
+              >
+                Name
+              </Button>
+              <Button
+                variant={sortBy === "usage" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("usage")}
+              >
+                Usage
+              </Button>
+            </div>
+          </div>
+        )}
+
         {!dataAvailable && (
           <div className="flex h-40 w-full flex-col items-center justify-center">
             <p>
@@ -201,7 +315,7 @@ function TagList() {
         )}
         {dataAvailable && (
           <div className="grid grid-flow-row gap-2 p-2 sm:grid-flow-row sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {tagsQuery.data.map((tag: any) => (
+            {sortedTags.map((tag: any) => (
               <TagCard tag={tag} key={tag.id} />
             ))}
           </div>
@@ -243,15 +357,38 @@ function TagCard({ tag }: { tag: any }) {
           {tag._count?.transactions || 0} transactions
         </span>
       </div>
-      <Button
-        className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-red-500/20"
-        variant="secondary"
-        onClick={() => deleteMutation.mutate(tag.id)}
-        disabled={deleteMutation.isPending}
-      >
-        <TrashIcon className="h-4 w-4" />
-        Remove
-      </Button>
+      <div className="flex w-full gap-2 p-2">
+        <EditTagDialog
+          tag={tag}
+          trigger={
+            <Button
+              className="flex-1 gap-2 text-muted-foreground hover:bg-blue-500/20"
+              variant="secondary"
+              size="sm"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Button>
+          }
+        />
+        <DeleteTagDialog
+          trigger={
+            <Button
+              className="flex-1 gap-2 text-muted-foreground hover:bg-red-500/20"
+              variant="secondary"
+              size="sm"
+              disabled={deleteMutation.isPending}
+            >
+              <TrashIcon className="h-4 w-4" />
+              Remove
+            </Button>
+          }
+          tagName={tag.name}
+          transactionCount={tag._count?.transactions || 0}
+          onConfirm={() => deleteMutation.mutate(tag.id)}
+          isPending={deleteMutation.isPending}
+        />
+      </div>
     </div>
   );
 }

@@ -4,18 +4,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { UserSettings } from "@prisma/client";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 interface HeatmapChartProps {
   from: Date;
   to: Date;
+  userSettings: UserSettings;
+  tagIds?: string[];
 }
 
-export default function HeatmapChart({ from, to }: HeatmapChartProps) {
+export default function HeatmapChart({ from, to, userSettings, tagIds = [] }: HeatmapChartProps) {
+  const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(userSettings.currency);
+  }, [userSettings.currency]);
+
   const heatmapQuery = useQuery({
-    queryKey: ["analytics", "heatmap", from, to],
+    queryKey: ["analytics", "heatmap", from, to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/heatmap?from=${from.toISOString()}&to=${to.toISOString()}`
+        `/api/analytics/heatmap?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
 
@@ -95,13 +105,11 @@ export default function HeatmapChart({ from, to }: HeatmapChartProps) {
                             className={`group relative flex-1 cursor-pointer rounded p-4 transition-all hover:scale-105 hover:shadow-lg ${getColor(
                               blockTotal
                             )}`}
-                            title={`${dayData.day} ${block.label}: $${blockTotal.toFixed(
-                              2
-                            )}`}
+                            title={`${dayData.day} ${block.label}: ${formatter.format(blockTotal)}`}
                           >
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                               <span className="text-xs font-semibold">
-                                ${blockTotal.toFixed(0)}
+                                {formatter.format(blockTotal)}
                               </span>
                             </div>
                           </div>
