@@ -1,7 +1,7 @@
 "use client ";
 
 import { getTransactionHistoryResponseType } from "@/app/api/transaction-history/route";
-import { DateToUTCDate } from "@/lib/helper";
+import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
@@ -52,6 +52,7 @@ import { Tag, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteTransaction } from "../_actions/deleteTransaction";
 import TransactionHistoryPopover from "./TransactionHistoryPopover";
+import BulkTagDialog from "./BulkTagDialog";
 
 interface Props {
   from: Date;
@@ -253,6 +254,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({}); // Row selection state
+  const [showBulkTagDialog, setShowBulkTagDialog] = useState(false);
   const history = useQuery<getTransactionHistoryResponseType>({
     queryKey: ["transactions", "history", from, to, searchFilters],
     queryFn: async () => {
@@ -434,20 +436,58 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
       </div>
       {/* Bulk Actions Toolbar */}
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="mb-4 flex items-center justify-between rounded-md border border-dashed bg-muted/50 p-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground ml-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-md border border-dashed bg-muted/50 p-2">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+            <span className="text-sm text-muted-foreground ml-2 whitespace-nowrap">
               {table.getFilteredSelectedRowModel().rows.length} selected
             </span>
+
+            <div className="flex items-center gap-3 text-sm ml-2 sm:ml-0">
+              {(() => {
+                const selectedRows = table.getFilteredSelectedRowModel().rows;
+                let income = 0;
+                let expense = 0;
+                selectedRows.forEach(row => {
+                  if (row.original.type === 'income') income += row.original.amount;
+                  if (row.original.type === 'expense') expense += row.original.amount;
+                });
+                const formatter = GetFormatterForCurrency(userSettings.data?.currency || 'USD');
+
+                return (
+                  <>
+                    {income > 0 && (
+                      <span className="text-emerald-500">Income: {formatter.format(income)}</span>
+                    )}
+                    {expense > 0 && (
+                      <span className="text-red-500">Expense: {formatter.format(expense)}</span>
+                    )}
+                    {(income > 0 || expense > 0) && (
+                      <span className="font-bold border-l pl-3">Net: {formatter.format(income - expense)}</span>
+                    )}
+                  </>
+                )
+              })()}
+            </div>
           </div>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={handleBulkDelete}
-          >
-            <TrashIcon className="mr-2 h-4 w-4" />
-            Delete Selected
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowBulkTagDialog(true)}
+            >
+              <Tag className="mr-2 h-4 w-4" />
+              Update Tags
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBulkDelete}
+            >
+              <TrashIcon className="mr-2 h-4 w-4" />
+              Delete
+            </Button>
+          </div>
         </div>
       )}
       <SkeletonWrapper isLoading={history.isFetching}>
@@ -520,6 +560,12 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
           </Button>
         </div>
       </SkeletonWrapper>
+      <BulkTagDialog
+        open={showBulkTagDialog}
+        setOpen={setShowBulkTagDialog}
+        transactionIds={table.getFilteredSelectedRowModel().rows.map(r => r.original.id)}
+        onSuccess={() => setRowSelection({})}
+      />
     </div>
   );
 };
