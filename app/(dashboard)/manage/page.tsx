@@ -25,6 +25,7 @@ import CreateTagDialog from "./_components/CreateTagDialog";
 import EditTagDialog from "./_components/EditTagDialog";
 import DeleteTagDialog from "./_components/DeleteTagDialog";
 import { Tag } from "lucide-react";
+import MergeCategoriesDialog from "./_components/MergeCategoriesDialog";
 
 const page = () => {
   return (
@@ -130,16 +131,22 @@ function CategoryList({ type }: { type: TransactionType }) {
               </div>
             </div>
 
-            <CreateCategoryDialog
-              type={type}
-              successCallback={() => categoriesQuery.refetch()}
-              trigger={
-                <Button className="gap-2 text-sm">
-                  <PlusSquare className="h-4 w-4" />
-                  Create Category
-                </Button>
-              }
-            />
+            <div className="flex items-center gap-2">
+              <MergeCategoriesDialog
+                type={type}
+                categories={categoriesQuery.data || []}
+              />
+              <CreateCategoryDialog
+                type={type}
+                successCallback={() => categoriesQuery.refetch()}
+                trigger={
+                  <Button className="gap-2 text-sm">
+                    <PlusSquare className="h-4 w-4" />
+                    Create Category
+                  </Button>
+                }
+              />
+            </div>
           </CardTitle>
         </CardHeader>
         <Separator />
