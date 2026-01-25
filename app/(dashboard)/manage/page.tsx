@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { TransactionType } from "@/lib/type";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pencil, PlusSquare, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
+import { Eraser, Loader2, Pencil, PlusSquare, Sparkles, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import CreateCategoryDialog from "../_components/CreateCategoryDialog";
@@ -64,6 +64,9 @@ export default page;
 
 function CategoryList({ type }: { type: TransactionType }) {
   const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
+  const [cleanupMode, setCleanupMode] = React.useState(false);
+
+  const queryClient = useQueryClient();
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
@@ -77,16 +80,31 @@ function CategoryList({ type }: { type: TransactionType }) {
   const sortedCategories = React.useMemo(() => {
     if (!categoriesQuery.data) return [];
 
-    const categoriesCopy = [...categoriesQuery.data];
+    let filtered = [...categoriesQuery.data];
+    if (cleanupMode) {
+      filtered = filtered.filter(c => (c._count?.transactions || 0) === 0);
+    }
 
     if (sortBy === "name") {
-      return categoriesCopy.sort((a, b) => a.name.localeCompare(b.name));
+      return filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else {
-      return categoriesCopy.sort((a, b) =>
+      return filtered.sort((a, b) =>
         (b._count?.transactions || 0) - (a._count?.transactions || 0)
       );
     }
-  }, [categoriesQuery.data, sortBy]);
+  }, [categoriesQuery.data, sortBy, cleanupMode]);
+
+  const cleanupMutation = useMutation({
+    mutationFn: () => fetch(`/api/manage/cleanup?target=categories`, { method: "POST" }).then(res => res.json()),
+    onSuccess: (data) => {
+      toast.success(data.message || "Cleanup completed");
+      queryClient.invalidateQueries({ queryKey: ["categories", type] });
+      setCleanupMode(false);
+    },
+    onError: () => {
+      toast.error("Cleanup failed");
+    }
+  });
 
   const totalCategories = categoriesQuery.data?.length || 0;
   const totalUsage = categoriesQuery.data?.reduce((acc: number, category: any) =>
@@ -127,7 +145,7 @@ function CategoryList({ type }: { type: TransactionType }) {
         <Separator />
 
         {dataAvailable && (
-          <div className="p-4 border-b">
+          <div className="p-4 border-b flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Sort by:</span>
               <Button
@@ -144,6 +162,35 @@ function CategoryList({ type }: { type: TransactionType }) {
               >
                 Usage
               </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={cleanupMode ? "destructive" : "outline"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setCleanupMode(!cleanupMode)}
+              >
+                <Eraser className="h-4 w-4" />
+                {cleanupMode ? "Exit Cleanup" : "Cleanup Mode"}
+              </Button>
+
+              {cleanupMode && sortedCategories.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-2 animate-pulse"
+                  onClick={() => {
+                    if (confirm(`Are you sure you want to delete all ${sortedCategories.length} unused categories?`)) {
+                      cleanupMutation.mutate();
+                    }
+                  }}
+                  disabled={cleanupMutation.isPending}
+                >
+                  {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  Delete All Unused ({sortedCategories.length})
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -165,6 +212,13 @@ function CategoryList({ type }: { type: TransactionType }) {
             <p className="text-sm text-muted-foreground">
               Create one to get started
             </p>
+          </div>
+        )}
+        {cleanupMode && dataAvailable && sortedCategories.length === 0 && (
+          <div className="flex h-32 w-full flex-col items-center justify-center bg-emerald-50/50 dark:bg-emerald-950/10">
+            <Sparkles className="h-8 w-8 text-emerald-500 mb-2" />
+            <p className="font-medium text-emerald-600">Your categories are sparkling clean!</p>
+            <p className="text-sm text-muted-foreground text-center">No unused categories found for this type.</p>
           </div>
         )}
         {dataAvailable && (
@@ -226,6 +280,9 @@ function CategoryCard({ category }: { category: any }) {
 
 function TagList() {
   const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
+  const [cleanupMode, setCleanupMode] = React.useState(false);
+
+  const queryClient = useQueryClient();
 
   const tagsQuery = useQuery({
     queryKey: ["tags"],
@@ -238,16 +295,31 @@ function TagList() {
   const sortedTags = React.useMemo(() => {
     if (!tagsQuery.data) return [];
 
-    const tagsCopy = [...tagsQuery.data];
+    let filtered = [...tagsQuery.data];
+    if (cleanupMode) {
+      filtered = filtered.filter(t => (t._count?.transactions || 0) === 0);
+    }
 
     if (sortBy === "name") {
-      return tagsCopy.sort((a, b) => a.name.localeCompare(b.name));
+      return filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else {
-      return tagsCopy.sort((a, b) =>
+      return filtered.sort((a, b) =>
         (b._count?.transactions || 0) - (a._count?.transactions || 0)
       );
     }
-  }, [tagsQuery.data, sortBy]);
+  }, [tagsQuery.data, sortBy, cleanupMode]);
+
+  const cleanupMutation = useMutation({
+    mutationFn: () => fetch(`/api/manage/cleanup?target=tags`, { method: "POST" }).then(res => res.json()),
+    onSuccess: (data) => {
+      toast.success(data.message || "Cleanup completed");
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      setCleanupMode(false);
+    },
+    onError: () => {
+      toast.error("Cleanup failed");
+    }
+  });
 
   const totalTags = tagsQuery.data?.length || 0;
   const totalUsage = tagsQuery.data?.reduce((acc: number, tag: any) =>
@@ -282,7 +354,7 @@ function TagList() {
         <Separator />
 
         {dataAvailable && (
-          <div className="p-4 border-b">
+          <div className="p-4 border-b flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Sort by:</span>
               <Button
@@ -300,6 +372,35 @@ function TagList() {
                 Usage
               </Button>
             </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={cleanupMode ? "destructive" : "outline"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setCleanupMode(!cleanupMode)}
+              >
+                <Eraser className="h-4 w-4" />
+                {cleanupMode ? "Exit Cleanup" : "Cleanup Mode"}
+              </Button>
+
+              {cleanupMode && sortedTags.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-2 animate-pulse"
+                  onClick={() => {
+                    if (confirm(`Are you sure you want to delete all ${sortedTags.length} unused tags?`)) {
+                      cleanupMutation.mutate();
+                    }
+                  }}
+                  disabled={cleanupMutation.isPending}
+                >
+                  {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  Delete All Unused ({sortedTags.length})
+                </Button>
+              )}
+            </div>
           </div>
         )}
 
@@ -311,6 +412,13 @@ function TagList() {
             <p className="text-sm text-muted-foreground">
               Create one to organize your transactions
             </p>
+          </div>
+        )}
+        {cleanupMode && dataAvailable && sortedTags.length === 0 && (
+          <div className="flex h-32 w-full flex-col items-center justify-center bg-emerald-50/50 dark:bg-emerald-950/10">
+            <Sparkles className="h-8 w-8 text-emerald-500 mb-2" />
+            <p className="font-medium text-emerald-600">Your tags are sparkling clean!</p>
+            <p className="text-sm text-muted-foreground text-center">No unused tags found.</p>
           </div>
         )}
         {dataAvailable && (
