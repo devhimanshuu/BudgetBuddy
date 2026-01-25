@@ -5,8 +5,9 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { useMemo, useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import CategoryDrilldownSheet from "./CategoryDrilldownSheet";
 
 interface CategoryBreakdownProps {
   userSettings: UserSettings;
@@ -36,6 +37,9 @@ export default function CategoryBreakdownChart({
   type,
   tagIds = [],
 }: CategoryBreakdownProps) {
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
@@ -88,11 +92,17 @@ export default function CategoryBreakdownChart({
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="amount"
+                    onClick={(data) => {
+                      setSelectedCategory(data.payload);
+                      setIsSheetOpen(true);
+                    }}
+                    style={{ cursor: "pointer" }}
                   >
                     {categoryBreakdownQuery.data.map((entry: any, index: number) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
+                        className="hover:opacity-80 transition-opacity outline-none"
                       />
                     ))}
                   </Pie>
@@ -125,10 +135,14 @@ export default function CategoryBreakdownChart({
                 {categoryBreakdownQuery.data.map((item: any, index: number) => (
                   <div
                     key={item.category}
-                    className="flex items-center gap-2 rounded-lg border p-2"
+                    className="flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-colors hover:bg-muted"
+                    onClick={() => {
+                      setSelectedCategory(item);
+                      setIsSheetOpen(true);
+                    }}
                   >
                     <div
-                      className="h-4 w-4 rounded-full"
+                      className="h-4 w-4 shrink-0 rounded-full"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
                     <div className="flex-1 overflow-hidden">
@@ -142,6 +156,16 @@ export default function CategoryBreakdownChart({
                   </div>
                 ))}
               </div>
+              <CategoryDrilldownSheet
+                open={isSheetOpen}
+                onOpenChange={setIsSheetOpen}
+                category={selectedCategory}
+                type={type}
+                from={from}
+                to={to}
+                tagIds={tagIds}
+                userSettings={userSettings}
+              />
             </div>
           ) : (
             <div className="flex h-[300px] items-center justify-center">

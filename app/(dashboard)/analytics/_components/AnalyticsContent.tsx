@@ -9,6 +9,7 @@ import CategoryBreakdownChart from "./CategoryBreakdownChart";
 import TrendsChart from "./TrendsChart";
 import HeatmapChart from "./HeatmapChart";
 import ComparisonChart from "./ComparisonChart";
+import SavingsImpactChart from "./SavingsImpactChart";
 import { UserSettings } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
@@ -155,6 +156,9 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             userSettings={userSettings}
             tagIds={tagIds}
           />
+
+          {/* Savings Goals Impact */}
+          <SavingsImpactChart userSettings={userSettings} />
         </div>
       </div>
     </>
