@@ -9,6 +9,9 @@ import CategoryBreakdownChart from "./CategoryBreakdownChart";
 import TrendsChart from "./TrendsChart";
 import HeatmapChart from "./HeatmapChart";
 import ComparisonChart from "./ComparisonChart";
+import SavingsImpactChart from "./SavingsImpactChart";
+import KPICards from "./KPICards";
+import CorrelationChart from "./CorrelationChart";
 import { UserSettings } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
@@ -117,6 +120,13 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
       </div>
 
       <div className="container py-6">
+        <div className="mb-6">
+          <KPICards
+            userSettings={userSettings}
+            from={dataRange.from}
+            to={dataRange.to}
+          />
+        </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
           {/* Pie Charts - Category Breakdown */}
           <CategoryBreakdownChart
@@ -142,6 +152,14 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             tagIds={tagIds}
           />
 
+          {/* Correlation Analytics */}
+          <CorrelationChart
+            userSettings={userSettings}
+            from={dataRange.from}
+            to={dataRange.to}
+            tagIds={tagIds}
+          />
+
           {/* Heatmap */}
           <HeatmapChart
             from={dataRange.from}
@@ -155,6 +173,9 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             userSettings={userSettings}
             tagIds={tagIds}
           />
+
+          {/* Savings Goals Impact */}
+          <SavingsImpactChart userSettings={userSettings} />
         </div>
       </div>
     </>
