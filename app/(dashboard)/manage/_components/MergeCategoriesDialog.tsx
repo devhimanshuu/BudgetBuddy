@@ -95,11 +95,11 @@ export default function MergeCategoriesDialog({ type, categories, trigger }: Pro
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Merge className="h-5 w-5 text-blue-500" />
-                        Merge {type === "income" ? "Income" : "Expense"} Categories
+                    <DialogTitle className="flex flex-wrap items-center gap-2 pr-6">
+                        <Merge className="h-5 w-5 shrink-0 text-blue-500" />
+                        <span>Merge {type === "income" ? "Income" : "Expense"} Categories</span>
                     </DialogTitle>
                     <DialogDescription>
                         Combine two categories into one. All transactions from the source will be moved to the target.
@@ -152,19 +152,19 @@ export default function MergeCategoriesDialog({ type, categories, trigger }: Pro
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>
+                <DialogFooter className="flex-col gap-2 sm:flex-row">
+                    <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
                         Cancel
                     </Button>
                     <Button
                         onClick={handleMerge}
                         disabled={mergeMutation.isPending || !sourceCategory || !targetCategory}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="w-full bg-blue-600 hover:bg-blue-700 sm:w-auto"
                     >
                         {mergeMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin mr-2" />
                         ) : (
-                            <Merge className="h-4 w-4 mr-2" />
+                            <Merge className="h-4 w-4 shrink-0 mr-2" />
                         )}
                         Execute Merge
                     </Button>
