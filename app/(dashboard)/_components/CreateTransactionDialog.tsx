@@ -481,6 +481,7 @@ const CreateTransactionDialog = ({
                               if (!value) return;
                               field.onChange(value);
                             }}
+                            disabled={(date) => date > new Date()}
                             initialFocus
                           />
                         </PopoverContent>

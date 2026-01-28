@@ -185,7 +185,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       return (
         <div className="flex items-center gap-2">
           <div className="text-muted-foreground">{formattedDate}</div>
-          {row.original._count.history > 0 && (
+          {row.original._count?.history > 0 && (
             <TransactionHistoryPopover
               transactionId={row.original.id}
               currentAmount={row.original.amount}
@@ -541,7 +541,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex items-center justify-center space-x-2 py-4">
           <Button
             variant="outline"
             size="sm"

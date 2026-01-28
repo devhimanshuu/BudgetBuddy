@@ -191,11 +191,13 @@ export default function AdvancedSearch({
               <Input
                 type="date"
                 value={filters.from}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFilters({ ...filters, from: e.target.value })}
               />
               <Input
                 type="date"
                 value={filters.to}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFilters({ ...filters, to: e.target.value })}
               />
             </div>

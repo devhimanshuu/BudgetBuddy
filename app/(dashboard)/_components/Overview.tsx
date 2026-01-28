@@ -20,6 +20,7 @@ const Overview = ({ userSettings }: { userSettings: UserSettings }) => {
         <h2 className="text-3xl font-bold 3xl:text-4xl">Overview</h2>
         <div className="flex items-center gap-3">
           <DateRangePicker
+            key={`${dataRange.from.toISOString()}-${dataRange.to.toISOString()}`}
             initialDateFrom={dataRange.from}
             initialDateTo={dataRange.to}
             showCompare={false}

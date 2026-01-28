@@ -1,12 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { MAX_DATE_RANGE_DAYS } from "@/lib/constants";
-import { differenceInDays, startOfMonth } from "date-fns";
+import { startOfMonth } from "date-fns";
 import { X } from "lucide-react";
 import React, { useState } from "react";
-import { toast } from "sonner";
 import TransactionTable from "./_components/TransactionTable";
 import AdvancedSearch, { SearchFilters } from "../_components/AdvancedSearch";
 import { useQuery } from "@tanstack/react-query";
@@ -50,25 +47,9 @@ const TransactionPage = () => {
               )}
             <AdvancedSearch
               onSearch={setSearchFilters}
-              categories={categoriesQuery.data?.map((c: any) => c.name) || []}
+              categories={Array.from(new Set(categoriesQuery.data?.map((c: any) => c.name) || []))}
             />
-            <DateRangePicker
-              initialDateFrom={dataRange.from}
-              initialDateTo={dataRange.to}
-              showCompare={false}
-              onUpdate={(values) => {
-                const { from, to } = values.range;
 
-                if (!from || !to) return;
-                if (differenceInDays(to, from) > MAX_DATE_RANGE_DAYS) {
-                  toast.error(
-                    `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE_DAYS} days`
-                  );
-                  return;
-                }
-                setDataRange({ from, to });
-              }}
-            />
           </div>
         </div>
       </div>

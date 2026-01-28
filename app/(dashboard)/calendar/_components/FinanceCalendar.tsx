@@ -164,6 +164,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                             variant="outline"
                             size="icon"
                             onClick={handleNextMonth}
+                            disabled={format(currentMonth, "yyyy-MM") >= format(new Date(), "yyyy-MM")}
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -197,6 +198,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                                 onSelect={handleDayClick}
                                 month={currentMonth}
                                 onMonthChange={setCurrentMonth}
+                                disabled={(date) => date > new Date()}
                                 className="rounded-md border"
                                 components={{
                                     DayButton: (props) => {
