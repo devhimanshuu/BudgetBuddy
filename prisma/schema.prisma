@@ -179,3 +179,38 @@ model TransactionHistory {
 
   @@index([transactionId])
 }
+
+model Asset {
+  id String @id @default(uuid())
+  userId String
+  name String
+  description String?
+  type String // "asset" or "liability"
+  category String // "stocks", "real-estate", "crypto", "cash", "mortgage", "loan", "credit-card", "other"
+  currentValue Float
+  icon String @default("💰")
+  color String @default("#3b82f6")
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  history AssetHistory[]
+  
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, category])
+}
+
+model AssetHistory {
+  id String @id @default(uuid())
+  assetId String
+  value Float
+  date DateTime
+  notes String?
+  createdAt DateTime @default(now())
+  
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  
+  @@index([assetId])
+  @@index([assetId, date])
+}

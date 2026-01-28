@@ -58,6 +58,7 @@ const TransactionPage = () => {
           from={dataRange.from}
           to={dataRange.to}
           searchFilters={searchFilters}
+          allCategories={categoriesQuery.data}
         />
       </div>
     </>

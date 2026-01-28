@@ -58,6 +58,7 @@ interface Props {
   from: Date;
   to: Date;
   searchFilters?: SearchFilters;
+  allCategories?: any[];
 }
 const emptyData: any[] = [];
 type TransactionHistoryRow = getTransactionHistoryResponseType[0] & {
@@ -250,7 +251,7 @@ const csvConfig = mkConfig({
   decimalSeparator: ",",
   useKeysAsHeaders: true,
 });
-const TransactionTable = ({ from, to, searchFilters }: Props) => {
+const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({}); // Row selection state
@@ -366,6 +367,24 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
   };
 
   const categoriesOptions = useMemo(() => {
+    // If allCategories is provided, use it; otherwise fall back to categories from visible transactions
+    if (allCategories && allCategories.length > 0) {
+      // Create a map of category names to icons from visible transactions
+      const iconMap = new Map();
+      history.data?.forEach((transaction) => {
+        if (!iconMap.has(transaction.category)) {
+          iconMap.set(transaction.category, transaction.categoryIcon);
+        }
+      });
+
+      // Use all categories with their icons
+      return allCategories.map((category) => ({
+        value: category.name,
+        label: `${category.icon} ${category.name}`,
+      }));
+    }
+
+    // Fallback: build from visible transactions
     const categoriesMap = new Map();
     history.data?.forEach((transaction) => {
       categoriesMap.set(transaction.category, {
@@ -375,7 +394,7 @@ const TransactionTable = ({ from, to, searchFilters }: Props) => {
     });
     const uniqueCategories = new Set(categoriesMap.values());
     return Array.from(uniqueCategories);
-  }, [history.data]);
+  }, [history.data, allCategories]);
   return (
     <div className="w-full ">
       <div className="flex flex-wrap items-end justify-between gap-2 py-4">
