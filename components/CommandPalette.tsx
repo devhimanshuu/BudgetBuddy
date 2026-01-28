@@ -10,6 +10,7 @@ import {
   Wallet,
   TrendingDown,
   Calendar,
+  Coins,
 } from "lucide-react"
 
 import {
@@ -29,9 +30,10 @@ interface CommandPaletteProps {
   setOpen: (open: boolean) => void
   onIncomeClick: () => void
   onExpenseClick: () => void
+  onAssetClick: () => void
 }
 
-export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick }: CommandPaletteProps) {
+export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onAssetClick }: CommandPaletteProps) {
   const router = useRouter()
 
   const runCommand = React.useCallback((command: () => unknown) => {
@@ -55,6 +57,11 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick }:
             <span>New Expense</span>
             <CommandShortcut>⌘E</CommandShortcut>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(onAssetClick)}>
+            <Coins className="mr-2 h-4 w-4 text-blue-500" />
+            <span>New Asset</span>
+            <CommandShortcut>⌘N</CommandShortcut>
+          </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Navigation">
@@ -67,6 +74,11 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick }:
             <Wallet className="mr-2 h-4 w-4" />
             <span>Transactions</span>
             <CommandShortcut>⌘T</CommandShortcut>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/assets"))}>
+            <Coins className="mr-2 h-4 w-4" />
+            <span>Assets</span>
+            <CommandShortcut>⌘S</CommandShortcut>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push("/budgets"))}>
             <PiggyBank className="mr-2 h-4 w-4" />

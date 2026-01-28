@@ -8,12 +8,15 @@ import {
 } from "@/hooks/useKeyboardShortcuts";
 import QuickAddWidget from "@/components/QuickAddWidget";
 import CreateTransactionDialog from "@/app/(dashboard)/_components/CreateTransactionDialog";
+import CreateAssetDialog from "@/app/(dashboard)/_components/CreateAssetDialog";
 import { CommandPalette } from "@/components/CommandPalette";
 
 export default function DashboardShortcuts() {
   const router = useRouter();
+
   const [showIncomeDialog, setShowIncomeDialog] = useState(false);
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
+  const [showAssetDialog, setShowAssetDialog] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   const shortcuts = [
@@ -66,6 +69,7 @@ export default function DashboardShortcuts() {
       <QuickAddWidget
         onIncomeClick={() => setShowIncomeDialog(true)}
         onExpenseClick={() => setShowExpenseDialog(true)}
+        onAssetClick={() => setShowAssetDialog(true)}
       />
 
       <CreateTransactionDialog
@@ -81,11 +85,18 @@ export default function DashboardShortcuts() {
         trigger={null}
       />
 
+      <CreateAssetDialog
+        open={showAssetDialog}
+        onOpenChange={setShowAssetDialog}
+        trigger={null}
+      />
+
       <CommandPalette
         open={showCommandPalette}
         setOpen={setShowCommandPalette}
         onIncomeClick={() => setShowIncomeDialog(true)}
         onExpenseClick={() => setShowExpenseDialog(true)}
+        onAssetClick={() => setShowAssetDialog(true)}
       />
 
       <KeyboardShortcutsHelp

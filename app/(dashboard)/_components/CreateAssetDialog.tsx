@@ -78,8 +78,16 @@ const createAssetSchema = z.object({
 
 type CreateAssetSchema = z.infer<typeof createAssetSchema>;
 
-export default function CreateAssetDialog() {
-    const [open, setOpen] = useState(false);
+interface Props {
+    trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+export default function CreateAssetDialog({ trigger, open: externalOpen, onOpenChange }: Props = {}) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const open = externalOpen !== undefined ? externalOpen : internalOpen;
+    const setOpen = onOpenChange || setInternalOpen;
     const queryClient = useQueryClient();
 
     const form = useForm<CreateAssetSchema>({
@@ -143,12 +151,18 @@ export default function CreateAssetDialog() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add {type === "asset" ? "Asset" : "Liability"}
-                </Button>
-            </DialogTrigger>
+            {trigger !== null && (
+                <DialogTrigger asChild>
+                    {trigger ? (
+                        trigger
+                    ) : (
+                        <Button className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            Add {type === "asset" ? "Asset" : "Liability"}
+                        </Button>
+                    )}
+                </DialogTrigger>
+            )}
             <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
