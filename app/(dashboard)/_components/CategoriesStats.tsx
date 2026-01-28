@@ -20,7 +20,7 @@ interface Props {
 
 function CategoriesStats({ userSettings, from, to }: Props) {
   const statsQuery = useQuery<GetCategoriesStatsResponseType>({
-    queryKey: ["overview", "stats", "categories", from, to],
+    queryKey: ["overview", "stats", "categories", from.toISOString(), to.toISOString()],
     queryFn: () =>
       fetch(
         `/api/stats/categories?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
