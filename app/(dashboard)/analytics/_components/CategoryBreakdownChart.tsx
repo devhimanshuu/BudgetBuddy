@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -66,16 +67,19 @@ export default function CategoryBreakdownChart({
   }, [categoryBreakdownQuery.data]);
 
   return (
-    <Card className="col-span-6">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <GlassCard className="col-span-6">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10" />
+
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center gap-2 3xl:text-2xl">
           <span className="text-2xl">
             {type === "expense" ? "💸" : "💰"}
           </span>
           {type === "expense" ? "Expense" : "Income"} Breakdown by Category
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <SkeletonWrapper isLoading={categoryBreakdownQuery.isFetching}>
           {dataAvailable ? (
             <div className="flex flex-col gap-4">
@@ -176,6 +180,6 @@ export default function CategoryBreakdownChart({
           )}
         </SkeletonWrapper>
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 }

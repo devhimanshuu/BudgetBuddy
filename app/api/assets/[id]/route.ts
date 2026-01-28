@@ -16,12 +16,14 @@ const updateAssetSchema = z.object({
 
 export async function PATCH(
 	request: Request,
-	{ params }: { params: { id: string } },
+	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const { id } = await params;
 
 	try {
 		const body = await request.json();
@@ -30,7 +32,7 @@ export async function PATCH(
 		// Check if asset belongs to user
 		const existingAsset = await prisma.asset.findFirst({
 			where: {
-				id: params.id,
+				id: id,
 				userId: user.id,
 			},
 		});
@@ -40,7 +42,7 @@ export async function PATCH(
 		}
 
 		const asset = await prisma.asset.update({
-			where: { id: params.id },
+			where: { id: id },
 			data: validatedData,
 		});
 
@@ -77,18 +79,20 @@ export async function PATCH(
 
 export async function DELETE(
 	request: Request,
-	{ params }: { params: { id: string } },
+	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
 
+	const { id } = await params;
+
 	try {
 		// Check if asset belongs to user
 		const existingAsset = await prisma.asset.findFirst({
 			where: {
-				id: params.id,
+				id: id,
 				userId: user.id,
 			},
 		});
@@ -98,7 +102,7 @@ export async function DELETE(
 		}
 
 		await prisma.asset.delete({
-			where: { id: params.id },
+			where: { id: id },
 		});
 
 		return NextResponse.json({ success: true });

@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -62,14 +63,17 @@ export default function HeatmapChart({ from, to, userSettings, tagIds = [] }: He
   ];
 
   return (
-    <Card className="col-span-12">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <GlassCard className="col-span-12">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-orange-500/10 to-yellow-500/10" />
+
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center gap-2 3xl:text-2xl">
           <span className="text-2xl">🔥</span>
           Spending Heatmap - Activity by Day & Time
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <SkeletonWrapper isLoading={heatmapQuery.isFetching}>
           {dataAvailable ? (
             <div className="overflow-x-auto">
@@ -143,6 +147,6 @@ export default function HeatmapChart({ from, to, userSettings, tagIds = [] }: He
           )}
         </SkeletonWrapper>
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 }

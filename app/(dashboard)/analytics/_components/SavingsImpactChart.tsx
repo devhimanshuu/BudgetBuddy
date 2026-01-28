@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -30,9 +31,12 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
     const avgMonthlySavings = data?.avgMonthlySavings || 0;
 
     return (
-        <Card className="col-span-12">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+        <GlassCard className="col-span-12">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-indigo-500/10" />
+
+            <CardHeader className="relative">
+                <CardTitle className="flex items-center gap-2 3xl:text-2xl">
                     <span className="text-2xl">🌈</span>
                     Savings Goals Impact
                 </CardTitle>
@@ -44,7 +48,7 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                     (last 3 months)
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
                 <SkeletonWrapper isLoading={impactQuery.isFetching}>
                     {goalImpacts.length > 0 ? (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -55,7 +59,7 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                                 const isImpossible = status === "impossible";
 
                                 return (
-                                    <Card key={goal.id} className="relative overflow-hidden border-2">
+                                    <GlassCard key={goal.id} className="relative overflow-hidden border-2">
                                         <div
                                             className="absolute left-0 top-0 h-full w-1"
                                             style={{ backgroundColor: goal.color }}
@@ -123,7 +127,7 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                                                 </p>
                                             )}
                                         </CardContent>
-                                    </Card>
+                                    </GlassCard>
                                 );
                             })}
                         </div>
@@ -136,6 +140,6 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                     )}
                 </SkeletonWrapper>
             </CardContent>
-        </Card>
+        </GlassCard>
     );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -44,10 +45,13 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
   const dataAvailable = comparisonQuery.data && comparisonQuery.data.length > 0;
 
   return (
-    <Card className="col-span-12">
-      <CardHeader>
+    <GlassCard className="col-span-12">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-teal-500/10" />
+
+      <CardHeader className="relative">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 3xl:text-2xl">
             <span className="text-2xl">📊</span>
             Year-over-Year Comparison
           </CardTitle>
@@ -81,7 +85,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
           Comparing {selectedYear} vs {selectedYear - 1}
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <SkeletonWrapper isLoading={comparisonQuery.isFetching}>
           {dataAvailable ? (
             <div className="space-y-4">
@@ -130,9 +134,9 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
                                 </span>
                                 <span
                                   className={`font-semibold ${data.currentYearExpense >
-                                      data.previousYearExpense
-                                      ? "text-red-500"
-                                      : "text-emerald-500"
+                                    data.previousYearExpense
+                                    ? "text-red-500"
+                                    : "text-emerald-500"
                                     }`}
                                 >
                                   {data.previousYearExpense > 0
@@ -213,9 +217,9 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
                                 </span>
                                 <span
                                   className={`font-semibold ${data.currentYearIncome >
-                                      data.previousYearIncome
-                                      ? "text-emerald-500"
-                                      : "text-red-500"
+                                    data.previousYearIncome
+                                    ? "text-emerald-500"
+                                    : "text-red-500"
                                     }`}
                                 >
                                   {data.previousYearIncome > 0
@@ -260,6 +264,6 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
           )}
         </SkeletonWrapper>
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 }

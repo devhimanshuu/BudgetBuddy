@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -43,14 +44,17 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [] }: Tre
   const dataAvailable = trendsQuery.data && trendsQuery.data.length > 0;
 
   return (
-    <Card className="col-span-12">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <GlassCard className="col-span-12">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-red-500/10" />
+
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center gap-2 3xl:text-2xl">
           <span className="text-2xl">📈</span>
           Income vs Expense Trends
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <SkeletonWrapper isLoading={trendsQuery.isFetching}>
           {dataAvailable ? (
             <ResponsiveContainer width="100%" height={400}>
@@ -162,6 +166,6 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [] }: Tre
           )}
         </SkeletonWrapper>
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 }

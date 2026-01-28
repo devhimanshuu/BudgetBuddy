@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
@@ -48,7 +49,7 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [] }
             if (!cat1) setCat1(categoriesQuery.data[0].name);
             if (!cat2) setCat2(categoriesQuery.data[1].name);
         }
-    }, [categoriesQuery.data]);
+    }, [categoriesQuery.data, cat1, cat2]);
 
     const correlationQuery = useQuery({
         queryKey: ["analytics", "correlation", cat1, cat2, from, to, tagIds],
@@ -62,11 +63,14 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [] }
     const dataAvailable = correlationQuery.data && correlationQuery.data.length > 0;
 
     return (
-        <Card className="col-span-12">
-            <CardHeader>
+        <GlassCard className="col-span-12">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-indigo-500/10" />
+
+            <CardHeader className="relative">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 3xl:text-2xl">
                             <span className="text-2xl">📉</span>
                             Correlation Analytics
                         </CardTitle>
@@ -108,7 +112,7 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [] }
                     </div>
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
                 <SkeletonWrapper isLoading={correlationQuery.isFetching || categoriesQuery.isFetching}>
                     {dataAvailable ? (
                         <ResponsiveContainer width="100%" height={400}>
@@ -187,6 +191,6 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [] }
                     )}
                 </SkeletonWrapper>
             </CardContent>
-        </Card>
+        </GlassCard>
     );
 }
