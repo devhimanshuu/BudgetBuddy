@@ -22,14 +22,14 @@ export default async function AssetsPage() {
     }
 
     return (
-        <div className="container mx-auto space-y-6 p-6">
+        <div className="container mx-auto space-y-6 p-6 4xl:space-y-10 4xl:p-10">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold 3xl:text-4xl">
+                    <h1 className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl">
                         Assets & Liabilities
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground 4xl:text-lg">
                         Track your net worth by managing your assets and liabilities
                     </p>
                 </div>
@@ -40,7 +40,7 @@ export default async function AssetsPage() {
             <NetWorthChart userSettings={userSettings} />
 
             {/* Assets and Liabilities Lists */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 4xl:gap-10">
                 <AssetList userSettings={userSettings} type="asset" />
                 <AssetList userSettings={userSettings} type="liability" />
             </div>

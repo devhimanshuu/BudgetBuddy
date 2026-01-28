@@ -42,7 +42,7 @@ function MobileNavbar() {
               <Menu />
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[400px] sm:w-[540px]" side={"left"}>
+          <SheetContent className="w-[320px] sm:w-[540px]" side={"left"}>
             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             <Logo />
             <div className="flex flex-col gap-1 pt-4">

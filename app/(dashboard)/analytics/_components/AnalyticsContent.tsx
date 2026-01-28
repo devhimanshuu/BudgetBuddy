@@ -77,15 +77,15 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
   return (
     <>
       <div className="border-b bg-card">
-        <div className="container flex flex-wrap items-center justify-between gap-6 py-4">
+        <div className="container flex flex-wrap items-center justify-between gap-6 py-4 4xl:py-8">
           <div>
-            <p className="text-3xl font-bold">Analytics & Insights</p>
-            <p className="text-muted-foreground">
+            <p className="text-3xl font-bold 4xl:text-5xl">Analytics & Insights</p>
+            <p className="text-muted-foreground 4xl:text-lg">
               Visualize your financial data with comprehensive charts and insights
             </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap 4xl:gap-6">
             <TagFilter
               selectedTags={selectedTags}
               onTagsChange={setSelectedTags}
@@ -111,23 +111,24 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
               variant="outline"
               onClick={handleExportPDF}
               disabled={categoryDataQuery.isFetching || trendsDataQuery.isFetching}
+              className="4xl:text-lg 4xl:px-6 4xl:py-6"
             >
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className="mr-2 h-4 w-4 4xl:h-6 4xl:w-6" />
               Export PDF
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="container py-6">
-        <div className="mb-6">
+      <div className="container py-6 4xl:py-10">
+        <div className="mb-6 4xl:mb-10">
           <KPICards
             userSettings={userSettings}
             from={dataRange.from}
             to={dataRange.to}
           />
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-12 2xl:gap-6 4xl:gap-8">
           {/* Pie Charts - Category Breakdown */}
           <CategoryBreakdownChart
             userSettings={userSettings}
