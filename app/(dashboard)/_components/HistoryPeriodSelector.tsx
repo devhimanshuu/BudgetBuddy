@@ -79,6 +79,8 @@ function YearSelector({
   setPeriod: (period: Period) => void;
   years: GetHistoryPeriodsResponseType;
 }) {
+  const currentYear = new Date().getFullYear();
+
   return (
     <Select
       value={period.year.toString()}
@@ -93,11 +95,13 @@ function YearSelector({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {years.map((year) => (
-          <SelectItem key={year} value={year.toString()}>
-            {year}
-          </SelectItem>
-        ))}
+        {years
+          .filter((year) => year <= currentYear) // Only show years up to current year
+          .map((year) => (
+            <SelectItem key={year} value={year.toString()}>
+              {year}
+            </SelectItem>
+          ))}
       </SelectContent>
     </Select>
   );
@@ -110,6 +114,10 @@ function MonthSelector({
   period: Period;
   setPeriod: (period: Period) => void;
 }) {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
   return (
     <Select
       value={period.month.toString()}
@@ -129,6 +137,13 @@ function MonthSelector({
             "default",
             { month: "long" }
           );
+
+          // Disable future months if the selected year is the current year
+          const isFutureMonth = period.year === currentYear && month > currentMonth;
+
+          // Don't render future months at all
+          if (isFutureMonth) return null;
+
           return (
             <SelectItem key={month} value={month.toString()}>
               {monthStr}
