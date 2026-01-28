@@ -191,12 +191,12 @@ function CategoryCard({ category }: { category: any }) {
           {category._count?.transactions || 0} transactions
         </span>
       </div>
-      <div className="flex w-full gap-2 p-2">
+      <div className="flex w-full flex-col gap-1 p-2">
         <EditCategoryDialog
           category={category}
           trigger={
             <Button
-              className="flex-1 gap-2 text-muted-foreground hover:bg-blue-500/20"
+              className="w-full gap-2 text-muted-foreground hover:bg-blue-500/20"
               variant={"secondary"}
               size="sm"
             >
@@ -209,7 +209,7 @@ function CategoryCard({ category }: { category: any }) {
           category={category}
           trigger={
             <Button
-              className="flex-1 gap-2 text-muted-foreground hover:bg-red-500/20"
+              className="w-full gap-2 text-muted-foreground hover:bg-red-500/20"
               variant={"secondary"}
               size="sm"
             >
@@ -357,12 +357,12 @@ function TagCard({ tag }: { tag: any }) {
           {tag._count?.transactions || 0} transactions
         </span>
       </div>
-      <div className="flex w-full gap-2 p-2">
+      <div className="flex w-full flex-col gap-1 p-2">
         <EditTagDialog
           tag={tag}
           trigger={
             <Button
-              className="flex-1 gap-2 text-muted-foreground hover:bg-blue-500/20"
+              className="w-full gap-2 text-muted-foreground hover:bg-blue-500/20"
               variant="secondary"
               size="sm"
             >
@@ -374,7 +374,7 @@ function TagCard({ tag }: { tag: any }) {
         <DeleteTagDialog
           trigger={
             <Button
-              className="flex-1 gap-2 text-muted-foreground hover:bg-red-500/20"
+              className="w-full gap-2 text-muted-foreground hover:bg-red-500/20"
               variant="secondary"
               size="sm"
               disabled={deleteMutation.isPending}

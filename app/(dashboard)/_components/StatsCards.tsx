@@ -17,7 +17,7 @@ interface Props {
 }
 const StatsCards = ({ from, to, userSettings }: Props) => {
   const stateQuery = useQuery<GetBalanceStatsResponseType>({
-    queryKey: ["overview", "stats", from, to],
+    queryKey: ["overview", "stats", from.toISOString(), to.toISOString()],
     queryFn: () =>
       fetch(
         `/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`
@@ -93,7 +93,7 @@ function StatCard({
     <Card className="group flex h-24 w-full items-center gap-2 p-4 relative overflow-hidden 3xl:h-28 3xl:gap-3 3xl:p-6">
       {/* Animated background gradient */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      
+
       <div className="relative z-10 transition-transform duration-300 group-hover:scale-110">
         {icon}
       </div>
