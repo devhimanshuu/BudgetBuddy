@@ -1,12 +1,12 @@
 # BudgetBuddy 💰
 
-BudgetBuddy is a modern, AI-powered personal finance tracker designed to help you master your financial life. Built with **Next.js 15** and **Google Gemini**, it combines powerful analytics with a seamless, stunning user experience to make money management effortless.
+BudgetBuddy is a modern personal finance tracker designed to help you master your financial life. Built with **Next.js 15**, it combines powerful analytics with a seamless, stunning user experience to make money management effortless.
 
 ## 🌟 What's New
 
 ### 🤖 AI Financial Analyst
 
-Unlock personalized financial insights with our **Gemini-powered AI Assistant**.
+Unlock personalized financial insights with our **AI Assistant**.
 
 - **Context-Aware**: Understands your transactions, budgets, and savings goals.
 - **Interactive Chat**: Ask questions like "How much did I spend on food this month?" or "Can I afford a vacation?".
@@ -55,12 +55,17 @@ Unlock personalized financial insights with our **Gemini-powered AI Assistant**.
 - **Motion**: [Framer Motion](https://www.framer.com/motion/) (Animations & Drag-and-Drop)
 - **State/Fetching**: [TanStack Query](https://tanstack.com/query/latest)
 - **Visualization**: [Recharts](https://recharts.org/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Utilities**: [date-fns](https://date-fns.org/), [React CountUp](https://www.npmjs.com/package/react-countup)
+- **UI Components**: [cmdk](https://cmdk.paco.me/), [Sonner](https://sonner.emilkowal.ski/), [Vaul](https://vaul.emilkowal.ski/), [Emoji Mart](https://www.npmjs.com/package/emoji-mart)
+- **Effects**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
 
-### Backend & AI
+### Backend
 
 - **Database**: [PostgreSQL](https://www.postgresql.org/) (via [Prisma ORM](https://www.prisma.io/))
 - **Auth**: [Clerk](https://clerk.com/) (Secure User Management)
-- **AI Model**: [Google Gemini 1.5 Flash](https://deepmind.google/technologies/gemini/) (via `@google/genai`)
+- **File Uploads**: [UploadThing](https://uploadthing.com/)
+- **Data Export**: [jspdf](https://github.com/parallax/jsPDF), [export-to-csv](https://www.npmjs.com/package/export-to-csv)
 - **Validation**: [Zod](https://zod.dev/)
 
 ---
@@ -72,7 +77,6 @@ Unlock personalized financial insights with our **Gemini-powered AI Assistant**.
 - **Node.js** (v18+)
 - **PostgreSQL** Database URL (Local or Cloud e.g., Neon, Supabase)
 - **Clerk** Account (Public/Secret Keys)
-- **Google AI Studio** API Key (for Chat features)
 
 ### Installation
 
@@ -101,9 +105,6 @@ Unlock personalized financial insights with our **Gemini-powered AI Assistant**.
    CLERK_SECRET_KEY=sk_test_...
    NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
    NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-
-   # AI (Google Gemini)
-   NEXT_PUBLIC_GEMINI_API_KEY=AIzaSy...
    ```
 
 4. **Initialize Database:**
