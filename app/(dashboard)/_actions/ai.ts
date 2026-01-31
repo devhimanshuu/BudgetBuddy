@@ -90,7 +90,7 @@ ${contextData}`;
 		// 5. Call API
 		// Trying gemini-1.5-flash as a standard free tier model.
 		const result = await genAI.models.generateContent({
-			model: "gemini-1.5-flash-001",
+			model: "gemini-2.0-flash-lite",
 			config: {
 				systemInstruction: {
 					parts: [{ text: systemInstruction }],
