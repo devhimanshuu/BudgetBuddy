@@ -7,8 +7,15 @@ import { Button } from "@/components/ui/button";
 import { AIChatWindow } from "./AIChatWindow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function AIChatButton() {
-    const [isOpen, setIsOpen] = useState(false);
+interface AIChatButtonProps {
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+export function AIChatButton({ open, onOpenChange }: AIChatButtonProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isOpen = open !== undefined ? open : internalOpen;
+    const setIsOpen = onOpenChange || setInternalOpen;
 
 
     return (

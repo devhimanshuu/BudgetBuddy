@@ -125,7 +125,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                                 <Bot className="w-6 h-6 text-primary" />
                                             </div>
                                             <p className="text-sm text-muted-foreground px-4">
-                                                Hello! I'm your AI Financial Analyst. Ask me anything about your spending, budgets, or savings goals!
+                                                Hello! I&apos;m your AI Financial Analyst. Ask me anything about your spending, budgets, or savings goals!
                                             </p>
                                             <div className="mt-4 flex flex-wrap gap-2 justify-center">
                                                 {["Spending analysis", "Budget status", "Savings tips"].map((tip) => (

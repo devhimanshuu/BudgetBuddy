@@ -11,6 +11,7 @@ import {
   TrendingDown,
   Calendar,
   Coins,
+  Bot,
 } from "lucide-react"
 
 import {
@@ -31,9 +32,10 @@ interface CommandPaletteProps {
   onIncomeClick: () => void
   onExpenseClick: () => void
   onAssetClick: () => void
+  onAIChatClick: () => void
 }
 
-export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onAssetClick }: CommandPaletteProps) {
+export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onAssetClick, onAIChatClick }: CommandPaletteProps) {
   const router = useRouter()
 
   const runCommand = React.useCallback((command: () => unknown) => {
@@ -47,6 +49,11 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, o
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Actions">
+          <CommandItem onSelect={() => runCommand(onAIChatClick)}>
+            <Bot className="mr-2 h-4 w-4 text-purple-500" />
+            <span>AI Assistant</span>
+            <CommandShortcut>⌘J</CommandShortcut>
+          </CommandItem>
           <CommandItem onSelect={() => runCommand(onIncomeClick)}>
             <TrendingUp className="mr-2 h-4 w-4 text-emerald-500" />
             <span>New Income</span>

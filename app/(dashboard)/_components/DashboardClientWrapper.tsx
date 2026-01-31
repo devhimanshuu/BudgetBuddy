@@ -11,13 +11,22 @@ interface DashboardClientWrapperProps {
 
 export function DashboardClientWrapper({ children }: DashboardClientWrapperProps) {
     const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+    const [isAIChatOpen, setIsAIChatOpen] = useState(false);
 
     return (
         <>
             <div className="w-full pt-[80px] md:pt-[60px] 3xl:pt-[100px]">{children}</div>
-            <DashboardShortcuts onQuickAddOpenChange={setIsQuickAddOpen} />
+            <DashboardShortcuts
+                onQuickAddOpenChange={setIsQuickAddOpen}
+                onAIChatOpen={() => setIsAIChatOpen(true)}
+            />
             <AnimatePresence>
-                {!isQuickAddOpen && <AIChatButton />}
+                {!isQuickAddOpen && (
+                    <AIChatButton
+                        open={isAIChatOpen}
+                        onOpenChange={setIsAIChatOpen}
+                    />
+                )}
             </AnimatePresence>
         </>
     );

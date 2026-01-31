@@ -13,8 +13,10 @@ import { CommandPalette } from "@/components/CommandPalette";
 
 export default function DashboardShortcuts({
   onQuickAddOpenChange,
+  onAIChatOpen,
 }: {
   onQuickAddOpenChange?: (isOpen: boolean) => void;
+  onAIChatOpen?: () => void;
 }) {
   const router = useRouter();
 
@@ -28,6 +30,11 @@ export default function DashboardShortcuts({
       key: "Ctrl+K",
       description: "Open Command Palette",
       action: () => setShowCommandPalette((prev) => !prev),
+    },
+    {
+      key: "Ctrl+J",
+      description: "Open AI Assistant",
+      action: () => onAIChatOpen?.(),
     },
     {
       key: "N",
@@ -102,6 +109,7 @@ export default function DashboardShortcuts({
         onIncomeClick={() => setShowIncomeDialog(true)}
         onExpenseClick={() => setShowExpenseDialog(true)}
         onAssetClick={() => setShowAssetDialog(true)}
+        onAIChatClick={() => onAIChatOpen?.()}
       />
 
       <KeyboardShortcutsHelp
