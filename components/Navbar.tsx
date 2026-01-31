@@ -82,8 +82,8 @@ function MobileNavbar() {
 function DesktopNavbar() {
   return (
     <div className="hidden border-separate border-b bg-background/80 backdrop-blur-md md:block fixed top-0 left-0 right-0 z-50 shadow-sm">
-      <nav className="container flex items-center justify-between px-8 3xl:px-12">
-        <div className="flex h-[25px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6">
+      <nav className="container flex items-center justify-between px-8 3xl:px-12 4xl:px-16">
+        <div className="flex h-[25px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6 4xl:h-[120px] 4xl:gap-x-8">
           <Logo />
           <div className="flex h-full ">
             {items.map((item) => (
@@ -95,7 +95,7 @@ function DesktopNavbar() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2 3xl:gap-3">
+        <div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4">
           <PrivacyModeToggle />
           <ThemeCustomizer />
           <UserButton
@@ -132,7 +132,7 @@ function NavbarItem({
         href={link}
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "w-full justify-start text-lg text-muted-foreground hover:text-foreground 3xl:text-xl gap-2",
+          "w-full justify-start text-lg text-muted-foreground hover:text-foreground 3xl:text-xl 4xl:text-2xl gap-2",
           isActive && "text-foreground"
         )}
         onClick={() => {

@@ -1,145 +1,143 @@
-
 # BudgetBuddy 💰
 
-BudgetBuddy is a modern, feature-rich personal finance tracker designed to help you take control of your financial life. Built with the latest web technologies, it offers a seamless and aesthetically pleasing experience for managing your expenses, savings, and budgets.
+BudgetBuddy is a modern, AI-powered personal finance tracker designed to help you master your financial life. Built with **Next.js 15** and **Google Gemini**, it combines powerful analytics with a seamless, stunning user experience to make money management effortless.
+
+## 🌟 What's New
+
+### 🤖 AI Financial Analyst
+
+Unlock personalized financial insights with our **Gemini-powered AI Assistant**.
+
+- **Context-Aware**: Understands your transactions, budgets, and savings goals.
+- **Interactive Chat**: Ask questions like "How much did I spend on food this month?" or "Can I afford a vacation?".
+- **Draggable Interface**: A floating, draggable chat window that stays with you but never gets in the way.
+
+### ⚡ Smart User Interface
+
+- **Draggable Quick Actions**: A floating "Quick Add" widget that you can move anywhere on the screen for easy access on mobile or desktop.
+- **Command Palette (`Cmd+K`)**: Navigate the entire app or trigger actions (like "New Expense" or "Open AI Chat") instantly with your keyboard.
+- **Visual Finance Calendar**: View your spending habits day-by-day in an intuitive calendar view.
+
+---
 
 ## 🚀 Key Features
 
-### 📊 Financial Management
-- **Expense & Income Tracking**: Log, categorize, and monitor your daily financial transactions with ease.
-- **Budgeting**: Create and manage monthly budgets to keep your spending in check.
-- **Savings Goals**: Set specific financial milestones (e.g., "Vacation Fund") and track your progress in real-time.
-- **Multi-Currency Support**: Seamlessly handle transactions in various currencies with real-time conversion rates.
+### 📊 Comprehensive Money Management
 
-### 📈 Analytics & Insights
-- **Interactive Dashboard**: Get a high-level overview of your finances with dynamic charts and graphs.
-- **Detailed Reports**: Analyze your spending habits over time with filtering by category, period, or type.
-- **Period History**: Compare your financial performance across different timeframes (Weekly, Monthly, Yearly).
-- **Export Data**: Download your financial data in **CSV** or **PDF** formats for offline analysis.
+- **Transaction Tracking**: Log income and expenses with smart categorization.
+- **Budgeting**: Create monthly budgets for specific categories and get alerted when you're close to limits.
+- **Savings Goals**: specific financial milestones (e.g., "New Car") and track contribution progress.
+- **Asset Tracking**: Monitor your net worth by tracking assets alongside your cash flow.
 
-### ⚡ User Experience & Aesthetics
-- **Modern UI/UX**: Built with **Shadcn UI** and **Glassmorphism** elements for a premium look and feel.
-- **Dark/Light Mode**: Fully supported theme switching to suit your preference.
-- **Responsive Design**: Optimized for all devices, ensuring a smooth experience on desktop, tablet, and mobile.
-- **Quick Add Widget**: Fast and accessible widget to log transactions on the go.
-- **Command Palette**: Quickly navigate the app or perform actions using a keyboard-centric command menu.
+### 📈 Deep Analytics & Insights
 
-### 🔒 Security & Performance
-- **Secure Authentication**: Powered by **Clerk** to ensure your data is private and secure.
-- **Real-Time Updates**: Leverages **React Query** for instant data synchronization and optimistic UI updates.
-- **Efficient Backend**: Built on **Prisma** and **PostgreSQL** for reliable data storage and retrieval.
+- **Real-time Dashboard**: Interactive charts showing cash flow, spending trends, and category breakdowns.
+- **Comparative History**: Analyze period-over-period performance (Weekly, Monthly, Yearly).
+- **Multi-Currency**: Full support for global currencies with user-selectable display formats.
+- **Data Export**: Download your complete financial history in **CSV** or **PDF** formats.
+
+### 🎨 Premium Design
+
+- **Glassmorphism UI**: A sleek, modern interface built with **Shadcn UI** and translucency effects.
+- **Theme Customization**: Switch between light/dark modes and customize primary colors.
+- **Fully Responsive**: Optimized experience for phones, tablets, and large desktop screens.
+- **Offline Mode**: Visual indicators and safe-guards for when you lose connectivity.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Components**: [Shadcn/ui](https://ui.shadcn.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/) & [React CountUp](https://www.npmjs.com/package/react-countup)
-- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
-- **Data Fetching**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
-- **Charts**: [Recharts](https://recharts.org/)
+- **Core**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/)
+- **Motion**: [Framer Motion](https://www.framer.com/motion/) (Animations & Drag-and-Drop)
+- **State/Fetching**: [TanStack Query](https://tanstack.com/query/latest)
+- **Visualization**: [Recharts](https://recharts.org/)
 
-### Backend
-- **Database**: [PostgreSQL](https://www.postgresql.org/)
-- **ORM**: [Prisma](https://www.prisma.io/)
-- **API**: Next.js Server Actions & API Routes
+### Backend & AI
 
-### Authentication & Tools
-- **Auth**: [Clerk](https://clerk.com/)
-- **File Uploads**: [UploadThing](https://uploadthing.com/)
-- **PDF Generation**: [jspdf](https://github.com/parallax/jsPDF)
-- **CSV Export**: [export-to-csv](https://www.npmjs.com/package/export-to-csv)
-- **Date Handling**: [date-fns](https://date-fns.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) (via [Prisma ORM](https://www.prisma.io/))
+- **Auth**: [Clerk](https://clerk.com/) (Secure User Management)
+- **AI Model**: [Google Gemini 1.5 Flash](https://deepmind.google/technologies/gemini/) (via `@google/genai`)
+- **Validation**: [Zod](https://zod.dev/)
 
 ---
 
 ## 🏁 Getting Started
 
-Follow these steps to set up the project locally.
-
 ### Prerequisites
-Ensure you have the following installed:
-- **Node.js** (v18.x or later)
-- **npm** or **yarn** or **pnpm**
-- **PostgreSQL** (Local instance or cloud provider like Neon/Supabase)
+
+- **Node.js** (v18+)
+- **PostgreSQL** Database URL (Local or Cloud e.g., Neon, Supabase)
+- **Clerk** Account (Public/Secret Keys)
+- **Google AI Studio** API Key (for Chat features)
 
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/devhimanshuu/BudgetBuddy.git
    cd BudgetBuddy
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
-   # or
-   yarn install
-   # or
-   pnpm install
    ```
 
 3. **Set up Environment Variables:**
-   Create a `.env` file in the root directory and add the following keys:
-   ```env
-   # Database connection string
-   DATABASE_URL="postgresql://username:password@localhost:5432/budgetbuddy?schema=public"
+   Create a `.env` file in the root directory:
 
-   # Clerk Authentication
+   ```env
+   # Database
+   DATABASE_URL="postgresql://user:pass@localhost:5432/budgetbuddy"
+
+   # Authentication (Clerk)
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
    CLERK_SECRET_KEY=sk_test_...
-
-   # Clerk URLs
    NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
    NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/wizard
+
+   # AI (Google Gemini)
+   NEXT_PUBLIC_GEMINI_API_KEY=AIzaSy...
    ```
 
-4. **Initialize the Database:**
-   Push the Prisma schema to your database:
+4. **Initialize Database:**
+
    ```bash
    npx prisma generate
    npx prisma db push
    ```
 
 5. **Run the Development Server:**
+
    ```bash
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000) in your browser to see the app.
+   Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you'd like to improve BudgetBuddy, please follow these steps:
+Contributions are welcome! Please follow these steps:
 
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
+1. Fork the repo.
+2. Create a feature branch (`git checkout -b feature/NewThing`).
+3. Commit your changes.
+4. Push to the branch.
 5. Open a Pull Request.
-
----
-
-## 📄 License
-
-This project is open-source and available under the [MIT License](LICENSE).
 
 ---
 
 ## 📬 Contact
 
-Created by [Himanshu Gupta](https://www.linkedin.com/in/himanshu-guptaa/) - feel free to reach out!
+Created by [Himanshu Gupta](https://www.linkedin.com/in/himanshu-guptaa/).
 
 - **Twitter**: [@devhimanshuu](https://twitter.com/devhimanshuu)
 - **Email**: devhimanshuu@gmail.com
-- **Blog**: [TechSphere](https://techsphere.hashnode.dev/)

@@ -5,8 +5,8 @@ import React from "react";
 const Logo = () => {
   return (
     <Link href="/" className="flex items-center gap-2">
-      <PiggyBank className="stroke h-11 w-11 stroke-amber-500 stroke-[1.5]" />
-      <p className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-3xl font-bold leading-tight tracking-tighter text-transparent">
+      <PiggyBank className="stroke h-9 w-9 stroke-amber-500 stroke-[1.5] lg:h-11 lg:w-11 4xl:h-14 4xl:w-14" />
+      <p className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-2xl font-bold leading-tight tracking-tighter text-transparent lg:text-3xl 4xl:text-4xl">
         Budget Buddy
       </p>
     </Link>
@@ -15,7 +15,7 @@ const Logo = () => {
 export function LogoMobile() {
   return (
     <Link href="/" className="flex items-center gap-2">
-      <p className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-3xl font-bold leading-tight tracking-tighter text-transparent">
+      <p className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-2xl font-bold leading-tight tracking-tighter text-transparent">
         Budget Buddy
       </p>
     </Link>
