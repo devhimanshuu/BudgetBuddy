@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import BudgetSummaryCard from "./BudgetSummaryCard";
 import CreateTransactionDialog from "../../_components/CreateTransactionDialog";
 import BudgetHistory from "./BudgetHistory";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -44,6 +45,7 @@ export default function BudgetProgressCards({
   month,
   year,
 }: BudgetProgressProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
@@ -85,10 +87,10 @@ export default function BudgetProgressCards({
                 className={cn(
                   "relative overflow-hidden transition-all",
                   budget.isOverBudget &&
-                    "border-red-500 bg-red-50 dark:bg-red-950/20",
+                  "border-red-500 bg-red-50 dark:bg-red-950/20",
                   budget.isNearLimit &&
-                    !budget.isOverBudget &&
-                    "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
+                  !budget.isOverBudget &&
+                  "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
                 )}
               >
                 <CardHeader className="pb-2">
@@ -104,7 +106,7 @@ export default function BudgetProgressCards({
                       {budget.isNearLimit && !budget.isOverBudget && (
                         <TrendingDown className="h-5 w-5 text-yellow-500" />
                       )}
-                      
+
                       {/* Quick-Add Expense Button */}
                       <CreateTransactionDialog
                         trigger={
@@ -171,13 +173,13 @@ export default function BudgetProgressCards({
                           budget.isOverBudget && "text-red-600 dark:text-red-400"
                         )}
                       >
-                        {formatter.format(budget.spent)}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.spent)}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Budget</span>
                       <span className="font-medium">
-                        {formatter.format(budget.budgetAmount)}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.budgetAmount)}
                       </span>
                     </div>
                   </div>
@@ -188,8 +190,8 @@ export default function BudgetProgressCards({
                       "h-2",
                       budget.isOverBudget && "[&>div]:bg-red-500",
                       budget.isNearLimit &&
-                        !budget.isOverBudget &&
-                        "[&>div]:bg-yellow-500"
+                      !budget.isOverBudget &&
+                      "[&>div]:bg-yellow-500"
                     )}
                   />
 
@@ -203,23 +205,23 @@ export default function BudgetProgressCards({
                         budget.isOverBudget
                           ? "text-red-600 dark:text-red-400"
                           : budget.remaining < budget.budgetAmount * 0.2
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : "text-emerald-600 dark:text-emerald-400"
+                            ? "text-yellow-600 dark:text-yellow-400"
+                            : "text-emerald-600 dark:text-emerald-400"
                       )}
                     >
-                      {formatter.format(Math.abs(budget.remaining))}
+                      {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(budget.remaining))}
                     </span>
                   </div>
 
                   <div className="text-center text-xs text-muted-foreground">
-                    {budget.percentage.toFixed(0)}% of budget used
+                    {isPrivacyMode ? "**%" : `${budget.percentage.toFixed(0)}%`} of budget used
                   </div>
 
                   {/* Daily Safe-to-Spend for this category */}
                   {!budget.isOverBudget && budget.remaining > 0 && (
                     <div className="mt-2 rounded border border-emerald-500/30 bg-emerald-50 px-2 py-1 text-center dark:bg-emerald-950/20">
                       <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                        {formatter.format(budget.remaining / daysRemaining)}/day
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : `${formatter.format(budget.remaining / daysRemaining)}/day`}
                       </p>
                     </div>
                   )}
@@ -230,16 +232,16 @@ export default function BudgetProgressCards({
                       {budget.isProjectedToOverspend ? (
                         <div className="rounded border border-orange-500/30 bg-orange-50 px-2 py-1 dark:bg-orange-950/20">
                           <p className="text-xs font-medium text-orange-700 dark:text-orange-300">
-                            ⚠️ Projected: {formatter.format(budget.projectedSpending)}
+                            ⚠️ Projected: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.projectedSpending)}
                           </p>
                           <p className="text-xs text-orange-600 dark:text-orange-400">
-                            May overspend by {formatter.format(budget.projectedOverspend)}
+                            May overspend by {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.projectedOverspend)}
                           </p>
                         </div>
                       ) : (
                         <div className="rounded border border-blue-500/30 bg-blue-50 px-2 py-1 dark:bg-blue-950/20">
                           <p className="text-xs text-blue-700 dark:text-blue-300">
-                            ✅ On track to save {formatter.format(budget.budgetAmount - budget.projectedSpending)}
+                            ✅ On track to save {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.budgetAmount - budget.projectedSpending)}
                           </p>
                         </div>
                       )}

@@ -183,8 +183,30 @@ export default function TagSelector({
                   value={searchValue}
                   onValueChange={setSearchValue}
                 />
-                <CommandList>
+                <CommandList className="max-h-[170px] overflow-y-auto">
                   <CommandEmpty>No tags found.</CommandEmpty>
+                  {allowCreation && (
+                    <>
+                      <CommandGroup>
+                        <CommandItem
+                          onSelect={() => {
+                            setIsCreating(true);
+                            setNewTagName(searchValue);
+                          }}
+                          className="gap-2 text-primary"
+                        >
+                          <Sparkles className="h-4 w-4" />
+                          Create new
+                          {searchValue && (
+                            <span className="ml-auto text-xs text-muted-foreground">
+                              &ldquo;{searchValue}&rdquo;
+                            </span>
+                          )}
+                        </CommandItem>
+                      </CommandGroup>
+                      <CommandSeparator />
+                    </>
+                  )}
                   <CommandGroup>
                     {tags?.map((tag) => {
                       const isSelected = selectedTags.some((t) => t.id === tag.id);
@@ -208,28 +230,6 @@ export default function TagSelector({
                       );
                     })}
                   </CommandGroup>
-                  {allowCreation && (
-                    <>
-                      <CommandSeparator />
-                      <CommandGroup>
-                        <CommandItem
-                          onSelect={() => {
-                            setIsCreating(true);
-                            setNewTagName(searchValue);
-                          }}
-                          className="gap-2 text-primary"
-                        >
-                          <Sparkles className="h-4 w-4" />
-                          Create new tag
-                          {searchValue && (
-                            <span className="ml-auto text-xs text-muted-foreground">
-                              &ldquo;{searchValue}&rdquo;
-                            </span>
-                          )}
-                        </CommandItem>
-                      </CommandGroup>
-                    </>
-                  )}
                 </CommandList>
               </>
             )}

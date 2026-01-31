@@ -35,6 +35,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Palette } from "lucide-react";
 
 const assetCategories = {
     asset: [
@@ -55,14 +58,15 @@ const assetCategories = {
     ],
 };
 
-const colors = [
-    { value: "#3b82f6", label: "Blue" },
-    { value: "#10b981", label: "Green" },
-    { value: "#f59e0b", label: "Orange" },
-    { value: "#ef4444", label: "Red" },
-    { value: "#8b5cf6", label: "Purple" },
-    { value: "#ec4899", label: "Pink" },
-    { value: "#06b6d4", label: "Cyan" },
+const PRESET_COLORS = [
+    "#3b82f6", // Blue
+    "#10b981", // Green
+    "#f59e0b", // Orange
+    "#ef4444", // Red
+    "#8b5cf6", // Purple
+    "#ec4899", // Pink
+    "#06b6d4", // Cyan
+    "#000000", // Black
 ];
 
 const createAssetSchema = z.object({
@@ -103,6 +107,13 @@ export default function CreateAssetDialog({ trigger, open: externalOpen, onOpenC
             notes: "",
         },
     });
+ 
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const [customHue, setCustomHue] = useState(210); // Default blue hue
+    const [customSaturation, setCustomSaturation] = useState(70);
+    const [customLightness, setCustomLightness] = useState(50);
+ 
+    const customColor = `hsl(${customHue}, ${customSaturation}%, ${customLightness}%)`;
 
     const type = form.watch("type");
     const category = form.watch("category");
@@ -304,26 +315,143 @@ export default function CreateAssetDialog({ trigger, open: externalOpen, onOpenC
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Color</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select color" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {colors.map((color) => (
-                                                <SelectItem key={color.value} value={color.value}>
-                                                    <div className="flex items-center gap-2">
-                                                        <div
-                                                            className="h-4 w-4 rounded-full"
-                                                            style={{ backgroundColor: color.value }}
-                                                        />
-                                                        {color.label}
+                                    <div className="flex flex-wrap gap-2">
+                                        {PRESET_COLORS.map((color) => (
+                                            <button
+                                                key={color}
+                                                type="button"
+                                                className={cn(
+                                                    "h-8 w-8 rounded-full border-2 transition-all",
+                                                    field.value === color
+                                                        ? "scale-110 border-foreground ring-2 ring-offset-2"
+                                                        : "border-transparent hover:scale-105"
+                                                )}
+                                                style={{ backgroundColor: color }}
+                                                onClick={() => field.onChange(color)}
+                                            />
+                                        ))}
+
+                                        {/* Custom Color Picker */}
+                                        <Popover open={showColorPicker} onOpenChange={setShowColorPicker}>
+                                            <PopoverTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    className={cn(
+                                                        "h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center",
+                                                        !PRESET_COLORS.includes(field.value)
+                                                            ? "scale-110 border-foreground ring-2 ring-offset-2"
+                                                            : "border-dashed border-muted-foreground hover:scale-105 hover:border-foreground"
+                                                    )}
+                                                    style={{
+                                                        backgroundColor: !PRESET_COLORS.includes(field.value) ? field.value : "transparent"
+                                                    }}
+                                                >
+                                                    {PRESET_COLORS.includes(field.value) && (
+                                                        <Palette className="h-4 w-4 text-muted-foreground" />
+                                                    )}
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-64" side="top">
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <h4 className="font-medium mb-1 text-sm">Custom Color</h4>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Adjust sliders to create your color
+                                                        </p>
                                                     </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+
+                                                    {/* Color Preview */}
+                                                    <div className="flex items-center justify-center">
+                                                        <div
+                                                            className="h-12 w-12 rounded-full border-4 border-border shadow-lg"
+                                                            style={{ backgroundColor: customColor }}
+                                                        />
+                                                    </div>
+
+                                                    {/* Hue Slider */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center">
+                                                            <label className="text-xs font-medium">Hue</label>
+                                                            <span className="text-xs text-muted-foreground">{customHue}°</span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min="0"
+                                                            max="360"
+                                                            value={customHue}
+                                                            onChange={(e) => setCustomHue(Number(e.target.value))}
+                                                            className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                                                            style={{
+                                                                background: `linear-gradient(to right, 
+                                                                    hsl(0, 100%, 50%), 
+                                                                    hsl(60, 100%, 50%), 
+                                                                    hsl(120, 100%, 50%), 
+                                                                    hsl(180, 100%, 50%), 
+                                                                    hsl(240, 100%, 50%), 
+                                                                    hsl(300, 100%, 50%), 
+                                                                    hsl(360, 100%, 50%))`
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    {/* Saturation Slider */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center">
+                                                            <label className="text-xs font-medium">Saturation</label>
+                                                            <span className="text-xs text-muted-foreground">{customSaturation}%</span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min="0"
+                                                            max="100"
+                                                            value={customSaturation}
+                                                            onChange={(e) => setCustomSaturation(Number(e.target.value))}
+                                                            className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                                                            style={{
+                                                                background: `linear-gradient(to right, 
+                                                                    hsl(${customHue}, 0%, 50%), 
+                                                                    hsl(${customHue}, 100%, 50%))`
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    {/* Lightness Slider */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center">
+                                                            <label className="text-xs font-medium">Brightness</label>
+                                                            <span className="text-xs text-muted-foreground">{customLightness}%</span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min="20"
+                                                            max="80"
+                                                            value={customLightness}
+                                                            onChange={(e) => setCustomLightness(Number(e.target.value))}
+                                                            className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                                                            style={{
+                                                                background: `linear-gradient(to right, 
+                                                                    hsl(${customHue}, ${customSaturation}%, 0%), 
+                                                                    hsl(${customHue}, ${customSaturation}%, 50%), 
+                                                                    hsl(${customHue}, ${customSaturation}%, 100%))`
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        onClick={() => {
+                                                            field.onChange(customColor);
+                                                            setShowColorPicker(false);
+                                                        }}
+                                                    >
+                                                        Set Color
+                                                    </Button>
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}

@@ -94,11 +94,14 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {months.map((month, index) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      {month}
-                    </SelectItem>
-                  ))}
+                  {months.map((month, index) => {
+                    const isFutureMonth = selectedYear === currentDate.getFullYear() && index > currentDate.getMonth();
+                    return (
+                      <SelectItem key={index} value={index.toString()} disabled={isFutureMonth}>
+                        {month}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
 
@@ -111,7 +114,7 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
+                    <SelectItem key={year} value={year.toString()} disabled={year > currentDate.getFullYear()}>
                       {year}
                     </SelectItem>
                   ))}

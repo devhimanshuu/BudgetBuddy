@@ -106,17 +106,17 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
         >
           <CommandInput placeholder="Search category..." />
           <CreateCategoryDialog type={type} successCallback={successCallback} />
-          <CommandEmpty>
-            <p>Category not found</p>
-            <p className="text-xs text-muted-foreground">
-              Tip: Create a new category
-            </p>
-          </CommandEmpty>
+          <CommandList className="max-h-[170px] overflow-y-auto">
+            <CommandEmpty>
+              <p>Category not found</p>
+              <p className="text-xs text-muted-foreground">
+                Tip: Create a new category
+              </p>
+            </CommandEmpty>
 
-          {/* Recent Categories */}
-          {recentCategories.length > 0 && (
-            <CommandGroup heading="Recent">
-              <CommandList>
+            {/* Recent Categories */}
+            {recentCategories.length > 0 && (
+              <CommandGroup heading="Recent">
                 {recentCategories.map((category: Category) => (
                   <CommandItem
                     key={category.name}
@@ -135,14 +135,12 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
                     />
                   </CommandItem>
                 ))}
-              </CommandList>
-            </CommandGroup>
-          )}
+              </CommandGroup>
+            )}
 
-          {/* All Categories */}
-          {otherCategories.length > 0 && (
-            <CommandGroup heading={recentCategories.length > 0 ? "All Categories" : undefined}>
-              <CommandList>
+            {/* All Categories */}
+            {otherCategories.length > 0 && (
+              <CommandGroup heading={recentCategories.length > 0 ? "All Categories" : undefined}>
                 {otherCategories.map((category: Category) => (
                   <CommandItem
                     key={category.name}
@@ -161,9 +159,9 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
                     />
                   </CommandItem>
                 ))}
-              </CommandList>
-            </CommandGroup>
-          )}
+              </CommandGroup>
+            )}
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

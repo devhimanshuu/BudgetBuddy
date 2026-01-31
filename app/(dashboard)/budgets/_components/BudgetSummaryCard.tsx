@@ -1,11 +1,12 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useMemo } from "react";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface BudgetProgress {
   id: string;
@@ -30,6 +31,7 @@ export default function BudgetSummaryCard({
   budgetProgress,
   isLoading,
 }: BudgetSummaryCardProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
@@ -112,7 +114,7 @@ export default function BudgetSummaryCard({
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Total Budget</p>
             <p className="text-2xl font-bold">
-              {formatter.format(summary.totalBudget)}
+              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(summary.totalBudget)}
             </p>
           </div>
 
@@ -125,7 +127,7 @@ export default function BudgetSummaryCard({
                 isOverBudget && "text-red-600 dark:text-red-400"
               )}
             >
-              {formatter.format(summary.totalSpent)}
+              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(summary.totalSpent)}
             </p>
           </div>
 
@@ -144,7 +146,7 @@ export default function BudgetSummaryCard({
                     : "text-emerald-600 dark:text-emerald-400"
               )}
             >
-              {formatter.format(Math.abs(summary.totalRemaining))}
+              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(summary.totalRemaining))}
             </p>
           </div>
 
@@ -186,7 +188,7 @@ export default function BudgetSummaryCard({
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-sm font-bold">
-                    {Math.min(summary.overallPercentage, 100).toFixed(0)}%
+                    {isPrivacyMode ? "**%" : `${Math.min(summary.overallPercentage, 100).toFixed(0)}%`}
                   </span>
                 </div>
               </div>
@@ -228,7 +230,7 @@ export default function BudgetSummaryCard({
               </div>
               <div className="text-right">
                 <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatter.format(summary.dailySafeToSpend)}
+                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(summary.dailySafeToSpend)}
                 </p>
                 <p className="text-xs text-muted-foreground">per day</p>
               </div>
@@ -244,7 +246,7 @@ export default function BudgetSummaryCard({
                   ⚠️ Budget Exceeded
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  You&apos;ve spent {formatter.format(Math.abs(summary.totalRemaining))} more than your budget
+                  You&apos;ve spent {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(summary.totalRemaining))} more than your budget
                 </p>
               </div>
             </div>
