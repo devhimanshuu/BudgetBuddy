@@ -11,6 +11,8 @@ import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import GlassCard from "@/components/GlassCard";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
+import { cn } from "@/lib/utils";
 
 interface Props {
   userSettings: UserSettings;
@@ -19,6 +21,7 @@ interface Props {
 }
 
 function CategoriesStats({ userSettings, from, to }: Props) {
+  const { isPrivacyMode } = usePrivacyMode();
   const statsQuery = useQuery<GetCategoriesStatsResponseType>({
     queryKey: ["overview", "stats", "categories", from.toISOString(), to.toISOString()],
     queryFn: () =>
@@ -40,6 +43,7 @@ function CategoriesStats({ userSettings, from, to }: Props) {
           formatter={formatter}
           type="income"
           data={statsQuery.data || []}
+          privacyMode={isPrivacyMode}
         />
       </SkeletonWrapper>
       <SkeletonWrapper isLoading={statsQuery.isFetching}>
@@ -47,6 +51,7 @@ function CategoriesStats({ userSettings, from, to }: Props) {
           formatter={formatter}
           type="expense"
           data={statsQuery.data || []}
+          privacyMode={isPrivacyMode}
         />
       </SkeletonWrapper>
     </div>
@@ -59,10 +64,12 @@ function CategoriesCard({
   data,
   type,
   formatter,
+  privacyMode,
 }: {
   type: TransactionType;
   formatter: Intl.NumberFormat;
   data: GetCategoriesStatsResponseType;
+  privacyMode: boolean;
 }) {
   const filteredData = data.filter((el) => el.type === type);
   const total = filteredData.reduce(
@@ -106,8 +113,11 @@ function CategoriesCard({
                         </span>
                       </span>
 
-                      <span className="text-sm text-gray-400 3xl:text-base">
-                        {formatter.format(amount)}
+                      <span className={cn(
+                        "text-sm text-gray-400 3xl:text-base",
+                        privacyMode && "privacy-blur"
+                      )}>
+                        {privacyMode ? "$******" : formatter.format(amount)}
                       </span>
                     </div>
 

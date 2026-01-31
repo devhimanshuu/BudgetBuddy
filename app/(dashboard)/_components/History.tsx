@@ -19,9 +19,11 @@ import {
   YAxis,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import CountUp from "react-countup";
 
 const History = ({ userSettings }: { userSettings: UserSettings }) => {
+  const { isPrivacyMode } = usePrivacyMode();
   const [timeframe, setTimeFrame] = useState<TimeFrame>("month");
   const [period, setPeriod] = useState<Period>({
     month: new Date().getMonth(),
@@ -75,7 +77,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
         <CardContent>
           <SkeletonWrapper isLoading={historyDataQuery.isFetching}>
             {dataAvailable && (
-              <ResponsiveContainer width={"100%"} height={300} className="3xl:!h-[400px]">
+              <ResponsiveContainer width={"100%"} height={300} className={cn("3xl:!h-[400px]", isPrivacyMode && "privacy-blur")}>
                 <BarChart
                   height={300}
                   data={historyDataQuery.data}
@@ -154,7 +156,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                   <Tooltip
                     cursor={{ opacity: 0.1 }}
                     content={(props) => (
-                      <CustomTooltip formatter={formatter} {...props} />
+                      <CustomTooltip formatter={formatter} isPrivacyMode={isPrivacyMode} {...props} />
                     )}
                   />
                 </BarChart>
@@ -177,7 +179,7 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
 
 export default History;
 
-function CustomTooltip({ active, payload, formatter }: any) {
+function CustomTooltip({ active, payload, formatter, isPrivacyMode }: any) {
   if (!active || !payload || payload.length === 0) return null;
 
   const data = payload[0].payload;
@@ -190,6 +192,7 @@ function CustomTooltip({ active, payload, formatter }: any) {
         value={expense}
         bgColor="bg-red-500"
         textColor="text-red-500"
+        isPrivacyMode={isPrivacyMode}
       />
       <TooltipRow
         formatter={formatter}
@@ -197,6 +200,7 @@ function CustomTooltip({ active, payload, formatter }: any) {
         value={income}
         bgColor="bg-emerald-500"
         textColor="text-emerald-500"
+        isPrivacyMode={isPrivacyMode}
       />
       <TooltipRow
         formatter={formatter}
@@ -204,6 +208,7 @@ function CustomTooltip({ active, payload, formatter }: any) {
         value={income - expense}
         bgColor="bg-gray-100"
         textColor="text-foreground"
+        isPrivacyMode={isPrivacyMode}
       />
     </div>
   );
@@ -214,12 +219,14 @@ function TooltipRow({
   bgColor,
   textColor,
   formatter,
+  isPrivacyMode,
 }: {
   label: string;
   textColor: string;
   bgColor: string;
   value: number;
   formatter: Intl.NumberFormat;
+  isPrivacyMode: boolean;
 }) {
   const formattingFn = useCallback(
     (value: number) => {
@@ -232,15 +239,19 @@ function TooltipRow({
       <div className={cn("h-4 w-4 rounded-full", bgColor)} />
       <div className="flex w-full justify-between">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <div className={cn("text-sm font-bold", textColor)}>
-          <CountUp
-            duration={0.5}
-            preserveValue
-            end={value}
-            decimals={0}
-            formattingFn={formattingFn}
-            className="text-sm"
-          />
+        <div className={cn("text-sm font-bold", textColor, isPrivacyMode && "privacy-blur")}>
+          {isPrivacyMode ? (
+            <span className="text-sm">****</span>
+          ) : (
+            <CountUp
+              duration={0.5}
+              preserveValue
+              end={value}
+              decimals={0}
+              formattingFn={formattingFn}
+              className="text-sm"
+            />
+          )}
         </div>
       </div>
     </div>

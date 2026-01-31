@@ -9,12 +9,14 @@ import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useMemo } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface NetWorthCardProps {
   userSettings: UserSettings;
 }
 
 export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const statsQuery = useQuery({
     queryKey: ["overview", "stats"],
     queryFn: () => fetch("/api/stats").then((res) => res.json()),
@@ -72,15 +74,16 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
             <p
               className={cn(
                 "text-4xl font-bold 3xl:text-5xl",
-                balance >= 0 ? "text-emerald-600" : "text-red-600"
+                balance >= 0 ? "text-emerald-600" : "text-red-600",
+                isPrivacyMode && "privacy-blur"
               )}
             >
-              {formatter.format(balance)}
+              {isPrivacyMode ? "$******" : formatter.format(balance)}
             </p>
             {balanceChange !== 0 && (
-              <p className="text-sm text-muted-foreground 3xl:text-base">
+              <p className={cn("text-sm text-muted-foreground 3xl:text-base", isPrivacyMode && "privacy-blur")}>
                 {balanceChange > 0 ? "+" : ""}
-                {formatter.format(balanceChange)} from last month
+                {isPrivacyMode ? "$******" : formatter.format(balanceChange)} from last month
               </p>
             )}
           </div>
@@ -89,14 +92,14 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
           <div className="grid grid-cols-2 gap-4 3xl:gap-6">
             <div className="space-y-1 3xl:space-y-2">
               <p className="text-xs text-muted-foreground 3xl:text-sm">Income</p>
-              <p className="text-lg font-semibold text-emerald-600 3xl:text-xl">
-                {formatter.format(income)}
+              <p className={cn("text-lg font-semibold text-emerald-600 3xl:text-xl", isPrivacyMode && "privacy-blur")}>
+                {isPrivacyMode ? "$******" : formatter.format(income)}
               </p>
             </div>
             <div className="space-y-1 3xl:space-y-2">
               <p className="text-xs text-muted-foreground 3xl:text-sm">Expenses</p>
-              <p className="text-lg font-semibold text-red-600 3xl:text-xl">
-                {formatter.format(expense)}
+              <p className={cn("text-lg font-semibold text-red-600 3xl:text-xl", isPrivacyMode && "privacy-blur")}>
+                {isPrivacyMode ? "$******" : formatter.format(expense)}
               </p>
             </div>
           </div>
