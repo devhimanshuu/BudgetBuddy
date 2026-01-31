@@ -108,7 +108,7 @@ function StatCard({
       <div className="relative z-10 flex flex-col items-start gap-0">
         <p className="text-muted-foreground 3xl:text-base">{title}</p>
         {privacyMode ? (
-          <span className="text-2xl font-bold 3xl:text-3xl privacy-blur">
+          <span className="text-2xl font-bold 3xl:text-3xl">
             {formatter.format(8888.88).replace(/\d/g, "*")}
           </span>
         ) : (

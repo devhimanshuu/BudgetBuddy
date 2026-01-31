@@ -67,8 +67,7 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
                         <span
                           className={cn(
                             "font-semibold",
-                            trend.change > 0 ? "text-red-600" : "text-emerald-600",
-                            isPrivacyMode && "privacy-blur"
+                            trend.change > 0 ? "text-red-600" : "text-emerald-600"
                           )}
                         >
                           {isPrivacyMode ? "**%" : `${Math.abs(trend.changePercent).toFixed(0)}%`}{" "}
@@ -88,14 +87,13 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
                       <p
                         className={cn(
                           "text-sm font-semibold 3xl:text-base",
-                          trend.change > 0 ? "text-red-600" : "text-emerald-600",
-                          isPrivacyMode && "privacy-blur"
+                          trend.change > 0 ? "text-red-600" : "text-emerald-600"
                         )}
                       >
                         {trend.change > 0 ? "+" : ""}
                         {isPrivacyMode ? "$******" : formatter.format(Math.abs(trend.change))}
                       </p>
-                      <p className={cn("text-xs text-muted-foreground 3xl:text-sm", isPrivacyMode && "privacy-blur")}>
+                      <p className="text-xs text-muted-foreground 3xl:text-sm">
                         {isPrivacyMode ? "$******" : formatter.format(trend.currentMonth)}
                       </p>
                     </div>

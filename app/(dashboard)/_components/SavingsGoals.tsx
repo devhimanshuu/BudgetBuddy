@@ -326,7 +326,7 @@ function GoalCard({
               } as React.CSSProperties
             }
           />
-          <div className={cn("flex justify-between text-xs text-muted-foreground 3xl:text-sm", privacyMode && "privacy-blur")}>
+          <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
             <span>{privacyMode ? "$******" : formatter.format(goal.currentAmount)}</span>
             <span>{privacyMode ? "$******" : formatter.format(goal.targetAmount)}</span>
           </div>
@@ -336,7 +336,7 @@ function GoalCard({
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-lg bg-muted p-2 3xl:p-3">
             <p className="text-xs text-muted-foreground 3xl:text-sm">Remaining</p>
-            <p className={cn("font-semibold 3xl:text-base", privacyMode && "privacy-blur")}>
+            <p className="font-semibold 3xl:text-base">
               {privacyMode ? "$******" : formatter.format(remaining)}
             </p>
           </div>

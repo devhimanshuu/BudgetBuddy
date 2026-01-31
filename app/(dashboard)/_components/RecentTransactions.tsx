@@ -60,8 +60,7 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
                      </div>
                      <div className={cn(
                         "font-bold",
-                        t.type === 'income' ? 'text-emerald-600' : 'text-red-600',
-                        isPrivacyMode && "privacy-blur"
+                        t.type === 'income' ? 'text-emerald-600' : 'text-red-600'
                      )}>
                         {t.type === 'income' ? '+' : '-'}{isPrivacyMode ? "$******" : formatter.format(t.amount)}
                      </div>

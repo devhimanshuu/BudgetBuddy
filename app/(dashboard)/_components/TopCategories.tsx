@@ -68,7 +68,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={cn("font-semibold 3xl:text-lg", isPrivacyMode && "privacy-blur")}>
+                      <p className="font-semibold 3xl:text-lg">
                         {isPrivacyMode ? "$******" : formatter.format(category.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground 3xl:text-sm">
@@ -97,7 +97,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
               <div className="mt-4 rounded-lg bg-muted p-3 3xl:mt-6 3xl:p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium 3xl:text-base">Total Spending</p>
-                  <p className={cn("text-lg font-bold 3xl:text-xl", isPrivacyMode && "privacy-blur")}>
+                  <p className="text-lg font-bold 3xl:text-xl">
                     {isPrivacyMode ? "$******" : formatter.format(totalAmount)}
                   </p>
                 </div>

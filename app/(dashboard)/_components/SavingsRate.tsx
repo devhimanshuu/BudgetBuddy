@@ -81,7 +81,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
         <CardContent className="space-y-4">
           {/* Savings Rate Display */}
           <div className="text-center">
-            <p className={cn("text-5xl font-bold", health.color, isPrivacyMode && "privacy-blur")}>
+            <p className={cn("text-5xl font-bold", health.color)}>
               {isPrivacyMode ? " --.-%" : `${savingsRate.toFixed(1)}%`}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -118,7 +118,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
           <div className="space-y-2 rounded-lg bg-muted p-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Income</span>
-              <span className={cn("font-medium", isPrivacyMode && "privacy-blur")}>
+              <span className="font-medium">
                 {isPrivacyMode ? "$******" : formatter.format(income)}
               </span>
             </div>
@@ -127,8 +127,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
               <span
                 className={cn(
                   "font-medium",
-                  savings >= 0 ? "text-emerald-600" : "text-red-600",
-                  isPrivacyMode && "privacy-blur"
+                  savings >= 0 ? "text-emerald-600" : "text-red-600"
                 )}
               >
                 {isPrivacyMode ? "$******" : formatter.format(savings)}
