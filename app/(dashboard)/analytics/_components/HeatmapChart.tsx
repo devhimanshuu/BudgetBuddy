@@ -6,16 +6,18 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { UserSettings } from "@prisma/client";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
+import { cn } from "@/lib/utils";
 
 interface HeatmapChartProps {
   from: Date;
   to: Date;
   userSettings: UserSettings;
   tagIds?: string[];
+  isPrivacyMode?: boolean;
 }
 
-export default function HeatmapChart({ from, to, userSettings, tagIds = [] }: HeatmapChartProps) {
+export default function HeatmapChart({ from, to, userSettings, tagIds = [], isPrivacyMode = false }: HeatmapChartProps) {
   const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
 
   const formatter = useMemo(() => {
@@ -92,7 +94,7 @@ export default function HeatmapChart({ from, to, userSettings, tagIds = [] }: He
                 </div>
 
                 {/* Heatmap grid */}
-                <div className="space-y-1">
+                <div className={cn("space-y-1", isPrivacyMode && "privacy-blur")}>
                   {heatmapQuery.data.map((dayData: any) => (
                     <div key={dayData.day} className="flex items-center gap-1">
                       <div className="w-16 text-sm font-medium">
@@ -113,7 +115,7 @@ export default function HeatmapChart({ from, to, userSettings, tagIds = [] }: He
                           >
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                               <span className="text-xs font-semibold">
-                                {formatter.format(blockTotal)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(blockTotal)}
                               </span>
                             </div>
                           </div>

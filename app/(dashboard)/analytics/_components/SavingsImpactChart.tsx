@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -14,9 +14,10 @@ import { Progress } from "@/components/ui/progress";
 
 interface SavingsImpactProps {
     userSettings: UserSettings;
+    isPrivacyMode?: boolean;
 }
 
-export default function SavingsImpactChart({ userSettings }: SavingsImpactProps) {
+export default function SavingsImpactChart({ userSettings, isPrivacyMode = false }: SavingsImpactProps) {
     const formatter = useMemo(() => {
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
@@ -43,7 +44,7 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                 <CardDescription>
                     Based on your average monthly savings of{" "}
                     <span className="font-semibold text-foreground">
-                        {formatter.format(avgMonthlySavings)}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(avgMonthlySavings)}
                     </span>{" "}
                     (last 3 months)
                 </CardDescription>
@@ -108,8 +109,8 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                                             {/* Progress bar */}
                                             <div className="space-y-1">
                                                 <div className="flex justify-between text-xs">
-                                                    <span>Target: {formatter.format(goal.targetAmount)}</span>
-                                                    <span>{((goal.currentAmount / goal.targetAmount) * 100).toFixed(0)}%</span>
+                                                    <span>Target: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(goal.targetAmount)}</span>
+                                                    <span>{isPrivacyMode ? "***%" : `${((goal.currentAmount / goal.targetAmount) * 100).toFixed(0)}%`}</span>
                                                 </div>
                                                 <Progress
                                                     value={(goal.currentAmount / goal.targetAmount) * 100}
@@ -123,7 +124,7 @@ export default function SavingsImpactChart({ userSettings }: SavingsImpactProps)
                                             {/* Call to action */}
                                             {isDelayed && (
                                                 <p className="text-[10px] text-muted-foreground bg-orange-50 dark:bg-orange-950/20 p-2 rounded border border-orange-100 dark:border-orange-900/50">
-                                                    💡 Increase savings by <span className="font-bold text-orange-600">{formatter.format((goal.targetAmount - goal.currentAmount) / (differenceInDays(new Date(goal.targetDate), new Date()) / 30.44) - avgMonthlySavings)}</span> /mo to stay on track.
+                                                    💡 Increase savings by <span className="font-bold text-orange-600">{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format((goal.targetAmount - goal.currentAmount) / (differenceInDays(new Date(goal.targetDate), new Date()) / 30.44) - avgMonthlySavings)}</span> /mo to stay on track.
                                                 </p>
                                             )}
                                         </CardContent>

@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -231,7 +231,7 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                     </p>
                   )}
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    Progress: {formatter.format(goalToDelete.currentAmount)} / {formatter.format(goalToDelete.targetAmount)}
+                    Progress: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(goalToDelete.currentAmount)} / {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(goalToDelete.targetAmount)}
                   </p>
                 </div>
               </div>
@@ -327,8 +327,8 @@ function GoalCard({
             }
           />
           <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
-            <span>{privacyMode ? "$******" : formatter.format(goal.currentAmount)}</span>
-            <span>{privacyMode ? "$******" : formatter.format(goal.targetAmount)}</span>
+            <span>{privacyMode ? GetPrivacyMask(formatter) : formatter.format(goal.currentAmount)}</span>
+            <span>{privacyMode ? GetPrivacyMask(formatter) : formatter.format(goal.targetAmount)}</span>
           </div>
         </div>
 
@@ -337,7 +337,7 @@ function GoalCard({
           <div className="rounded-lg bg-muted p-2 3xl:p-3">
             <p className="text-xs text-muted-foreground 3xl:text-sm">Remaining</p>
             <p className="font-semibold 3xl:text-base">
-              {privacyMode ? "$******" : formatter.format(remaining)}
+              {privacyMode ? GetPrivacyMask(formatter) : formatter.format(remaining)}
             </p>
           </div>
           <div className="rounded-lg bg-muted p-2 3xl:p-3">

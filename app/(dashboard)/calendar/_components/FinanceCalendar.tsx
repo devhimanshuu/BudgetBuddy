@@ -11,8 +11,9 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import DayTransactionsSheet from "./DayTransactionsSheet";
 import CalendarSettings from "./CalendarSettings";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { UserSettings } from "@prisma/client";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { CalendarData } from "@/lib/type";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ interface FinanceCalendarProps {
 }
 
 export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) {
+    const { isPrivacyMode } = usePrivacyMode();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [sheetOpen, setSheetOpen] = useState(false);
@@ -265,7 +267,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-emerald-500">
-                                {formatter.format(calendarQuery.data.monthStats.totalIncome)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalIncome)}
                             </div>
                         </CardContent>
                     </Card>
@@ -278,7 +280,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-red-500">
-                                {formatter.format(calendarQuery.data.monthStats.totalExpense)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalExpense)}
                             </div>
                         </CardContent>
                     </Card>
@@ -296,7 +298,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                                     ? "text-emerald-500"
                                     : "text-red-500"
                             )}>
-                                {formatter.format(calendarQuery.data.monthStats.totalIncome - calendarQuery.data.monthStats.totalExpense)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalIncome - calendarQuery.data.monthStats.totalExpense)}
                             </div>
                         </CardContent>
                     </Card>
@@ -309,7 +311,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {formatter.format(calendarQuery.data.monthStats.avgDailyExpense)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.avgDailyExpense)}
                             </div>
                         </CardContent>
                     </Card>
@@ -323,6 +325,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                 date={selectedDate}
                 dayData={selectedDayData}
                 formatter={formatter}
+                isPrivacyMode={isPrivacyMode}
             />
         </div>
     );

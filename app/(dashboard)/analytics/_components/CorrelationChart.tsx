@@ -3,7 +3,7 @@
 import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -18,6 +18,7 @@ import {
     Legend,
 } from "recharts";
 import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CorrelationChartProps {
@@ -25,9 +26,10 @@ interface CorrelationChartProps {
     from: Date;
     to: Date;
     tagIds?: string[];
+    isPrivacyMode?: boolean;
 }
 
-export default function CorrelationChart({ userSettings, from, to, tagIds = [] }: CorrelationChartProps) {
+export default function CorrelationChart({ userSettings, from, to, tagIds = [], isPrivacyMode = false }: CorrelationChartProps) {
     const [cat1, setCat1] = useState<string>("");
     const [cat2, setCat2] = useState<string>("");
 
@@ -115,7 +117,7 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [] }
             <CardContent className="relative">
                 <SkeletonWrapper isLoading={correlationQuery.isFetching || categoriesQuery.isFetching}>
                     {dataAvailable ? (
-                        <ResponsiveContainer width="100%" height={400}>
+                        <ResponsiveContainer width="100%" height={400} className={cn(isPrivacyMode && "privacy-blur")}>
                             <LineChart data={correlationQuery.data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                                 <XAxis
@@ -143,14 +145,14 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [] }
                                                         <div className="h-3 w-3 rounded-full bg-blue-500" />
                                                         <span className="text-sm text-muted-foreground">{cat1}:</span>
                                                         <span className="font-semibold text-blue-500">
-                                                            {formatter.format(data.amount1)}
+                                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.amount1)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <div className="h-3 w-3 rounded-full bg-purple-500" />
                                                         <span className="text-sm text-muted-foreground">{cat2}:</span>
                                                         <span className="font-semibold text-purple-500">
-                                                            {formatter.format(data.amount2)}
+                                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.amount2)}
                                                         </span>
                                                     </div>
                                                 </div>

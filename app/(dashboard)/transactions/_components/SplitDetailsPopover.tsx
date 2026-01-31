@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Split } from "lucide-react";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface SplitType {
     id: string;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 function SplitDetailsPopover({ splits, transactionType }: Props) {
+    const { isPrivacyMode } = usePrivacyMode();
     const userSettings = useQuery({
         queryKey: ["userSettings"],
         queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
@@ -80,7 +82,7 @@ function SplitDetailsPopover({ splits, transactionType }: Props) {
                                                     : "text-emerald-500"
                                             )}
                                         >
-                                            {formatter.format(split.amount)}
+                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(split.amount)}
                                         </div>
                                         <div className="text-[10px] text-muted-foreground">
                                             {percent.toFixed(1)}%

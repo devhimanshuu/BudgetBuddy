@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import {
     Popover,
     PopoverContent,
@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface TransactionHistoryPopoverProps {
     transactionId: string;
@@ -49,6 +50,7 @@ const TransactionHistoryPopover = ({
     currentTagIds,
     currency,
 }: TransactionHistoryPopoverProps) => {
+    const { isPrivacyMode } = usePrivacyMode();
     const [open, setOpen] = useState(false);
     const formatter = GetFormatterForCurrency(currency);
 
@@ -82,7 +84,7 @@ const TransactionHistoryPopover = ({
 
         if (version.amount !== nextVersion.amount) {
             changes.push(
-                `Amount: ${nextVersion.amount} → ${version.amount}`
+                `Amount: ${isPrivacyMode ? GetPrivacyMask(formatter) : nextVersion.amount} → ${isPrivacyMode ? GetPrivacyMask(formatter) : version.amount}`
             );
         }
         if (version.description !== nextVersion.description) {
@@ -153,7 +155,7 @@ const TransactionHistoryPopover = ({
                                             <span className="font-medium">{currentDescription}</span>
                                         </div>
                                         <div className="text-xs text-muted-foreground space-y-0.5">
-                                            <div>Amount: {formatter.format(currentAmount)}</div>
+                                            <div>Amount: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(currentAmount)}</div>
                                             <div>Category: {currentCategoryIcon} {currentCategory}</div>
                                             <div>Date: {format(currentDate, "PPP")}</div>
                                             {currentTagIds.length > 0 && (
@@ -165,9 +167,9 @@ const TransactionHistoryPopover = ({
                                         {history && history.length > 0 && (() => {
                                             const latestHistory = history[0];
                                             const changes: string[] = [];
-                                            
+
                                             if (currentAmount !== latestHistory.amount) {
-                                                changes.push(`Amount: ${formatter.format(latestHistory.amount)} → ${formatter.format(currentAmount)}`);
+                                                changes.push(`Amount: ${isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(latestHistory.amount)} → ${isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(currentAmount)}`);
                                             }
                                             if (currentDescription !== latestHistory.description) {
                                                 changes.push("Description changed");
@@ -239,7 +241,7 @@ const TransactionHistoryPopover = ({
                                                     <span className="font-medium">{version.description}</span>
                                                 </div>
                                                 <div className="text-xs text-muted-foreground space-y-0.5">
-                                                    <div>Amount: {formatter.format(version.amount)}</div>
+                                                    <div>Amount: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(version.amount)}</div>
                                                     <div>Category: {version.categoryIcon} {version.category}</div>
                                                     <div>Date: {format(new Date(version.date), "PPP")}</div>
                                                     {version.tags && version.tags.length > 0 && (

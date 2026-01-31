@@ -1,7 +1,7 @@
-"use client ";
+"use client";
 
 import { getTransactionHistoryResponseType } from "@/app/api/transaction-history/route";
-import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
+import { DateToUTCDate, GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
@@ -53,6 +53,8 @@ import { toast } from "sonner";
 import { DeleteTransaction } from "../_actions/deleteTransaction";
 import TransactionHistoryPopover from "./TransactionHistoryPopover";
 import BulkTagDialog from "./BulkTagDialog";
+
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface Props {
   from: Date;
@@ -233,11 +235,15 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount" />
     ),
-    cell: ({ row }) => (
-      <p className="text-md rounded-lg bg-gray-400/5 p-2 text-center font-medium">
-        {row.original.formattedAmount}
-      </p>
-    ),
+    cell: ({ row, table }) => {
+      const { isPrivacyMode, userSettings } = table.options.meta as any;
+      const formatter = GetFormatterForCurrency(userSettings?.currency || "USD");
+      return (
+        <p className="text-md rounded-lg bg-gray-400/5 p-2 text-center font-medium">
+          {isPrivacyMode ? GetPrivacyMask(formatter) : row.original.formattedAmount}
+        </p>
+      );
+    },
   },
   {
     id: "actions",
@@ -252,6 +258,7 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
 });
 const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => {
+  const { isPrivacyMode } = usePrivacyMode();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({}); // Row selection state
@@ -343,6 +350,7 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
     getPaginationRowModel: getPaginationRowModel(),
     meta: {
       userSettings: userSettings.data,
+      isPrivacyMode,
     },
   });
 

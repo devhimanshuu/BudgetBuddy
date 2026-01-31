@@ -18,6 +18,7 @@ import { FileText } from "lucide-react";
 import { exportAnalyticsToPDF } from "@/lib/pdf-export";
 import { useQuery } from "@tanstack/react-query";
 import TagFilter from "./TagFilter";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface Tag {
   id: string;
@@ -30,6 +31,7 @@ interface AnalyticsContentProps {
 }
 
 export default function AnalyticsContent({ userSettings }: AnalyticsContentProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const [dataRange, setDataRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
     to: new Date(),
@@ -126,6 +128,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             userSettings={userSettings}
             from={dataRange.from}
             to={dataRange.to}
+            isPrivacyMode={isPrivacyMode}
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12 2xl:gap-6 4xl:gap-8">
@@ -136,6 +139,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             to={dataRange.to}
             type="expense"
             tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
           />
           <CategoryBreakdownChart
             userSettings={userSettings}
@@ -143,6 +147,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             to={dataRange.to}
             type="income"
             tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
           />
 
           {/* Line Chart - Trends */}
@@ -151,6 +156,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             from={dataRange.from}
             to={dataRange.to}
             tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
           />
 
           {/* Correlation Analytics */}
@@ -159,6 +165,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             from={dataRange.from}
             to={dataRange.to}
             tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
           />
 
           {/* Heatmap */}
@@ -167,16 +174,18 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             to={dataRange.to}
             userSettings={userSettings}
             tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
           />
 
           {/* Year-over-Year Comparison */}
           <ComparisonChart
             userSettings={userSettings}
             tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
           />
 
           {/* Savings Goals Impact */}
-          <SavingsImpactChart userSettings={userSettings} />
+          <SavingsImpactChart userSettings={userSettings} isPrivacyMode={isPrivacyMode} />
         </div>
       </div>
     </>

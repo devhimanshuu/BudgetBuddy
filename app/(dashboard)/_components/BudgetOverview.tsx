@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -120,8 +120,8 @@ export default function BudgetOverview({ userSettings }: BudgetOverviewProps) {
                   />
                   <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
                     <span>
-                      {isPrivacyMode ? "$******" : formatter.format(budget.spent)} /{" "}
-                      {isPrivacyMode ? "$******" : formatter.format(budget.budgetAmount)}
+                      {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.spent)} /{" "}
+                      {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.budgetAmount)}
                     </span>
                     <span>{isPrivacyMode ? "**%" : `${budget.percentage.toFixed(0)}%`}</span>
                   </div>

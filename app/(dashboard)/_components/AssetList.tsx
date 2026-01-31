@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
@@ -118,7 +118,7 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                                     type === "asset" ? "text-blue-600" : "text-red-600"
                                 )}
                             >
-                                {isPrivacyMode ? "$******" : formatter.format(totalValue)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(totalValue)}
                             </p>
                         </div>
                     </div>
@@ -164,7 +164,7 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
                                                 <p className="text-lg font-bold">
-                                                    {isPrivacyMode ? "$******" : formatter.format(asset.currentValue)}
+                                                    {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(asset.currentValue)}
                                                 </p>
                                                 {trend && (
                                                     <div

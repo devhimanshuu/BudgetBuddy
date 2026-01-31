@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { PieChart } from "lucide-react";
@@ -69,7 +69,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold 3xl:text-lg">
-                        {isPrivacyMode ? "$******" : formatter.format(category.amount)}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(category.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground 3xl:text-sm">
                         {category.percentage.toFixed(1)}% of total
@@ -98,7 +98,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium 3xl:text-base">Total Spending</p>
                   <p className="text-lg font-bold 3xl:text-xl">
-                    {isPrivacyMode ? "$******" : formatter.format(totalAmount)}
+                    {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(totalAmount)}
                   </p>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground 3xl:text-sm">

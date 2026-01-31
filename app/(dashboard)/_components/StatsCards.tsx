@@ -3,7 +3,7 @@
 import { GetBalanceStatsResponseType } from "@/app/api/stats/balance/route";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Card } from "@/components/ui/card";
-import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
+import { DateToUTCDate, GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
@@ -109,7 +109,7 @@ function StatCard({
         <p className="text-muted-foreground 3xl:text-base">{title}</p>
         {privacyMode ? (
           <span className="text-2xl font-bold 3xl:text-3xl">
-            {formatter.format(8888.88).replace(/\d/g, "*")}
+            {GetPrivacyMask(formatter)}
           </span>
         ) : (
           <CountUp

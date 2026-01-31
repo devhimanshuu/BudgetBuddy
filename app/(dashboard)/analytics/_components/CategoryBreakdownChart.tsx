@@ -3,11 +3,12 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { cn } from "@/lib/utils";
 import CategoryDrilldownSheet from "./CategoryDrilldownSheet";
 
 interface CategoryBreakdownProps {
@@ -16,6 +17,7 @@ interface CategoryBreakdownProps {
   to: Date;
   type: "income" | "expense";
   tagIds?: string[];
+  isPrivacyMode?: boolean;
 }
 
 const COLORS = [
@@ -37,6 +39,7 @@ export default function CategoryBreakdownChart({
   to,
   type,
   tagIds = [],
+  isPrivacyMode = false,
 }: CategoryBreakdownProps) {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -83,7 +86,7 @@ export default function CategoryBreakdownChart({
         <SkeletonWrapper isLoading={categoryBreakdownQuery.isFetching}>
           {dataAvailable ? (
             <div className="flex flex-col gap-4">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300} className={cn(isPrivacyMode && "privacy-blur")}>
                 <PieChart>
                   <Pie
                     data={categoryBreakdownQuery.data}
@@ -123,7 +126,7 @@ export default function CategoryBreakdownChart({
                           <div className="mt-2 text-sm">
                             <p className="text-muted-foreground">Amount:</p>
                             <p className="text-lg font-bold">
-                              {formatter.format(data.amount)}
+                              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.amount)}
                             </p>
                             <p className="text-muted-foreground">
                               {((data.amount / total) * 100).toFixed(1)}% of total
@@ -154,7 +157,7 @@ export default function CategoryBreakdownChart({
                         {item.categoryIcon} {item.category}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {formatter.format(item.amount)}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(item.amount)}
                       </p>
                     </div>
                   </div>

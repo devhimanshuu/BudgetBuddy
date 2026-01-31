@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Activity } from "lucide-react";
@@ -91,10 +91,10 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
                         )}
                       >
                         {trend.change > 0 ? "+" : ""}
-                        {isPrivacyMode ? "$******" : formatter.format(Math.abs(trend.change))}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(trend.change))}
                       </p>
                       <p className="text-xs text-muted-foreground 3xl:text-sm">
-                        {isPrivacyMode ? "$******" : formatter.format(trend.currentMonth)}
+                        {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(trend.currentMonth)}
                       </p>
                     </div>
                   </div>

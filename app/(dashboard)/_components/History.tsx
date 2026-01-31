@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { Period, TimeFrame } from "@/lib/type";
 import { UserSettings } from "@prisma/client";
 import React, { useCallback, useMemo, useState } from "react";
@@ -241,7 +241,7 @@ function TooltipRow({
         <p className="text-sm text-muted-foreground">{label}</p>
         <div className={cn("text-sm font-bold", textColor)}>
           {isPrivacyMode ? (
-            <span className="text-sm">****</span>
+            <span className="text-sm">{GetPrivacyMask(formatter, "****")}</span>
           ) : (
             <CountUp
               duration={0.5}

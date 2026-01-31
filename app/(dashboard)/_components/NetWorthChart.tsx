@@ -4,7 +4,7 @@ import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -94,25 +94,25 @@ export default function NetWorthChart({ userSettings }: NetWorthChartProps) {
                                     current.netWorth >= 0 ? "text-emerald-600" : "text-red-600"
                                 )}
                             >
-                                {isPrivacyMode ? "$******" : formatter.format(current.netWorth)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(current.netWorth)}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">Total Assets</p>
                             <p className="text-lg font-semibold text-blue-600 3xl:text-xl">
-                                {isPrivacyMode ? "$******" : formatter.format(current.assets)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(current.assets)}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">Cash Balance</p>
                             <p className="text-lg font-semibold text-emerald-600 3xl:text-xl">
-                                {isPrivacyMode ? "$******" : formatter.format(current.cash)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(current.cash)}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">Liabilities</p>
                             <p className="text-lg font-semibold text-red-600 3xl:text-xl">
-                                {isPrivacyMode ? "$******" : formatter.format(current.liabilities)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(current.liabilities)}
                             </p>
                         </div>
                     </div>
@@ -174,25 +174,25 @@ export default function NetWorthChart({ userSettings }: NetWorthChartProps) {
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-emerald-600">Net Worth:</span>
                                                         <span className="font-semibold">
-                                                            {isPrivacyMode ? "$******" : formatter.format(data.netWorth)}
+                                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.netWorth)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-blue-600">Assets:</span>
                                                         <span className="font-semibold">
-                                                            {isPrivacyMode ? "$******" : formatter.format(data.assets)}
+                                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.assets)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-emerald-600">Cash:</span>
                                                         <span className="font-semibold">
-                                                            {isPrivacyMode ? "$******" : formatter.format(data.cash)}
+                                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.cash)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-red-600">Liabilities:</span>
                                                         <span className="font-semibold">
-                                                            {isPrivacyMode ? "$******" : formatter.format(data.liabilities)}
+                                                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.liabilities)}
                                                         </span>
                                                     </div>
                                                 </div>

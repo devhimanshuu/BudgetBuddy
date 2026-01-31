@@ -3,7 +3,7 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -14,9 +14,10 @@ interface KPICardsProps {
     userSettings: UserSettings;
     from: Date;
     to: Date;
+    isPrivacyMode?: boolean;
 }
 
-export default function KPICards({ userSettings, from, to }: KPICardsProps) {
+export default function KPICards({ userSettings, from, to, isPrivacyMode = false }: KPICardsProps) {
     const formatter = useMemo(() => {
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
@@ -49,7 +50,7 @@ export default function KPICards({ userSettings, from, to }: KPICardsProps) {
 
                     <div className="relative z-20 flex items-end justify-between">
                         <h3 className="text-3xl font-bold bg-gradient-to-br from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent">
-                            {data?.savingsRate?.current.toFixed(1)}%
+                            {isPrivacyMode ? "**.*%" : `${data?.savingsRate?.current.toFixed(1)}%`}
                         </h3>
                         <div className={cn(
                             "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium backdrop-blur-sm",
@@ -58,7 +59,7 @@ export default function KPICards({ userSettings, from, to }: KPICardsProps) {
                                 : "bg-red-500/10 text-red-500"
                         )}>
                             {data?.savingsRate?.change >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-                            <span>{Math.abs(data?.savingsRate?.change || 0).toFixed(1)}%</span>
+                            <span>{isPrivacyMode ? "*.*%" : `${Math.abs(data?.savingsRate?.change || 0).toFixed(1)}%`}</span>
                         </div>
                     </div>
                 </GlassCard>
@@ -80,7 +81,7 @@ export default function KPICards({ userSettings, from, to }: KPICardsProps) {
 
                     <div className="relative z-20 flex items-end justify-between">
                         <h3 className="text-3xl font-bold bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                            {formatter.format(data?.disposableIncome?.current || 0)}
+                            {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data?.disposableIncome?.current || 0)}
                         </h3>
                         <div className={cn(
                             "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium backdrop-blur-sm",
@@ -89,7 +90,7 @@ export default function KPICards({ userSettings, from, to }: KPICardsProps) {
                                 : "bg-red-500/10 text-red-500"
                         )}>
                             {data?.disposableIncome?.change >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-                            <span>{Math.abs(data?.disposableIncome?.change || 0).toFixed(0)}</span>
+                            <span>{isPrivacyMode ? GetPrivacyMask(formatter, "***") : Math.abs(data?.disposableIncome?.change || 0).toFixed(0)}</span>
                         </div>
                     </div>
                 </GlassCard>
@@ -112,7 +113,7 @@ export default function KPICards({ userSettings, from, to }: KPICardsProps) {
                     <div className="relative z-20 flex items-end justify-between">
                         <div className="flex items-baseline gap-1">
                             <h3 className="text-3xl font-bold bg-gradient-to-br from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">
-                                {formatter.format(data?.spendVelocity?.current || 0)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter, "***") : formatter.format(data?.spendVelocity?.current || 0)}
                             </h3>
                             <span className="text-sm font-medium text-muted-foreground">/day</span>
                         </div>
@@ -123,7 +124,7 @@ export default function KPICards({ userSettings, from, to }: KPICardsProps) {
                                 : "bg-red-500/10 text-red-500"
                         )}>
                             {data?.spendVelocity?.change <= 0 ? <TrendingDown className="h-3.5 w-3.5" /> : <TrendingUp className="h-3.5 w-3.5" />}
-                            <span>{Math.abs(data?.spendVelocity?.change || 0).toFixed(1)}%</span>
+                            <span>{isPrivacyMode ? "*.*%" : `${Math.abs(data?.spendVelocity?.change || 0).toFixed(1)}%`}</span>
                         </div>
                     </div>
                 </GlassCard>

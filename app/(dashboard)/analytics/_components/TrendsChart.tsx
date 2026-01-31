@@ -3,7 +3,7 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -18,15 +18,17 @@ import {
   Legend,
 } from "recharts";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface TrendsChartProps {
   userSettings: UserSettings;
   from: Date;
   to: Date;
   tagIds?: string[];
+  isPrivacyMode?: boolean;
 }
 
-export default function TrendsChart({ userSettings, from, to, tagIds = [] }: TrendsChartProps) {
+export default function TrendsChart({ userSettings, from, to, tagIds = [], isPrivacyMode = false }: TrendsChartProps) {
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
@@ -57,7 +59,7 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [] }: Tre
       <CardContent className="relative">
         <SkeletonWrapper isLoading={trendsQuery.isFetching}>
           {dataAvailable ? (
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width="100%" height={400} className={cn(isPrivacyMode && "privacy-blur")}>
               <LineChart data={trendsQuery.data}>
                 <defs>
                   <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -97,7 +99,7 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [] }: Tre
                               Income:
                             </span>
                             <span className="font-semibold text-emerald-500">
-                              {formatter.format(data.income)}
+                              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.income)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -106,7 +108,7 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [] }: Tre
                               Expense:
                             </span>
                             <span className="font-semibold text-red-500">
-                              {formatter.format(data.expense)}
+                              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.expense)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 border-t pt-1">
@@ -118,7 +120,7 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [] }: Tre
                               className={`font-semibold ${data.balance >= 0 ? "text-emerald-500" : "text-red-500"
                                 }`}
                             >
-                              {formatter.format(data.balance)}
+                              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.balance)}
                             </span>
                           </div>
                         </div>

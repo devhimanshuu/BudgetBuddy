@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { PiggyBank, TrendingUp, TrendingDown } from "lucide-react";
@@ -119,7 +119,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Income</span>
               <span className="font-medium">
-                {isPrivacyMode ? "$******" : formatter.format(income)}
+                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(income)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
@@ -130,7 +130,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
                   savings >= 0 ? "text-emerald-600" : "text-red-600"
                 )}
               >
-                {isPrivacyMode ? "$******" : formatter.format(savings)}
+                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(savings)}
               </span>
             </div>
           </div>

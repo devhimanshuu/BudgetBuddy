@@ -2,7 +2,7 @@
 
 import GlassCard from "@/components/GlassCard";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
@@ -77,12 +77,12 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
                 balance >= 0 ? "text-emerald-600" : "text-red-600"
               )}
             >
-              {isPrivacyMode ? "$******" : formatter.format(balance)}
+              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(balance)}
             </p>
             {balanceChange !== 0 && (
               <p className="text-sm text-muted-foreground 3xl:text-base">
                 {balanceChange > 0 ? "+" : ""}
-                {isPrivacyMode ? "$******" : formatter.format(balanceChange)} from last month
+                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(balanceChange)} from last month
               </p>
             )}
           </div>
@@ -92,13 +92,13 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
             <div className="space-y-1 3xl:space-y-2">
               <p className="text-xs text-muted-foreground 3xl:text-sm">Income</p>
               <p className="text-lg font-semibold text-emerald-600 3xl:text-xl">
-                {isPrivacyMode ? "$******" : formatter.format(income)}
+                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(income)}
               </p>
             </div>
             <div className="space-y-1 3xl:space-y-2">
               <p className="text-xs text-muted-foreground 3xl:text-sm">Expenses</p>
               <p className="text-lg font-semibold text-red-600 3xl:text-xl">
-                {isPrivacyMode ? "$******" : formatter.format(expense)}
+                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(expense)}
               </p>
             </div>
           </div>

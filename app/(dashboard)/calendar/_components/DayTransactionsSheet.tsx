@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { format } from "date-fns";
 import { CalendarDayData } from "@/lib/type";
+import { GetPrivacyMask } from "@/lib/helper";
 
 interface DayTransactionsSheetProps {
     open: boolean;
@@ -17,6 +18,7 @@ interface DayTransactionsSheetProps {
     date: Date | null;
     dayData: CalendarDayData | null | undefined;
     formatter: Intl.NumberFormat;
+    isPrivacyMode?: boolean;
 }
 
 export default function DayTransactionsSheet({
@@ -25,6 +27,7 @@ export default function DayTransactionsSheet({
     date,
     dayData,
     formatter,
+    isPrivacyMode = false,
 }: DayTransactionsSheetProps) {
     if (!date) return null;
 
@@ -48,13 +51,13 @@ export default function DayTransactionsSheet({
                             <div className="rounded-lg border bg-emerald-500/10 p-4">
                                 <div className="text-sm text-muted-foreground">Income</div>
                                 <div className="text-2xl font-bold text-emerald-500">
-                                    {formatter.format(dayData.income)}
+                                    {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(dayData.income)}
                                 </div>
                             </div>
                             <div className="rounded-lg border bg-red-500/10 p-4">
                                 <div className="text-sm text-muted-foreground">Expenses</div>
                                 <div className="text-2xl font-bold text-red-500">
-                                    {formatter.format(dayData.expense)}
+                                    {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(dayData.expense)}
                                 </div>
                             </div>
                         </div>
@@ -96,7 +99,7 @@ export default function DayTransactionsSheet({
                                                     </div>
                                                 </div>
                                                 <div className="text-lg font-bold text-emerald-500">
-                                                    +{formatter.format(transaction.amount)}
+                                                    +{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(transaction.amount)}
                                                 </div>
                                             </div>
                                             {transaction.notes && (
@@ -136,7 +139,7 @@ export default function DayTransactionsSheet({
                                                     </div>
                                                 </div>
                                                 <div className="text-lg font-bold text-red-500">
-                                                    -{formatter.format(transaction.amount)}
+                                                    -{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(transaction.amount)}
                                                 </div>
                                             </div>
                                             {transaction.notes && (

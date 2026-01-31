@@ -9,12 +9,13 @@ import {
 } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useMemo } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { TransactionType } from "@/lib/type";
 import { Separator } from "@/components/ui/separator";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface Props {
     open: boolean;
@@ -41,6 +42,7 @@ export default function CategoryDrilldownSheet({
     tagIds,
     userSettings,
 }: Props) {
+    const { isPrivacyMode } = usePrivacyMode();
     const formatter = useMemo(() => {
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
@@ -82,7 +84,7 @@ export default function CategoryDrilldownSheet({
                     <div className="rounded-lg bg-muted p-4">
                         <p className="text-sm text-muted-foreground">Total {type === "expense" ? "Spent" : "Earned"}</p>
                         <p className="text-3xl font-bold">
-                            {category ? formatter.format(category.amount) : "0"}
+                            {isPrivacyMode ? GetPrivacyMask(formatter) : (category ? formatter.format(category.amount) : "0")}
                         </p>
                     </div>
 
@@ -112,7 +114,7 @@ export default function CategoryDrilldownSheet({
                                         <div className="text-right">
                                             <p className={`font-bold ${type === "expense" ? "text-red-500" : "text-emerald-500"}`}>
                                                 {type === "expense" ? "-" : "+"}
-                                                {formatter.format(transaction.amount)}
+                                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(transaction.amount)}
                                             </p>
                                             {transaction.notes && (
                                                 <p className="text-[10px] text-muted-foreground truncate max-w-[100px]">

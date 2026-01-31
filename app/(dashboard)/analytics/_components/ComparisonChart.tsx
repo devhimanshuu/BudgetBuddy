@@ -3,7 +3,7 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -18,13 +18,14 @@ import {
   Legend,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-
+import { cn } from "@/lib/utils";
 interface ComparisonChartProps {
   userSettings: UserSettings;
   tagIds?: string[];
+  isPrivacyMode?: boolean;
 }
 
-export default function ComparisonChart({ userSettings, tagIds = [] }: ComparisonChartProps) {
+export default function ComparisonChart({ userSettings, tagIds = [], isPrivacyMode = false }: ComparisonChartProps) {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
@@ -92,7 +93,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
               {/* Expense Comparison */}
               <div>
                 <h3 className="mb-2 text-lg font-semibold">Expense Comparison</h3>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={300} className={cn(isPrivacyMode && "privacy-blur")}>
                   <BarChart data={comparisonQuery.data}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis dataKey="month" stroke="#888888" fontSize={12} />
@@ -116,7 +117,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
                                   {selectedYear}:
                                 </span>
                                 <span className="font-semibold">
-                                  {formatter.format(data.currentYearExpense)}
+                                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.currentYearExpense)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -125,7 +126,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
                                   {selectedYear - 1}:
                                 </span>
                                 <span className="font-semibold">
-                                  {formatter.format(data.previousYearExpense)}
+                                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.previousYearExpense)}
                                 </span>
                               </div>
                               <div className="border-t pt-1">
@@ -175,7 +176,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
               {/* Income Comparison */}
               <div>
                 <h3 className="mb-2 text-lg font-semibold">Income Comparison</h3>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={300} className={cn(isPrivacyMode && "privacy-blur")}>
                   <BarChart data={comparisonQuery.data}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis dataKey="month" stroke="#888888" fontSize={12} />
@@ -199,7 +200,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
                                   {selectedYear}:
                                 </span>
                                 <span className="font-semibold">
-                                  {formatter.format(data.currentYearIncome)}
+                                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.currentYearIncome)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -208,7 +209,7 @@ export default function ComparisonChart({ userSettings, tagIds = [] }: Compariso
                                   {selectedYear - 1}:
                                 </span>
                                 <span className="font-semibold">
-                                  {formatter.format(data.previousYearIncome)}
+                                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.previousYearIncome)}
                                 </span>
                               </div>
                               <div className="border-t pt-1">

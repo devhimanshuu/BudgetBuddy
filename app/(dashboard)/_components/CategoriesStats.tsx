@@ -5,7 +5,7 @@ import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
+import { DateToUTCDate, GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { TransactionType } from "@/lib/type";
 import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
@@ -114,7 +114,7 @@ function CategoriesCard({
                       </span>
 
                       <span className="text-sm text-gray-400 3xl:text-base">
-                        {privacyMode ? "$******" : formatter.format(amount)}
+                        {privacyMode ? GetPrivacyMask(formatter) : formatter.format(amount)}
                       </span>
                     </div>
 

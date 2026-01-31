@@ -1,6 +1,6 @@
 "use client";
 
-import { GetFormatterForCurrency } from "@/lib/helper";
+import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
                         "font-bold",
                         t.type === 'income' ? 'text-emerald-600' : 'text-red-600'
                      )}>
-                        {t.type === 'income' ? '+' : '-'}{isPrivacyMode ? "$******" : formatter.format(t.amount)}
+                        {t.type === 'income' ? '+' : '-'}{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(t.amount)}
                      </div>
                   </div>
                ))}
