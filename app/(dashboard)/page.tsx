@@ -80,7 +80,7 @@ async function page() {
       </div>
 
       <div className="container py-0 mb-6 4xl:mb-10">
-        <RecentTransactions />
+        <RecentTransactions userSettings={userSettings} />
       </div>
 
       <Overview userSettings={userSettings} />

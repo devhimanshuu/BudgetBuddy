@@ -17,6 +17,7 @@ import { MoreVertical, Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-r
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface AssetListProps {
     userSettings: UserSettings;
@@ -44,6 +45,7 @@ interface Asset {
 }
 
 export default function AssetList({ userSettings, type }: AssetListProps) {
+    const { isPrivacyMode } = usePrivacyMode();
     const queryClient = useQueryClient();
 
     const assetsQuery = useQuery<Asset[]>({
@@ -113,10 +115,11 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                             <p
                                 className={cn(
                                     "text-2xl font-bold 3xl:text-3xl",
-                                    type === "asset" ? "text-blue-600" : "text-red-600"
+                                    type === "asset" ? "text-blue-600" : "text-red-600",
+                                    isPrivacyMode && "privacy-blur"
                                 )}
                             >
-                                {formatter.format(totalValue)}
+                                {isPrivacyMode ? "$******" : formatter.format(totalValue)}
                             </p>
                         </div>
                     </div>
@@ -161,8 +164,11 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
 
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <p className="text-lg font-bold">
-                                                    {formatter.format(asset.currentValue)}
+                                                <p className={cn(
+                                                    "text-lg font-bold",
+                                                    isPrivacyMode && "privacy-blur"
+                                                )}>
+                                                    {isPrivacyMode ? "$******" : formatter.format(asset.currentValue)}
                                                 </p>
                                                 {trend && (
                                                     <div
