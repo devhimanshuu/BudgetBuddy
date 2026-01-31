@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { PieChart } from "lucide-react";
 import { useMemo } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
+import { cn } from "@/lib/utils";
 
 interface TopCategoriesProps {
   userSettings: UserSettings;
@@ -21,6 +23,7 @@ interface CategoryData {
 }
 
 export default function TopCategories({ userSettings }: TopCategoriesProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const categoriesQuery = useQuery<CategoryData[]>({
     queryKey: ["top-categories"],
     queryFn: () => fetch("/api/stats/top-categories").then((res) => res.json()),
@@ -65,8 +68,8 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold 3xl:text-lg">
-                        {formatter.format(category.amount)}
+                      <p className={cn("font-semibold 3xl:text-lg", isPrivacyMode && "privacy-blur")}>
+                        {isPrivacyMode ? "$******" : formatter.format(category.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground 3xl:text-sm">
                         {category.percentage.toFixed(1)}% of total
@@ -82,8 +85,8 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
                           index === 0
                             ? "hsl(var(--chart-1))"
                             : index === 1
-                            ? "hsl(var(--chart-2))"
-                            : "hsl(var(--chart-3))",
+                              ? "hsl(var(--chart-2))"
+                              : "hsl(var(--chart-3))",
                       } as React.CSSProperties
                     }
                   />
@@ -94,8 +97,8 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
               <div className="mt-4 rounded-lg bg-muted p-3 3xl:mt-6 3xl:p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium 3xl:text-base">Total Spending</p>
-                  <p className="text-lg font-bold 3xl:text-xl">
-                    {formatter.format(totalAmount)}
+                  <p className={cn("text-lg font-bold 3xl:text-xl", isPrivacyMode && "privacy-blur")}>
+                    {isPrivacyMode ? "$******" : formatter.format(totalAmount)}
                   </p>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground 3xl:text-sm">

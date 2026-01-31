@@ -6,10 +6,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, LayoutDashboard, PiggyBank, Settings, Wallet, LineChart, Calendar, TrendingUp } from "lucide-react";
+import { Menu, LayoutDashboard, PiggyBank, Settings, Wallet, LineChart, Calendar, TrendingUp, Eye, EyeOff } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeCustomizer } from "./ThemeCustomizer";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { usePrivacyMode } from "./providers/PrivacyProvider";
 
 const Navbar = () => {
   return (
@@ -62,6 +63,7 @@ function MobileNavbar() {
           <LogoMobile />
         </div>
         <div className="flex items-center gap-2">
+          <PrivacyModeToggle />
           <ThemeCustomizer />
           <UserButton
             afterSignOutUrl="/sign-in"
@@ -94,6 +96,7 @@ function DesktopNavbar() {
           </div>
         </div>
         <div className="flex items-center gap-2 3xl:gap-3">
+          <PrivacyModeToggle />
           <ThemeCustomizer />
           <UserButton
             afterSignOutUrl="/sign-in"
@@ -143,6 +146,26 @@ function NavbarItem({
         <div className="absolute -bottom-[2px] left-1/2 hidden h-[2px] w-[80%] -translate-x-1/2 rounded-xl bg-foreground md:block"></div>
       )}
     </div>
+  );
+}
+
+function PrivacyModeToggle() {
+  const { isPrivacyMode, togglePrivacyMode } = usePrivacyMode();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={togglePrivacyMode}
+      title={isPrivacyMode ? "Disable Privacy Mode" : "Enable Privacy Mode"}
+      className="text-muted-foreground hover:text-foreground rounded-full"
+    >
+      {isPrivacyMode ? (
+        <EyeOff className="h-[1.2rem] w-[1.2rem]" />
+      ) : (
+        <Eye className="h-[1.2rem] w-[1.2rem]" />
+      )}
+    </Button>
   );
 }
 

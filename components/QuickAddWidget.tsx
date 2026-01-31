@@ -40,11 +40,11 @@ export default function QuickAddWidget({
                   onAssetClick();
                   setIsOpen(false);
                 }}
-                className="group relative h-12 gap-2 overflow-hidden border-blue-500 bg-blue-600 pr-4 shadow-lg hover:bg-blue-700 hover:shadow-xl rounded-full"
+                className="group relative h-14 gap-3 overflow-hidden border-blue-500 bg-blue-600 pr-5 shadow-lg hover:bg-blue-700 hover:shadow-xl rounded-full 3xl:h-16 3xl:gap-4 3xl:pr-6"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <Coins className="h-5 w-5" />
-                <span className="relative z-10 font-semibold">Add Asset</span>
+                <Coins className="h-6 w-6 3xl:h-7 3xl:w-7" />
+                <span className="relative z-10 font-semibold 3xl:text-lg">Add Asset</span>
               </Button>
             </motion.div>
 
@@ -59,11 +59,11 @@ export default function QuickAddWidget({
                   onIncomeClick();
                   setIsOpen(false);
                 }}
-                className="group relative h-12 gap-2 overflow-hidden border-emerald-500 bg-emerald-600 pr-4 shadow-lg hover:bg-emerald-700 hover:shadow-xl rounded-full"
+                className="group relative h-14 gap-3 overflow-hidden border-emerald-500 bg-emerald-600 pr-5 shadow-lg hover:bg-emerald-700 hover:shadow-xl rounded-full 3xl:h-16 3xl:gap-4 3xl:pr-6"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <Plus className="h-5 w-5" />
-                <span className="relative z-10 font-semibold">Add Income</span>
+                <Plus className="h-6 w-6 3xl:h-7 3xl:w-7" />
+                <span className="relative z-10 font-semibold 3xl:text-lg">Add Income</span>
               </Button>
             </motion.div>
 
@@ -78,11 +78,11 @@ export default function QuickAddWidget({
                   onExpenseClick();
                   setIsOpen(false);
                 }}
-                className="group relative h-12 gap-2 overflow-hidden border-red-500 bg-red-600 pr-4 shadow-lg hover:bg-red-700 hover:shadow-xl rounded-full"
+                className="group relative h-14 gap-3 overflow-hidden border-red-500 bg-red-600 pr-5 shadow-lg hover:bg-red-700 hover:shadow-xl rounded-full 3xl:h-16 3xl:gap-4 3xl:pr-6"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <Plus className="h-5 w-5" />
-                <span className="relative z-10 font-semibold">Add Expense</span>
+                <Plus className="h-6 w-6 3xl:h-7 3xl:w-7" />
+                <span className="relative z-10 font-semibold 3xl:text-lg">Add Expense</span>
               </Button>
             </motion.div>
           </motion.div>
@@ -94,7 +94,7 @@ export default function QuickAddWidget({
         <Button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "group relative h-16 w-16 overflow-hidden rounded-full shadow-2xl transition-all duration-300",
+            "group relative h-20 w-20 overflow-hidden rounded-full shadow-2xl transition-all duration-300 3xl:h-24 3xl:w-24",
             isOpen
               ? "bg-gray-600 hover:bg-gray-700"
               : "bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -109,7 +109,7 @@ export default function QuickAddWidget({
             transition={{ duration: 0.3 }}
             className="relative z-10"
           >
-            <Plus className="h-8 w-8 text-white" />
+            <Plus className="h-10 w-10 text-white 3xl:h-12 3xl:w-12" />
           </motion.div>
 
           {/* Ripple effect */}
