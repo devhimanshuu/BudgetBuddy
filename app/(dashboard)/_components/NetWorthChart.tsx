@@ -91,8 +91,7 @@ export default function NetWorthChart({ userSettings }: NetWorthChartProps) {
                             <p
                                 className={cn(
                                     "text-lg font-bold 3xl:text-xl",
-                                    current.netWorth >= 0 ? "text-emerald-600" : "text-red-600",
-                                    isPrivacyMode && "privacy-blur"
+                                    current.netWorth >= 0 ? "text-emerald-600" : "text-red-600"
                                 )}
                             >
                                 {isPrivacyMode ? "$******" : formatter.format(current.netWorth)}
@@ -100,28 +99,19 @@ export default function NetWorthChart({ userSettings }: NetWorthChartProps) {
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">Total Assets</p>
-                            <p className={cn(
-                                "text-lg font-semibold text-blue-600 3xl:text-xl",
-                                isPrivacyMode && "privacy-blur"
-                            )}>
+                            <p className="text-lg font-semibold text-blue-600 3xl:text-xl">
                                 {isPrivacyMode ? "$******" : formatter.format(current.assets)}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">Cash Balance</p>
-                            <p className={cn(
-                                "text-lg font-semibold text-emerald-600 3xl:text-xl",
-                                isPrivacyMode && "privacy-blur"
-                            )}>
+                            <p className="text-lg font-semibold text-emerald-600 3xl:text-xl">
                                 {isPrivacyMode ? "$******" : formatter.format(current.cash)}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">Liabilities</p>
-                            <p className={cn(
-                                "text-lg font-semibold text-red-600 3xl:text-xl",
-                                isPrivacyMode && "privacy-blur"
-                            )}>
+                            <p className="text-lg font-semibold text-red-600 3xl:text-xl">
                                 {isPrivacyMode ? "$******" : formatter.format(current.liabilities)}
                             </p>
                         </div>
@@ -183,25 +173,25 @@ export default function NetWorthChart({ userSettings }: NetWorthChartProps) {
                                                 <div className="space-y-1 text-sm">
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-emerald-600">Net Worth:</span>
-                                                        <span className={cn("font-semibold", isPrivacyMode && "privacy-blur")}>
+                                                        <span className="font-semibold">
                                                             {isPrivacyMode ? "$******" : formatter.format(data.netWorth)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-blue-600">Assets:</span>
-                                                        <span className={cn("font-semibold", isPrivacyMode && "privacy-blur")}>
+                                                        <span className="font-semibold">
                                                             {isPrivacyMode ? "$******" : formatter.format(data.assets)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-emerald-600">Cash:</span>
-                                                        <span className={cn("font-semibold", isPrivacyMode && "privacy-blur")}>
+                                                        <span className="font-semibold">
                                                             {isPrivacyMode ? "$******" : formatter.format(data.cash)}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <span className="text-red-600">Liabilities:</span>
-                                                        <span className={cn("font-semibold", isPrivacyMode && "privacy-blur")}>
+                                                        <span className="font-semibold">
                                                             {isPrivacyMode ? "$******" : formatter.format(data.liabilities)}
                                                         </span>
                                                     </div>

@@ -118,7 +118,7 @@ export default function BudgetOverview({ userSettings }: BudgetOverviewProps) {
                       "[&>div]:bg-yellow-500"
                     )}
                   />
-                  <div className={cn("flex justify-between text-xs text-muted-foreground 3xl:text-sm", isPrivacyMode && "privacy-blur")}>
+                  <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
                     <span>
                       {isPrivacyMode ? "$******" : formatter.format(budget.spent)} /{" "}
                       {isPrivacyMode ? "$******" : formatter.format(budget.budgetAmount)}

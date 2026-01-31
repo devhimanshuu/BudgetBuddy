@@ -115,8 +115,7 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                             <p
                                 className={cn(
                                     "text-2xl font-bold 3xl:text-3xl",
-                                    type === "asset" ? "text-blue-600" : "text-red-600",
-                                    isPrivacyMode && "privacy-blur"
+                                    type === "asset" ? "text-blue-600" : "text-red-600"
                                 )}
                             >
                                 {isPrivacyMode ? "$******" : formatter.format(totalValue)}
@@ -164,10 +163,7 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
 
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <p className={cn(
-                                                    "text-lg font-bold",
-                                                    isPrivacyMode && "privacy-blur"
-                                                )}>
+                                                <p className="text-lg font-bold">
                                                     {isPrivacyMode ? "$******" : formatter.format(asset.currentValue)}
                                                 </p>
                                                 {trend && (

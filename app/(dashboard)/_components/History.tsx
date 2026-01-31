@@ -239,7 +239,7 @@ function TooltipRow({
       <div className={cn("h-4 w-4 rounded-full", bgColor)} />
       <div className="flex w-full justify-between">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <div className={cn("text-sm font-bold", textColor, isPrivacyMode && "privacy-blur")}>
+        <div className={cn("text-sm font-bold", textColor)}>
           {isPrivacyMode ? (
             <span className="text-sm">****</span>
           ) : (

@@ -74,14 +74,13 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
             <p
               className={cn(
                 "text-4xl font-bold 3xl:text-5xl",
-                balance >= 0 ? "text-emerald-600" : "text-red-600",
-                isPrivacyMode && "privacy-blur"
+                balance >= 0 ? "text-emerald-600" : "text-red-600"
               )}
             >
               {isPrivacyMode ? "$******" : formatter.format(balance)}
             </p>
             {balanceChange !== 0 && (
-              <p className={cn("text-sm text-muted-foreground 3xl:text-base", isPrivacyMode && "privacy-blur")}>
+              <p className="text-sm text-muted-foreground 3xl:text-base">
                 {balanceChange > 0 ? "+" : ""}
                 {isPrivacyMode ? "$******" : formatter.format(balanceChange)} from last month
               </p>
@@ -92,13 +91,13 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
           <div className="grid grid-cols-2 gap-4 3xl:gap-6">
             <div className="space-y-1 3xl:space-y-2">
               <p className="text-xs text-muted-foreground 3xl:text-sm">Income</p>
-              <p className={cn("text-lg font-semibold text-emerald-600 3xl:text-xl", isPrivacyMode && "privacy-blur")}>
+              <p className="text-lg font-semibold text-emerald-600 3xl:text-xl">
                 {isPrivacyMode ? "$******" : formatter.format(income)}
               </p>
             </div>
             <div className="space-y-1 3xl:space-y-2">
               <p className="text-xs text-muted-foreground 3xl:text-sm">Expenses</p>
-              <p className={cn("text-lg font-semibold text-red-600 3xl:text-xl", isPrivacyMode && "privacy-blur")}>
+              <p className="text-lg font-semibold text-red-600 3xl:text-xl">
                 {isPrivacyMode ? "$******" : formatter.format(expense)}
               </p>
             </div>

@@ -113,10 +113,7 @@ function CategoriesCard({
                         </span>
                       </span>
 
-                      <span className={cn(
-                        "text-sm text-gray-400 3xl:text-base",
-                        privacyMode && "privacy-blur"
-                      )}>
+                      <span className="text-sm text-gray-400 3xl:text-base">
                         {privacyMode ? "$******" : formatter.format(amount)}
                       </span>
                     </div>
