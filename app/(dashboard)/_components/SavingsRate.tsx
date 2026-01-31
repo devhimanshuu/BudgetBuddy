@@ -9,6 +9,7 @@ import { PiggyBank, TrendingUp, TrendingDown } from "lucide-react";
 import { useMemo } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
 interface SavingsRateProps {
   userSettings: UserSettings;
@@ -24,6 +25,7 @@ interface SavingsData {
 }
 
 export default function SavingsRate({ userSettings }: SavingsRateProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const savingsQuery = useQuery<SavingsData>({
     queryKey: ["savings-rate"],
     queryFn: () => fetch("/api/stats/savings").then((res) => res.json()),
@@ -79,8 +81,8 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
         <CardContent className="space-y-4">
           {/* Savings Rate Display */}
           <div className="text-center">
-            <p className={cn("text-5xl font-bold", health.color)}>
-              {savingsRate.toFixed(1)}%
+            <p className={cn("text-5xl font-bold", health.color, isPrivacyMode && "privacy-blur")}>
+              {isPrivacyMode ? " --.-%" : `${savingsRate.toFixed(1)}%`}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               of income saved
@@ -98,8 +100,8 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
                 "h-3",
                 savingsRate >= 20 && "[&>div]:bg-emerald-500",
                 savingsRate >= 10 &&
-                  savingsRate < 20 &&
-                  "[&>div]:bg-blue-500",
+                savingsRate < 20 &&
+                "[&>div]:bg-blue-500",
                 savingsRate >= 5 && savingsRate < 10 && "[&>div]:bg-yellow-500",
                 savingsRate > 0 && savingsRate < 5 && "[&>div]:bg-orange-500",
                 savingsRate <= 0 && "[&>div]:bg-red-500"
@@ -116,17 +118,20 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
           <div className="space-y-2 rounded-lg bg-muted p-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Income</span>
-              <span className="font-medium">{formatter.format(income)}</span>
+              <span className={cn("font-medium", isPrivacyMode && "privacy-blur")}>
+                {isPrivacyMode ? "$******" : formatter.format(income)}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Amount Saved</span>
               <span
                 className={cn(
                   "font-medium",
-                  savings >= 0 ? "text-emerald-600" : "text-red-600"
+                  savings >= 0 ? "text-emerald-600" : "text-red-600",
+                  isPrivacyMode && "privacy-blur"
                 )}
               >
-                {formatter.format(savings)}
+                {isPrivacyMode ? "$******" : formatter.format(savings)}
               </span>
             </div>
           </div>

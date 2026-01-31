@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Activity } from "lucide-react";
 import { useMemo } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { cn } from "@/lib/utils";
 
 interface SpendingTrendsProps {
@@ -23,6 +24,7 @@ interface CategoryTrend {
 }
 
 export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const trendsQuery = useQuery<CategoryTrend[]>({
     queryKey: ["spending-trends"],
     queryFn: () => fetch("/api/stats/trends").then((res) => res.json()),
@@ -65,10 +67,11 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
                         <span
                           className={cn(
                             "font-semibold",
-                            trend.change > 0 ? "text-red-600" : "text-emerald-600"
+                            trend.change > 0 ? "text-red-600" : "text-emerald-600",
+                            isPrivacyMode && "privacy-blur"
                           )}
                         >
-                          {Math.abs(trend.changePercent).toFixed(0)}%{" "}
+                          {isPrivacyMode ? "**%" : `${Math.abs(trend.changePercent).toFixed(0)}%`}{" "}
                           {trend.change > 0 ? "more" : "less"}
                         </span>
                         {" vs last month"}
@@ -85,14 +88,15 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
                       <p
                         className={cn(
                           "text-sm font-semibold 3xl:text-base",
-                          trend.change > 0 ? "text-red-600" : "text-emerald-600"
+                          trend.change > 0 ? "text-red-600" : "text-emerald-600",
+                          isPrivacyMode && "privacy-blur"
                         )}
                       >
                         {trend.change > 0 ? "+" : ""}
-                        {formatter.format(Math.abs(trend.change))}
+                        {isPrivacyMode ? "$******" : formatter.format(Math.abs(trend.change))}
                       </p>
-                      <p className="text-xs text-muted-foreground 3xl:text-sm">
-                        {formatter.format(trend.currentMonth)}
+                      <p className={cn("text-xs text-muted-foreground 3xl:text-sm", isPrivacyMode && "privacy-blur")}>
+                        {isPrivacyMode ? "$******" : formatter.format(trend.currentMonth)}
                       </p>
                     </div>
                   </div>

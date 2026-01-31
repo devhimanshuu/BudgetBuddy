@@ -8,6 +8,8 @@ import { UserSettings } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import React, { ReactNode, useCallback, useMemo } from "react";
+import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import CountUp from "react-countup";
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
   userSettings: UserSettings;
 }
 const StatsCards = ({ from, to, userSettings }: Props) => {
+  const { isPrivacyMode } = usePrivacyMode();
   const stateQuery = useQuery<GetBalanceStatsResponseType>({
     queryKey: ["overview", "stats", from.toISOString(), to.toISOString()],
     queryFn: () =>
@@ -43,6 +46,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           icon={
             <TrendingUp className="h-12 w-12 items-center rounded-lg p-2 text-emerald-500 bg-emerald-400/10 3xl:h-14 3xl:w-14" />
           }
+          privacyMode={isPrivacyMode}
         />
       </SkeletonWrapper>
       <SkeletonWrapper isLoading={stateQuery.isFetching}>
@@ -53,6 +57,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           icon={
             <TrendingDown className="h-12 w-12 items-center rounded-lg p-2 text-red-500 bg-red-400/10 3xl:h-14 3xl:w-14" />
           }
+          privacyMode={isPrivacyMode}
         />
       </SkeletonWrapper>
       <SkeletonWrapper isLoading={stateQuery.isFetching}>
@@ -63,6 +68,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           icon={
             <Wallet className="h-12 w-12 items-center rounded-lg p-2 text-violet-500 bg-violet-400/10 3xl:h-14 3xl:w-14" />
           }
+          privacyMode={isPrivacyMode}
         />
       </SkeletonWrapper>
     </div>
@@ -76,11 +82,13 @@ function StatCard({
   value,
   title,
   icon,
+  privacyMode,
 }: {
   formatter: Intl.NumberFormat;
   icon: ReactNode;
   title: String;
   value: number;
+  privacyMode: boolean;
 }) {
   const formatfn = useCallback(
     (value: number) => {
@@ -99,15 +107,21 @@ function StatCard({
       </div>
       <div className="relative z-10 flex flex-col items-start gap-0">
         <p className="text-muted-foreground 3xl:text-base">{title}</p>
-        <CountUp
-          preserveValue
-          redraw={false}
-          end={value}
-          decimals={2}
-          formattingFn={formatfn}
-          className="text-2xl font-bold 3xl:text-3xl"
-          duration={2}
-        />
+        {privacyMode ? (
+          <span className="text-2xl font-bold 3xl:text-3xl privacy-blur">
+            {formatter.format(8888.88).replace(/\d/g, "*")}
+          </span>
+        ) : (
+          <CountUp
+            preserveValue
+            redraw={false}
+            end={value}
+            decimals={2}
+            formattingFn={formatfn}
+            className="text-2xl font-bold 3xl:text-3xl"
+            duration={2}
+          />
+        )}
       </div>
     </Card>
   );

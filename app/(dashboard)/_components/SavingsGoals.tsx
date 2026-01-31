@@ -35,6 +35,7 @@ import {
 import { useMemo, useState } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { cn } from "@/lib/utils";
+import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { toast } from "sonner";
 import { differenceInDays, format } from "date-fns";
 import CreateGoalDialog from "./CreateGoalDialog";
@@ -58,6 +59,7 @@ interface SavingsGoal {
 }
 
 export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
+  const { isPrivacyMode } = usePrivacyMode();
   const [selectedGoal, setSelectedGoal] = useState<SavingsGoal | null>(null);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -156,6 +158,7 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                           formatter={formatter}
                           onUpdate={() => handleUpdateClick(goal)}
                           onDelete={() => handleDeleteClick(goal)}
+                          privacyMode={isPrivacyMode}
                         />
                       ))}
                     </div>
@@ -176,6 +179,7 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                           formatter={formatter}
                           onUpdate={() => handleUpdateClick(goal)}
                           onDelete={() => handleDeleteClick(goal)}
+                          privacyMode={isPrivacyMode}
                         />
                       ))}
                     </div>
@@ -258,11 +262,13 @@ function GoalCard({
   formatter,
   onUpdate,
   onDelete,
+  privacyMode,
 }: {
   goal: SavingsGoal;
   formatter: Intl.NumberFormat;
   onUpdate: () => void;
   onDelete: () => void;
+  privacyMode: boolean;
 }) {
   const progress = (goal.currentAmount / goal.targetAmount) * 100;
   const remaining = goal.targetAmount - goal.currentAmount;
@@ -320,9 +326,9 @@ function GoalCard({
               } as React.CSSProperties
             }
           />
-          <div className="flex justify-between text-xs text-muted-foreground 3xl:text-sm">
-            <span>{formatter.format(goal.currentAmount)}</span>
-            <span>{formatter.format(goal.targetAmount)}</span>
+          <div className={cn("flex justify-between text-xs text-muted-foreground 3xl:text-sm", privacyMode && "privacy-blur")}>
+            <span>{privacyMode ? "$******" : formatter.format(goal.currentAmount)}</span>
+            <span>{privacyMode ? "$******" : formatter.format(goal.targetAmount)}</span>
           </div>
         </div>
 
@@ -330,7 +336,9 @@ function GoalCard({
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-lg bg-muted p-2 3xl:p-3">
             <p className="text-xs text-muted-foreground 3xl:text-sm">Remaining</p>
-            <p className="font-semibold 3xl:text-base">{formatter.format(remaining)}</p>
+            <p className={cn("font-semibold 3xl:text-base", privacyMode && "privacy-blur")}>
+              {privacyMode ? "$******" : formatter.format(remaining)}
+            </p>
           </div>
           <div className="rounded-lg bg-muted p-2 3xl:p-3">
             <p className="text-xs text-muted-foreground 3xl:text-sm">Target Date</p>
