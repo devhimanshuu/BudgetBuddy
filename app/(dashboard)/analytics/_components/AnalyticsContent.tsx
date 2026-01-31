@@ -1,9 +1,5 @@
 "use client";
-
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { MAX_DATE_RANGE_DAYS } from "@/lib/constants";
-import { differenceInDays, startOfMonth } from "date-fns";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { toast } from "sonner";
 import CategoryBreakdownChart from "./CategoryBreakdownChart";
 import TrendsChart from "./TrendsChart";
@@ -12,6 +8,13 @@ import ComparisonChart from "./ComparisonChart";
 import SavingsImpactChart from "./SavingsImpactChart";
 import KPICards from "./KPICards";
 import CorrelationChart from "./CorrelationChart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { UserSettings } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
@@ -32,10 +35,24 @@ interface AnalyticsContentProps {
 
 export default function AnalyticsContent({ userSettings }: AnalyticsContentProps) {
   const { isPrivacyMode } = usePrivacyMode();
-  const [dataRange, setDataRange] = useState<{ from: Date; to: Date }>({
-    from: startOfMonth(new Date()),
-    to: new Date(),
-  });
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
+  const dataRange = useMemo(() => {
+    return {
+      from: new Date(selectedYear, selectedMonth, 1),
+      to: new Date(selectedYear, selectedMonth + 1, 0),
+    };
+  }, [selectedMonth, selectedYear]);
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 3 + i);
+
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   // Get tag IDs for API calls
@@ -92,23 +109,42 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
               selectedTags={selectedTags}
               onTagsChange={setSelectedTags}
             />
-            <DateRangePicker
-              initialDateFrom={dataRange.from}
-              initialDateTo={dataRange.to}
-              showCompare={false}
-              onUpdate={(values) => {
-                const { from, to } = values.range;
+            <div className="flex items-center gap-2">
+              <Select
+                value={selectedMonth.toString()}
+                onValueChange={(value) => setSelectedMonth(parseInt(value))}
+              >
+                <SelectTrigger className="w-[140px] 4xl:w-[180px] 4xl:h-12 4xl:text-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month, index) => {
+                    const isFutureMonth = selectedYear === currentDate.getFullYear() && index > currentDate.getMonth();
+                    return (
+                      <SelectItem key={index} value={index.toString()} disabled={isFutureMonth}>
+                        {month}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
 
-                if (!from || !to) return;
-                if (differenceInDays(to, from) > MAX_DATE_RANGE_DAYS) {
-                  toast.error(
-                    `The selected date range is too big. Max allowed range is ${MAX_DATE_RANGE_DAYS} days`
-                  );
-                  return;
-                }
-                setDataRange({ from, to });
-              }}
-            />
+              <Select
+                value={selectedYear.toString()}
+                onValueChange={(value) => setSelectedYear(parseInt(value))}
+              >
+                <SelectTrigger className="w-[100px] 4xl:w-[140px] 4xl:h-12 4xl:text-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year.toString()} disabled={year > currentDate.getFullYear()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button
               variant="outline"
               onClick={handleExportPDF}
