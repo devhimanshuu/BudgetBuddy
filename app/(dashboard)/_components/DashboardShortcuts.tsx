@@ -11,7 +11,11 @@ import CreateTransactionDialog from "@/app/(dashboard)/_components/CreateTransac
 import CreateAssetDialog from "@/app/(dashboard)/_components/CreateAssetDialog";
 import { CommandPalette } from "@/components/CommandPalette";
 
-export default function DashboardShortcuts() {
+export default function DashboardShortcuts({
+  onQuickAddOpenChange,
+}: {
+  onQuickAddOpenChange?: (isOpen: boolean) => void;
+}) {
   const router = useRouter();
 
   const [showIncomeDialog, setShowIncomeDialog] = useState(false);
@@ -70,6 +74,7 @@ export default function DashboardShortcuts() {
         onIncomeClick={() => setShowIncomeDialog(true)}
         onExpenseClick={() => setShowExpenseDialog(true)}
         onAssetClick={() => setShowAssetDialog(true)}
+        onOpenChange={onQuickAddOpenChange}
       />
 
       <CreateTransactionDialog

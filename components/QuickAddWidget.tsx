@@ -10,17 +10,23 @@ interface QuickAddWidgetProps {
   onIncomeClick: () => void;
   onExpenseClick: () => void;
   onAssetClick: () => void;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export default function QuickAddWidget({
   onIncomeClick,
   onExpenseClick,
   onAssetClick,
+  onOpenChange,
 }: QuickAddWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 3xl:bottom-8 3xl:right-8">
+    <motion.div
+      drag
+      dragMomentum={false}
+      className="fixed bottom-4 right-4 z-40 3xl:bottom-8 3xl:right-8"
+    >
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -89,10 +95,13 @@ export default function QuickAddWidget({
         )}
       </AnimatePresence>
 
-      {/* Main FAB */}
       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
         <Button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            const newState = !isOpen;
+            setIsOpen(newState);
+            onOpenChange?.(newState);
+          }}
           className={cn(
             "group relative h-20 w-20 overflow-hidden rounded-full shadow-2xl transition-all duration-300 3xl:h-24 3xl:w-24",
             isOpen
@@ -116,6 +125,6 @@ export default function QuickAddWidget({
           <div className="absolute inset-0 animate-pulse-soft rounded-full bg-white/10" />
         </Button>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
