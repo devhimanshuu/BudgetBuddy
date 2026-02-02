@@ -263,11 +263,11 @@ export default function LandingPageContent() {
                             <span className="text-foreground font-semibold">CreatedBy</span>
                             <span className="text-purple-500 pl-1">dev</span>
                             <span className="text-blue-500">=</span>
-                            <span className="text-orange-500">"</span>
+                            <span className="text-orange-500">&quot;</span>
                             <Link href="https://www.linkedin.com/in/himanshu-guptaa/" target="_blank" rel="noopener noreferrer" className="hover:underline decoration-orange-500/50 underline-offset-2">
                                 <span className="text-orange-500">Himanshu Gupta</span>
                             </Link>
-                            <span className="text-orange-500">"</span>
+                            <span className="text-orange-500">&quot;</span>
                             <span className="text-blue-500">/&gt;</span>
                         </div>
                     </div>
