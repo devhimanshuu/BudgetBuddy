@@ -72,7 +72,7 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, o
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Navigation">
-          <CommandItem onSelect={() => runCommand(() => router.push("/"))}>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard"))}>
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
             <CommandShortcut>⌘H</CommandShortcut>
