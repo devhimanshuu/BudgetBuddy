@@ -5,6 +5,7 @@ import { startOfMonth } from "date-fns";
 import { X } from "lucide-react";
 import React, { useState } from "react";
 import TransactionTable from "./_components/TransactionTable";
+import { ManageRecurringTransactions } from "./_components/ManageRecurringTransactions";
 import AdvancedSearch, { SearchFilters } from "../_components/AdvancedSearch";
 import { useQuery } from "@tanstack/react-query";
 
@@ -30,6 +31,7 @@ const TransactionPage = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <ManageRecurringTransactions />
             {searchFilters &&
               Object.values(searchFilters).some(
                 (val) =>

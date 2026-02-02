@@ -214,3 +214,24 @@ model AssetHistory {
   @@index([assetId])
   @@index([assetId, date])
 }
+
+model RecurringTransaction {
+  id String @id @default(uuid())
+  userId String
+  amount Float
+  description String
+  type String @default("income") // "income" or "expense"
+  
+  category String
+  categoryIcon String
+  
+  date DateTime // Next due date
+  interval String // "daily", "weekly", "monthly", "yearly"
+  
+  lastProcessed DateTime? 
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
