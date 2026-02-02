@@ -22,7 +22,7 @@ const Navbar = () => {
 };
 
 const items = [
-  { label: "Dashboard", link: "/", icon: <LayoutDashboard className="h-4 w-4" /> },
+  { label: "Dashboard", link: "/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
   { label: "Transactions", link: "/transactions", icon: <Wallet className="h-4 w-4" /> },
   { label: "Budgets", link: "/budgets", icon: <PiggyBank className="h-4 w-4" /> },
   { label: "Assets", link: "/assets", icon: <TrendingUp className="h-4 w-4" /> },
