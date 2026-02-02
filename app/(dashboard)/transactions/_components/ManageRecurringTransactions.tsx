@@ -579,9 +579,9 @@ export function ManageRecurringTransactions() {
                     {transactions?.map((transaction) => (
                         <div
                             key={transaction.id}
-                            className="flex items-center justify-between p-3 border rounded-lg bg-card"
+                            className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg bg-card"
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 mb-2 sm:mb-0">
                                 <span className="text-xl" role="img" aria-label={transaction.category}>
                                     {transaction.categoryIcon}
                                 </span>
@@ -592,15 +592,17 @@ export function ManageRecurringTransactions() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                                 <span className={cn(
                                     "font-bold",
                                     transaction.type === "income" ? "text-emerald-500" : "text-red-500"
                                 )}>
                                     {transaction.type === "income" ? "+" : "-"}{formatter.format(transaction.amount)}
                                 </span>
-                                <EditRecurringDialog transaction={transaction} />
-                                <DeleteRecurringButton id={transaction.id} />
+                                <div className="flex items-center gap-2">
+                                    <EditRecurringDialog transaction={transaction} />
+                                    <DeleteRecurringButton id={transaction.id} />
+                                </div>
                             </div>
                         </div>
                     ))}

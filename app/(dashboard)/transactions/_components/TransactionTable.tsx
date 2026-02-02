@@ -102,6 +102,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         aria-label="Select row"
       />
     ),
+    meta: {
+      className: "hidden md:table-cell",
+    },
     enableSorting: false,
     enableHiding: false,
   },
@@ -141,6 +144,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         )}
       </div>
     ),
+    meta: {
+      className: "hidden xl:table-cell",
+    },
   },
   {
     accessorKey: "tags",
@@ -154,6 +160,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         )}
       </div>
     ),
+    meta: {
+      className: "hidden lg:table-cell",
+    },
   },
   {
     accessorKey: "splits",
@@ -170,6 +179,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         )}
       </div>
     ),
+    meta: {
+      className: "hidden xl:table-cell",
+    },
   },
   {
     accessorKey: "date",
@@ -203,6 +215,9 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         </div>
       );
     },
+    meta: {
+      className: "hidden md:table-cell",
+    },
   },
   {
     accessorKey: "type",
@@ -224,11 +239,17 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         {row.original.type}
       </div>
     ),
+    meta: {
+      className: "hidden md:table-cell",
+    },
   },
   {
     accessorKey: "attachments",
     header: "Attachments",
     cell: ({ row }) => <AttachmentCell transaction={row.original} />,
+    meta: {
+      className: "hidden lg:table-cell",
+    },
   },
   {
     accessorKey: "amount",
@@ -239,7 +260,11 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       const { isPrivacyMode, userSettings } = table.options.meta as any;
       const formatter = GetFormatterForCurrency(userSettings?.currency || "USD");
       return (
-        <p className="text-md rounded-lg bg-gray-400/5 p-2 text-center font-medium">
+        <p className={cn(
+          "text-md rounded-lg p-2 text-center font-medium",
+          row.original.type === "income" && "bg-emerald-400/10 text-emerald-500",
+          row.original.type === "expense" && "bg-red-400/10 text-red-500"
+        )}>
           {isPrivacyMode ? GetPrivacyMask(formatter) : row.original.formattedAmount}
         </p>
       );
@@ -525,7 +550,7 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className={(header.column.columnDef.meta as any)?.className}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -546,7 +571,7 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className={(cell.column.columnDef.meta as any)?.className}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

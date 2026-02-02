@@ -31,7 +31,7 @@ const TransactionPage = () => {
             <p className="text-3xl font-bold ">Transactions history</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <DetectSubscriptionDialog />
             <ManageRecurringTransactions />
             {searchFilters &&

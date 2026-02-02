@@ -57,7 +57,7 @@ export function DetectSubscriptionDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" className="gap-2 text-violet-500 hover:text-violet-600 hover:bg-violet-100">
+                <Button variant="ghost" className="gap-2 text-violet-500 border border-violet-200 hover:text-violet-600 hover:bg-gray-300 hover:border-violet-600">
                     <Sparkles className="h-4 w-4" />
                     Scan for Subscriptions
                 </Button>
