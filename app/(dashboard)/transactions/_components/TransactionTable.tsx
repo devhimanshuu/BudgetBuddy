@@ -103,7 +103,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       />
     ),
     meta: {
-      className: "hidden md:table-cell",
+      className: "",
     },
     enableSorting: false,
     enableHiding: false,
@@ -145,7 +145,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       </div>
     ),
     meta: {
-      className: "hidden xl:table-cell",
+      className: "",
     },
   },
   {
@@ -161,7 +161,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       </div>
     ),
     meta: {
-      className: "hidden lg:table-cell",
+      className: "",
     },
   },
   {
@@ -180,7 +180,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       </div>
     ),
     meta: {
-      className: "hidden xl:table-cell",
+      className: "",
     },
   },
   {
@@ -216,7 +216,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       );
     },
     meta: {
-      className: "hidden md:table-cell",
+      className: "",
     },
   },
   {
@@ -240,7 +240,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
       </div>
     ),
     meta: {
-      className: "hidden md:table-cell",
+      className: "",
     },
   },
   {
@@ -248,7 +248,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     header: "Attachments",
     cell: ({ row }) => <AttachmentCell transaction={row.original} />,
     meta: {
-      className: "hidden lg:table-cell",
+      className: "",
     },
   },
   {

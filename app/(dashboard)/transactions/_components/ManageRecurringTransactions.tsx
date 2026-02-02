@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil } from "lucide-react";
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -556,8 +556,9 @@ export function ManageRecurringTransactions() {
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="ml-auto bg-card hover:bg-muted">
-                    Manage Recurring
+                <Button variant="outline" className="ml-auto bg-card hover:bg-muted gap-2">
+                    <Repeat className="h-4 w-4" />
+                    <span className="hidden sm:inline">Manage Recurring</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[425px] sm:max-w-[600px] overflow-visible">

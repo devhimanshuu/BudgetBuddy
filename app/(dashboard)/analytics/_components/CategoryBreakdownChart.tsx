@@ -70,7 +70,7 @@ export default function CategoryBreakdownChart({
   }, [categoryBreakdownQuery.data]);
 
   return (
-    <GlassCard className="col-span-6">
+    <GlassCard className="col-span-full md:col-span-6">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10" />
 

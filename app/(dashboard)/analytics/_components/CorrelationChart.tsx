@@ -65,7 +65,7 @@ export default function CorrelationChart({ userSettings, from, to, tagIds = [], 
     const dataAvailable = correlationQuery.data && correlationQuery.data.length > 0;
 
     return (
-        <GlassCard className="col-span-12">
+        <GlassCard className="col-span-full">
             {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-indigo-500/10" />
 

@@ -46,7 +46,7 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [], isPri
   const dataAvailable = trendsQuery.data && trendsQuery.data.length > 0;
 
   return (
-    <GlassCard className="col-span-12">
+    <GlassCard className="col-span-full">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-red-500/10" />
 

@@ -85,7 +85,7 @@ export default function AdvancedSearch({
       <SheetTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Search className="h-4 w-4" />
-          Advanced Search
+          <span className="hidden sm:inline">Advanced Search</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">

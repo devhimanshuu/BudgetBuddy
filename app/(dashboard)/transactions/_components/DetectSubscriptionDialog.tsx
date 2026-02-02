@@ -59,7 +59,7 @@ export function DetectSubscriptionDialog() {
             <DialogTrigger asChild>
                 <Button variant="ghost" className="gap-2 text-violet-500 border border-violet-200 hover:text-violet-600 hover:bg-gray-300 hover:border-violet-600">
                     <Sparkles className="h-4 w-4" />
-                    Scan for Subscriptions
+                    <span className="hidden sm:inline">Scan for Subscriptions</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">

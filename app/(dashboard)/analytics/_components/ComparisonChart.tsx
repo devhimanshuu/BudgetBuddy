@@ -46,7 +46,7 @@ export default function ComparisonChart({ userSettings, tagIds = [], isPrivacyMo
   const dataAvailable = comparisonQuery.data && comparisonQuery.data.length > 0;
 
   return (
-    <GlassCard className="col-span-12">
+    <GlassCard className="col-span-full">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-teal-500/10" />
 

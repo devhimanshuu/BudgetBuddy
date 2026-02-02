@@ -32,7 +32,7 @@ export default function SavingsImpactChart({ userSettings, isPrivacyMode = false
     const avgMonthlySavings = data?.avgMonthlySavings || 0;
 
     return (
-        <GlassCard className="col-span-12">
+        <GlassCard className="col-span-full">
             {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-indigo-500/10" />
 

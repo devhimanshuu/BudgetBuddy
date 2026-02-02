@@ -65,7 +65,7 @@ export default function HeatmapChart({ from, to, userSettings, tagIds = [], isPr
   ];
 
   return (
-    <GlassCard className="col-span-12">
+    <GlassCard className="col-span-full">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-orange-500/10 to-yellow-500/10" />
 
