@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import React, { useState } from "react";
 import TransactionTable from "./_components/TransactionTable";
 import { ManageRecurringTransactions } from "./_components/ManageRecurringTransactions";
+import { DetectSubscriptionDialog } from "./_components/DetectSubscriptionDialog";
 import AdvancedSearch, { SearchFilters } from "../_components/AdvancedSearch";
 import { useQuery } from "@tanstack/react-query";
 
@@ -31,6 +32,7 @@ const TransactionPage = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <DetectSubscriptionDialog />
             <ManageRecurringTransactions />
             {searchFilters &&
               Object.values(searchFilters).some(

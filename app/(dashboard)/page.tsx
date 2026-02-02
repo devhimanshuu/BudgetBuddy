@@ -14,6 +14,7 @@ import SavingsRate from "./_components/SavingsRate";
 import SavingsGoals from "./_components/SavingsGoals";
 import RecentTransactions from "./_components/RecentTransactions";
 import { DueTransactionsPopup } from "./_components/DueTransactionsPopup";
+import { SubscriptionAlerts } from "./_components/SubscriptionAlerts";
 
 async function page() {
   const user = await currentUser();
@@ -65,6 +66,7 @@ async function page() {
       </div>
       {/* Dashboard Widgets */}
       <div className="container py-6 4xl:py-10">
+        <SubscriptionAlerts />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 2xl:gap-6 4xl:gap-8">
           <div className="md:col-span-2 3xl:col-span-1">
             <NetWorthCard userSettings={userSettings} />

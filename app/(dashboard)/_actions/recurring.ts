@@ -308,3 +308,160 @@ export async function SkipRecurringTransaction(id: string) {
 
 	revalidatePath("/");
 }
+
+export interface SuspectedSubscription {
+	description: string;
+	amount: number;
+	interval: RecurringInterval;
+	type: "income" | "expense";
+	category: string;
+	categoryIcon: string;
+	nextDate: Date;
+	confidence: number; // 0-1 score
+}
+
+export async function DetectRecurringTransactions(): Promise<
+	SuspectedSubscription[]
+> {
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
+
+	// 1. Fetch recent transactions (last 6 months)
+	const sixMonthsAgo = new Date();
+	sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+	const transactions = await prisma.transaction.findMany({
+		where: {
+			userId: user.id,
+			date: { gte: sixMonthsAgo },
+		},
+		orderBy: { date: "desc" },
+	});
+
+	// 2. Group by description (normalized)
+	const groups: Record<string, typeof transactions> = {};
+	for (const tx of transactions) {
+		const key = tx.description.toLowerCase().trim();
+		if (!groups[key]) groups[key] = [];
+		groups[key].push(tx);
+	}
+
+	const candidates: SuspectedSubscription[] = [];
+
+	// 3. Analyze groups
+	for (const [key, txs] of Object.entries(groups)) {
+		if (txs.length < 2) continue;
+
+		// Sort by date desc (already sorted but just to be safe)
+		txs.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+		// Check if amounts are consistent (most recent ones)
+		// We allow detecting even if price changed, but for now let's stick to consistent amount
+		// or ensure the most recent 2-3 are same.
+		const recentAmount = txs[0].amount;
+		// Check if at least 70% of transactions have this amount
+		const sameAmountCount = txs.filter(
+			(t) => Math.abs(t.amount - recentAmount) < 0.01,
+		).length;
+		if (sameAmountCount / txs.length < 0.7) continue;
+
+		// Calculate intervals
+		const intervals: number[] = [];
+		for (let i = 0; i < txs.length - 1; i++) {
+			const diffTime = Math.abs(
+				txs[i].date.getTime() - txs[i + 1].date.getTime(),
+			);
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			intervals.push(diffDays);
+		}
+
+		if (intervals.length === 0) continue;
+
+		const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+
+		// Determine if it matches a standard interval
+		let interval: RecurringInterval | null = null;
+		let confidence = 0.5;
+
+		// Daily: ~1 day
+		if (Math.abs(avgInterval - 1) < 0.2) {
+			interval = "daily";
+			confidence = 0.9;
+		}
+		// Weekly: ~7 days
+		else if (Math.abs(avgInterval - 7) < 2) {
+			interval = "weekly";
+			confidence = 0.8;
+		}
+		// Monthly: ~30 days (28-31)
+		else if (Math.abs(avgInterval - 30) < 5) {
+			interval = "monthly";
+			confidence = 0.85;
+		}
+		// Yearly: ~365 days
+		else if (Math.abs(avgInterval - 365) < 10) {
+			interval = "yearly";
+			confidence = 0.9;
+		}
+
+		if (interval) {
+			// Predict next date
+			const lastDate = txs[0].date;
+			const nextDate = calculateNextDate(lastDate, interval);
+
+			// Check if it's already in recurring transactions
+			// We do this check later or here? Better later to fetch once.
+
+			candidates.push({
+				description: txs[0].description, // Use original case
+				amount: recentAmount,
+				interval,
+				type: txs[0].type as "income" | "expense",
+				category: txs[0].category,
+				categoryIcon: txs[0].categoryIcon,
+				nextDate,
+				confidence,
+			});
+		}
+	}
+
+	// 4. Filter out existing subscriptions
+	const existing = await prisma.recurringTransaction.findMany({
+		where: { userId: user.id },
+	});
+
+	const existingMap = new Set(
+		existing.map((e) => e.description.toLowerCase().trim()),
+	);
+
+	return candidates.filter(
+		(c) => !existingMap.has(c.description.toLowerCase().trim()),
+	);
+}
+
+export async function GetUpcomingRecurringTransactions(days: number = 3) {
+	const user = await currentUser();
+	if (!user) throw new Error("User not authenticated");
+
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	const future = new Date(today);
+	future.setDate(future.getDate() + days);
+
+	// Fetch recurring transactions due on or before target date
+	// We filter locally or in query.
+	return await prisma.recurringTransaction.findMany({
+		where: {
+			userId: user.id,
+			date: {
+				lte: future,
+			},
+		},
+		orderBy: {
+			date: "asc",
+		},
+	});
+}
