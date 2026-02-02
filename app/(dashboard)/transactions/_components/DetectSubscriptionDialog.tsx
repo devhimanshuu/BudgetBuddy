@@ -91,7 +91,7 @@ export function DetectSubscriptionDialog() {
                     {!isLoading && candidates?.length === 0 && (
                         <div className="text-center py-8 text-muted-foreground">
                             <p>No new potential subscriptions found.</p>
-                            <p className="text-sm mt-1">We'll keep looking!</p>
+                            <p className="text-sm mt-1">We&apos;ll keep looking!</p>
                         </div>
                     )}
 
