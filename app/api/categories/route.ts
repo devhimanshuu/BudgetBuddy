@@ -32,25 +32,32 @@ export async function GET(request: Request) {
 		},
 	});
 
-	// Get transaction counts for each category
-	const categoriesWithCounts = await Promise.all(
-		categories.map(async (category) => {
-			const transactionCount = await prisma.transaction.count({
-				where: {
-					userId: user.id,
-					category: category.name,
-					type: category.type,
-				},
-			});
+	// Get transaction counts for all categories in one query using groupBy
+	const transactionCounts = await prisma.transaction.groupBy({
+		by: ["category", "type"],
+		where: {
+			userId: user.id,
+			...(type && { type }),
+		},
+		_count: {
+			_all: true,
+		},
+	});
 
-			return {
-				...category,
-				_count: {
-					transactions: transactionCount,
-				},
-			};
-		}),
-	);
+	// Map counts to categories in memory
+	const categoriesWithCounts = categories.map((category) => {
+		const countObj = transactionCounts.find(
+			(c) => c.category === category.name && c.type === category.type,
+		);
+		const count = countObj ? countObj._count._all : 0;
+
+		return {
+			...category,
+			_count: {
+				transactions: count,
+			},
+		};
+	});
 
 	return Response.json(categoriesWithCounts);
 }

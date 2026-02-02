@@ -53,6 +53,8 @@ model Transaction {
   
   @@index([userId, date])
   @@index([userId, category])
+  @@index([userId, type, date]) // Optimize "Get all expenses for month"
+  @@index([userId, date, type]) // Optimize date range + type filtering
 }
 
 model Tag {
@@ -101,6 +103,7 @@ model MonthlyHistory {
   expense Float
 
   @@id([day, month, year, userId])
+  @@index([userId, month, year]) // Optimize stats/dashboard queries
 }
 
 model YearHistory {
