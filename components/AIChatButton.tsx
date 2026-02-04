@@ -22,7 +22,7 @@ export function AIChatButton({ open, onOpenChange }: AIChatButtonProps) {
         <motion.div
             drag
             dragMomentum={false}
-            className="fixed bottom-32 right-6 z-50 flex flex-col items-end"
+            className="fixed bottom-32 right-6 z-50 flex flex-col items-end 2xl:bottom-36 2xl:right-8 3xl:bottom-40 3xl:right-10 4xl:bottom-52 4xl:right-14"
         >
             <AIChatWindow isOpen={isOpen} onClose={() => setIsOpen(false)} />
 
@@ -40,9 +40,9 @@ export function AIChatButton({ open, onOpenChange }: AIChatButtonProps) {
                             <Button
                                 onClick={() => setIsOpen(!isOpen)}
                                 size="icon"
-                                className="rounded-full h-16 w-16 bg-background border-2 border-primary/20 hover:border-primary/50 text-foreground relative shadow-2xl"
+                                className="rounded-full h-16 w-16 bg-background border-2 border-primary/20 hover:border-primary/50 text-foreground relative shadow-2xl 2xl:h-18 2xl:w-18 3xl:h-20 3xl:w-20 4xl:h-24 4xl:w-24"
                             >
-                                <Bot className="h-8 w-8 text-primary" />
+                                <Bot className="h-8 w-8 text-primary 2xl:h-9 2xl:w-9 3xl:h-10 3xl:w-10 4xl:h-12 4xl:w-12" />
                             </Button>
 
                             {/* Notification Badge (optional) */}

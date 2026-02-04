@@ -1,12 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import FeatureCard from "@/components/landing/FeatureCard";
 import { motion } from "framer-motion";
+import { MovingBorder } from "@/components/landing/MovingBorder";
 
 import { ThemeSwitcherBtn } from "@/components/ThemeSwitcherBtn";
 
@@ -17,7 +18,7 @@ export default function LandingPageContent() {
 
             {/* Navbar */}
             <header className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/40 backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-background/20">
-                <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+                <div className="container flex h-16 items-center justify-between px-4 md:px-6 3xl:h-24 4xl:h-32 3xl:px-12 4xl:px-20">
                     <div className="flex items-center gap-2">
                         <Logo />
                     </div>
@@ -39,7 +40,7 @@ export default function LandingPageContent() {
 
             <main className="flex-1 relative z-10">
                 {/* Hero Section */}
-                <section className="relative overflow-visible pt-20 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32">
+                <section className="relative overflow-visible pt-20 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32 3xl:pt-60 3xl:pb-48 4xl:pt-72 4xl:pb-60">
                     {/* Background Gradients */}
                     <div className="absolute top-0 left-1/2 -z-10 h-[600px] w-full -translate-x-1/2 blur-[120px] pointer-events-none opacity-70 dark:opacity-20 bg-gradient-to-tr from-indigo-500/30 via-purple-500/30 to-amber-500/30 dark:from-primary/40 dark:via-purple-500/20 dark:to-amber-500/10" />
 
@@ -47,11 +48,23 @@ export default function LandingPageContent() {
                         <div className="flex flex-col items-center space-y-8 text-center">
                             <div className="space-y-4 max-w-4xl relative">
                                 {/* Floating Elements */}
-                                <div className="absolute -top-12 -left-12 opacity-50 animate-bounce delay-1000 hidden lg:block">
-                                    <Coins className="w-12 h-12 text-amber-500 rotate-12" />
+                                <div className="absolute -top-12 -left-12 opacity-30 animate-float hidden lg:block">
+                                    <Coins className="w-12 h-12 text-amber-500" />
                                 </div>
-                                <div className="absolute -bottom-8 -right-12 opacity-50 animate-bounce delay-700 hidden lg:block">
-                                    <PieChart className="w-10 h-10 text-emerald-500 -rotate-12" />
+                                <div className="absolute -bottom-16 -right-16 opacity-30 animate-float hidden lg:block" style={{ animationDelay: '1s' }}>
+                                    <PieChart className="w-14 h-14 text-emerald-500" />
+                                </div>
+                                <div className="absolute top-20 -right-24 opacity-20 animate-float hidden xl:block" style={{ animationDelay: '2s' }}>
+                                    <TrendingUp className="w-16 h-16 text-blue-500" />
+                                </div>
+                                <div className="absolute -bottom-24 -left-20 opacity-20 animate-float hidden xl:block" style={{ animationDelay: '3s' }}>
+                                    <Wallet className="w-12 h-12 text-purple-500" />
+                                </div>
+                                <div className="absolute top-1/2 -left-16 opacity-30 animate-float hidden xl:block" style={{ animationDelay: '4s' }}>
+                                    <CreditCard className="w-10 h-10 text-rose-500/80" />
+                                </div>
+                                <div className="absolute top-10/4 -right-20 opacity-30 animate-float hidden xl:block" style={{ animationDelay: '1.5s' }}>
+                                    <Sparkles className="w-12 h-12 text-amber-300/80" />
                                 </div>
 
                                 <motion.div
@@ -59,11 +72,15 @@ export default function LandingPageContent() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5 }}
                                 >
-                                    <div className="inline-flex items-center rounded-full border border-border/40 bg-muted/50 px-3 py-1 text-sm font-medium text-emerald-500 border-emerald-500 mb-6 backdrop-blur-sm">
+                                    <MovingBorder
+                                        duration={3500}
+                                        containerClassName="w-48 h-9 mb-6 mx-auto"
+                                        className="text-emerald-500 font-medium flex items-center justify-center px-4"
+                                    >
                                         <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
                                         AI Financial Analyst
-                                    </div>
-                                    <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-sm text-foreground">
+                                    </MovingBorder>
+                                    <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl 3xl:text-8xl 4xl:text-[10rem] drop-shadow-sm text-foreground">
                                         Master Your Money <br />
                                         <motion.span
                                             initial={{ backgroundPosition: "0% 50%" }}
@@ -80,7 +97,7 @@ export default function LandingPageContent() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.2 }}
-                                    className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl leading-relaxed"
+                                    className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl 3xl:max-w-[1000px] 4xl:max-w-[1300px] leading-relaxed"
                                 >
                                     Unlock the full potential of your finances. Precise tracking, intelligent forecasting, and personalized insights to help you <span className="text-primary font-semibold">build wealth faster</span>.
                                 </motion.p>
@@ -89,15 +106,15 @@ export default function LandingPageContent() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.4 }}
-                                className="flex flex-col gap-4 min-[400px]:flex-row pt-4"
+                                className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-4 pt-4 w-full px-6 sm:px-0"
                             >
-                                <Link href="/sign-up">
-                                    <Button size="lg" className="h-14 px-8 text-lg font-bold shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-indigo-600 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 rounded-full">
-                                        Start for Free <ArrowRight className="ml-2 h-5 w-5" />
+                                <Link href="/sign-up" className="w-auto">
+                                    <Button size="lg" className="h-11 px-8 min-w-[200px] text-sm md:h-14 md:px-8 md:text-lg font-bold shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-indigo-600 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 rounded-full 3xl:h-20 3xl:px-12 3xl:text-2xl 4xl:h-24 4xl:px-16 4xl:text-3xl">
+                                        Start for Free <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 3xl:h-8 3xl:w-8" />
                                     </Button>
                                 </Link>
-                                <Link href="#features">
-                                    <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-border/40 bg-muted/50 hover:bg-muted text-foreground transition-all">
+                                <Link href="#features" className="w-auto">
+                                    <Button size="lg" variant="outline" className="h-11 px-8 min-w-[200px] text-sm md:h-14 md:px-8 md:text-lg rounded-full border-border/40 bg-muted/50 hover:bg-muted text-foreground transition-all 3xl:h-20 3xl:px-12 3xl:text-2xl 4xl:h-24 4xl:px-16 4xl:text-3xl">
                                         Explore Features
                                     </Button>
                                 </Link>
@@ -105,8 +122,8 @@ export default function LandingPageContent() {
                         </div>
 
                         {/* Dashboard Preview Mockup */}
-                        <div className="relative mt-20 w-full max-w-6xl perspective-1000 group">
-                            <div className="rounded-xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-md lg:p-4 transform transition-transform duration-700 hover:rotate-x-2">
+                        <div className="relative mx-auto mt-20 md:mt-32 3xl:mt-40 4xl:mt-52 w-full max-w-6xl 3xl:max-w-[1400px] 4xl:max-w-[1800px] perspective-1000 group">
+                            <div className="rounded-xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-md lg:p-4 3xl:p-8 4xl:p-12 transform transition-transform duration-700 hover:rotate-x-2">
                                 <div className="aspect-[16/9] overflow-hidden rounded-lg border border-border/50 bg-background shadow-inner relative">
                                     {/* Abstract Representation of Dashboard for faster LCP */}
                                     <div className="grid h-full grid-cols-4 grid-rows-3 gap-4 p-6 opacity-90 overflow-hidden">
@@ -118,7 +135,7 @@ export default function LandingPageContent() {
                                         </div>
                                         <div className="col-span-3 row-span-2 rounded-lg bg-muted/50 border border-border/40 flex items-center justify-center relative overflow-hidden group-hover:border-primary/30 transition-colors">
                                             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-200%] group-hover:animate-shine" />
-                                            <p className="text-muted-foreground/30 font-medium text-2xl">Financial Dashboard Preview</p>
+                                            <p className="text-muted-foreground/30 font-medium text-2xl 3xl:text-4xl 4xl:text-6xl text-center px-4">Financial Dashboard Preview</p>
                                         </div>
                                     </div>
                                 </div>
@@ -135,47 +152,47 @@ export default function LandingPageContent() {
                         <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary mb-4">
                             Features
                         </div>
-                        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4 text-foreground">
+                        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl mb-4 text-foreground">
                             Everything you need to grow
                         </h2>
-                        <p className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto">
+                        <p className="mt-4 text-xl 3xl:text-3xl 4xl:text-4xl text-muted-foreground max-w-2xl 3xl:max-w-4xl mx-auto pl-2 pr-2">
                             Detailed analytics, privacy by default, and AI-driven insights wrapped in a beautiful interface.
                         </p>
                     </div>
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5">
                         <FeatureCard
                             delay={0.1}
-                            icon={<Zap className="h-6 w-6" />}
+                            icon={<Zap className="h-full w-full" />}
                             title="AI Financial Analyst"
                             description="Chat with your finances. Ask questions like 'How much did I spend on food this month?' and get instant answers."
                         />
                         <FeatureCard
                             delay={0.2}
-                            icon={<BarChart3 className="h-6 w-6" />}
+                            icon={<BarChart3 className="h-full w-full" />}
                             title="Smart Analytics"
                             description="Visualize your spending patterns with beautiful heatmaps, trend lines, and category breakdowns."
                         />
                         <FeatureCard
                             delay={0.3}
-                            icon={<Shield className="h-6 w-6" />}
+                            icon={<Shield className="h-full w-full" />}
                             title="Bank-Grade Privacy"
                             description="Your data is yours. We use advanced encryption and offer a Privacy Mode to mask sensitive numbers in public."
                         />
                         <FeatureCard
                             delay={0.4}
-                            icon={<PieChart className="h-6 w-6" />}
+                            icon={<PieChart className="h-full w-full" />}
                             title="Budgeting Made Easy"
                             description="Set monthly budgets for categories and track your progress in real-time to avoid overspending."
                         />
                         <FeatureCard
                             delay={0.5}
-                            icon={<Smartphone className="h-6 w-6" />}
+                            icon={<Smartphone className="h-full w-full" />}
                             title="Mobile First Design"
                             description="Manage your money on the go with our fully responsive interface designed for any device."
                         />
                         <FeatureCard
                             delay={0.6}
-                            icon={<Lock className="h-6 w-6" />}
+                            icon={<Lock className="h-full w-full" />}
                             title="Secure Authentication"
                             description="Powered by Clerk for seamless and secure sign-in options including Google, GitHub, and more."
                         />
@@ -189,42 +206,42 @@ export default function LandingPageContent() {
                             <div className="inline-block rounded-lg bg-blue-500/10 px-3 py-1 text-sm text-blue-500 mb-4">
                                 Process
                             </div>
-                            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">How BudgetBuddy Works</h2>
-                            <p className="mt-4 text-xl text-muted-foreground">Simple steps to financial freedom.</p>
+                            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl 3xl:text-7xl 4xl:text-8xl text-foreground">How BudgetBuddy Works</h2>
+                            <p className="mt-4 text-xl 3xl:text-3xl 4xl:text-4xl text-muted-foreground">Simple steps to financial freedom.</p>
                         </div>
 
                         <div className="grid gap-8 md:grid-cols-3 relative">
                             {/* Connector Line (Desktop) */}
-                            <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent border-t border-dashed border-border/40" />
+                            <div className="hidden md:block absolute top-10 3xl:top-16 4xl:top-20 left-[16%] right-[16%] h-px border-t-2 border-dashed border-primary/30 z-0" />
 
                             <div className="flex flex-col items-center text-center relative z-10">
-                                <div className="w-24 h-24 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
+                                <div className="w-20 h-20 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
                                     <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <span className="text-3xl font-bold text-foreground group-hover:scale-110 transition-transform">1</span>
-                                    <div className="absolute -bottom-2 bg-purple-500 text-xs font-bold px-2 py-0.5 rounded text-white">STEP</div>
+                                    <span className="text-3xl 3xl:text-5xl 4xl:text-6xl font-bold text-foreground group-hover:scale-110 transition-transform">1</span>
+                                    <div className="absolute -bottom-2 bg-purple-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">STEP</div>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-2">Create Account</h3>
-                                <p className="text-muted-foreground">Simply sign up and manually input or import your financial data securely.</p>
+                                <h3 className="text-xl 3xl:text-3xl 4xl:text-4xl font-bold text-foreground mb-2">Create Account</h3>
+                                <p className="text-muted-foreground 3xl:text-xl 4xl:text-2xl">Simply sign up and manually input or import your financial data securely.</p>
                             </div>
 
                             <div className="flex flex-col items-center text-center relative z-10">
-                                <div className="w-24 h-24 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
+                                <div className="w-20 h-20 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
                                     <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <span className="text-3xl font-bold text-foreground group-hover:scale-110 transition-transform">2</span>
-                                    <div className="absolute -bottom-2 bg-blue-500 text-xs font-bold px-2 py-0.5 rounded text-white">STEP</div>
+                                    <span className="text-3xl 3xl:text-5xl 4xl:text-6xl font-bold text-foreground group-hover:scale-110 transition-transform">2</span>
+                                    <div className="absolute -bottom-2 bg-blue-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">STEP</div>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-2">Analyze Spending</h3>
-                                <p className="text-muted-foreground">Our AI analyzes your transactions to categorize them and find savings.</p>
+                                <h3 className="text-xl 3xl:text-3xl 4xl:text-4xl font-bold text-foreground mb-2">Analyze Spending</h3>
+                                <p className="text-muted-foreground 3xl:text-xl 4xl:text-2xl">Our AI analyzes your transactions to categorize them and find savings.</p>
                             </div>
 
                             <div className="flex flex-col items-center text-center relative z-10">
-                                <div className="w-24 h-24 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
+                                <div className="w-20 h-20 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
                                     <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <span className="text-3xl font-bold text-foreground group-hover:scale-110 transition-transform">3</span>
-                                    <div className="absolute -bottom-2 bg-emerald-500 text-xs font-bold px-2 py-0.5 rounded text-white">STEP</div>
+                                    <span className="text-3xl 3xl:text-5xl 4xl:text-6xl font-bold text-foreground group-hover:scale-110 transition-transform">3</span>
+                                    <div className="absolute -bottom-2 bg-emerald-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">STEP</div>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-2">Achieve Goals</h3>
-                                <p className="text-muted-foreground">Set budgets, track limits, and watch your savings grow over time.</p>
+                                <h3 className="text-xl 3xl:text-3xl 4xl:text-4xl font-bold text-foreground mb-2">Achieve Goals</h3>
+                                <p className="text-muted-foreground 3xl:text-xl 4xl:text-2xl">Set budgets, track limits, and watch your savings grow over time.</p>
                             </div>
                         </div>
                     </div>
@@ -236,12 +253,12 @@ export default function LandingPageContent() {
                     <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
                     <div className="container px-4 md:px-6 relative z-10">
                         <div className="flex flex-col items-center space-y-4 text-center">
-                            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-foreground">Ready to take control?</h2>
-                            <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
+                            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">Ready to take control?</h2>
+                            <p className="mx-auto max-w-[600px] 3xl:max-w-[900px] text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl">
                                 Be one of the first to master their financial life with Budget Buddy.
                             </p>
                             <Link href="/sign-up">
-                                <Button size="lg" className="h-14 mt-6 px-10 text-lg font-bold shadow-2xl bg-foreground text-background hover:bg-foreground/90 rounded-full transition-transform hover:scale-105">
+                                <Button size="lg" className="h-14 mt-6 px-10 text-lg font-bold shadow-2xl bg-foreground text-background hover:bg-foreground/90 rounded-full transition-transform hover:scale-105 3xl:h-20 3xl:px-16 3xl:text-2xl 4xl:h-24 4xl:px-20 4xl:text-3xl">
                                     Create Free Account
                                 </Button>
                             </Link>
