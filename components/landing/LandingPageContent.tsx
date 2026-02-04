@@ -49,23 +49,23 @@ export default function LandingPageContent() {
                         <div className="flex flex-col items-center space-y-8 text-center">
                             <div className="space-y-4 max-w-4xl relative">
                                 {/* Floating Elements */}
-                                <div className="absolute -top-12 -left-12 opacity-30 animate-float hidden lg:block">
-                                    <Coins className="w-12 h-12 text-amber-500" />
+                                <div className="absolute -top-6 -left-4 md:-top-12 md:-left-12 opacity-30 animate-float">
+                                    <Coins className="w-8 h-8 md:w-12 md:h-12 text-amber-500" />
                                 </div>
-                                <div className="absolute -bottom-16 -right-16 opacity-30 animate-float hidden lg:block" style={{ animationDelay: '1s' }}>
-                                    <PieChart className="w-14 h-14 text-emerald-500" />
+                                <div className="absolute -bottom-10 -right-4 md:-bottom-16 md:-right-16 opacity-30 animate-float" style={{ animationDelay: '1s' }}>
+                                    <PieChart className="w-10 h-10 md:w-14 md:h-14 text-emerald-500" />
                                 </div>
-                                <div className="absolute top-20 -right-24 opacity-20 animate-float hidden xl:block" style={{ animationDelay: '2s' }}>
-                                    <TrendingUp className="w-16 h-16 text-blue-500" />
+                                <div className="absolute top-10 -right-8 md:top-20 md:-right-24 opacity-20 animate-float" style={{ animationDelay: '2s' }}>
+                                    <TrendingUp className="w-12 h-12 md:w-16 md:h-16 text-blue-500" />
                                 </div>
-                                <div className="absolute -bottom-24 -left-20 opacity-20 animate-float hidden xl:block" style={{ animationDelay: '3s' }}>
-                                    <Wallet className="w-12 h-12 text-purple-500" />
+                                <div className="absolute -bottom-20 -left-8 md:-bottom-24 md:-left-20 opacity-20 animate-float" style={{ animationDelay: '3s' }}>
+                                    <Wallet className="w-8 h-8 md:w-12 md:h-12 text-purple-500" />
                                 </div>
-                                <div className="absolute top-1/2 -left-16 opacity-30 animate-float hidden xl:block" style={{ animationDelay: '4s' }}>
-                                    <CreditCard className="w-10 h-10 text-rose-500/80" />
+                                <div className="absolute top-1/2 -left-10 md:-left-16 opacity-30 animate-float" style={{ animationDelay: '4s' }}>
+                                    <CreditCard className="w-8 h-8 md:w-10 md:h-10 text-rose-500/80" />
                                 </div>
-                                <div className="absolute top-10/4 -right-20 opacity-30 animate-float hidden xl:block" style={{ animationDelay: '1.5s' }}>
-                                    <Sparkles className="w-12 h-12 text-amber-300/80" />
+                                <div className="absolute top-1/4 -right-10 md:-right-20 opacity-30 animate-float" style={{ animationDelay: '1.5s' }}>
+                                    <Sparkles className="w-8 h-8 md:w-12 md:h-12 text-amber-300/80" />
                                 </div>
 
                                 <motion.div
