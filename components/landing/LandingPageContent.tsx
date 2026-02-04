@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Logo from "@/components/Logo";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import FeatureCard from "@/components/landing/FeatureCard";
@@ -126,18 +127,22 @@ export default function LandingPageContent() {
                             <div className="rounded-xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-md lg:p-4 3xl:p-8 4xl:p-12 transform transition-transform duration-700 hover:rotate-x-2">
                                 <div className="aspect-[16/9] overflow-hidden rounded-lg border border-border/50 bg-background shadow-inner relative">
                                     {/* Abstract Representation of Dashboard for faster LCP */}
-                                    <div className="grid h-full grid-cols-4 grid-rows-3 gap-4 p-6 opacity-90 overflow-hidden">
-                                        <div className="col-span-1 row-span-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 animate-pulse" />
-                                        <div className="col-span-1 row-span-1 rounded-lg bg-rose-500/10 border border-rose-500/20" />
-                                        <div className="col-span-1 row-span-1 rounded-lg bg-blue-500/10 border border-blue-500/20" />
-                                        <div className="col-span-1 row-span-3 rounded-lg bg-muted/50 border border-border/40 relative overflow-hidden">
-                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" style={{ animationDuration: '3s' }} />
-                                        </div>
-                                        <div className="col-span-3 row-span-2 rounded-lg bg-muted/50 border border-border/40 flex items-center justify-center relative overflow-hidden group-hover:border-primary/30 transition-colors">
-                                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-200%] group-hover:animate-shine" />
-                                            <p className="text-muted-foreground/30 font-medium text-2xl 3xl:text-4xl 4xl:text-6xl text-center px-4">Financial Dashboard Preview</p>
-                                        </div>
-                                    </div>
+                                    <Image
+                                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181853/dashboard-dark_ocosok.png`}
+                                        alt="Dashboard Dark Preview"
+                                        fill
+                                        className="object-cover hidden dark:block transition-transform duration-500 group-hover:scale-[1.02]"
+                                        priority
+                                        unoptimized
+                                    />
+                                    <Image
+                                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181879/dashboard-light_xvrjns.png`}
+                                        alt="Dashboard Light Preview"
+                                        fill
+                                        className="object-cover block dark:hidden transition-transform duration-500 group-hover:scale-[1.02]"
+                                        priority
+                                        unoptimized
+                                    />
                                 </div>
                             </div>
                             <div className="absolute -bottom-10 -left-10 -z-10 h-72 w-72 rounded-full bg-amber-500/20 blur-[100px]" />
