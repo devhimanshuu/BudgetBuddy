@@ -75,7 +75,7 @@ export default function LandingPageContent() {
                                 >
                                     <MovingBorder
                                         duration={3500}
-                                        containerClassName="w-48 h-9 mb-6 mx-auto"
+                                        containerClassName="w-48 h-9 mb-6 mx-auto shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)] hover:shadow-[0_0_25px_-2px_rgba(16,185,129,0.6)] transition-all duration-300"
                                         className="text-emerald-500 font-medium flex items-center justify-center px-4"
                                     >
                                         <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
@@ -280,17 +280,25 @@ export default function LandingPageContent() {
                     </div>
 
                     <div className="flex justify-center w-full">
-                        <div className="flex items-center gap-1 text-sm font-mono opacity-80 hover:opacity-100 select-none cursor-default bg-muted/50 px-3 py-1.5 rounded-full border border-border/50 hover:border-border transition-colors">
-                            <span className="text-blue-500">&lt;</span>
-                            <span className="text-foreground font-semibold">CreatedBy</span>
-                            <span className="text-purple-500 pl-1">dev</span>
-                            <span className="text-blue-500">=</span>
-                            <span className="text-orange-500">&quot;</span>
-                            <Link href="https://www.linkedin.com/in/himanshu-guptaa/" target="_blank" rel="noopener noreferrer" className="hover:underline decoration-orange-500/50 underline-offset-2">
-                                <span className="text-orange-500">Himanshu Gupta</span>
-                            </Link>
-                            <span className="text-orange-500">&quot;</span>
-                            <span className="text-blue-500">/&gt;</span>
+                        <div className="relative flex items-center gap-1 text-sm font-mono select-none cursor-default px-4 py-2 rounded-full border border-border/50 overflow-hidden group/footer-badge shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] hover:shadow-[0_0_25px_-2px_rgba(239,68,68,0.6)] transition-all duration-300">
+                            {/* The Moving Border Beam - Applied to Parent */}
+                            <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0deg,transparent_180deg,#ef4444_270deg,transparent_360deg)] animate-spin-slow" style={{ width: '200%', height: '200%', left: '-50%', top: '-50%' }} />
+
+                            {/* Inner Background for Contrast */}
+                            <div className="absolute inset-[1px] bg-background/95 rounded-full z-0" />
+
+                            <div className="relative z-10 flex items-center gap-1">
+                                <span className="text-blue-500">&lt;</span>
+                                <span className="text-foreground font-semibold">CreatedBy</span>
+                                <span className="text-purple-500 pl-1">dev</span>
+                                <span className="text-blue-500">=</span>
+                                <span className="text-orange-500">&quot;</span>
+                                <Link href="https://www.linkedin.com/in/himanshu-guptaa/" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-all font-bold">
+                                    <span className="text-orange-500">Himanshu Gupta</span>
+                                </Link>
+                                <span className="text-orange-500">&quot;</span>
+                                <span className="text-blue-500">/&gt;</span>
+                            </div>
                         </div>
                     </div>
 
