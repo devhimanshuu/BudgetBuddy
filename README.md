@@ -2,6 +2,8 @@
 
 BudgetBuddy is a modern personal finance tracker designed to help you master your financial life. Built with **Next.js 15**, it combines powerful analytics with a seamless, stunning user experience to make money management effortless.
 
+[![BudgetBuddy Dashboard Preview](https://res.cloudinary.com/dbonhpuvh/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181853/dashboard-dark_ocosok.png)](https://budget-buddy.vercel.app)
+
 ## 🌟 What's New
 
 ### 🤖 AI Financial Analyst
