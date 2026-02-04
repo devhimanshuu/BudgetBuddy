@@ -64,7 +64,7 @@ export default function LandingPageContent() {
                                 <div className="absolute top-1/2 -left-10 md:-left-16 opacity-30 animate-float" style={{ animationDelay: '4s' }}>
                                     <CreditCard className="w-8 h-8 md:w-10 md:h-10 text-rose-500/80" />
                                 </div>
-                                <div className="absolute top-1/4 -right-10 md:-right-20 opacity-30 animate-float" style={{ animationDelay: '1.5s' }}>
+                                <div className="absolute top-10/6 -right-10 md:-right-20 opacity-30 animate-float" style={{ animationDelay: '1.5s' }}>
                                     <Sparkles className="w-8 h-8 md:w-12 md:h-12 text-amber-300/80" />
                                 </div>
 
