@@ -156,7 +156,7 @@ export default function AchievementsDisplay() {
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Achievements</h2>
                     <p className="text-muted-foreground">
-                        You've unlocked <span className="font-bold text-primary">{stats.totalAchievements}</span> of <span className="font-bold">{allAchievements.length}</span> achievements
+                        You&apos;ve unlocked <span className="font-bold text-primary">{stats.totalAchievements}</span> of <span className="font-bold">{allAchievements.length}</span> achievements
                     </p>
                 </div>
 
