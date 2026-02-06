@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -10,7 +10,7 @@ import FeatureCard from "@/components/landing/FeatureCard";
 import { motion } from "framer-motion";
 import { MovingBorder } from "@/components/landing/MovingBorder";
 
-import { ThemeSwitcherBtn } from "@/components/ThemeSwitcherBtn";
+import { ThemeCustomizer } from "@/components/ThemeCustomizer";
 
 export default function LandingPageContent() {
     return (
@@ -24,7 +24,7 @@ export default function LandingPageContent() {
                         <Logo />
                     </div>
                     <div className="flex items-center gap-2 md:gap-4">
-                        <ThemeSwitcherBtn />
+                        <ThemeCustomizer />
                         <Link href="/sign-in" className="hidden md:block">
                             <Button variant="ghost" className="text-base font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
                                 Log In
@@ -131,7 +131,7 @@ export default function LandingPageContent() {
                                         src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181853/dashboard-dark_ocosok.png`}
                                         alt="Dashboard Dark Preview"
                                         fill
-                                        className="object-cover hidden dark:block transition-transform duration-500 group-hover:scale-[1.02]"
+                                        className="object-cover dashboard-preview-dark transition-transform duration-500 group-hover:scale-[1.02]"
                                         priority
                                         unoptimized
                                     />
@@ -139,7 +139,7 @@ export default function LandingPageContent() {
                                         src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181879/dashboard-light_xvrjns.png`}
                                         alt="Dashboard Light Preview"
                                         fill
-                                        className="object-cover block dark:hidden transition-transform duration-500 group-hover:scale-[1.02]"
+                                        className="object-cover dashboard-preview-light transition-transform duration-500 group-hover:scale-[1.02]"
                                         priority
                                         unoptimized
                                     />
@@ -191,9 +191,9 @@ export default function LandingPageContent() {
                         />
                         <FeatureCard
                             delay={0.5}
-                            icon={<Smartphone className="h-full w-full" />}
-                            title="Mobile First Design"
-                            description="Manage your money on the go with our fully responsive interface designed for any device."
+                            icon={<Trophy className="h-full w-full" />}
+                            title="Gamified Finance"
+                            description="Stay motivated with steaks, levels, and achievements. Earn rewards for hitting your financial goals."
                         />
                         <FeatureCard
                             delay={0.6}

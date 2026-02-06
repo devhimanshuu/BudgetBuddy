@@ -57,7 +57,7 @@ const ParticlesBackground = () => {
 
             draw() {
                 if (!ctx) return;
-                ctx.fillStyle = theme === "dark"
+                ctx.fillStyle = theme !== "light"
                     ? "rgba(255, 255, 255, 0.2)"
                     : "rgba(0, 0, 0, 0.2)";
                 ctx.beginPath();
@@ -147,7 +147,7 @@ const ParticlesBackground = () => {
 
                     if (distance < maxDistance) {
                         const opacityValue = 1 - distance / maxDistance;
-                        ctx.strokeStyle = theme === "dark"
+                        ctx.strokeStyle = theme !== "light"
                             ? `rgba(255, 255, 255, ${opacityValue * 0.15})`
                             : `rgba(0, 0, 0, ${opacityValue * 0.15})`;
                         ctx.lineWidth = 1;
