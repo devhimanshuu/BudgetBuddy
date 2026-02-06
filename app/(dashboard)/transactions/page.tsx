@@ -9,6 +9,7 @@ import { ManageRecurringTransactions } from "./_components/ManageRecurringTransa
 import { DetectSubscriptionDialog } from "./_components/DetectSubscriptionDialog";
 import AdvancedSearch, { SearchFilters } from "../_components/AdvancedSearch";
 import { useQuery } from "@tanstack/react-query";
+import CSVImportDialog from "./_components/CSVImportDialog";
 
 const TransactionPage = () => {
   const [dataRange, setDataRange] = useState<{ from: Date; to: Date }>({
@@ -34,6 +35,7 @@ const TransactionPage = () => {
           <div className="flex flex-wrap items-center gap-2">
             <DetectSubscriptionDialog />
             <ManageRecurringTransactions />
+            <CSVImportDialog />
             {searchFilters &&
               Object.values(searchFilters).some(
                 (val) =>
