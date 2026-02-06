@@ -34,7 +34,7 @@ export default function GlassCard({
       >
         {/* Gradient overlay */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent dark:from-white/5" />
-        
+
         {/* Content */}
         <div className="relative z-10">{children}</div>
       </motion.div>
@@ -45,9 +45,9 @@ export default function GlassCard({
     <div className={cn(baseClasses, hoverClasses, className)}>
       {/* Gradient overlay */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent dark:from-white/5" />
-      
+
       {/* Content */}
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 h-full">{children}</div>
     </div>
   );
 }

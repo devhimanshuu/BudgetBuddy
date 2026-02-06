@@ -15,6 +15,7 @@ import SavingsGoals from "../_components/SavingsGoals";
 import RecentTransactions from "../_components/RecentTransactions";
 import { DueTransactionsPopup } from "../_components/DueTransactionsPopup";
 import { SubscriptionAlerts } from "../_components/SubscriptionAlerts";
+import StreakDisplay from "../_components/StreakDisplay";
 
 async function page() {
     const user = await currentUser();
@@ -67,17 +68,23 @@ async function page() {
             {/* Dashboard Widgets */}
             <div className="container py-6 4xl:py-10">
                 <SubscriptionAlerts />
+
+                {/* Gamification Streak Display */}
+                <div className="mb-4 3xl:mb-6">
+                    <StreakDisplay />
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 2xl:gap-6 4xl:gap-8">
-                    <div className="md:col-span-2 3xl:col-span-1">
+                    <div className="md:col-span-2 3xl:col-span-1 h-full">
                         <NetWorthCard userSettings={userSettings} />
                     </div>
-                    <div className="md:col-span-2 3xl:col-span-1">
+                    <div className="md:col-span-2 3xl:col-span-1 h-full">
                         <SavingsRate userSettings={userSettings} />
                     </div>
-                    <div className="md:col-span-2 3xl:col-span-1">
+                    <div className="md:col-span-2 3xl:col-span-1 h-full">
                         <SpendingTrends userSettings={userSettings} />
                     </div>
-                    <div className="md:col-span-2 3xl:col-span-1">
+                    <div className="md:col-span-2 3xl:col-span-1 h-full">
                         <TopCategories userSettings={userSettings} />
                     </div>
                 </div>

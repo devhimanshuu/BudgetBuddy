@@ -18,6 +18,12 @@ datasource db {
 model UserSettings{
   userId   String @id
   currency String
+  
+  // Gamification fields
+  currentStreak Int @default(0)
+  longestStreak Int @default(0)
+  lastActivityDate DateTime?
+  totalPoints Int @default(0)
 
 }
 
@@ -237,4 +243,33 @@ model RecurringTransaction {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Achievement {
+  id String @id @default(uuid())
+  key String @unique // e.g., "first_transaction", "streak_7", "budget_hero"
+  name String
+  description String
+  icon String
+  category String // "streak", "budget", "savings", "general"
+  tier String @default("bronze") // "bronze", "silver", "gold", "platinum"
+  points Int @default(10)
+  requirement Int? // e.g., 7 for "7 day streak"
+  createdAt DateTime @default(now())
+  
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id String @id @default(uuid())
+  userId String
+  achievementId String
+  unlockedAt DateTime @default(now())
+  progress Int @default(0) // For tracking progress towards achievement
+  
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([userId, unlockedAt])
 }

@@ -12,27 +12,20 @@ import {
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { useAccent, AccentColor } from "@/components/providers/AccentProvider";
-import { Moon, Sun, Laptop, Paintbrush, Check } from "lucide-react";
+import { Moon, Sun, Paintbrush, Check, CloudMoon, Eclipse, Cpu, Droplets, Trees } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 export function ThemeCustomizer() {
     const { theme, setTheme } = useTheme();
     const { accent, setAccent } = useAccent();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) return null;
-
     const themes = [
         { name: "Light", value: "light", icon: Sun },
         { name: "Dark", value: "dark", icon: Moon },
-        { name: "Midnight", value: "midnight", icon: Moon },
-        { name: "Solaris", value: "solaris", icon: Moon },
-        { name: "Cyberpunk", value: "cyberpunk", icon: Laptop },
+        { name: "Midnight", value: "midnight", icon: CloudMoon },
+        { name: "Solaris", value: "solaris", icon: Eclipse },
+        { name: "Cyberpunk", value: "cyberpunk", icon: Cpu },
+        { name: "Forest", value: "forest", icon: Trees },
     ];
 
     const accents: { name: string; value: AccentColor; color: string }[] = [
