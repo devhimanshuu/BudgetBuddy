@@ -183,7 +183,7 @@ export default function TagSelector({
                   value={searchValue}
                   onValueChange={setSearchValue}
                 />
-                <CommandList className="max-h-[170px] overflow-y-auto">
+                <CommandList className="max-h-[300px] overflow-y-auto">
                   <CommandEmpty>No tags found.</CommandEmpty>
                   {allowCreation && (
                     <>

@@ -98,7 +98,7 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[250px] p-0">
         <Command
           onSubmit={(e) => {
             e.preventDefault();
@@ -106,7 +106,7 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
         >
           <CommandInput placeholder="Search category..." />
           <CreateCategoryDialog type={type} successCallback={successCallback} />
-          <CommandList className="max-h-[170px] overflow-y-auto">
+          <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>
               <p>Category not found</p>
               <p className="text-xs text-muted-foreground">
