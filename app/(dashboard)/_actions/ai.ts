@@ -29,8 +29,8 @@ export async function ChatWithAI(
 	let contextData = "";
 	let currency = "USD";
 	try {
-		const thirtyDaysAgo = new Date();
-		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+		const twoMonthsAgo = new Date();
+		twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
 		const [transactions, budgets, savingsGoals, userSettings] =
 			await Promise.all([
@@ -38,11 +38,11 @@ export async function ChatWithAI(
 					where: {
 						userId: user.id,
 						date: {
-							gte: thirtyDaysAgo,
+							gte: twoMonthsAgo,
 						},
 					},
 					orderBy: { date: "desc" },
-					take: 500, // Safety limit, covers significant monthly activity
+					take: 1000, // Safety limit for 2 months of activity
 					select: {
 						amount: true,
 						description: true,

@@ -4,46 +4,52 @@ import prisma from "@/lib/prisma";
 import CreateAssetDialog from "../_components/CreateAssetDialog";
 import AssetList from "../_components/AssetList";
 import NetWorthChart from "../_components/NetWorthChart";
+import ForecastingContent from "./_components/ForecastingContent";
 
 export default async function AssetsPage() {
-    const user = await currentUser();
-    if (!user) {
-        redirect("/sign-in");
-    }
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
 
-    const userSettings = await prisma.userSettings.findUnique({
-        where: {
-            userId: user.id,
-        },
-    });
+	const userSettings = await prisma.userSettings.findUnique({
+		where: {
+			userId: user.id,
+		},
+	});
 
-    if (!userSettings) {
-        redirect("/wizard");
-    }
+	if (!userSettings) {
+		redirect("/wizard");
+	}
 
-    return (
-        <div className="container mx-auto space-y-6 p-6 4xl:space-y-10 4xl:p-10">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl">
-                        Assets & Liabilities
-                    </h1>
-                    <p className="text-muted-foreground 4xl:text-lg">
-                        Track your net worth by managing your assets and liabilities
-                    </p>
-                </div>
-                <CreateAssetDialog />
-            </div>
+	return (
+		<div className="container mx-auto space-y-6 p-6 4xl:space-y-10 4xl:p-10">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl">
+						Assets & Liabilities
+					</h1>
+					<p className="text-muted-foreground 4xl:text-lg">
+						Track your net worth by managing your assets and liabilities
+					</p>
+				</div>
+				<CreateAssetDialog />
+			</div>
 
-            {/* Net Worth Chart */}
-            <NetWorthChart userSettings={userSettings} />
+			{/* Net Worth Chart */}
+			<NetWorthChart userSettings={userSettings} />
 
-            {/* Assets and Liabilities Lists */}
-            <div className="grid gap-6 md:grid-cols-2 4xl:gap-10">
-                <AssetList userSettings={userSettings} type="asset" />
-                <AssetList userSettings={userSettings} type="liability" />
-            </div>
-        </div>
-    );
+			{/* Assets and Liabilities Lists */}
+			<div className="grid gap-6 md:grid-cols-2 4xl:gap-10">
+				<AssetList userSettings={userSettings} type="asset" />
+				<AssetList userSettings={userSettings} type="liability" />
+			</div>
+
+			{/* Predictions */}
+			<div id="predictions" className="border-t pt-6 4xl:pt-10">
+				<ForecastingContent userSettings={userSettings} />
+			</div>
+		</div>
+	);
 }
