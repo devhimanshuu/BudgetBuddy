@@ -39,7 +39,7 @@ export default function StreakDisplay() {
 					value={stats?.currentStreak || 0}
 					title="Current Streak"
 					subtitle="days in a row"
-					icon={<Flame className="h-4 w-4 text-white 3xl:h-5 3xl:w-5" />}
+					icon={<Flame className="h-5 w-5 text-white 3xl:h-5 3xl:w-5" />}
 					iconBg="from-orange-500 to-red-600"
 					gradientBg="from-orange-500/10 via-red-500/10 to-pink-500/10"
 					progress={progressToNext}
@@ -54,13 +54,13 @@ export default function StreakDisplay() {
 					value={stats?.longestStreak || 0}
 					title="Best Streak"
 					subtitle="personal record"
-					icon={<Trophy className="h-4 w-4 text-white 3xl:h-5 3xl:w-5" />}
+					icon={<Trophy className="h-5 w-5 text-white 3xl:h-5 3xl:w-5" />}
 					iconBg="from-amber-500 to-yellow-600"
 					gradientBg="from-amber-500/10 via-yellow-500/10 to-orange-500/10"
 					isRecord={
 						stats
 							? stats.currentStreak === stats.longestStreak &&
-								stats.currentStreak > 0
+							stats.currentStreak > 0
 							: false
 					}
 					activeMessage="New record!"
@@ -72,7 +72,7 @@ export default function StreakDisplay() {
 					value={stats?.totalPoints || 0}
 					title="Total Points"
 					subtitle={`${stats?.totalAchievements || 0} achievement${(stats?.totalAchievements || 0) !== 1 ? "s" : ""} unlocked`}
-					icon={<Target className="h-4 w-4 text-white 3xl:h-5 3xl:w-5" />}
+					icon={<Target className="h-5 w-5 text-white 3xl:h-5 3xl:w-5" />}
 					iconBg="from-emerald-500 to-teal-600"
 					gradientBg="from-emerald-500/10 via-teal-500/10 to-cyan-500/10"
 					showTrend
@@ -126,8 +126,8 @@ function StreakCard({
 				)}
 			/>
 
-			<CardHeader className="relative pb-2 p-4 3xl:p-6 3xl:pb-3">
-				<CardTitle className="flex items-center gap-2 text-sm font-semibold 3xl:text-base">
+			<CardHeader className="relative p-4 3xl:p-6 3xl:pb-3">
+				<CardTitle className="flex items-center gap-2 text-base font-semibold 3xl:text-base">
 					<div
 						className={cn(
 							"flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm transition-transform duration-300 group-hover:scale-105",

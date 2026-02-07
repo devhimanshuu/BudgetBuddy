@@ -15,7 +15,9 @@ import { Button } from "@/components/ui/button";
 import BudgetSummaryCard from "./BudgetSummaryCard";
 import CreateTransactionDialog from "../../_components/CreateTransactionDialog";
 import BudgetHistory from "./BudgetHistory";
+import BudgetTransactionDialog from "./BudgetTransactionDialog";
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
+import { History as HistoryIcon } from "lucide-react";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -121,6 +123,22 @@ export default function BudgetProgressCards({
                         type="expense"
                         initialCategory={budget.category}
                         initialCategoryIcon={budget.categoryIcon}
+                      />
+
+                      <BudgetTransactionDialog
+                        category={budget.category}
+                        categoryIcon={budget.categoryIcon}
+                        month={month}
+                        year={year}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-950"
+                          >
+                            <HistoryIcon className="h-4 w-4" />
+                          </Button>
+                        }
                       />
 
                       <EditBudgetDialog

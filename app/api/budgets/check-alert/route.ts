@@ -56,17 +56,34 @@ export async function GET(request: Request) {
 	const transactions = await prisma.transaction.findMany({
 		where: {
 			userId: user.id,
-			category: queryParams.data.category,
+			OR: [
+				{ category: queryParams.data.category },
+				{ splits: { some: { category: queryParams.data.category } } },
+			],
 			type: "expense",
 			date: {
 				gte: startDate,
 				lte: endDate,
 			},
 		},
+		include: {
+			splits: true,
+		},
 	});
 
-	// Calculate current spending + new transaction
-	const currentSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+	// Calculate current spending for this category
+	let currentSpent = 0;
+	transactions.forEach((t) => {
+		if (t.splits && t.splits.length > 0) {
+			const relevantSplits = t.splits.filter(
+				(s) => s.category === queryParams.data.category,
+			);
+			relevantSplits.forEach((s) => (currentSpent += s.amount));
+		} else if (t.category === queryParams.data.category) {
+			currentSpent += t.amount;
+		}
+	});
+
 	const newTotal = currentSpent + transactionAmount;
 
 	// Check budget status with new amount
