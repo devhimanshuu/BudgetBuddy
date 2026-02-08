@@ -11,8 +11,31 @@ import { motion } from "framer-motion";
 import { MovingBorder } from "@/components/landing/MovingBorder";
 
 import { ThemeCustomizer } from "@/components/ThemeCustomizer";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export default function LandingPageContent() {
+    const { theme, resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Map themes to their specific image URLs
+    const themeImages: Record<string, string> = {
+        dark: "v1770181853/dashboard-dark_ocosok.png",
+        light: "v1770181879/dashboard-light_xvrjns.png",
+        solaris: "v1770577023/solaris_pibuwk.png",
+        cyberpunk: "v1770577013/cyberpunk_h4rvkt.png",
+        midnight: "v1770577001/midnight_gnuolc.png",
+        forest: "v1770576992/forest_kaqil7.png",
+    };
+
+    // Use resolvedTheme if theme is 'system' or not set
+    const activeTheme = (theme === "system" ? resolvedTheme : theme) || "dark";
+    const currentThemeImage = themeImages[activeTheme] || themeImages.dark;
+
     return (
         <div className="flex min-h-screen flex-col text-foreground selection:bg-primary/20 relative overflow-x-hidden">
             <ParticlesBackground />
@@ -126,23 +149,20 @@ export default function LandingPageContent() {
                         <div className="relative mx-auto mt-20 md:mt-32 3xl:mt-40 4xl:mt-52 w-full max-w-6xl 3xl:max-w-[1400px] 4xl:max-w-[1800px] perspective-1000 group">
                             <div className="rounded-xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-md lg:p-4 3xl:p-8 4xl:p-12 transform transition-transform duration-700 hover:rotate-x-2">
                                 <div className="aspect-[16/9] overflow-hidden rounded-lg border border-border/50 bg-background shadow-inner relative">
-                                    {/* Abstract Representation of Dashboard for faster LCP */}
-                                    <Image
-                                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181853/dashboard-dark_ocosok.png`}
-                                        alt="Dashboard Dark Preview"
-                                        fill
-                                        className="object-cover dashboard-preview-dark transition-transform duration-500 group-hover:scale-[1.02]"
-                                        priority
-                                        unoptimized
-                                    />
-                                    <Image
-                                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181879/dashboard-light_xvrjns.png`}
-                                        alt="Dashboard Light Preview"
-                                        fill
-                                        className="object-cover dashboard-preview-light transition-transform duration-500 group-hover:scale-[1.02]"
-                                        priority
-                                        unoptimized
-                                    />
+                                    {mounted && (
+                                        <Image
+                                            key={activeTheme}
+                                            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/${currentThemeImage}`}
+                                            alt={`${activeTheme} Dashboard Preview`}
+                                            fill
+                                            className="object-cover transition-all duration-700 group-hover:scale-[1.02]"
+                                            priority
+                                            unoptimized
+                                        />
+                                    )}
+                                    {!mounted && (
+                                        <div className="absolute inset-0 bg-muted animate-pulse" />
+                                    )}
                                 </div>
                             </div>
                             <div className="absolute -bottom-10 -left-10 -z-10 h-72 w-72 rounded-full bg-amber-500/20 blur-[100px]" />
