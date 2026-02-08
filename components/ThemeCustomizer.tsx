@@ -19,6 +19,12 @@ import { useEffect, useState } from "react";
 export function ThemeCustomizer() {
     const { theme, setTheme } = useTheme();
     const { accent, setAccent } = useAccent();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const themes = [
         { name: "Light", value: "light", icon: Sun },
         { name: "Dark", value: "dark", icon: Moon },
@@ -38,6 +44,15 @@ export function ThemeCustomizer() {
         { name: "Orange", value: "orange", color: "bg-orange-500" },
         { name: "Rose", value: "rose", color: "bg-rose-500" },
     ];
+
+    if (!mounted) {
+        return (
+            <Button variant="outline" size="icon" className="rounded-full h-9 w-9" disabled>
+                <Paintbrush className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">Customize Theme</span>
+            </Button>
+        );
+    }
 
     return (
         <Dialog>

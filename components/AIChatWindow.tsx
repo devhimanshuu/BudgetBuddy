@@ -6,7 +6,6 @@ import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank } from "lu
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatWithAI } from "@/app/(dashboard)/_actions/ai";
 import { cn } from "@/lib/utils";
 
@@ -93,12 +92,6 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                         isMinimized && "h-full border-b-0 justify-center" // Fill height, remove border, center content
                     )}>
                         <div className={cn("flex items-center gap-2", isMinimized && "mr-auto")}>
-                            {/* Hide icon when minimized to save space if needed, or keep it. Let's keep it but adjust layout if needed. 
-                                Actually, if we center justify, we need to handle the buttons. 
-                                Let's use absolute positioning for buttons if we want true center, 
-                                OR just normal flex behavior which is usually fine if h-full is there.
-                                The user said "text in middle". 
-                             */}
                             <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
                                 <PiggyBank className="w-4 h-4 text-amber-500" />
                             </div>
@@ -132,7 +125,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                     {messages.length === 0 && (
                                         <div className="text-center py-6">
                                             <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
-                                                <Bot className="w-6 h-6 text-amber-500" />
+                                                <Bot className="w-6 h-6" />
                                             </div>
                                             <p className="text-sm text-balance text-muted-foreground px-4">
                                                 Hello! I&apos;m your AI Financial Analyst. Ask me anything about your spending, budgets, or savings goals!

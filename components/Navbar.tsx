@@ -66,6 +66,31 @@ const items = [
 	{ label: "Manage", link: "/manage", icon: <Settings className="h-4 w-4" /> },
 ];
 
+function NavbarActions() {
+	const [isMounted, setIsMounted] = useState(false);
+
+	React.useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
+	if (!isMounted) return null;
+
+	return (
+		<div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4">
+			<PrivacyModeToggle />
+			<ThemeCustomizer />
+			<UserButton
+				afterSignOutUrl="/sign-in"
+				appearance={{
+					elements: {
+						userButtonAvatarBox: "w-8 h-8",
+					},
+				}}
+			/>
+		</div>
+	);
+}
+
 function MobileNavbar() {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -97,18 +122,7 @@ function MobileNavbar() {
 				<div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
 					<LogoMobile />
 				</div>
-				<div className="flex items-center gap-2">
-					<PrivacyModeToggle />
-					<ThemeCustomizer />
-					<UserButton
-						afterSignOutUrl="/sign-in"
-						appearance={{
-							elements: {
-								userButtonAvatarBox: "w-8 h-8",
-							},
-						}}
-					/>
-				</div>
+				<NavbarActions />
 			</nav>
 		</div>
 	);
@@ -130,18 +144,7 @@ function DesktopNavbar() {
 						))}
 					</div>
 				</div>
-				<div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4">
-					<PrivacyModeToggle />
-					<ThemeCustomizer />
-					<UserButton
-						afterSignOutUrl="/sign-in"
-						appearance={{
-							elements: {
-								userButtonAvatarBox: "w-8 h-8",
-							},
-						}}
-					/>
-				</div>
+				<NavbarActions />
 			</nav>
 		</div>
 	);
