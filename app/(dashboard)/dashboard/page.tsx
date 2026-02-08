@@ -75,16 +75,16 @@ async function page() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 2xl:gap-6 4xl:gap-8">
-                    <div className="md:col-span-2 3xl:col-span-1 h-full">
+                    <div className="md:col-span-2 3xl:col-span-2 h-full">
                         <NetWorthCard userSettings={userSettings} />
                     </div>
-                    <div className="md:col-span-2 3xl:col-span-1 h-full">
+                    <div className="md:col-span-2 3xl:col-span-2 h-full">
                         <SavingsRate userSettings={userSettings} />
                     </div>
-                    <div className="md:col-span-2 3xl:col-span-1 h-full">
+                    <div className="md:col-span-2 3xl:col-span-2 h-full">
                         <SpendingTrends userSettings={userSettings} />
                     </div>
-                    <div className="md:col-span-2 3xl:col-span-1 h-full">
+                    <div className="md:col-span-2 3xl:col-span-2 h-full">
                         <TopCategories userSettings={userSettings} />
                     </div>
                 </div>

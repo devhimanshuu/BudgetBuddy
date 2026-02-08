@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X, Bot, User, Loader2, Sparkles, MinusCircle, Maximize2, Minimize2 } from "lucide-react";
+import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,10 +99,12 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                 OR just normal flex behavior which is usually fine if h-full is there.
                                 The user said "text in middle". 
                              */}
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                <Sparkles className="w-4 h-4 text-primary" />
+                            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                <PiggyBank className="w-4 h-4 text-amber-500" />
                             </div>
-                            <span className="font-semibold text-sm whitespace-nowrap">Budget Buddy AI</span>
+                            <span className="font-bold text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                Budget Buddy AI
+                            </span>
                         </div>
                         <div className="flex items-center gap-1">
                             <Button
@@ -129,8 +131,8 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                 <div className="space-y-4 pr-1">
                                     {messages.length === 0 && (
                                         <div className="text-center py-6">
-                                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                                                <Bot className="w-6 h-6 text-primary" />
+                                            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+                                                <Bot className="w-6 h-6 text-amber-500" />
                                             </div>
                                             <p className="text-sm text-balance text-muted-foreground px-4">
                                                 Hello! I&apos;m your AI Financial Analyst. Ask me anything about your spending, budgets, or savings goals!
@@ -158,8 +160,8 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                             )}
                                         >
                                             {msg.role === "model" && (
-                                                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                                                    <Bot className="w-3.5 h-3.5 text-primary" />
+                                                <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-1">
+                                                    <Bot className="w-3.5 h-3.5 text-amber-500" />
                                                 </div>
                                             )}
                                             <div
@@ -208,8 +210,8 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                     ))}
                                     {isLoading && (
                                         <div className="flex gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-1">
-                                                <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                                            <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center mt-1">
+                                                <Loader2 className="w-3.5 h-3.5 text-amber-500 animate-spin" />
                                             </div>
                                             <div className="bg-secondary/50 border border-border/50 rounded-2xl px-4 py-2 text-sm flex items-center gap-1">
                                                 <span className="text-muted-foreground text-xs">Thinking...</span>
