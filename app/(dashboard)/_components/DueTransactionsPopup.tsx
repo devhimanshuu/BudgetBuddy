@@ -15,6 +15,7 @@ import { Check, X, SkipForward, Loader2 } from "lucide-react";
 import {
     GetDueRecurringTransactions,
     ProcessRecurringTransaction,
+    ProcessAllDueRecurringTransactions,
     SkipRecurringTransaction,
 } from "@/app/(dashboard)/_actions/recurring";
 import { format } from "date-fns";
@@ -48,10 +49,20 @@ export function DueTransactionsPopup({ userSettings }: { userSettings: UserSetti
         onSuccess: () => {
             toast.success("Transaction processed");
             queryClient.invalidateQueries({ queryKey: ["due-recurring-transactions"] });
-            // The list will update, and if empty, popup closes via useEffect
         },
         onError: (e) => {
             toast.error("Error processing: " + e.message);
+        }
+    });
+
+    const processAllMutation = useMutation({
+        mutationFn: ProcessAllDueRecurringTransactions,
+        onSuccess: () => {
+            toast.success("All transactions processed");
+            queryClient.invalidateQueries({ queryKey: ["due-recurring-transactions"] });
+        },
+        onError: (e) => {
+            toast.error("Error processing all: " + e.message);
         }
     });
 
@@ -70,7 +81,9 @@ export function DueTransactionsPopup({ userSettings }: { userSettings: UserSetti
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
 
-    if (isLoading) return null; // Don't show anything while loading first time
+    if (isLoading) return null;
+
+    const isPending = processMutation.isPending || skipMutation.isPending || processAllMutation.isPending;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -109,7 +122,7 @@ export function DueTransactionsPopup({ userSettings }: { userSettings: UserSetti
                                     variant="outline"
                                     size="sm"
                                     onClick={() => skipMutation.mutate(transaction.id)}
-                                    disabled={skipMutation.isPending || processMutation.isPending}
+                                    disabled={isPending}
                                 >
                                     <SkipForward className="mr-1 h-3 w-3" />
                                     Skip
@@ -117,7 +130,7 @@ export function DueTransactionsPopup({ userSettings }: { userSettings: UserSetti
                                 <Button
                                     size="sm"
                                     onClick={() => processMutation.mutate(transaction.id)}
-                                    disabled={skipMutation.isPending || processMutation.isPending}
+                                    disabled={isPending}
                                     className={transaction.type === "income" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}
                                 >
                                     {processMutation.isPending && processMutation.variables === transaction.id ? <Loader2 className="animate-spin h-3 w-3" /> : (<Check className="mr-1 h-3 w-3" />)}
@@ -127,7 +140,16 @@ export function DueTransactionsPopup({ userSettings }: { userSettings: UserSetti
                         </div>
                     ))}
                 </div>
-                <DialogFooter>
+                <DialogFooter className="flex items-center justify-between w-full sm:justify-between">
+                    <Button
+                        variant="outline"
+                        className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20"
+                        onClick={() => processAllMutation.mutate()}
+                        disabled={isPending}
+                    >
+                        {processAllMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />}
+                        Approve All
+                    </Button>
                     <Button variant="ghost" onClick={() => setOpen(false)}>Close</Button>
                 </DialogFooter>
             </DialogContent>

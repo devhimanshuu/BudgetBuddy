@@ -279,6 +279,35 @@ export async function ProcessRecurringTransaction(id: string) {
 	revalidatePath("/transactions");
 }
 
+export async function ProcessAllDueRecurringTransactions() {
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
+
+	const now = new Date();
+	const due = await prisma.recurringTransaction.findMany({
+		where: {
+			userId: user.id,
+			date: {
+				lte: now,
+			},
+		},
+	});
+
+	if (due.length === 0) return;
+
+	// Loop through and process each
+	// In a real production app with massive numbers, you'd want a more optimized bulk update
+	// but for personal finance typical number of due transactions is small (< 100).
+	for (const transaction of due) {
+		await ProcessRecurringTransaction(transaction.id);
+	}
+
+	revalidatePath("/");
+	revalidatePath("/transactions");
+}
+
 export async function SkipRecurringTransaction(id: string) {
 	const user = await currentUser();
 	if (!user) {
