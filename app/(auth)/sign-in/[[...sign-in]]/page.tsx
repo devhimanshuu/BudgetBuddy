@@ -63,7 +63,7 @@ export default function Page() {
       {/* Sign Up Link */}
       <div className="mt-6 2xl:mt-8 text-center">
         <p className="text-sm 2xl:text-base text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/sign-up"
             className="text-primary hover:text-primary/80 font-semibold transition-colors underline-offset-4 hover:underline"
