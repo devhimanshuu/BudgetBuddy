@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -184,7 +184,7 @@ export default function LandingPageContent() {
                             Detailed analytics, privacy by default, and AI-driven insights wrapped in a beautiful interface.
                         </p>
                     </div>
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5">
+                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                         <FeatureCard
                             delay={0.1}
                             icon={<Zap className="h-full w-full" />}
@@ -220,6 +220,24 @@ export default function LandingPageContent() {
                             icon={<Lock className="h-full w-full" />}
                             title="Secure Authentication"
                             description="Powered by Clerk for seamless and secure sign-in options including Google, GitHub, and more."
+                        />
+                        <FeatureCard
+                            delay={0.7}
+                            icon={<Target className="h-full w-full" />}
+                            title="Smart Goal Setting"
+                            description="Create custom savings targets for holidays, gadgets, or emergency funds and track your progress visually."
+                        />
+                        <FeatureCard
+                            delay={0.8}
+                            icon={<Bell className="h-full w-full" />}
+                            title="Bill Reminders"
+                            description="Get timely notifications for upcoming bills and subscription renewals so you never pay late fees again."
+                        />
+                        <FeatureCard
+                            delay={0.9}
+                            icon={<FileText className="h-full w-full" />}
+                            title="Export & Reports"
+                            description="Need to share data with your accountant? Export your financial reports in CSV, PDF, or Excel formats instantly."
                         />
                     </div>
                 </section>
