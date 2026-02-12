@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { startOfMonth } from "date-fns";
 import { X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import TransactionTable from "./_components/TransactionTable";
 import { ManageRecurringTransactions } from "./_components/ManageRecurringTransactions";
 import { DetectSubscriptionDialog } from "./_components/DetectSubscriptionDialog";
@@ -19,6 +20,31 @@ const TransactionPage = () => {
   const [searchFilters, setSearchFilters] = useState<SearchFilters | undefined>(
     undefined
   );
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const query = searchParams.get("query");
+    const category = searchParams.get("category");
+    const type = searchParams.get("type");
+    const minAmount = searchParams.get("minAmount");
+    const maxAmount = searchParams.get("maxAmount");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+
+    if (query || category || type || minAmount || maxAmount || from || to) {
+      setSearchFilters({
+        query: query || "",
+        category: category || "",
+        type: type || "",
+        minAmount: minAmount || "",
+        maxAmount: maxAmount || "",
+        from: from || "",
+        to: to || "",
+        tags: [],
+      });
+    }
+  }, [searchParams]);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", "all"],
