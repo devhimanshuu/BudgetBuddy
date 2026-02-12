@@ -16,6 +16,7 @@ import RecentTransactions from "../_components/RecentTransactions";
 import { DueTransactionsPopup } from "../_components/DueTransactionsPopup";
 import { SubscriptionAlerts } from "../_components/SubscriptionAlerts";
 import StreakDisplay from "../_components/StreakDisplay";
+import { SmartNudge } from "../_components/SmartNudge";
 
 async function page() {
     const user = await currentUser();
@@ -67,6 +68,9 @@ async function page() {
             </div>
             {/* Dashboard Widgets */}
             <div className="container py-6 4xl:py-10">
+                <div className="mb-6">
+                    <SmartNudge />
+                </div>
                 <SubscriptionAlerts />
 
                 {/* Gamification Streak Display */}
