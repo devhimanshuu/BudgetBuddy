@@ -10,12 +10,20 @@ BudgetBuddy is a modern personal finance tracker designed to help you master you
 
 Unlock personalized financial insights with our **AI Assistant**.
 
-- **Context-Aware**: Understands your transactions, budgets, and savings goals.
-- **Interactive Chat**: Ask questions like "How much did I spend on food this month?" or "Can I afford a vacation?".
+- **Multimodal capabilities**: 
+  - 📷 **Vision**: Upload receipts or bank statements; AI extracts merchant, amount, date, and category automatically.
+  - 🎤 **Voice**: Speak naturally to log transactions or ask for financial advice.
+- **Living UI Components**: The AI doesn't just talk; it creates! It can embed **dynamic charts**, **progress bars**, and **trend lines** directly into the chat.
+- **Context-Aware**: Understands your transactions, budgets, and savings goals in real-time.
+- **Interactive Typewriter Effect**: Responses flow smoothly with a professional typewriter animation.
 - **Draggable Interface**: A floating, draggable chat window that stays with you but never gets in the way.
 
 ### ⚡ Smart User Interface
 
+- **Living UI Components**: 
+  - **Animated Bar Charts**: Say "Show me a chart of my spending" to see interactive vertical bars.
+  - **Budget Progress Bars**: Get visual feedback on your monthly limits.
+  - **Mini Trend Charts**: Visualize your spending velocity over time.
 - **Draggable Quick Actions**: A floating "Quick Add" widget that you can move anywhere on the screen for easy access on mobile or desktop.
 - **Command Palette (`Cmd+K`)**: Navigate the entire app or trigger actions (like "New Expense" or "Open AI Chat") instantly with your keyboard.
 - **Visual Finance Calendar**: View your spending habits day-by-day in an intuitive calendar view.
@@ -66,6 +74,7 @@ Unlock personalized financial insights with our **AI Assistant**.
 
 - **Database**: [PostgreSQL](https://www.postgresql.org/) (via [Prisma ORM](https://www.prisma.io/))
 - **Auth**: [Clerk](https://clerk.com/) (Secure User Management)
+- **AI Models**: [Groq (Llama 3.3)](https://groq.com/), [OpenRouter (GPT-4o)](https://openrouter.ai/)
 - **File Uploads**: [UploadThing](https://uploadthing.com/)
 - **Data Export**: [jspdf](https://github.com/parallax/jsPDF), [export-to-csv](https://www.npmjs.com/package/export-to-csv)
 - **Validation**: [Zod](https://zod.dev/)
