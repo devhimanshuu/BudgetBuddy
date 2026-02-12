@@ -105,11 +105,13 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         const components: React.ReactNode[] = [];
 
         // Match [PROGRESS_BAR: {...}]
-        const progressBarRegex = /\[PROGRESS_BAR:\s*({.*?})\]/g;
+        const progressBarRegex = /\[PROGRESS_BAR:\s*({[\s\S]*?})\s*\]/g;
         let match;
         while ((match = progressBarRegex.exec(text)) !== null) {
             try {
-                const data = JSON.parse(match[1]);
+                const jsonStr = match[1].trim();
+                if (!jsonStr.endsWith("}")) continue; // Incomplete JSON
+                const data = JSON.parse(jsonStr);
                 components.push(
                     <div key={`pb-${match.index}`} className="mt-4 p-3 rounded-lg bg-background/50 border border-border shadow-sm">
                         <div className="flex justify-between items-center mb-2">
@@ -123,14 +125,16 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                         </div>
                     </div>
                 );
-            } catch (e) { console.error("LivingUI Parse Error", e); }
+            } catch (e) { /* Fail silently during typing */ }
         }
 
         // Match [MINI_TREND: {...}]
-        const trendRegex = /\[MINI_TREND:\s*({.*?})\]/g;
+        const trendRegex = /\[MINI_TREND:\s*({[\s\S]*?})\s*\]/g;
         while ((match = trendRegex.exec(text)) !== null) {
             try {
-                const data = JSON.parse(match[1]);
+                const jsonStr = match[1].trim();
+                if (!jsonStr.endsWith("}")) continue; // Incomplete JSON
+                const data = JSON.parse(jsonStr);
                 components.push(
                     <div key={`trend-${match.index}`} className="mt-4 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 shadow-sm flex items-center gap-3">
                         <TrendingUp className="h-4 w-4 text-emerald-500" />
@@ -144,7 +148,80 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                         </div>
                     </div>
                 );
-            } catch (e) { console.error("LivingUI Trend Parse Error", e); }
+            } catch (e) { /* Fail silently during typing */ }
+        }
+
+        // Match [BAR_CHART: {...}]
+        const barChartRegex = /\[BAR_CHART:\s*({[\s\S]*?})\s*\]/g;
+        while ((match = barChartRegex.exec(text)) !== null) {
+            try {
+                let jsonStr = match[1].trim();
+
+                // Stricter check: Bar chart JSON must end with "}]" or "}}" to be considered "complete"
+                if (!jsonStr.endsWith("}]") && !jsonStr.endsWith("}}")) {
+                    continue;
+                }
+
+                // Extremely permissive: if it looks like single quotes are used, try to fix them
+                if (jsonStr.includes("'") && !jsonStr.includes('"')) {
+                    jsonStr = jsonStr.replace(/'/g, '"');
+                }
+
+                const data = JSON.parse(jsonStr);
+                const chartData = Array.isArray(data) ? data : (data.data || []);
+
+                if (!Array.isArray(chartData) || chartData.length === 0) {
+                    console.log("LivingUI: BarChart has no data", data);
+                    continue;
+                }
+
+                components.push(
+                    <div key={`bar-${match.index}`} className="mt-4 p-4 rounded-xl bg-card border border-border shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <div className="flex items-center gap-2 mb-4">
+                            <BarChart3 className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-bold tracking-tight">{data.title || "Financial Breakdown"}</span>
+                        </div>
+                        <div className="flex items-end gap-3 h-40 px-2 pb-6">
+                            {chartData.map((item: any, i: number) => {
+                                const label = item.label || item.name || item.category || item.date || `Item ${i + 1}`;
+                                const value = Number(item.value || item.amount || 0);
+                                const rawMaxValue = Math.max(...chartData.map((d: any) => Number(d.value || d.amount || 0)));
+                                const maxValue = rawMaxValue > 0 ? rawMaxValue : 1;
+                                const heightPercentage = Math.max((value / maxValue) * 100, 5); // Min 5% height for visibility
+
+                                return (
+                                    <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                                        <div className="relative w-full group">
+                                            <div
+                                                className="w-full bg-primary/20 rounded-t-lg absolute bottom-0 left-0 transition-all duration-700"
+                                                style={{ height: `${heightPercentage}%` }}
+                                            />
+                                            <div
+                                                className="w-full bg-primary rounded-t-lg absolute bottom-0 left-0 transition-all duration-1000 group-hover:bg-primary/80"
+                                                style={{ height: `${heightPercentage}%`, transformOrigin: 'bottom' }}
+                                            />
+                                            {/* Tooltip on hover */}
+                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-sm border border-border pointer-events-none z-10">
+                                                {value.toFixed(2)}
+                                            </div>
+                                        </div>
+                                        <div className="h-4 flex items-center justify-center w-full">
+                                            <span className="text-[10px] font-medium text-muted-foreground truncate w-full text-center group-hover:text-foreground transition-colors">
+                                                {label}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            } catch (e: any) {
+                // Only log if we have a full-looking tag that failed
+                if (match[1].includes('"data"') || match[1].includes("'data'")) {
+                    console.error("LivingUI: BarChart Parse Failed", e.message, match[1]);
+                }
+            }
         }
 
         return <>{components}</>;
@@ -227,6 +304,37 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         }
     };
 
+    const typeMessage = (fullText: string) => {
+        // First add the empty model message
+        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }] }]);
+
+        let i = 0;
+        const speed = 10;
+
+        const typeChar = () => {
+            if (i < fullText.length) {
+                const currentText = fullText.substring(0, i + 1);
+                setMessages((prev) => {
+                    const next = [...prev];
+                    const lastIdx = next.length - 1;
+                    if (next[lastIdx] && next[lastIdx].role === "model") {
+                        // Crucially: replace the entire text with the current substring
+                        // This prevents doubling if the updater runs twice (StrictMode)
+                        next[lastIdx] = {
+                            ...next[lastIdx],
+                            parts: [{ text: currentText }]
+                        };
+                    }
+                    return next;
+                });
+                i++;
+                setTimeout(typeChar, speed);
+            }
+        };
+
+        typeChar();
+    };
+
     const handleConfirmReceipt = async () => {
         if (!pendingReceipt) return;
 
@@ -249,21 +357,12 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             const result = await ChatWithAI(transactionRequest, messages);
 
             if (result.error) {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "model", parts: [{ text: result.error as string }] },
-                ]);
+                typeMessage(result.error as string);
             } else if (result.text) {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "model", parts: [{ text: result.text as string }] },
-                ]);
+                typeMessage(result.text as string);
             }
         } catch (error) {
-            setMessages((prev) => [
-                ...prev,
-                { role: "model", parts: [{ text: "Failed to create transaction. Please try again." }] },
-            ]);
+            typeMessage("Failed to create transaction. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -286,15 +385,9 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             const result = await ChatWithAI(input, messages);
 
             if (result.error) {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "model", parts: [{ text: result.error as string }] },
-                ]);
+                typeMessage(result.error as string);
             } else if (result.text) {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "model", parts: [{ text: result.text as string }] },
-                ]);
+                typeMessage(result.text as string);
 
                 if (result.filter) {
                     const params = new URLSearchParams();
@@ -312,10 +405,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                 }
             }
         } catch (error) {
-            setMessages((prev) => [
-                ...prev,
-                { role: "model", parts: [{ text: "Something went wrong. Please try again." }] },
-            ]);
+            typeMessage("Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);
         }
