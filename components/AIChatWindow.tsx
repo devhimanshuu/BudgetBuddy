@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank, Mic, MicOff, Volume2 } from "lucide-react";
+import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank, Mic, MicOff, Volume2, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,41 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [pendingReceipt, setPendingReceipt] = useState<any>(null);
+
+    // Load history on mount
+    useEffect(() => {
+        const saved = localStorage.getItem("budget-buddy-chat-history");
+        if (saved) {
+            try {
+                const { messages: savedMessages, timestamp } = JSON.parse(saved);
+                // Keep history for 24 hours
+                const isRecent = Date.now() - timestamp < 24 * 60 * 60 * 1000;
+                if (isRecent && savedMessages.length > 0) {
+                    setMessages(savedMessages);
+                }
+            } catch (e) {
+                console.error("Failed to load chat history", e);
+            }
+        }
+    }, []);
+
+    // Save history whenever messages change
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem("budget-buddy-chat-history", JSON.stringify({
+                messages,
+                timestamp: Date.now()
+            }));
+        }
+    }, [messages]);
+
+    const clearHistory = () => {
+        if (window.confirm("Are you sure you want to clear your chat history?")) {
+            setMessages([]);
+            localStorage.removeItem("budget-buddy-chat-history");
+            toast.success("History cleared");
+        }
+    };
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -445,6 +480,19 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                             </span>
                         </div>
                         <div className="flex items-center gap-1">
+                            {!isMinimized && (
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={clearHistory}
+                                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+                                        title="Clear history"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </>
+                            )}
                             {!isMinimized && (
                                 <Button
                                     variant="ghost"
