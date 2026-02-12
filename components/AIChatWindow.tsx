@@ -13,6 +13,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, BarChart3, ImagePlus } from "lucide-react";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
+import { ConvertCurrency } from "@/app/(dashboard)/_actions/conversion";
+import { GetUserSettings } from "@/app/(dashboard)/_actions/user-settings";
 
 interface Message {
     role: "user" | "model";
@@ -175,18 +177,39 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                 const result = await ExtractReceiptData(base64);
 
                 if (result.success && result.data) {
-                    const { merchant, amount, date, currency, category } = result.data;
+                    const { merchant, amount, date, currency: receiptCurrency, category } = result.data;
 
-                    setPendingReceipt(result.data);
+                    // Fetch user settings to get base currency
+                    const userSettings = await GetUserSettings();
+                    const baseCurrency = userSettings.currency;
 
-                    const confirmMsg = `🧾 **Receipt Detected!**\n\nI found a ${currency || "USD"} ${amount?.toFixed(2) || "??"} receipt from **${merchant || "Unknown Merchant"}**${date ? ` on ${date}` : ""}.\n\nShould I log this under **${category || "Other"}**?\n\n*Click "Confirm" below to create this transaction.*`;
+                    let displayMsg = `🧾 **Receipt Detected!**\n\nI found a ${receiptCurrency || "USD"} ${amount?.toFixed(2) || "??"} receipt from **${merchant || "Unknown Merchant"}**${date ? ` on ${date}` : ""}.`;
+
+                    let finalAmount = amount;
+
+                    if (receiptCurrency && receiptCurrency !== baseCurrency && amount) {
+                        const conv = await ConvertCurrency(amount, receiptCurrency, baseCurrency);
+                        if (conv.success) {
+                            finalAmount = conv.convertedAmount;
+                            displayMsg += `\n\n🌍 **Multi-Currency Reconciliation**:\nConverted to **${baseCurrency} ${finalAmount.toFixed(2)}** (Rate: ${conv.rate.toFixed(4)})\nKeep track in your local currency!`;
+                        }
+                    }
+
+                    setPendingReceipt({
+                        ...result.data,
+                        amount: finalAmount, // Use the converted amount for the transaction
+                        originalAmount: amount,
+                        originalCurrency: receiptCurrency
+                    });
+
+                    const confirmMsg = `${displayMsg}\n\nShould I log this under **${category || "Other"}**?\n\n*Click "Confirm" below to create this transaction.*`;
 
                     setMessages(prev => [...prev, {
                         role: "model",
                         parts: [{ text: confirmMsg }]
                     }]);
 
-                    toast.success("Receipt scanned successfully!", { id: "receipt-scan" });
+                    toast.success("Receipt scanned & reconciled!", { id: "receipt-scan" });
                 } else {
                     toast.error(result.error || "Failed to scan receipt", { id: "receipt-scan" });
                     setMessages(prev => [...prev, {
