@@ -15,6 +15,16 @@ import { TrendingUp, BarChart3, ImagePlus } from "lucide-react";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 import { ConvertCurrency } from "@/app/(dashboard)/_actions/conversion";
 import { GetUserSettings } from "@/app/(dashboard)/_actions/user-settings";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Message {
     role: "user" | "model";
@@ -38,9 +48,14 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [pendingReceipt, setPendingReceipt] = useState<any>(null);
+    const [userPersona, setUserPersona] = useState<string | null>(null);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     // Load history on mount
     useEffect(() => {
+        const savedPersona = localStorage.getItem("budget-buddy-user-persona");
+        if (savedPersona) setUserPersona(savedPersona);
+
         const saved = localStorage.getItem("budget-buddy-chat-history");
         if (saved) {
             try {
@@ -64,14 +79,18 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                 timestamp: Date.now()
             }));
         }
-    }, [messages]);
+        if (userPersona) {
+            localStorage.setItem("budget-buddy-user-persona", userPersona);
+        }
+    }, [messages, userPersona]);
 
     const clearHistory = () => {
-        if (window.confirm("Are you sure you want to clear your chat history?")) {
-            setMessages([]);
-            localStorage.removeItem("budget-buddy-chat-history");
-            toast.success("History cleared");
-        }
+        setMessages([]);
+        setUserPersona(null);
+        localStorage.removeItem("budget-buddy-chat-history");
+        localStorage.removeItem("budget-buddy-user-persona");
+        setShowClearConfirm(false);
+        toast.success("History cleared");
     };
 
     useEffect(() => {
@@ -394,6 +413,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             if (result.error) {
                 typeMessage(result.error as string);
             } else if (result.text) {
+                if (result.persona) setUserPersona(result.persona);
                 typeMessage(result.text as string);
             }
         } catch (error) {
@@ -434,6 +454,8 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                     if (f.maxAmount) params.set("maxAmount", f.maxAmount.toString());
                     if (f.from) params.set("from", f.from);
                     if (f.to) params.set("to", f.to);
+
+                    if (result.persona) setUserPersona(result.persona);
 
                     router.push(`/transactions?${params.toString()}`);
                     toast.success("Applied search filters!");
@@ -478,6 +500,26 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                             <span className="font-bold text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                                 Budget Buddy AI
                             </span>
+                            {!isMinimized && userPersona && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className={cn(
+                                        "hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border shadow-sm ml-2",
+                                        userPersona === "Squirrel" && "bg-amber-500/10 border-amber-500/20 text-amber-600",
+                                        userPersona === "Peacock" && "bg-purple-500/10 border-purple-500/20 text-purple-600",
+                                        userPersona === "Owl" && "bg-indigo-500/10 border-indigo-500/20 text-indigo-600",
+                                        userPersona === "Fox" && "bg-orange-500/10 border-orange-500/20 text-orange-600"
+                                    )}
+                                >
+                                    <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                        {userPersona === "Squirrel" && <>🐿️ <span className="opacity-80">Squirrel</span></>}
+                                        {userPersona === "Peacock" && <>🦚 <span className="opacity-80">Peacock</span></>}
+                                        {userPersona === "Owl" && <>🦉 <span className="opacity-80">Owl</span></>}
+                                        {userPersona === "Fox" && <>🦊 <span className="opacity-80">Fox</span></>}
+                                    </span>
+                                </motion.div>
+                            )}
                         </div>
                         <div className="flex items-center gap-1">
                             {!isMinimized && (
@@ -485,7 +527,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={clearHistory}
+                                        onClick={() => setShowClearConfirm(true)}
                                         className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
                                         title="Clear history"
                                     >
@@ -706,6 +748,28 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                             </div>
                         </>
                     )}
+                    <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+                        <AlertDialogContent className="w-[90vw] max-w-[400px] rounded-2xl">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className="flex items-center gap-2">
+                                    <Trash2 className="h-5 w-5 text-destructive" />
+                                    Clear Chat History
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete your entire conversation history with Budget Buddy. This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex-row gap-2">
+                                <AlertDialogCancel className="flex-1 rounded-xl">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={clearHistory}
+                                    className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl"
+                                >
+                                    Clear History
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </motion.div>
             )}
         </AnimatePresence>

@@ -45,7 +45,7 @@ export async function ChatWithAI(
 						},
 					},
 					orderBy: { date: "desc" },
-					take: 1000, // Safety limit for 2 months of activity
+					take: 1000,
 					select: {
 						amount: true,
 						description: true,
@@ -72,8 +72,71 @@ export async function ChatWithAI(
 		currency = userSettings?.currency || "USD";
 		availableCategories = categories.map((c) => c.name);
 
+		// --- PERSONA LOGIC ---
+		const last30Days = new Date();
+		last30Days.setDate(last30Days.getDate() - 30);
+
+		const recentTx = transactions.filter((t) => t.date >= last30Days);
+		const totalIncome = recentTx
+			.filter((t) => t.type === "income")
+			.reduce((acc, t) => acc + t.amount, 0);
+		const totalExpense = recentTx
+			.filter((t) => t.type === "expense")
+			.reduce((acc, t) => acc + t.amount, 0);
+
+		const luxuryCategories = [
+			"Shopping",
+			"Entertainment",
+			"Travel",
+			"Dining",
+			"Luxury",
+			"Misc",
+		];
+		const luxurySpending = recentTx
+			.filter(
+				(t) => t.type === "expense" && luxuryCategories.includes(t.category),
+			)
+			.reduce((acc, t) => acc + t.amount, 0);
+
+		const savingsRate =
+			totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
+		const luxuryRate = totalExpense > 0 ? luxurySpending / totalExpense : 0;
+
+		// Check Budget Adherence
+		let overBudgetCount = 0;
+		budgets.forEach((b) => {
+			const spentInCategory = recentTx
+				.filter((t) => t.type === "expense" && t.category === b.category)
+				.reduce((acc, t) => acc + t.amount, 0);
+			if (spentInCategory > b.amount) overBudgetCount++;
+		});
+		const budgetAdherence =
+			budgets.length > 0 ? 1 - overBudgetCount / budgets.length : 1;
+
+		let persona = "Fox";
+		let personaPersonality = "";
+
+		if (savingsRate > 0.3) {
+			persona = "Squirrel";
+			personaPersonality =
+				"USER PERSONA: Squirrel (Wealth Builder). Be encouraging, praise their discipline, and suggest how to optimize their growing savings. Personality: Wise, protective, and slightly obsessive about nuts (savings).";
+		} else if (luxuryRate > 0.4) {
+			persona = "Peacock";
+			personaPersonality =
+				"USER PERSONA: Peacock (Luxury Spender). Be a bit 'savage' and playfully roast their high-end spending. Urge them to find value and cut unnecessary waste. Personality: Glamorous, bold, but brutally honest about overpriced vanity.";
+		} else if (budgetAdherence > 0.9 && budgets.length > 0) {
+			persona = "Owl";
+			personaPersonality =
+				"USER PERSONA: Owl (The Strategist). They are perfect at budgeting. Be professional, data-driven, and provide high-level insights. Personality: Intelligent, calm, and focused on long-term foresight.";
+		} else {
+			persona = "Fox";
+			personaPersonality =
+				"USER PERSONA: Fox (Balanced). Be quick, clever, and help them maintain their steady financial balance. Personality: Agile, street-smart, and always looking for the best deal/opportunity.";
+		}
+
 		contextData = `
 User Currency: ${currency}
+User Financial Persona: ${persona}
 Available Categories: ${availableCategories.join(", ")}
 Recent Transactions:
 ${transactions.map((t) => `- ${t.date.toISOString().split("T")[0]}: ${t.type} ${t.amount} (${t.category}) "${t.description}"`).join("\n")}
@@ -82,12 +145,10 @@ ${budgets.map((b) => `- ${b.category}: ${b.amount}`).join("\n")}
 Savings Goals:
 ${savingsGoals.map((s) => `- ${s.name}: ${s.currentAmount}/${s.targetAmount}`).join("\n")}
 `;
-	} catch (error) {
-		console.error("Error fetching context data:", error);
-		return { error: "Failed to fetch financial data." };
-	}
 
-	const systemInstruction = `You are Budget Buddy, an expert financial analyst.
+		const systemInstruction = `You are Budget Buddy, an expert financial analyst with a unique personality adapted to the user.
+${personaPersonality}
+
 Use the provided data to answer user questions.
 Format amounts in ${currency}.
 Be concise and helpful.
@@ -97,7 +158,7 @@ Use Markdown.
 1. **Transaction Creation**: Use 'create_transaction' to log new items.
 2. **Visualizations (PRIORITY)**: If the user asks for a chart, bar chart, or summary, use the provided context Data to build a visual component. EMBED it at the END of your text response:
    - [BAR_CHART: { "title": "Spending by Category", "data": [{ "label": "Food", "value": 450 }, { "label": "Bills", "value": 1200 }] }]
-   - [PROGRESS_BAR: { "label": "Monthly Goal", "current": 800, "target": 1000, "color": "blue" }]
+   - [PROGRESS_BAR: { "label": "Food Budget", "current": 450, "target": 500, "color": "amber" }]
    - [MINI_TREND: { "data": [10, 25, 15, 40, 30], "label": "Recent activity" }]
 
 3. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
@@ -107,301 +168,89 @@ Use Markdown.
 - Aggregate values by category or date.
 - **LIMIT**: Only include the **Top 10** labels to keep the chart clean and avoid response truncation.
 - Summarize the data in 1-2 sentences, then provide the [BAR_CHART: ...] tag.
-- Ensure the JSON is compact and correctly closed with }].
 
 Data:
 ${contextData}`;
 
-	const tools: any[] = [
-		{
-			type: "function",
-			function: {
-				name: "create_transaction",
-				description: "Create a new financial transaction (income or expense)",
-				parameters: {
-					type: "object",
-					properties: {
-						amount: {
-							type: "number",
-							description: "Amount of the transaction",
+		const tools: any[] = [
+			{
+				type: "function",
+				function: {
+					name: "create_transaction",
+					description: "Create a new financial transaction (income or expense)",
+					parameters: {
+						type: "object",
+						properties: {
+							amount: { type: "number", description: "Amount" },
+							description: { type: "string", description: "Description" },
+							date: { type: "string", description: "Date (YYYY-MM-DD)" },
+							category: {
+								type: "string",
+								description: "Category from available list",
+							},
+							type: {
+								type: "string",
+								enum: ["income", "expense"],
+								description: "Type",
+							},
 						},
-						description: {
-							type: "string",
-							description: "Description or title of the transaction",
-						},
-						date: {
-							type: "string",
-							description: "Date of the transaction in ISO format (YYYY-MM-DD)",
-						},
-						category: {
-							type: "string",
-							description:
-								"Category of the transaction. Must be strictly one of: " +
-								availableCategories.join(", "),
-						},
-						type: {
-							type: "string",
-							enum: ["income", "expense"],
-							description: "Type of transaction",
-						},
-					},
-					required: ["amount", "date", "category", "type"],
-				},
-			},
-		},
-		{
-			type: "function",
-			function: {
-				name: "search_transactions",
-				description:
-					"Filter and find specific transactions in the user's history",
-				parameters: {
-					type: "object",
-					properties: {
-						query: { type: "string", description: "Text search query" },
-						category: { type: "string", description: "Filter by category" },
-						type: {
-							type: "string",
-							enum: ["income", "expense"],
-							description: "Filter by type",
-						},
-						minAmount: { type: "number", description: "Minimum amount" },
-						maxAmount: { type: "number", description: "Maximum amount" },
-						from: { type: "string", description: "Start date (YYYY-MM-DD)" },
-						to: { type: "string", description: "End date (YYYY-MM-DD)" },
+						required: ["amount", "date", "category", "type"],
 					},
 				},
 			},
-		},
-	];
+			{
+				type: "function",
+				function: {
+					name: "search_transactions",
+					description: "Filter and find specific transactions",
+					parameters: {
+						type: "object",
+						properties: {
+							query: { type: "string" },
+							category: { type: "string" },
+							type: { type: "string", enum: ["income", "expense"] },
+							minAmount: { type: "number" },
+							maxAmount: { type: "number" },
+							from: { type: "string" },
+							to: { type: "string" },
+						},
+					},
+				},
+			},
+		];
 
-	// Attempt 1: Groq
-	if (groqApiKey) {
-		try {
-			console.log("Attempting Groq...");
-			const groq = new Groq({ apiKey: groqApiKey });
+		// Attempt 1: Groq
+		if (groqApiKey) {
+			try {
+				const groq = new Groq({ apiKey: groqApiKey });
+				const messages: any[] = [
+					{ role: "system", content: systemInstruction },
+					...history.map((msg) => ({
+						role: (msg.role === "model" ? "assistant" : "user") as any,
+						content: msg.parts.map((p) => p.text || "").join(" "),
+					})),
+					{ role: "user", content: message },
+				];
 
-			const messages: any[] = [
-				{ role: "system", content: systemInstruction },
-				...history.map((msg) => ({
-					role: msg.role === "model" ? "assistant" : "user",
-					content: msg.parts.map((p) => p.text || "").join(" "),
-				})),
-				{ role: "user", content: message },
-			];
+				const groqModels = ["llama-3.3-70b-versatile", "llama3-70b-8192"];
 
-			const groqModels = [
-				"groq/compound-mini",
-				"llama-3.3-70b-versatile",
-				"moonshotai/kimi-k2-instruct",
-				"openai/gpt-oss-safeguard-20b",
-			];
+				for (const model of groqModels) {
+					try {
+						const completion = await groq.chat.completions.create({
+							messages,
+							model,
+							tools,
+							tool_choice: "auto",
+						});
 
-			for (const model of groqModels) {
-				try {
-					console.log(`Groq: Attempting model: ${model}`);
-					const completion = await groq.chat.completions.create({
-						messages: messages,
-						model: model,
-						tools: tools,
-						tool_choice: "auto",
-					});
+						const responseMessage = completion.choices[0].message;
 
-					const choice = completion.choices[0];
-					const responseMessage = choice.message;
-
-					// Handle Tool Calls
-					if (
-						responseMessage.tool_calls &&
-						responseMessage.tool_calls.length > 0
-					) {
-						const toolCall = responseMessage.tool_calls[0] as any;
-						if (toolCall.function?.name === "create_transaction") {
-							try {
-								const args = JSON.parse(toolCall.function.arguments);
-								console.log("Executing create_transaction with args:", args);
-
-								await CreateTransaction({
-									amount: args.amount,
-									description: args.description || "AI Created Transaction",
-									date: new Date(args.date),
-									category: args.category,
-									type: args.type,
-								});
-
-								// Impact Analysis Logic
-								const [updatedBudgets, updatedSavingsGoals] = await Promise.all(
-									[
-										prisma.budget.findMany({
-											where: { userId: user.id },
-											select: { category: true, amount: true },
-										}),
-										prisma.savingsGoal.findMany({
-											where: { userId: user.id, isCompleted: false },
-											select: {
-												name: true,
-												targetAmount: true,
-												currentAmount: true,
-											},
-										}),
-									],
-								);
-
-								let impactMessage = "";
-								if (args.type === "expense") {
-									const categoryBudget = updatedBudgets.find(
-										(b) => b.category === args.category,
-									);
-									if (categoryBudget) {
-										const monthTransactions = await prisma.transaction.findMany(
-											{
-												where: {
-													userId: user.id,
-													category: args.category,
-													date: {
-														gte: new Date(
-															new Date().getFullYear(),
-															new Date().getMonth(),
-															1,
-														),
-													},
-												},
-												select: { amount: true },
-											},
-										);
-										const totalSpent = monthTransactions.reduce(
-											(sum, t) => sum + t.amount,
-											0,
-										);
-										const remaining = categoryBudget.amount - totalSpent;
-										impactMessage +=
-											remaining < 0
-												? `\n\n⚠️ **Budget Warning**: You've exceeded your ${args.category} budget by ${Math.abs(remaining).toFixed(2)} ${currency}.`
-												: `\n\n📊 **Budget Status**: ${remaining.toFixed(2)} ${currency} left in your ${args.category} monthly budget.`;
-									}
-									if (updatedSavingsGoals.length > 0) {
-										const totalIncome = await prisma.transaction.aggregate({
-											where: {
-												userId: user.id,
-												type: "income",
-												date: {
-													gte: new Date(
-														new Date().getFullYear(),
-														new Date().getMonth(),
-														1,
-													),
-												},
-											},
-											_sum: { amount: true },
-										});
-										const totalExpenses = await prisma.transaction.aggregate({
-											where: {
-												userId: user.id,
-												type: "expense",
-												date: {
-													gte: new Date(
-														new Date().getFullYear(),
-														new Date().getMonth(),
-														1,
-													),
-												},
-											},
-											_sum: { amount: true },
-										});
-										if (
-											(totalIncome._sum.amount || 0) <
-											(totalExpenses._sum.amount || 0)
-										) {
-											impactMessage += `\n\n🎯 **Goal Impact**: Your monthly spending currently exceeds your income. This may delay your "${updatedSavingsGoals[0].name}" goal.`;
-										}
-									}
-								}
-
-								return {
-									text: `✅ Successfully created a ${args.type} of ${args.amount} ${currency} for "${args.description || "items"}" under ${args.category}.${impactMessage}`,
-								};
-							} catch (err: any) {
-								console.error("Tool Execution Error:", err);
-								return {
-									text: `❌ Failed to create transaction: ${err.message}`,
-								};
-							}
-						}
-
-						if (toolCall.function?.name === "search_transactions") {
-							const args = JSON.parse(toolCall.function.arguments);
-							console.log("Applying filters via AI:", args);
-							return {
-								text: `🔍 I've found those records for you! I'm updating your view with the requested filters: ${args.query || args.category || "criteria"}.`,
-								filter: args,
-							};
-						}
-					}
-
-					const text = responseMessage.content || "";
-					console.log(`Groq: Success with ${model}`);
-					return { text };
-				} catch (innerError: any) {
-					console.error(`Groq Model ${model} failed:`, innerError.message);
-					// Continue loop to next Groq model
-				}
-			}
-		} catch (error: any) {
-			console.error("Groq Setup Error:", error.message);
-			// Fallthrough to OpenRouter
-		}
-	}
-
-	// Attempt 2: OpenRouter Fallback
-	if (openRouterApiKey) {
-		try {
-			console.log("Falling back to OpenRouter...");
-			const client = new OpenAI({
-				baseURL: "https://openrouter.ai/api/v1",
-				apiKey: openRouterApiKey,
-			});
-
-			// Models to try in order
-			const models = [
-				"moonshotai/kimi-k2-instruct",
-				"deepseek/deepseek-r1-0528:free",
-				"meta-llama/llama-3.3-70b-instruct:free",
-				"qwen/qwen3-coder:free",
-				"openai/gpt-oss-safeguard-20b",
-			];
-
-			const messages: any[] = [
-				{ role: "system", content: systemInstruction },
-				...history.map((msg) => ({
-					role: msg.role === "model" ? "assistant" : "user",
-					content: msg.parts.map((p) => p.text || "").join(" "),
-				})),
-				{ role: "user", content: message },
-			];
-
-			for (const model of models) {
-				try {
-					console.log(`OpenRouter: Attempting model: ${model}`);
-					// Note: OpenRouter support for tools varies by model.
-					// For simplicity, we fallback to text-only for OpenRouter or attempt tools if supported.
-					// Llama 3.3 70b Instruct usually supports tools.
-
-					const completion = await client.chat.completions.create({
-						model: model,
-						messages: messages,
-						tools: tools,
-					});
-
-					const choice = completion.choices[0];
-					const responseMessage = choice.message;
-
-					if (
-						responseMessage.tool_calls &&
-						responseMessage.tool_calls.length > 0
-					) {
-						const toolCall = responseMessage.tool_calls[0] as any;
-						if (toolCall.function?.name === "create_transaction") {
-							try {
+						if (
+							responseMessage.tool_calls &&
+							responseMessage.tool_calls.length > 0
+						) {
+							const toolCall = responseMessage.tool_calls[0] as any;
+							if (toolCall.function?.name === "create_transaction") {
 								const args = JSON.parse(toolCall.function.arguments);
 								await CreateTransaction({
 									amount: args.amount,
@@ -410,131 +259,86 @@ ${contextData}`;
 									category: args.category,
 									type: args.type,
 								});
-
-								// Impact Analysis Logic
-								const [updatedBudgets, updatedSavingsGoals] = await Promise.all(
-									[
-										prisma.budget.findMany({
-											where: { userId: user.id },
-											select: { category: true, amount: true },
-										}),
-										prisma.savingsGoal.findMany({
-											where: { userId: user.id, isCompleted: false },
-											select: {
-												name: true,
-												targetAmount: true,
-												currentAmount: true,
-											},
-										}),
-									],
-								);
-
-								let impactMessage = "";
-								if (args.type === "expense") {
-									const categoryBudget = updatedBudgets.find(
-										(b) => b.category === args.category,
-									);
-									if (categoryBudget) {
-										const monthTransactions = await prisma.transaction.findMany(
-											{
-												where: {
-													userId: user.id,
-													category: args.category,
-													date: {
-														gte: new Date(
-															new Date().getFullYear(),
-															new Date().getMonth(),
-															1,
-														),
-													},
-												},
-												select: { amount: true },
-											},
-										);
-										const totalSpent = monthTransactions.reduce(
-											(sum, t) => sum + t.amount,
-											0,
-										);
-										const remaining = categoryBudget.amount - totalSpent;
-										impactMessage +=
-											remaining < 0
-												? `\n\n⚠️ **Budget Warning**: You've exceeded your ${args.category} budget by ${Math.abs(remaining).toFixed(2)} ${currency}.`
-												: `\n\n📊 **Budget Status**: ${remaining.toFixed(2)} ${currency} left in your ${args.category} monthly budget.`;
-									}
-									if (updatedSavingsGoals.length > 0) {
-										const totalIncome = await prisma.transaction.aggregate({
-											where: {
-												userId: user.id,
-												type: "income",
-												date: {
-													gte: new Date(
-														new Date().getFullYear(),
-														new Date().getMonth(),
-														1,
-													),
-												},
-											},
-											_sum: { amount: true },
-										});
-										const totalExpenses = await prisma.transaction.aggregate({
-											where: {
-												userId: user.id,
-												type: "expense",
-												date: {
-													gte: new Date(
-														new Date().getFullYear(),
-														new Date().getMonth(),
-														1,
-													),
-												},
-											},
-											_sum: { amount: true },
-										});
-										if (
-											(totalIncome._sum.amount || 0) <
-											(totalExpenses._sum.amount || 0)
-										) {
-											impactMessage += `\n\n🎯 **Goal Impact**: Your monthly spending currently exceeds your income. This may delay your "${updatedSavingsGoals[0].name}" goal.`;
-										}
-									}
-								}
-
 								return {
-									text: `✅ Successfully created a ${args.type} of ${args.amount} ${currency} for "${args.description || "items"}" under ${args.category}.${impactMessage}`,
+									text: `✅ Created ${args.type} of ${args.amount} for "${args.description}"`,
+									persona,
 								};
-							} catch (err: any) {
+							}
+							if (toolCall.function?.name === "search_transactions") {
 								return {
-									text: `❌ Failed to create transaction: ${err.message}`,
+									text: `🔍 Querying and filtering your view...`,
+									filter: JSON.parse(toolCall.function.arguments),
+									persona,
 								};
 							}
 						}
-
-						if (toolCall.function?.name === "search_transactions") {
-							const args = JSON.parse(toolCall.function.arguments);
-							return {
-								text: `🔍 Querying your records... I've found what you were looking for and filtered your view accordingly!`,
-								filter: args,
-							};
-						}
+						return { text: responseMessage.content || "", persona };
+					} catch (e) {
+						continue;
 					}
-
-					const text = responseMessage.content || "";
-					console.log(`OpenRouter: Success with ${model}`);
-					return { text };
-				} catch (innerError: any) {
-					console.error(
-						`OpenRouter Model ${model} failed:`,
-						innerError.message,
-					);
-					// Continue loop
 				}
+			} catch (e) {
+				console.error("Groq Error", e);
 			}
-		} catch (error: any) {
-			console.error("OpenRouter Setup Error:", error.message);
 		}
+
+		// Attempt 2: OpenRouter
+		if (openRouterApiKey) {
+			try {
+				const openai = new OpenAI({
+					baseURL: "https://openrouter.ai/api/v1",
+					apiKey: openRouterApiKey,
+				});
+				const response = await openai.chat.completions.create({
+					model: "google/gemini-2.0-flash-exp:free",
+					messages: [
+						{ role: "system", content: systemInstruction },
+						...history.map((msg) => ({
+							role: (msg.role === "model" ? "assistant" : "user") as any,
+							content: msg.parts.map((p) => p.text || "").join(" "),
+						})),
+						{ role: "user", content: message },
+					],
+					tools,
+				});
+
+				const responseMessage = response.choices[0].message;
+				if (
+					responseMessage.tool_calls &&
+					responseMessage.tool_calls.length > 0
+				) {
+					const toolCall = responseMessage.tool_calls[0] as any;
+					if (toolCall.function?.name === "create_transaction") {
+						const args = JSON.parse(toolCall.function.arguments);
+						await CreateTransaction({
+							amount: args.amount,
+							description: args.description || "AI Created",
+							date: new Date(args.date),
+							category: args.category,
+							type: args.type,
+						});
+						return {
+							text: `✅ Created ${args.type} of ${args.amount}`,
+							persona,
+						};
+					}
+					if (toolCall.function?.name === "search_transactions") {
+						return {
+							text: `🔍 Filtering view...`,
+							filter: JSON.parse(toolCall.function.arguments),
+							persona,
+						};
+					}
+				}
+				return { text: responseMessage.content || "", persona };
+			} catch (e) {
+				console.error("OpenRouter Error", e);
+			}
+		}
+	} catch (error) {
+		console.error("AI Flow Error", error);
+		return { error: "Failed to process AI request." };
 	}
 
-	return {
-		error: "AI Service Unavailable. All providers and models failed.",
-	};
+	return { error: "AI Service Unavailable." };
 }
