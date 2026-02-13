@@ -2,16 +2,11 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank, Mic, MicOff, Volume2, Trash2, LineChart, Sparkles } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Bot, Loader2 } from "lucide-react";
 import { ChatWithAI } from "@/app/(dashboard)/_actions/ai";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Progress } from "@/components/ui/progress";
-import { TrendingUp, BarChart3, ImagePlus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 import { ConvertCurrency } from "@/app/(dashboard)/_actions/conversion";
 import { GetUserSettings } from "@/app/(dashboard)/_actions/user-settings";
@@ -25,8 +20,15 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
-interface Message {
+// Refactored Components
+import { ChatHeader } from "./chat/ChatHeader";
+import { ChatInput } from "./chat/ChatInput";
+import { MessageItem } from "./chat/MessageItem";
+import { HealthScoreBar } from "./chat/HealthScoreBar";
+
+export interface Message {
     role: "user" | "model";
     parts: { text: string }[];
 }
@@ -61,7 +63,6 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         if (saved) {
             try {
                 const { messages: savedMessages, timestamp } = JSON.parse(saved);
-                // Keep history for 24 hours
                 const isRecent = Date.now() - timestamp < 24 * 60 * 60 * 1000;
                 if (isRecent && savedMessages.length > 0) {
                     setMessages(savedMessages);
@@ -97,7 +98,6 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     useEffect(() => {
         if (typeof window !== "undefined") {
             const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            // ... (omitted same lines for brevity, actually I should include them in replacement)
             if (SpeechRecognition) {
                 recognitionRef.current = new SpeechRecognition();
                 recognitionRef.current.continuous = false;
@@ -139,9 +139,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
 
     const speakText = (text: string) => {
         if (typeof window !== "undefined" && window.speechSynthesis) {
-            // Cancel any current speaking
             window.speechSynthesis.cancel();
-
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
@@ -155,226 +153,39 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading]);
 
-    const LivingUIRenderer = ({ text }: { text: string }) => {
-        // Find [COMPONENT: {json}]
-        const components: React.ReactNode[] = [];
-
-        // Match [PROGRESS_BAR: {...}]
-        const progressBarRegex = /\[PROGRESS_BAR:\s*({[\s\S]*?})\s*\]/g;
-        let match;
-        while ((match = progressBarRegex.exec(text)) !== null) {
-            try {
-                const jsonStr = match[1].trim();
-                if (!jsonStr.endsWith("}")) continue; // Incomplete JSON
-                const data = JSON.parse(jsonStr);
-                components.push(
-                    <div key={`pb-${match.index}`} className="mt-4 p-3 rounded-lg bg-background/50 border border-border shadow-sm">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-semibold">{data.label}</span>
-                            <span className="text-[10px] text-muted-foreground">{((data.current / data.target) * 100).toFixed(0)}%</span>
-                        </div>
-                        <Progress value={(data.current / data.target) * 100} className={cn("h-1.5", data.color === "orange" ? "bg-orange-500/20" : "")} />
-                        <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
-                            <span>{data.current} spent</span>
-                            <span>{data.target} budget</span>
-                        </div>
-                    </div>
-                );
-            } catch (e) { /* Fail silently during typing */ }
-        }
-
-        // Match [MINI_TREND: {...}]
-        const trendRegex = /\[MINI_TREND:\s*({[\s\S]*?})\s*\]/g;
-        while ((match = trendRegex.exec(text)) !== null) {
-            try {
-                const jsonStr = match[1].trim();
-                if (!jsonStr.endsWith("}")) continue; // Incomplete JSON
-                const data = JSON.parse(jsonStr);
-                components.push(
-                    <div key={`trend-${match.index}`} className="mt-4 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 shadow-sm flex items-center gap-3">
-                        <TrendingUp className="h-4 w-4 text-emerald-500" />
-                        <div className="flex-1">
-                            <p className="text-xs font-semibold text-emerald-600">{data.label}</p>
-                            <div className="flex items-end gap-0.5 h-6 mt-1">
-                                {data.data.map((v: number, i: number) => (
-                                    <div key={i} className="flex-1 bg-emerald-400/50 rounded-t-sm" style={{ height: `${(v / Math.max(...data.data)) * 100}%` }} />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                );
-            } catch (e) { /* Fail silently during typing */ }
-        }
-
-        // Match [BAR_CHART: {...}]
-        const barChartRegex = /\[BAR_CHART:\s*({[\s\S]*?})\s*\]/g;
-        while ((match = barChartRegex.exec(text)) !== null) {
-            try {
-                let jsonStr = match[1].trim();
-
-                // Stricter check: Bar chart JSON must end with "}]" or "}}" to be considered "complete"
-                if (!jsonStr.endsWith("}]") && !jsonStr.endsWith("}}")) {
-                    continue;
-                }
-
-                // Extremely permissive: if it looks like single quotes are used, try to fix them
-                if (jsonStr.includes("'") && !jsonStr.includes('"')) {
-                    jsonStr = jsonStr.replace(/'/g, '"');
-                }
-
-                const data = JSON.parse(jsonStr);
-                const chartData = Array.isArray(data) ? data : (data.data || []);
-
-                if (!Array.isArray(chartData) || chartData.length === 0) {
-                    console.log("LivingUI: BarChart has no data", data);
-                    continue;
-                }
-
-                components.push(
-                    <div key={`bar-${match.index}`} className="mt-4 p-4 rounded-xl bg-card border border-border shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <div className="flex items-center gap-2 mb-4">
-                            <BarChart3 className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-bold tracking-tight">{data.title || "Financial Breakdown"}</span>
-                        </div>
-                        <div className="flex items-end gap-3 h-40 px-2 pb-6">
-                            {chartData.map((item: any, i: number) => {
-                                const label = item.label || item.name || item.category || item.date || `Item ${i + 1}`;
-                                const value = Number(item.value || item.amount || 0);
-                                const rawMaxValue = Math.max(...chartData.map((d: any) => Number(d.value || d.amount || 0)));
-                                const maxValue = rawMaxValue > 0 ? rawMaxValue : 1;
-                                const heightPercentage = Math.max((value / maxValue) * 100, 5); // Min 5% height for visibility
-
-                                return (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                                        <div className="relative w-full group">
-                                            <div
-                                                className="w-full bg-primary/20 rounded-t-lg absolute bottom-0 left-0 transition-all duration-700"
-                                                style={{ height: `${heightPercentage}%` }}
-                                            />
-                                            <div
-                                                className="w-full bg-primary rounded-t-lg absolute bottom-0 left-0 transition-all duration-1000 group-hover:bg-primary/80"
-                                                style={{ height: `${heightPercentage}%`, transformOrigin: 'bottom' }}
-                                            />
-                                            {/* Tooltip on hover */}
-                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-sm border border-border pointer-events-none z-10">
-                                                {value.toFixed(2)}
-                                            </div>
-                                        </div>
-                                        <div className="h-4 flex items-center justify-center w-full">
-                                            <span className="text-[10px] font-medium text-muted-foreground truncate w-full text-center group-hover:text-foreground transition-colors">
-                                                {label}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            } catch (e: any) {
-                // Only log if we have a full-looking tag that failed
-                if (match[1].includes('"data"') || match[1].includes("'data'")) {
-                    console.error("LivingUI: BarChart Parse Failed", e.message, match[1]);
-                }
+    const typeMessage = (fullText: string) => {
+        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }] }]);
+        let i = 0;
+        const speed = 10;
+        const typeChar = () => {
+            if (i < fullText.length) {
+                const currentText = fullText.substring(0, i + 1);
+                setMessages((prev) => {
+                    const next = [...prev];
+                    const lastIdx = next.length - 1;
+                    if (next[lastIdx] && next[lastIdx].role === "model") {
+                        next[lastIdx] = {
+                            ...next[lastIdx],
+                            parts: [{ text: currentText }]
+                        };
+                    }
+                    return next;
+                });
+                i++;
+                setTimeout(typeChar, speed);
             }
-        }
-
-        // Match [LINE_CHART: {...}]
-        const lineChartRegex = /\[LINE_CHART:\s*({[\s\S]*?})\s*\]/g;
-        while ((match = lineChartRegex.exec(text)) !== null) {
-            try {
-                const data = JSON.parse(match[1].trim());
-                const points = data.data || [];
-                const labels = data.labels || [];
-                const max = Math.max(...points, 1);
-
-                // Construct animated path
-                const width = 300;
-                const height = 100;
-                const step = width / (points.length - 1);
-                const pathData = points.map((p: number, i: number) =>
-                    `${i === 0 ? 'M' : 'L'} ${i * step} ${height - (p / max) * height}`
-                ).join(' ');
-
-                components.push(
-                    <div key={`line-${match.index}`} className="mt-4 p-4 rounded-xl bg-gradient-to-br from-card to-secondary/30 border border-border shadow-md overflow-hidden animate-in zoom-in-95 duration-500">
-                        <div className="flex items-center gap-2 mb-4">
-                            <LineChart className="h-4 w-4 text-emerald-500" />
-                            <span className="text-sm font-bold">{data.title || "Trend Analysis"}</span>
-                        </div>
-                        <div className="relative h-28 w-full mt-2">
-                            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
-                                <defs>
-                                    <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                                    </linearGradient>
-                                </defs>
-                                {/* Area fill */}
-                                <motion.path
-                                    initial={{ d: `M 0 ${height} L ${width} ${height} L ${width} ${height} L 0 ${height} Z` }}
-                                    animate={{ d: `${pathData} L ${width} ${height} L 0 ${height} Z` }}
-                                    transition={{ duration: 1.5, ease: "easeOut" }}
-                                    fill="url(#lineGradient)"
-                                />
-                                {/* Main line */}
-                                <motion.path
-                                    initial={{ pathLength: 0 }}
-                                    animate={{ pathLength: 1 }}
-                                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                                    d={pathData}
-                                    fill="none"
-                                    stroke="#10b981"
-                                    strokeWidth="3"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
-                        </div>
-                        <div className="flex justify-between mt-2">
-                            {labels.map((l: string, i: number) => (
-                                <span key={i} className="text-[10px] text-muted-foreground font-medium">{l}</span>
-                            ))}
-                        </div>
-                    </div>
-                );
-            } catch (e) { /* silent */ }
-        }
-
-        // Match [SUGGESTIONS: [...]]
-        const suggestionRegex = /\[SUGGESTIONS:\s*(\[[\s\S]*?\])\s*\]/g;
-        while ((match = suggestionRegex.exec(text)) !== null) {
-            try {
-                const suggestions = JSON.parse(match[1].trim());
-                components.push(
-                    <div key={`sug-${match.index}`} className="mt-4 flex flex-wrap gap-2">
-                        {suggestions.map((s: string, i: number) => (
-                            <button
-                                key={i}
-                                onClick={() => handleSend(s)}
-                                className="text-xs px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/20 border border-primary/20 transition-all hover:scale-105 active:scale-95 text-primary font-medium flex items-center gap-1.5 shadow-sm"
-                            >
-                                <Sparkles className="h-3 w-3" />
-                                {s}
-                            </button>
-                        ))}
-                    </div>
-                );
-            } catch (e) { /* silent */ }
-        }
-
-        return <>{components}</>;
+        };
+        typeChar();
     };
 
     const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
         if (!file.type.startsWith("image/")) {
             toast.error("Please upload an image file");
             return;
         }
-
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
             toast.error("Image must be less than 5MB");
             return;
@@ -384,22 +195,17 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         toast.loading("Scanning receipt...", { id: "receipt-scan" });
 
         try {
-            // Convert to base64
             const reader = new FileReader();
             reader.onload = async () => {
                 const base64 = reader.result as string;
-
                 const result = await ExtractReceiptData(base64);
 
                 if (result.success && result.data) {
                     const { merchant, amount, date, currency: receiptCurrency, category } = result.data;
-
-                    // Fetch user settings to get base currency
                     const userSettings = await GetUserSettings();
                     const baseCurrency = userSettings.currency;
 
                     let displayMsg = `🧾 **Receipt Detected!**\n\nI found a ${receiptCurrency || "USD"} ${amount?.toFixed(2) || "??"} receipt from **${merchant || "Unknown Merchant"}**${date ? ` on ${date}` : ""}.`;
-
                     let finalAmount = amount;
 
                     if (receiptCurrency && receiptCurrency !== baseCurrency && amount) {
@@ -412,25 +218,17 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
 
                     setPendingReceipt({
                         ...result.data,
-                        amount: finalAmount, // Use the converted amount for the transaction
+                        amount: finalAmount,
                         originalAmount: amount,
                         originalCurrency: receiptCurrency
                     });
 
                     const confirmMsg = `${displayMsg}\n\nShould I log this under **${category || "Other"}**?\n\n*Click "Confirm" below to create this transaction.*`;
-
-                    setMessages(prev => [...prev, {
-                        role: "model",
-                        parts: [{ text: confirmMsg }]
-                    }]);
-
+                    setMessages(prev => [...prev, { role: "model", parts: [{ text: confirmMsg }] }]);
                     toast.success("Receipt scanned & reconciled!", { id: "receipt-scan" });
                 } else {
                     toast.error(result.error || "Failed to scan receipt", { id: "receipt-scan" });
-                    setMessages(prev => [...prev, {
-                        role: "model",
-                        parts: [{ text: "❌ I couldn't extract data from that receipt. Please try a clearer image or enter the transaction manually." }]
-                    }]);
+                    setMessages(prev => [...prev, { role: "model", parts: [{ text: "❌ I couldn't extract data from that receipt. Please try a clearer image or enter the transaction manually." }] }]);
                 }
             };
             reader.readAsDataURL(file);
@@ -442,58 +240,18 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         }
     };
 
-    const typeMessage = (fullText: string) => {
-        // First add the empty model message
-        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }] }]);
-
-        let i = 0;
-        const speed = 10;
-
-        const typeChar = () => {
-            if (i < fullText.length) {
-                const currentText = fullText.substring(0, i + 1);
-                setMessages((prev) => {
-                    const next = [...prev];
-                    const lastIdx = next.length - 1;
-                    if (next[lastIdx] && next[lastIdx].role === "model") {
-                        // Crucially: replace the entire text with the current substring
-                        // This prevents doubling if the updater runs twice (StrictMode)
-                        next[lastIdx] = {
-                            ...next[lastIdx],
-                            parts: [{ text: currentText }]
-                        };
-                    }
-                    return next;
-                });
-                i++;
-                setTimeout(typeChar, speed);
-            }
-        };
-
-        typeChar();
-    };
-
     const handleConfirmReceipt = async () => {
         if (!pendingReceipt) return;
-
         const { merchant, amount, date, category } = pendingReceipt;
-
-        // Create a natural language request for the AI
         const transactionRequest = `Create an expense transaction for ${amount} from ${merchant || "Unknown"} under ${category || "Other"} category${date ? ` on ${date}` : ""}`;
-
-        // Add user message
-        const userMessage: Message = {
-            role: "user",
-            parts: [{ text: transactionRequest }],
-        };
-
+        
+        const userMessage: Message = { role: "user", parts: [{ text: transactionRequest }] };
         setMessages((prev) => [...prev, userMessage]);
         setPendingReceipt(null);
         setIsLoading(true);
 
         try {
             const result = await ChatWithAI(transactionRequest, messages);
-
             if (result.error) {
                 typeMessage(result.error as string);
             } else if (result.text) {
@@ -512,23 +270,19 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         const messageText = overrideInput || input;
         if (!messageText.trim() || isLoading) return;
 
-        const userMessage: Message = {
-            role: "user",
-            parts: [{ text: messageText }],
-        };
-
+        const userMessage: Message = { role: "user", parts: [{ text: messageText }] };
         setMessages((prev) => [...prev, userMessage]);
         if (!overrideInput) setInput("");
         setIsLoading(true);
 
         try {
-            // We send the history EXCEPT the message we just added (the action will handle it)
             const result = await ChatWithAI(messageText, messages);
-
             if (result.error) {
                 typeMessage(result.error as string);
             } else if (result.text) {
                 typeMessage(result.text as string);
+                if (result.persona) setUserPersona(result.persona);
+                if (result.healthScore !== undefined) setHealthScore(result.healthScore);
 
                 if (result.filter) {
                     const params = new URLSearchParams();
@@ -540,10 +294,6 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                     if (f.maxAmount) params.set("maxAmount", f.maxAmount.toString());
                     if (f.from) params.set("from", f.from);
                     if (f.to) params.set("to", f.to);
-
-                    if (result.persona) setUserPersona(result.persona);
-                    if (result.healthScore !== undefined) setHealthScore(result.healthScore);
-
                     router.push(`/transactions?${params.toString()}`);
                     toast.success("Applied search filters!");
                 }
@@ -572,117 +322,27 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                     className={cn(
                         "absolute bottom-20 right-0 z-50 overflow-hidden",
                         "bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl flex flex-col",
-                        isExpanded && "right-4 sm:right-8" // Center it a bit more when expanded
+                        isExpanded && "right-4 sm:right-8"
                     )}
                 >
-                    {/* Header */}
-                    <div className={cn(
-                        "p-3 border-b border-border flex items-center justify-between bg-primary/5 shrink-0 transition-all duration-300",
-                        isMinimized && "h-full border-b-0 justify-center" // Fill height, remove border, center content
-                    )}>
-                        <div className={cn("flex items-center gap-2", isMinimized && "mr-auto")}>
-                            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                                <PiggyBank className="w-4 h-4 text-amber-500" />
-                            </div>
-                            <span className="font-bold text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
-                                Budget Buddy AI
-                            </span>
-                            {!isMinimized && userPersona && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className={cn(
-                                        "hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border shadow-sm ml-2",
-                                        userPersona === "Squirrel" && "bg-amber-500/10 border-amber-500/20 text-amber-600",
-                                        userPersona === "Peacock" && "bg-purple-500/10 border-purple-500/20 text-purple-600",
-                                        userPersona === "Owl" && "bg-indigo-500/10 border-indigo-500/20 text-indigo-600",
-                                        userPersona === "Fox" && "bg-orange-500/10 border-orange-500/20 text-orange-600"
-                                    )}
-                                >
-                                    <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                                        {userPersona === "Squirrel" && <>🐿️ <span className="opacity-80">Squirrel</span></>}
-                                        {userPersona === "Peacock" && <>🦚 <span className="opacity-80">Peacock</span></>}
-                                        {userPersona === "Owl" && <>🦉 <span className="opacity-80">Owl</span></>}
-                                        {userPersona === "Fox" && <>🦊 <span className="opacity-80">Fox</span></>}
-                                    </span>
-                                </motion.div>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-1">
-                            {!isMinimized && (
-                                <>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setShowClearConfirm(true)}
-                                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
-                                        title="Clear history"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </>
-                            )}
-                            {!isMinimized && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => setIsExpanded(!isExpanded)}
-                                    title={isExpanded ? "Shrink" : "Expand"}
-                                >
-                                    {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                                </Button>
-                            )}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={(e) => {
-                                    e.stopPropagation(); // Prevent potentially triggering other clicks
-                                    setIsMinimized(!isMinimized);
-                                    if (isExpanded) setIsExpanded(false); // Can't be expanded and minimized
-                                }}
-                                title={isMinimized ? "Show" : "Hide"}
-                            >
-                                {isMinimized ? <Maximize2 className="h-4 w-4 rotate-45" /> : <X className="h-4 w-4" />}
-                            </Button>
-                        </div>
-                    </div>
+                    <ChatHeader 
+                        isMinimized={isMinimized}
+                        isExpanded={isExpanded}
+                        userPersona={userPersona}
+                        onToggleMinimize={() => {
+                            setIsMinimized(!isMinimized);
+                            if (isExpanded) setIsExpanded(false);
+                        }}
+                        onToggleExpand={() => setIsExpanded(!isExpanded)}
+                        onClearHistory={() => setShowClearConfirm(true)}
+                    />
 
                     {!isMinimized && healthScore !== null && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            className="px-4 py-2 border-b border-border bg-gradient-to-r from-primary/5 to-transparent flex items-center justify-between gap-3 shrink-0"
-                        >
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="h-3 w-3 text-amber-500" />
-                                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground">Financial Health</span>
-                            </div>
-                            <div className="flex-1 max-w-[120px]">
-                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${healthScore}%` }}
-                                        className={cn(
-                                            "h-full transition-all duration-1000",
-                                            healthScore > 70 ? "bg-emerald-500" : healthScore > 40 ? "bg-amber-500" : "bg-destructive"
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                            <span className={cn(
-                                "text-[10px] font-black",
-                                healthScore > 70 ? "text-emerald-500" : healthScore > 40 ? "text-amber-500" : "text-destructive"
-                            )}>
-                                {healthScore}%
-                            </span>
-                        </motion.div>
+                        <HealthScoreBar healthScore={healthScore} />
                     )}
 
                     {!isMinimized && (
                         <>
-                            {/* Chat Area */}
                             <div className="flex-1 overflow-y-auto p-4 min-h-0 custom-scrollbar">
                                 <div className="space-y-4 pr-1">
                                     {messages.length === 0 && (
@@ -708,72 +368,15 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                     )}
 
                                     {messages.map((msg, i) => (
-                                        <div
+                                        <MessageItem 
                                             key={i}
-                                            className={cn(
-                                                "flex w-full gap-2",
-                                                msg.role === "user" ? "justify-end" : "justify-start"
-                                            )}
-                                        >
-                                            {msg.role === "model" && (
-                                                <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-1">
-                                                    <Bot className="w-3.5 h-3.5 text-amber-500" />
-                                                </div>
-                                            )}
-                                            <div
-                                                className={cn(
-                                                    "max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm relative group",
-                                                    msg.role === "user"
-                                                        ? "bg-primary text-primary-foreground"
-                                                        : "bg-secondary/50 border border-border/50 text-foreground"
-                                                )}
-                                            >
-                                                {msg.role === "model" && (
-                                                    <button
-                                                        onClick={() => speakText(msg.parts[0].text)}
-                                                        className="absolute -right-8 top-1 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-secondary rounded-full"
-                                                        title="Speak response"
-                                                    >
-                                                        <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    </button>
-                                                )}
-                                                <div className="text-sm leading-relaxed">
-                                                    <ReactMarkdown
-                                                        components={{
-                                                            p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-                                                            ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
-                                                            ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
-                                                            li: ({ children }) => <li className="mb-0.5">{children}</li>,
-                                                            h1: ({ children }) => <h1 className="text-base font-bold mb-2">{children}</h1>,
-                                                            h2: ({ children }) => <h2 className="text-sm font-bold mb-1">{children}</h2>,
-                                                            h3: ({ children }) => <h3 className="text-xs font-bold mb-1 uppercase text-muted-foreground">{children}</h3>,
-                                                            blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-2 italic my-2">{children}</blockquote>,
-                                                            code: ({ className, children }) => {
-                                                                const match = /language-(\w+)/.exec(className || "");
-                                                                return match ? (
-                                                                    <code className="block bg-muted p-2 rounded text-xs my-2 overflow-x-auto">
-                                                                        {children}
-                                                                    </code>
-                                                                ) : (
-                                                                    <code className="bg-muted/50 px-1 py-0.5 rounded text-xs font-mono">
-                                                                        {children}
-                                                                    </code>
-                                                                );
-                                                            },
-                                                        }}
-                                                    >
-                                                        {msg.parts[0].text}
-                                                    </ReactMarkdown>
-                                                    <LivingUIRenderer text={msg.parts[0].text} />
-                                                </div>
-                                            </div>
-                                            {msg.role === "user" && (
-                                                <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border mt-1">
-                                                    <User className="w-3.5 h-3.5" />
-                                                </div>
-                                            )}
-                                        </div>
+                                            role={msg.role}
+                                            text={msg.parts[0].text}
+                                            onSpeak={speakText}
+                                            onSendSuggestion={handleSend}
+                                        />
                                     ))}
+                                    
                                     {isLoading && (
                                         <div className="flex gap-2">
                                             <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center mt-1">
@@ -788,84 +391,23 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                 </div>
                             </div>
 
-                            {/* Input Area */}
-                            <div className="p-4 border-t border-border bg-background/50">
-                                {pendingReceipt && (
-                                    <div className="mb-3 flex gap-2">
-                                        <Button
-                                            type="button"
-                                            onClick={handleConfirmReceipt}
-                                            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                                            disabled={isLoading}
-                                        >
-                                            ✓ Confirm & Create Transaction
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setPendingReceipt(null)}
-                                            disabled={isLoading}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </div>
-                                )}
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleSend();
-                                    }}
-                                    className="flex gap-2"
-                                >
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleReceiptUpload}
-                                        className="hidden"
-                                    />
-                                    <div className="flex gap-1">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="h-10 w-10 shrink-0"
-                                            title="Upload receipt"
-                                            disabled={isLoading}
-                                        >
-                                            <ImagePlus className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={toggleListening}
-                                            className={cn(
-                                                "h-10 w-10 shrink-0",
-                                                isListening && "text-red-500 animate-pulse bg-red-500/10"
-                                            )}
-                                        >
-                                            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4 text-muted-foreground" />}
-                                        </Button>
-                                    </div>
-                                    <Input
-                                        placeholder="Ask about your budget..."
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        disabled={isLoading}
-                                        className="h-10 border-border focus-visible:ring-primary/20 pr-10"
-                                    />
-                                    <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-10 w-10 shrink-0">
-                                        <Send className="h-4 w-4" />
-                                    </Button>
-                                </form>
-                                <p className="text-[10px] text-center text-muted-foreground mt-2">
-                                    Powered by Groq • Analysis based on your data
-                                </p>
-                            </div>
+                            <ChatInput 
+                                input={input}
+                                setInput={setInput}
+                                isLoading={isLoading}
+                                isListening={isListening}
+                                onSend={handleSend}
+                                onToggleListening={toggleListening}
+                                onUploadClick={() => fileInputRef.current?.click()}
+                                fileInputRef={fileInputRef}
+                                onFileChange={handleReceiptUpload}
+                                pendingReceipt={pendingReceipt}
+                                onConfirmReceipt={handleConfirmReceipt}
+                                onCancelReceipt={() => setPendingReceipt(null)}
+                            />
                         </>
                     )}
+
                     <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
                         <AlertDialogContent className="w-[90vw] max-w-[400px] rounded-2xl">
                             <AlertDialogHeader>

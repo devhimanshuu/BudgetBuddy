@@ -166,6 +166,9 @@ Use Markdown.
 1. **Transaction Creation**: Use 'create_transaction' to log new items.
 2. **Visualizations (PRIORITY)**: If the user asks for a chart, bar chart, or summary, use the provided context Data to build a visual component. EMBED it at the END of your text response:
    - [BAR_CHART: { "title": "Spending by Category", "data": [{ "label": "Food", "value": 450 }, { "label": "Bills", "value": 1200 }] }]
+   - [PIE_CHART: { "title": "Spending Distribution", "data": [{ "label": "Food", "value": 450 }, { "label": "Bills", "value": 1200 }] }]
+   - [COMPARISON: { "current": 1200, "previous": 1500, "label": "Food Spending", "period": "vs Last Month" }]
+   - [HEATMAP: { "title": "Spending Activity", "data": { "2024-01-15": 450, "2024-01-16": 120, "2024-01-17": 300 } }]
    - [PROGRESS_BAR: { "label": "Food Budget", "current": 450, "target": 500, "color": "amber" }]
    - [MINI_TREND: { "data": [10, 25, 15, 40, 30], "label": "Recent activity" }]
    - [LINE_CHART: { "title": "7-Day Spending Trend", "data": [120, 450, 300, 800, 200, 600, 400], "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }]
@@ -177,6 +180,9 @@ Use Markdown.
 - Aggregate values by category or date.
 - **LIMIT**: Only include the **Top 10** labels to keep the chart clean and avoid response truncation.
 - Summarize the data in 1-2 sentences, then provide the appropriate tag.
+- **Use PIE_CHART** for showing proportions/percentages (e.g., "spending breakdown")
+- **Use COMPARISON** for month-over-month or period comparisons
+- **Use HEATMAP** for showing activity patterns over time (requires date-value pairs)
 
 **Smart Suggestions (IMPORTANT)**: 
 At the end of your response, strictly provide exactly 3 "Quick Action" buttons for follow-up questions in this format:
