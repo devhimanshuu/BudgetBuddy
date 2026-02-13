@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank, Mic, MicOff, Volume2, Trash2 } from "lucide-react";
+import { Send, X, Bot, User, Loader2, Maximize2, Minimize2, PiggyBank, Mic, MicOff, Volume2, Trash2, LineChart, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [pendingReceipt, setPendingReceipt] = useState<any>(null);
     const [userPersona, setUserPersona] = useState<string | null>(null);
+    const [healthScore, setHealthScore] = useState<number | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     // Load history on mount
@@ -278,6 +279,89 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             }
         }
 
+        // Match [LINE_CHART: {...}]
+        const lineChartRegex = /\[LINE_CHART:\s*({[\s\S]*?})\s*\]/g;
+        while ((match = lineChartRegex.exec(text)) !== null) {
+            try {
+                const data = JSON.parse(match[1].trim());
+                const points = data.data || [];
+                const labels = data.labels || [];
+                const max = Math.max(...points, 1);
+
+                // Construct animated path
+                const width = 300;
+                const height = 100;
+                const step = width / (points.length - 1);
+                const pathData = points.map((p: number, i: number) =>
+                    `${i === 0 ? 'M' : 'L'} ${i * step} ${height - (p / max) * height}`
+                ).join(' ');
+
+                components.push(
+                    <div key={`line-${match.index}`} className="mt-4 p-4 rounded-xl bg-gradient-to-br from-card to-secondary/30 border border-border shadow-md overflow-hidden animate-in zoom-in-95 duration-500">
+                        <div className="flex items-center gap-2 mb-4">
+                            <LineChart className="h-4 w-4 text-emerald-500" />
+                            <span className="text-sm font-bold">{data.title || "Trend Analysis"}</span>
+                        </div>
+                        <div className="relative h-28 w-full mt-2">
+                            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+                                <defs>
+                                    <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                                    </linearGradient>
+                                </defs>
+                                {/* Area fill */}
+                                <motion.path
+                                    initial={{ d: `M 0 ${height} L ${width} ${height} L ${width} ${height} L 0 ${height} Z` }}
+                                    animate={{ d: `${pathData} L ${width} ${height} L 0 ${height} Z` }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                    fill="url(#lineGradient)"
+                                />
+                                {/* Main line */}
+                                <motion.path
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
+                                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                                    d={pathData}
+                                    fill="none"
+                                    stroke="#10b981"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                        </div>
+                        <div className="flex justify-between mt-2">
+                            {labels.map((l: string, i: number) => (
+                                <span key={i} className="text-[10px] text-muted-foreground font-medium">{l}</span>
+                            ))}
+                        </div>
+                    </div>
+                );
+            } catch (e) { /* silent */ }
+        }
+
+        // Match [SUGGESTIONS: [...]]
+        const suggestionRegex = /\[SUGGESTIONS:\s*(\[[\s\S]*?\])\s*\]/g;
+        while ((match = suggestionRegex.exec(text)) !== null) {
+            try {
+                const suggestions = JSON.parse(match[1].trim());
+                components.push(
+                    <div key={`sug-${match.index}`} className="mt-4 flex flex-wrap gap-2">
+                        {suggestions.map((s: string, i: number) => (
+                            <button
+                                key={i}
+                                onClick={() => handleSend(s)}
+                                className="text-xs px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/20 border border-primary/20 transition-all hover:scale-105 active:scale-95 text-primary font-medium flex items-center gap-1.5 shadow-sm"
+                            >
+                                <Sparkles className="h-3 w-3" />
+                                {s}
+                            </button>
+                        ))}
+                    </div>
+                );
+            } catch (e) { /* silent */ }
+        }
+
         return <>{components}</>;
     };
 
@@ -414,6 +498,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                 typeMessage(result.error as string);
             } else if (result.text) {
                 if (result.persona) setUserPersona(result.persona);
+                if (result.healthScore !== undefined) setHealthScore(result.healthScore);
                 typeMessage(result.text as string);
             }
         } catch (error) {
@@ -423,21 +508,22 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         }
     };
 
-    const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
+    const handleSend = async (overrideInput?: string) => {
+        const messageText = overrideInput || input;
+        if (!messageText.trim() || isLoading) return;
 
         const userMessage: Message = {
             role: "user",
-            parts: [{ text: input }],
+            parts: [{ text: messageText }],
         };
 
         setMessages((prev) => [...prev, userMessage]);
-        setInput("");
+        if (!overrideInput) setInput("");
         setIsLoading(true);
 
         try {
             // We send the history EXCEPT the message we just added (the action will handle it)
-            const result = await ChatWithAI(input, messages);
+            const result = await ChatWithAI(messageText, messages);
 
             if (result.error) {
                 typeMessage(result.error as string);
@@ -456,6 +542,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                     if (f.to) params.set("to", f.to);
 
                     if (result.persona) setUserPersona(result.persona);
+                    if (result.healthScore !== undefined) setHealthScore(result.healthScore);
 
                     router.push(`/transactions?${params.toString()}`);
                     toast.success("Applied search filters!");
@@ -561,6 +648,37 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                             </Button>
                         </div>
                     </div>
+
+                    {!isMinimized && healthScore !== null && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            className="px-4 py-2 border-b border-border bg-gradient-to-r from-primary/5 to-transparent flex items-center justify-between gap-3 shrink-0"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="h-3 w-3 text-amber-500" />
+                                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground">Financial Health</span>
+                            </div>
+                            <div className="flex-1 max-w-[120px]">
+                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${healthScore}%` }}
+                                        className={cn(
+                                            "h-full transition-all duration-1000",
+                                            healthScore > 70 ? "bg-emerald-500" : healthScore > 40 ? "bg-amber-500" : "bg-destructive"
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                            <span className={cn(
+                                "text-[10px] font-black",
+                                healthScore > 70 ? "text-emerald-500" : healthScore > 40 ? "text-amber-500" : "text-destructive"
+                            )}>
+                                {healthScore}%
+                            </span>
+                        </motion.div>
+                    )}
 
                     {!isMinimized && (
                         <>

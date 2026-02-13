@@ -146,6 +146,14 @@ Savings Goals:
 ${savingsGoals.map((s) => `- ${s.name}: ${s.currentAmount}/${s.targetAmount}`).join("\n")}
 `;
 
+		const healthScore = Math.min(
+			Math.max(
+				Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100),
+				0,
+			),
+			100,
+		);
+
 		const systemInstruction = `You are Budget Buddy, an expert financial analyst with a unique personality adapted to the user.
 ${personaPersonality}
 
@@ -160,6 +168,7 @@ Use Markdown.
    - [BAR_CHART: { "title": "Spending by Category", "data": [{ "label": "Food", "value": 450 }, { "label": "Bills", "value": 1200 }] }]
    - [PROGRESS_BAR: { "label": "Food Budget", "current": 450, "target": 500, "color": "amber" }]
    - [MINI_TREND: { "data": [10, 25, 15, 40, 30], "label": "Recent activity" }]
+   - [LINE_CHART: { "title": "7-Day Spending Trend", "data": [120, 450, 300, 800, 200, 600, 400], "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }]
 
 3. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
 
@@ -167,7 +176,11 @@ Use Markdown.
 - Look at the 'Recent Transactions' in the context Data.
 - Aggregate values by category or date.
 - **LIMIT**: Only include the **Top 10** labels to keep the chart clean and avoid response truncation.
-- Summarize the data in 1-2 sentences, then provide the [BAR_CHART: ...] tag.
+- Summarize the data in 1-2 sentences, then provide the appropriate tag.
+
+**Smart Suggestions (IMPORTANT)**: 
+At the end of your response, strictly provide exactly 3 "Quick Action" buttons for follow-up questions in this format:
+[SUGGESTIONS: ["How can I save more?", "Show my top category", "Compare to last month"]]
 
 Data:
 ${contextData}`;
@@ -262,6 +275,7 @@ ${contextData}`;
 								return {
 									text: `✅ Created ${args.type} of ${args.amount} for "${args.description}"`,
 									persona,
+									healthScore,
 								};
 							}
 							if (toolCall.function?.name === "search_transactions") {
@@ -269,10 +283,15 @@ ${contextData}`;
 									text: `🔍 Querying and filtering your view...`,
 									filter: JSON.parse(toolCall.function.arguments),
 									persona,
+									healthScore,
 								};
 							}
 						}
-						return { text: responseMessage.content || "", persona };
+						return {
+							text: responseMessage.content || "",
+							persona,
+							healthScore,
+						};
 					} catch (e) {
 						continue;
 					}
@@ -320,6 +339,7 @@ ${contextData}`;
 						return {
 							text: `✅ Created ${args.type} of ${args.amount}`,
 							persona,
+							healthScore,
 						};
 					}
 					if (toolCall.function?.name === "search_transactions") {
@@ -327,10 +347,11 @@ ${contextData}`;
 							text: `🔍 Filtering view...`,
 							filter: JSON.parse(toolCall.function.arguments),
 							persona,
+							healthScore,
 						};
 					}
 				}
-				return { text: responseMessage.content || "", persona };
+				return { text: responseMessage.content || "", persona, healthScore };
 			} catch (e) {
 				console.error("OpenRouter Error", e);
 			}
