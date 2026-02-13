@@ -59,6 +59,8 @@ export const stripComponentTags = (text: string): string => {
 		"ALERT",
 		"GOAL_PROGRESS",
 		"FORECAST",
+		"STREAK",
+		"ACHIEVEMENT",
 	];
 	for (const tag of tags) {
 		const prefix = `[${tag}:`;
@@ -120,4 +122,54 @@ export const stripComponentTags = (text: string): string => {
 		}
 	}
 	return cleaned.trim();
+};
+
+export const detectVoiceCommand = (
+	text: string,
+): { type: string; feedback: string } | null => {
+	const lower = text.toLowerCase().trim();
+
+	// Add Expense: "add 50 dollars for coffee", "spent 20 on lunch"
+	const expenseMatch = lower.match(
+		/(?:add|spent|log|create)\s*(?:an?\s*)?(?:expense\s*)?(?:of\s*)?\$?(\d+(?:\.\d{2})?)\s*(?:dollars?)?\s*(?:for|on|at)?\s*(.+)/i,
+	);
+	if (expenseMatch) {
+		return {
+			type: "ADD_EXPENSE",
+			feedback: `Processing expense: $${expenseMatch[1]} for ${expenseMatch[2]}...`,
+		};
+	}
+
+	// Show Budget: "show my food budget", "how much is left in bills budget"
+	if (
+		lower.includes("budget") &&
+		(lower.includes("show") ||
+			lower.includes("check") ||
+			lower.includes("how much"))
+	) {
+		return {
+			type: "SHOW_BUDGET",
+			feedback: "Checking your budget status...",
+		};
+	}
+
+	// Search/Yesterday: "what did i spend yesterday", "show transactions from last week"
+	if (
+		lower.includes("spend") ||
+		lower.includes("transaction") ||
+		lower.includes("history")
+	) {
+		if (
+			lower.includes("yesterday") ||
+			lower.includes("last week") ||
+			lower.includes("month")
+		) {
+			return {
+				type: "SEARCH",
+				feedback: "Fetching your spending history...",
+			};
+		}
+	}
+
+	return null;
 };

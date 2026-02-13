@@ -27,6 +27,7 @@ import { ChatHeader } from "./chat/ChatHeader";
 import { ChatInput } from "./chat/ChatInput";
 import { MessageItem } from "./chat/MessageItem";
 import { HealthScoreBar } from "./chat/HealthScoreBar";
+import { detectVoiceCommand } from "./chat/utils";
 
 export interface Message {
     role: "user" | "model";
@@ -108,6 +109,14 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                     const transcript = event.results[0][0].transcript;
                     setInput(transcript);
                     setIsListening(false);
+
+                    const command = detectVoiceCommand(transcript);
+                    if (command) {
+                        toast.success(command.feedback, { icon: "🎤" });
+                    }
+
+                    // Auto-execute voice commands
+                    handleSend(transcript);
                 };
 
                 recognitionRef.current.onerror = (event: any) => {
@@ -244,7 +253,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         if (!pendingReceipt) return;
         const { merchant, amount, date, category } = pendingReceipt;
         const transactionRequest = `Create an expense transaction for ${amount} from ${merchant || "Unknown"} under ${category || "Other"} category${date ? ` on ${date}` : ""}`;
-        
+
         const userMessage: Message = { role: "user", parts: [{ text: transactionRequest }] };
         setMessages((prev) => [...prev, userMessage]);
         setPendingReceipt(null);
@@ -325,10 +334,11 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                         isExpanded && "right-4 sm:right-8"
                     )}
                 >
-                    <ChatHeader 
+                    <ChatHeader
                         isMinimized={isMinimized}
                         isExpanded={isExpanded}
                         userPersona={userPersona}
+                        history={messages}
                         onToggleMinimize={() => {
                             setIsMinimized(!isMinimized);
                             if (isExpanded) setIsExpanded(false);
@@ -368,7 +378,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                     )}
 
                                     {messages.map((msg, i) => (
-                                        <MessageItem 
+                                        <MessageItem
                                             key={i}
                                             role={msg.role}
                                             text={msg.parts[0].text}
@@ -376,7 +386,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                             onSendSuggestion={handleSend}
                                         />
                                     ))}
-                                    
+
                                     {isLoading && (
                                         <div className="flex gap-2">
                                             <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center mt-1">
@@ -391,7 +401,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                 </div>
                             </div>
 
-                            <ChatInput 
+                            <ChatInput
                                 input={input}
                                 setInput={setInput}
                                 isLoading={isLoading}

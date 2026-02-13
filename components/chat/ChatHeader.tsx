@@ -2,14 +2,18 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { PiggyBank, Trash2, Minimize2, Maximize2, X } from "lucide-react";
+import { PiggyBank, Trash2, Minimize2, Maximize2, X, FileDown, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import { format } from "date-fns";
 
 interface ChatHeaderProps {
     isMinimized: boolean;
     isExpanded: boolean;
     userPersona: string | null;
+    history: any[];
     onToggleMinimize: () => void;
     onToggleExpand: () => void;
     onClearHistory: () => void;
@@ -19,10 +23,47 @@ export const ChatHeader = ({
     isMinimized,
     isExpanded,
     userPersona,
+    history,
     onToggleMinimize,
     onToggleExpand,
     onClearHistory,
 }: ChatHeaderProps) => {
+
+    const handleExportPDF = () => {
+        const doc = new jsPDF();
+        const date = format(new Date(), "PPpp");
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(245, 158, 11); // Amber
+        doc.text("Budget Buddy AI Report", 14, 20);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${date}`, 14, 28);
+        doc.text(`Persona: ${userPersona || "Standard"}`, 14, 33);
+
+        // Content
+        const tableData = history.map((msg: any) => [
+            msg.role === "user" ? "You" : "Budget Buddy",
+            msg.parts.map((p: any) => p.text).join("\n").replace(/\[.*?\]/g, "").trim()
+        ]).filter(row => row[1] !== "");
+
+        autoTable(doc, {
+            startY: 40,
+            head: [['Sender', 'Message']],
+            body: tableData,
+            theme: 'striped',
+            headStyles: { fillColor: [245, 158, 11] },
+            styles: { fontSize: 9, cellPadding: 5 },
+            columnStyles: {
+                0: { cellWidth: 30, fontStyle: 'bold' },
+                1: { cellWidth: 'auto' }
+            }
+        });
+
+        doc.save(`BudgetBuddy_Report_${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    };
     return (
         <div className={cn(
             "p-3 border-b border-border flex items-center justify-between bg-primary/5 shrink-0 transition-all duration-300",
@@ -58,15 +99,27 @@ export const ChatHeader = ({
             </div>
             <div className="flex items-center gap-1">
                 {!isMinimized && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onClearHistory}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
-                        title="Clear history"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleExportPDF}
+                            className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors"
+                            title="Export PDF Report"
+                            disabled={history.length === 0}
+                        >
+                            <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onClearHistory}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+                            title="Clear history"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
+                    </div>
                 )}
                 {!isMinimized && (
                     <Button

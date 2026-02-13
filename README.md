@@ -6,27 +6,40 @@ BudgetBuddy is a modern personal finance tracker designed to help you master you
 
 ## 🌟 What's New
 
-### 🤖 AI Financial Analyst
+### 🤖 AI Financial Command Center
 
-Unlock personalized financial insights with our **AI Assistant**.
+BudgetBuddy features a world-class **AI Financial Analyst** that evolves with your spending habits. It's not just a chatbot; it's a proactive intelligence engine.
 
-- **Multimodal capabilities**: 
-  - 📷 **Vision**: Upload receipts or bank statements; AI extracts merchant, amount, date, and category automatically.
-  - 🎤 **Voice**: Speak naturally to log transactions or ask for financial advice.
-- **Living UI Components**: The AI doesn't just talk; it creates! It can embed **dynamic charts**, **progress bars**, and **trend lines** directly into the chat.
-- **Context-Aware**: Understands your transactions, budgets, and savings goals in real-time.
-- **Interactive Typewriter Effect**: Responses flow smoothly with a professional typewriter animation.
-- **Draggable Interface**: A floating, draggable chat window that stays with you but never gets in the way.
+#### 🧠 Smart Insights & Intelligence
 
-### ⚡ Smart User Interface
+- **Anomaly Detection**: Automatically scans your history to flag unusual spending spikes with **Smart Alerts** ⚠️.
+- **Predictive Forecasting**: Projects your end-of-month spending vs. budget with **Confidence Scores** 🔮.
+- **Automated Recaps**: Daily and Weekly summaries that track trends, savings growth, and provide actionable **Budget Buddy Tips** 🗓️.
+- **Persona-Driven Advice**: Adapts its personality based on your behavior—meet the **Squirrel** (Saver), **Peacock** (Spender), **Owl** (Strategist), or **Fox** (Balanced).
 
-- **Living UI Components**: 
-  - **Animated Bar Charts**: Say "Show me a chart of my spending" to see interactive vertical bars.
-  - **Budget Progress Bars**: Get visual feedback on your monthly limits.
-  - **Mini Trend Charts**: Visualize your spending velocity over time.
-- **Draggable Quick Actions**: A floating "Quick Add" widget that you can move anywhere on the screen for easy access on mobile or desktop.
-- **Command Palette (`Cmd+K`)**: Navigate the entire app or trigger actions (like "New Expense" or "Open AI Chat") instantly with your keyboard.
-- **Visual Finance Calendar**: View your spending habits day-by-day in an intuitive calendar view.
+#### 🎮 Gamification & Engagement
+
+- **Streak Tracking**: Stay motivated with **Budget Adherence Streaks** and level up your financial discipline 🔥.
+- **Achievement System**: Unlock literal achievements for hitting milestones, celebrated with **Dynamic Confetti** explosions 🎊.
+
+#### 🎙️ Voice & Accessibility
+
+- **Voice-to-Action**: "Add $50 for coffee" — speak naturally and watch the AI execute actions instantly 🎤.
+- **Auto-Execution**: Voice commands trigger real-time transactions and tool calls without pressing "Send".
+- **Text-to-Speech**: Professional voice narration for all AI insights and responses.
+
+#### 📊 Interactive Living UI
+
+The AI embeds functional, reactive components directly in your chat:
+
+- **Budget Adjuster**: Modify your monthly limits inline with increment/decrement controls.
+- **Transaction Cards**: Instant access to Edit/Delete transactions within the chat flow.
+- **Goal Progress**: Visualized milestones for savings goals with celebration badges.
+- **Rich Visualizations**: Interactive Bar Charts, Pie Charts, Heatmaps, and Trend Lines.
+
+#### 📄 Professional Documentation
+
+- **Export PDF Report**: Instantly generate and download a professional-grade PDF of your chat history and financial insights with one click.
 
 ---
 

@@ -35,41 +35,51 @@ export async function ChatWithAI(
 		const twoMonthsAgo = new Date();
 		twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-		const [transactions, budgets, savingsGoals, userSettings, categories] =
-			await Promise.all([
-				prisma.transaction.findMany({
-					where: {
-						userId: user.id,
-						date: {
-							gte: twoMonthsAgo,
-						},
+		const [
+			transactions,
+			budgets,
+			savingsGoals,
+			userSettings,
+			categories,
+			achievements,
+		] = await Promise.all([
+			prisma.transaction.findMany({
+				where: {
+					userId: user.id,
+					date: {
+						gte: twoMonthsAgo,
 					},
-					orderBy: { date: "desc" },
-					take: 1000,
-					select: {
-						id: true,
-						amount: true,
-						description: true,
-						category: true,
-						categoryIcon: true,
-						date: true,
-						type: true,
-					},
-				}),
-				prisma.budget.findMany({
-					where: { userId: user.id },
-					select: { id: true, category: true, amount: true },
-				}),
-				prisma.savingsGoal.findMany({
-					where: { userId: user.id },
-					select: { name: true, targetAmount: true, currentAmount: true },
-				}),
-				prisma.userSettings.findFirst({ where: { userId: user.id } }),
-				prisma.category.findMany({
-					where: { userId: user.id },
-					select: { name: true, type: true },
-				}),
-			]);
+				},
+				orderBy: { date: "desc" },
+				take: 1000,
+				select: {
+					id: true,
+					amount: true,
+					description: true,
+					category: true,
+					categoryIcon: true,
+					date: true,
+					type: true,
+				},
+			}),
+			prisma.budget.findMany({
+				where: { userId: user.id },
+				select: { id: true, category: true, amount: true },
+			}),
+			prisma.savingsGoal.findMany({
+				where: { userId: user.id },
+				select: { name: true, targetAmount: true, currentAmount: true },
+			}),
+			prisma.userSettings.findFirst({ where: { userId: user.id } }),
+			prisma.category.findMany({
+				where: { userId: user.id },
+				select: { name: true, type: true },
+			}),
+			prisma.userAchievement.findMany({
+				where: { userId: user.id },
+				include: { achievement: true },
+			}),
+		]);
 
 		currency = userSettings?.currency || "USD";
 		availableCategories = categories.map((c) => c.name);
@@ -180,7 +190,10 @@ export async function ChatWithAI(
 User Currency: ${currency}
 User Financial Persona: ${persona}
 Financial Health Score: ${Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100)}/100
+User Streak: ${userSettings?.currentStreak || 0} days (Record: ${userSettings?.longestStreak || 0} days)
 Available Categories: ${availableCategories.join(", ")}
+Unlocked Achievements:
+${achievements.map((a) => `- ${a.achievement.name}: ${a.achievement.description}`).join("\n")}
 Insights (Forecasts & Anomalies):
 ${categoryInsights.map((i) => `- ${i.category}: Spent ${i.spent}, Budget ${i.budget}, Forecast ${i.projected.toFixed(0)}${i.anomalies.length > 0 ? `, ANOMALIES found: ${i.anomalies.map((a) => `${a.description} (${a.amount})`).join(", ")}` : ""}`).join("\n")}
 Recent Transactions:
@@ -232,8 +245,13 @@ Use Markdown.
    - **Alert**: Detect unusual spending or critical issues. EMBED: [ALERT: { "type": "warning", "message": "You spent 3x more on dining this week", "amount": 450 }]
    - **Goal Progress**: Show savings progress with milestones. EMBED: [GOAL_PROGRESS: { "name": "Vacation Fund", "current": 750, "target": 1000, "milestones": [250, 500, 750] }]
    - **Forecast**: Predict end-of-month spending vs budget. EMBED: [FORECAST: { "category": "Food", "projected": 1200, "budget": 1000, "confidence": 0.85 }]
+   - **Recap**: Provide daily/weekly summaries. EMBED: [RECAP: { "period": "Weekly", "stats": [{ "label": "Savings", "value": "+$200", "trend": "up" }], "tip": "Cut back on coffee to save $50 next week!" }]
 
-5. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
+5. **Gamification**: Use these to reward the user:
+   - **Streak**: Show consecutive days of good habits. EMBED: [STREAK: { "days": 7, "type": "budget_adherence", "reward": "🔥" }]
+   - **Achievement**: Award badges for milestones. EMBED: [ACHIEVEMENT: { "name": "Savings Master", "description": "Saved 20% of income for 3 months", "points": 100 }]
+
+6. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
 
 **How to Chart**:
 - Look at the 'Recent Transactions' in the context Data.
@@ -244,10 +262,12 @@ Use Markdown.
 - **Use COMPARISON** for month-over-month or period comparisons
 - **Use HEATMAP** for showing activity patterns over time (requires date-value pairs)
 - **Use ALERT** when looking at anomalies in the Insights section.
+- **Use STREAK** when the user asks about their progress or logs a transaction that maintains a streak.
+- **Use ACHIEVEMENT** when the user hits a new milestone or asks about rewards.
 
 **Smart Suggestions (IMPORTANT)**: 
 At the end of your response, strictly provide exactly 3 "Quick Action" buttons for follow-up questions in this format:
-[SUGGESTIONS: ["Track my food expenses", "Show my spending trend", "Adjust my food budget"]]
+[SUGGESTIONS: ["How can I save more?", "Show my streak", "Give me a weekly recap"]]
 
 Data:
 ${contextData}`;

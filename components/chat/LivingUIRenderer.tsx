@@ -2,10 +2,11 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, BarChart3, LineChart, Sparkles, Trash2, Edit2, Plus, Minus, Check, Calendar, Tag, CreditCard, Wallet, ArrowUpCircle, ArrowDownCircle, PieChart, Info, History, AlertTriangle, Target, Zap, Waves } from "lucide-react";
+import { TrendingUp, BarChart3, LineChart, Sparkles, Trash2, Edit2, Plus, Minus, Check, Calendar, Tag, CreditCard, Wallet, ArrowUpCircle, ArrowDownCircle, PieChart, Info, History, AlertTriangle, Target, Zap, Waves, Flame, Award, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 import { extractBalancedJson } from "./utils";
 import { BudgetAdjuster } from "./BudgetAdjuster";
@@ -530,6 +531,120 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
             );
         } catch (e) { /* silent */ }
     }
+    // Match [STREAK: {...}]
+    const streakMatches = extractBalancedJson(text, 'STREAK');
+    for (const streakMatch of streakMatches) {
+        try {
+            const data = JSON.parse(streakMatch.json.trim());
+            components.push(
+                <div key={`streak-${streakMatch.index}`} className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 shadow-lg relative overflow-hidden group animate-in zoom-in-95 duration-500">
+                    <div className="absolute top-[-20px] right-[-20px] opacity-10 group-hover:scale-110 transition-transform duration-1000">
+                        <Flame className="w-32 h-32 text-orange-500" />
+                    </div>
+                    <div className="relative z-10 flex items-center gap-4">
+                        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 flex flex-col items-center justify-center shadow-xl shadow-orange-500/20">
+                            <span className="text-2xl font-black text-white leading-none">{data.days}</span>
+                            <span className="text-[10px] font-bold text-white/80 uppercase tracking-tighter mt-1">Days</span>
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <Flame className="h-4 w-4 text-orange-500 animate-pulse" />
+                                <h4 className="text-sm font-black uppercase tracking-tight text-orange-600">Unstoppable Streak!</h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">You've hit {data.days} consecutive days of {data.type.replace('_', ' ')}.</p>
+                            <div className="mt-2 flex items-center gap-1.5 bg-orange-500/5 px-2 py-1 rounded-full border border-orange-500/10 w-fit">
+                                <span className="text-xs">{data.reward || "🔥"}</span>
+                                <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Level Up</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
+
+    // Match [ACHIEVEMENT: {...}]
+    const achievementMatches = extractBalancedJson(text, 'ACHIEVEMENT');
+    for (const achMatch of achievementMatches) {
+        try {
+            const data = JSON.parse(achMatch.json.trim());
+
+            // Trigger confetti on render
+            if (typeof window !== 'undefined') {
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#fbbf24', '#f59e0b', '#fb923c', '#d97706']
+                    });
+                }, 500);
+            }
+
+            components.push(
+                <div key={`ach-${achMatch.index}`} className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-amber-400/10 to-yellow-600/10 border border-amber-400/30 shadow-xl relative overflow-hidden group animate-in scale-90 fade-in duration-700">
+                    <div className="absolute -top-6 -left-6 opacity-10 rotate-12">
+                        <Trophy className="w-24 h-24 text-amber-500" />
+                    </div>
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                        <div className="h-14 w-14 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-600 flex items-center justify-center shadow-lg mb-3">
+                            <Award className="h-7 w-7 text-white" />
+                        </div>
+                        <h4 className="text-lg font-black text-amber-600 tracking-tight">Achievement Unlocked!</h4>
+                        <p className="text-sm font-bold mt-1">{data.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1 px-4">{data.description}</p>
+                        <div className="mt-4 px-4 py-1.5 rounded-full bg-amber-400 text-white text-[10px] font-black uppercase tracking-widest shadow-md">
+                            +{data.points || 50} BB Points
+                        </div>
+                    </div>
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
+
+    // Match [RECAP: {...}]
+    const recapMatches = extractBalancedJson(text, 'RECAP');
+    for (const recapMatch of recapMatches) {
+        try {
+            const data = JSON.parse(recapMatch.json.trim());
+            components.push(
+                <div key={`recap-${recapMatch.index}`} className="mt-4 p-5 rounded-2xl bg-card border border-primary/20 shadow-xl animate-in slide-in-from-bottom-5 duration-700">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-black tracking-tight">{data.period} Summary</h4>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest leading-none mt-1">Budget Recap</p>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                        {data.stats.map((stat: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50 border border-border/50">
+                                <span className="text-xs font-medium text-muted-foreground">{stat.label}</span>
+                                <span className={cn(
+                                    "text-sm font-black",
+                                    stat.trend === 'up' ? "text-emerald-500" : stat.trend === 'down' ? "text-red-500" : ""
+                                )}>
+                                    {stat.value}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="mt-4 p-3 rounded-xl bg-primary/5 border border-primary/10">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Sparkles className="h-3 w-3 text-primary" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Budget Buddy Tip</span>
+                        </div>
+                        <p className="text-xs italic text-muted-foreground">"{data.tip}"</p>
+                    </div>
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
+
     // Match [SUGGESTIONS: [...]]
     const suggestionRegex = /\[SUGGESTIONS:\s*(\[[\s\S]*?\])\s*\]/g;
     while ((match = suggestionRegex.exec(text)) !== null) {
