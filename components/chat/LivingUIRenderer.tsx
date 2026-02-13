@@ -479,7 +479,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                     {percentage >= 100 && (
                         <div className="mt-3 flex items-center gap-2 text-[10px] text-emerald-500 font-bold bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
                             <Sparkles className="h-3 w-3" />
-                            Goal Completed! You're amazing!
+                            Goal Completed! You&apos;re amazing!
                         </div>
                     )}
                 </div>
@@ -551,7 +551,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                                 <Flame className="h-4 w-4 text-orange-500 animate-pulse" />
                                 <h4 className="text-sm font-black uppercase tracking-tight text-orange-600">Unstoppable Streak!</h4>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">You've hit {data.days} consecutive days of {data.type.replace('_', ' ')}.</p>
+                            <p className="text-xs text-muted-foreground mt-1">You&apos;ve hit {data.days} consecutive days of {data.type.replace('_', ' ')}.</p>
                             <div className="mt-2 flex items-center gap-1.5 bg-orange-500/5 px-2 py-1 rounded-full border border-orange-500/10 w-fit">
                                 <span className="text-xs">{data.reward || "🔥"}</span>
                                 <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Level Up</span>
@@ -618,7 +618,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                             <p className="text-[10px] text-muted-foreground uppercase tracking-widest leading-none mt-1">Budget Recap</p>
                         </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                         {data.stats.map((stat: any, i: number) => (
                             <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50 border border-border/50">
@@ -632,13 +632,13 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                             </div>
                         ))}
                     </div>
-                    
+
                     <div className="mt-4 p-3 rounded-xl bg-primary/5 border border-primary/10">
                         <div className="flex items-center gap-2 mb-1">
                             <Sparkles className="h-3 w-3 text-primary" />
                             <span className="text-[10px] font-black uppercase tracking-widest text-primary">Budget Buddy Tip</span>
                         </div>
-                        <p className="text-xs italic text-muted-foreground">"{data.tip}"</p>
+                        <p className="text-xs italic text-muted-foreground">&quot;{data.tip}&quot;</p>
                     </div>
                 </div>
             );

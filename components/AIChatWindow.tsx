@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Loader2 } from "lucide-react";
 import { ChatWithAI } from "@/app/(dashboard)/_actions/ai";
@@ -96,6 +96,83 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         toast.success("History cleared");
     };
 
+    const speakText = (text: string) => {
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        } else {
+            toast.error("Text-to-speech is not supported in your browser.");
+        }
+    };
+
+    const typeMessage = useCallback((fullText: string) => {
+        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }] }]);
+        let i = 0;
+        const speed = 10;
+        const typeChar = () => {
+            if (i < fullText.length) {
+                const currentText = fullText.substring(0, i + 1);
+                setMessages((prev) => {
+                    const next = [...prev];
+                    const lastIdx = next.length - 1;
+                    if (next[lastIdx] && next[lastIdx].role === "model") {
+                        next[lastIdx] = {
+                            ...next[lastIdx],
+                            parts: [{ text: currentText }]
+                        };
+                    }
+                    return next;
+                });
+                i++;
+                setTimeout(typeChar, speed);
+            }
+        };
+        typeChar();
+    }, []);
+
+    const handleSend = useCallback(async (overrideInput?: string) => {
+        const messageText = overrideInput || input;
+        if (!messageText.trim() || isLoading) return;
+
+        const userMessage: Message = { role: "user", parts: [{ text: messageText }] };
+        setMessages((prev) => [...prev, userMessage]);
+        if (!overrideInput) setInput("");
+        setIsLoading(true);
+
+        try {
+            const result = await ChatWithAI(messageText, messages);
+            if (result.error) {
+                typeMessage(result.error as string);
+            } else if (result.text) {
+                typeMessage(result.text as string);
+                if (result.persona) setUserPersona(result.persona);
+                if (result.healthScore !== undefined) setHealthScore(result.healthScore);
+
+                if (result.filter) {
+                    const params = new URLSearchParams();
+                    const f = result.filter;
+                    if (f.query) params.set("query", f.query);
+                    if (f.category) params.set("category", f.category);
+                    if (f.type) params.set("type", f.type);
+                    if (f.minAmount) params.set("minAmount", f.minAmount.toString());
+                    if (f.maxAmount) params.set("maxAmount", f.maxAmount.toString());
+                    if (f.from) params.set("from", f.from);
+                    if (f.to) params.set("to", f.to);
+                    router.push(`/transactions?${params.toString()}`);
+                    toast.success("Applied search filters!");
+                }
+            }
+        } catch (error) {
+            typeMessage("Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [input, isLoading, messages, router, typeMessage]);
+
+    // Initialize Speech Recognition
     useEffect(() => {
         if (typeof window !== "undefined") {
             const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -130,7 +207,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                 };
             }
         }
-    }, []);
+    }, [handleSend]);
 
     const toggleListening = () => {
         if (!recognitionRef.current) {
@@ -146,46 +223,9 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         }
     };
 
-    const speakText = (text: string) => {
-        if (typeof window !== "undefined" && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            window.speechSynthesis.speak(utterance);
-        } else {
-            toast.error("Text-to-speech is not supported in your browser.");
-        }
-    };
-
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading]);
-
-    const typeMessage = (fullText: string) => {
-        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }] }]);
-        let i = 0;
-        const speed = 10;
-        const typeChar = () => {
-            if (i < fullText.length) {
-                const currentText = fullText.substring(0, i + 1);
-                setMessages((prev) => {
-                    const next = [...prev];
-                    const lastIdx = next.length - 1;
-                    if (next[lastIdx] && next[lastIdx].role === "model") {
-                        next[lastIdx] = {
-                            ...next[lastIdx],
-                            parts: [{ text: currentText }]
-                        };
-                    }
-                    return next;
-                });
-                i++;
-                setTimeout(typeChar, speed);
-            }
-        };
-        typeChar();
-    };
 
     const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -270,45 +310,6 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             }
         } catch (error) {
             typeMessage("Failed to create transaction. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSend = async (overrideInput?: string) => {
-        const messageText = overrideInput || input;
-        if (!messageText.trim() || isLoading) return;
-
-        const userMessage: Message = { role: "user", parts: [{ text: messageText }] };
-        setMessages((prev) => [...prev, userMessage]);
-        if (!overrideInput) setInput("");
-        setIsLoading(true);
-
-        try {
-            const result = await ChatWithAI(messageText, messages);
-            if (result.error) {
-                typeMessage(result.error as string);
-            } else if (result.text) {
-                typeMessage(result.text as string);
-                if (result.persona) setUserPersona(result.persona);
-                if (result.healthScore !== undefined) setHealthScore(result.healthScore);
-
-                if (result.filter) {
-                    const params = new URLSearchParams();
-                    const f = result.filter;
-                    if (f.query) params.set("query", f.query);
-                    if (f.category) params.set("category", f.category);
-                    if (f.type) params.set("type", f.type);
-                    if (f.minAmount) params.set("minAmount", f.minAmount.toString());
-                    if (f.maxAmount) params.set("maxAmount", f.maxAmount.toString());
-                    if (f.from) params.set("from", f.from);
-                    if (f.to) params.set("to", f.to);
-                    router.push(`/transactions?${params.toString()}`);
-                    toast.success("Applied search filters!");
-                }
-            }
-        } catch (error) {
-            typeMessage("Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);
         }
