@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown, Radar } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -218,7 +218,7 @@ export default function LandingPageContent() {
         {
             name: "The Fox",
             badgeName: "Fox Analyst",
-            icon: <Zap className="w-8 h-8 text-orange-600" />,
+            icon: <Radar className="w-8 h-8 text-orange-600" />,
             emoji: "🦊",
             animal: "fox",
             animalColor: "text-orange-500/[0.15]",
