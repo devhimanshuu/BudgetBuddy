@@ -18,14 +18,282 @@ import React, { useEffect, useState } from "react";
 export default function LandingPageContent() {
     const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [personaIndex, setPersonaIndex] = useState(0);
+    // Premium geometric animal SVG silhouettes for persona cards
+    const AnimalSilhouette = ({ type, className }: { type: string; className?: string }) => {
+        const svgProps = { className: cn("absolute pointer-events-none select-none", className), viewBox: "0 0 200 200", fill: "none", xmlns: "http://www.w3.org/2000/svg" };
+        // Shared SVG filter for soft glow effect behind strokes
+        const glowFilter = (
+            <defs>
+                <filter id={`glow-${type}`} x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+        );
+        switch (type) {
+            case 'fox': return (
+                <svg {...svgProps}>
+                    {glowFilter}
+                    {/* Soft filled shape beneath for depth */}
+                    <path d="M60 40 L100 10 L140 40 L135 90 L120 110 L100 120 L80 110 L65 90 Z" fill="currentColor" opacity="0.06" />
+                    <path d="M60 40 L50 10 L75 30 Z" fill="currentColor" opacity="0.04" />
+                    <path d="M140 40 L150 10 L125 30 Z" fill="currentColor" opacity="0.04" />
+                    {/* Glow layer */}
+                    <g filter={`url(#glow-${type})`} opacity="0.5">
+                        <path d="M60 40 L100 10 L140 40 L135 90 L120 110 L100 120 L80 110 L65 90 Z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" fill="none" />
+                    </g>
+                    {/* Crisp detail layer */}
+                    <path d="M60 40 L100 10 L140 40 L135 90 L120 110 L100 120 L80 110 L65 90 Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" opacity="0.7" />
+                    {/* Inner face structure */}
+                    <path d="M65 90 L80 75 L90 85 L100 70 L110 85 L120 75 L135 90" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    {/* Ears - triangular */}
+                    <path d="M60 40 L50 10 L75 30" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" opacity="0.6" />
+                    <path d="M140 40 L150 10 L125 30" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" opacity="0.6" />
+                    {/* Inner ear detail */}
+                    <path d="M62 36 L56 18 L72 32" stroke="currentColor" strokeWidth="0.6" opacity="0.25" />
+                    <path d="M138 36 L144 18 L128 32" stroke="currentColor" strokeWidth="0.6" opacity="0.25" />
+                    {/* Eyes - almond shaped */}
+                    <ellipse cx="82" cy="65" rx="5" ry="4" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+                    <ellipse cx="118" cy="65" rx="5" ry="4" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+                    <circle cx="83" cy="65" r="1.5" fill="currentColor" opacity="0.4" />
+                    <circle cx="119" cy="65" r="1.5" fill="currentColor" opacity="0.4" />
+                    {/* Nose */}
+                    <path d="M95 88 L100 94 L105 88 Z" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.1" strokeLinejoin="round" opacity="0.6" />
+                    {/* Whiskers */}
+                    <line x1="78" y1="80" x2="55" y2="75" stroke="currentColor" strokeWidth="0.7" opacity="0.25" />
+                    <line x1="78" y1="84" x2="55" y2="85" stroke="currentColor" strokeWidth="0.7" opacity="0.25" />
+                    <line x1="122" y1="80" x2="145" y2="75" stroke="currentColor" strokeWidth="0.7" opacity="0.25" />
+                    <line x1="122" y1="84" x2="145" y2="85" stroke="currentColor" strokeWidth="0.7" opacity="0.25" />
+                    {/* Tail sweep - elegant curve */}
+                    <path d="M25 175 Q50 120 80 140 Q105 155 100 185" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.35" strokeLinecap="round" />
+                    <path d="M28 172 Q52 125 78 142" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.15" />
+                </svg>
+            );
+            case 'squirrel': return (
+                <svg {...svgProps}>
+                    {glowFilter}
+                    {/* Filled body silhouette */}
+                    <path d="M90 80 Q70 60 80 40 Q90 25 105 35 Q115 25 125 40 Q130 55 120 70 L130 90 Q135 110 120 120 L90 120 Q75 115 75 100 Z" fill="currentColor" opacity="0.05" />
+                    {/* Filled tail silhouette */}
+                    <path d="M120 120 Q155 100 165 70 Q170 45 155 30 Q140 20 135 40 Q145 55 140 80 Q138 95 130 110 Z" fill="currentColor" opacity="0.04" />
+                    {/* Glow layer */}
+                    <g filter={`url(#glow-${type})`} opacity="0.45">
+                        <path d="M90 80 Q70 60 80 40 Q90 25 105 35 Q115 25 125 40 Q130 55 120 70 L130 90 Q135 110 120 120 L90 120 Q75 115 75 100 Z" stroke="currentColor" strokeWidth="1" fill="none" />
+                        <path d="M120 120 Q155 100 165 70 Q170 45 155 30 Q140 20 135 40 Q145 55 140 80 Q138 95 130 110" stroke="currentColor" strokeWidth="1" fill="none" />
+                    </g>
+                    {/* Crisp body */}
+                    <path d="M90 80 Q70 60 80 40 Q90 25 105 35 Q115 25 125 40 Q130 55 120 70 L130 90 Q135 110 120 120 L90 120 Q75 115 75 100 Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" opacity="0.65" />
+                    {/* Signature bushy tail */}
+                    <path d="M120 120 Q155 100 165 70 Q170 45 155 30 Q140 20 135 40 Q145 55 140 80 Q138 95 130 110" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.6" strokeLinecap="round" />
+                    {/* Tail fluff texture */}
+                    <path d="M155 30 Q162 38 158 48" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
+                    <path d="M165 70 Q158 76 152 72" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
+                    <path d="M148 50 Q155 55 152 62" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    {/* Eye - big and expressive */}
+                    <circle cx="100" cy="50" r="5" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+                    <circle cx="101" cy="49" r="2" fill="currentColor" opacity="0.5" />
+                    <circle cx="103" cy="47" r="0.8" fill="currentColor" opacity="0.3" />
+                    {/* Rounded ears */}
+                    <path d="M85 35 Q80 22 90 28" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
+                    <path d="M115 35 Q120 22 110 28" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
+                    {/* Little paws */}
+                    <path d="M88 105 Q80 98 78 108 Q80 114 86 112" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    {/* Acorn it's holding */}
+                    <ellipse cx="82" cy="105" rx="5" ry="4" stroke="currentColor" strokeWidth="1" opacity="0.35" />
+                    <path d="M77 102 Q82 97 87 102" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+                    {/* Ground accent */}
+                    <line x1="60" y1="125" x2="150" y2="125" stroke="currentColor" strokeWidth="0.5" opacity="0.12" strokeDasharray="6 4" />
+                </svg>
+            );
+            case 'peacock': return (
+                <svg {...svgProps}>
+                    {glowFilter}
+                    {/* Filled fan backdrop */}
+                    <path d="M100 95 L30 20 L20 55 L18 90 Z" fill="currentColor" opacity="0.03" />
+                    <path d="M100 95 L170 20 L180 55 L182 90 Z" fill="currentColor" opacity="0.03" />
+                    {/* Glow layer - fan shape */}
+                    <g filter={`url(#glow-${type})`} opacity="0.4">
+                        <path d="M100 90 Q60 45 30 18" stroke="currentColor" strokeWidth="1" />
+                        <path d="M100 90 Q140 45 170 18" stroke="currentColor" strokeWidth="1" />
+                        <path d="M100 90 Q45 55 20 55" stroke="currentColor" strokeWidth="1" />
+                        <path d="M100 90 Q155 55 180 55" stroke="currentColor" strokeWidth="1" />
+                    </g>
+                    {/* Crisp body */}
+                    <path d="M95 135 Q85 115 90 95 Q95 78 100 72 Q105 78 110 95 Q115 115 105 135" stroke="currentColor" strokeWidth="1.8" opacity="0.55" />
+                    <path d="M95 135 Q85 115 90 95 Q95 78 100 72 Q105 78 110 95 Q115 115 105 135" fill="currentColor" opacity="0.04" />
+                    {/* Head */}
+                    <circle cx="100" cy="65" r="9" stroke="currentColor" strokeWidth="1.8" opacity="0.7" />
+                    <circle cx="100" cy="65" r="9" fill="currentColor" opacity="0.05" />
+                    {/* Crown plumes */}
+                    <line x1="100" y1="56" x2="100" y2="40" stroke="currentColor" strokeWidth="1.2" opacity="0.6" />
+                    <circle cx="100" cy="38" r="2.5" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity="0.08" opacity="0.6" />
+                    <line x1="94" y1="57" x2="88" y2="43" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+                    <circle cx="87" cy="41" r="2" stroke="currentColor" strokeWidth="1" fill="currentColor" fillOpacity="0.06" opacity="0.5" />
+                    <line x1="106" y1="57" x2="112" y2="43" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+                    <circle cx="113" cy="41" r="2" stroke="currentColor" strokeWidth="1" fill="currentColor" fillOpacity="0.06" opacity="0.5" />
+                    {/* Fan tail - 8 feathers radiating */}
+                    {/* Left feathers */}
+                    <path d="M100 90 Q60 45 30 18" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    <circle cx="28" cy="15" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.4" />
+                    <circle cx="28" cy="15" r="2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    <circle cx="28" cy="15" r="2.5" fill="currentColor" opacity="0.06" />
+                    <path d="M100 90 Q45 55 20 55" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    <circle cx="17" cy="55" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.4" />
+                    <circle cx="17" cy="55" r="2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    <circle cx="17" cy="55" r="2.5" fill="currentColor" opacity="0.06" />
+                    <path d="M100 90 Q52 78 20 90" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    <circle cx="17" cy="91" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.4" />
+                    <circle cx="17" cy="91" r="2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    <circle cx="17" cy="91" r="2.5" fill="currentColor" opacity="0.06" />
+                    <path d="M100 90 Q65 35 45 10" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    {/* Right feathers - mirror */}
+                    <path d="M100 90 Q140 45 170 18" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    <circle cx="172" cy="15" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.4" />
+                    <circle cx="172" cy="15" r="2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    <circle cx="172" cy="15" r="2.5" fill="currentColor" opacity="0.06" />
+                    <path d="M100 90 Q155 55 180 55" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    <circle cx="183" cy="55" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.4" />
+                    <circle cx="183" cy="55" r="2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    <circle cx="183" cy="55" r="2.5" fill="currentColor" opacity="0.06" />
+                    <path d="M100 90 Q148 78 180 90" stroke="currentColor" strokeWidth="1.2" opacity="0.45" />
+                    <circle cx="183" cy="91" r="6" stroke="currentColor" strokeWidth="1.2" opacity="0.4" />
+                    <circle cx="183" cy="91" r="2.5" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    <circle cx="183" cy="91" r="2.5" fill="currentColor" opacity="0.06" />
+                    <path d="M100 90 Q135 35 155 10" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+                    {/* Eye detail */}
+                    <circle cx="97" cy="64" r="1.5" fill="currentColor" opacity="0.35" />
+                </svg>
+            );
+            case 'owl': return (
+                <svg {...svgProps}>
+                    {glowFilter}
+                    {/* Filled head backdrop */}
+                    <circle cx="100" cy="80" r="48" fill="currentColor" opacity="0.04" />
+                    {/* Glow layer */}
+                    <g filter={`url(#glow-${type})`} opacity="0.4">
+                        <circle cx="100" cy="80" r="48" stroke="currentColor" strokeWidth="1" fill="none" />
+                        <circle cx="80" cy="72" r="16" stroke="currentColor" strokeWidth="1" fill="none" />
+                        <circle cx="120" cy="72" r="16" stroke="currentColor" strokeWidth="1" fill="none" />
+                    </g>
+                    {/* Owl face - bold outer ring */}
+                    <circle cx="100" cy="80" r="48" stroke="currentColor" strokeWidth="2" opacity="0.55" />
+                    {/* Facial disc - layered rings for depth */}
+                    <circle cx="100" cy="80" r="42" stroke="currentColor" strokeWidth="0.6" opacity="0.2" />
+                    <circle cx="100" cy="80" r="36" stroke="currentColor" strokeWidth="0.4" opacity="0.12" />
+                    {/* Big round eyes - signature owl feature */}
+                    <circle cx="80" cy="72" r="16" stroke="currentColor" strokeWidth="1.8" opacity="0.7" />
+                    <circle cx="120" cy="72" r="16" stroke="currentColor" strokeWidth="1.8" opacity="0.7" />
+                    <circle cx="80" cy="72" r="16" fill="currentColor" opacity="0.04" />
+                    <circle cx="120" cy="72" r="16" fill="currentColor" opacity="0.04" />
+                    {/* Iris rings */}
+                    <circle cx="80" cy="72" r="9" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
+                    <circle cx="120" cy="72" r="9" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
+                    {/* Pupils */}
+                    <circle cx="80" cy="72" r="4" fill="currentColor" opacity="0.3" />
+                    <circle cx="120" cy="72" r="4" fill="currentColor" opacity="0.3" />
+                    {/* Highlight reflections */}
+                    <circle cx="84" cy="68" r="2" fill="currentColor" opacity="0.15" />
+                    <circle cx="124" cy="68" r="2" fill="currentColor" opacity="0.15" />
+                    {/* Beak */}
+                    <path d="M94 88 L100 98 L106 88 Z" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.08" strokeLinejoin="round" opacity="0.6" />
+                    {/* Ear tufts - dramatic horns */}
+                    <path d="M62 48 L48 18 L76 40" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" opacity="0.6" />
+                    <path d="M138 48 L152 18 L124 40" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" opacity="0.6" />
+                    <path d="M62 48 L48 18 L76 40 Z" fill="currentColor" opacity="0.04" />
+                    <path d="M138 48 L152 18 L124 40 Z" fill="currentColor" opacity="0.04" />
+                    {/* Feather cascade */}
+                    <path d="M65 110 Q82 128 100 122 Q118 128 135 110" stroke="currentColor" strokeWidth="1.2" opacity="0.35" />
+                    <path d="M70 118 Q85 134 100 128 Q115 134 130 118" stroke="currentColor" strokeWidth="0.8" opacity="0.22" />
+                    <path d="M76 125 Q88 138 100 133 Q112 138 124 125" stroke="currentColor" strokeWidth="0.5" opacity="0.12" />
+                </svg>
+            );
+            default: return null;
+        }
+    };
 
     const personas = [
-        { name: "Fox Analyst", icon: "🦊", color: "text-orange-600", border: "bg-[radial-gradient(rgb(234,88,12)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(234,88,12,0.4)] hover:shadow-[0_0_25px_rgba(234,88,12,0.6)]" },
-        { name: "Squirrel Advisor", icon: "🐿️", color: "text-emerald-600", border: "bg-[radial-gradient(rgb(5,150,105)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(5,150,105,0.4)] hover:shadow-[0_0_25px_rgba(5,150,105,0.6)]" },
-        { name: "Peacock Critic", icon: "🦚", color: "text-purple-600", border: "bg-[radial-gradient(rgb(147,51,234)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(147,51,234,0.4)] hover:shadow-[0_0_25px_rgba(147,51,234,0.6)]" },
-        { name: "Owl Strategist", icon: "🦉", color: "text-indigo-600", border: "bg-[radial-gradient(rgb(79,70,229)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(79,70,229,0.4)] hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]" },
+        {
+            name: "The Fox",
+            badgeName: "Fox Analyst",
+            icon: <Zap className="w-8 h-8 text-orange-600" />,
+            emoji: "🦊",
+            animal: "fox",
+            animalColor: "text-orange-500/[0.15]",
+            animalColorBack: "text-orange-500/[0.12]",
+            role: "Balanced Style",
+            hint: "Agile & Opportunity Spotter",
+            description: "The Fox understands the balance of life. Quick to spot a deal and clever enough to avoid a trap. Perfect for those who want to live well.",
+            trait: "Opportunity Radar",
+            color: "from-orange-600/20 via-amber-500/10 to-background",
+            iconBg: "bg-orange-600/10",
+            traitBorder: "border-orange-600/30 text-orange-700 bg-orange-600/5",
+            textColor: "text-orange-600",
+            badgeBorder: "bg-[radial-gradient(rgb(234,88,12)_40%,transparent_60%)]",
+            badgeGlow: "shadow-[0_0_15px_-3px_rgba(234,88,12,0.4)] hover:shadow-[0_0_25px_rgba(234,88,12,0.6)]"
+        },
+        {
+            name: "The Squirrel",
+            badgeName: "Squirrel Advisor",
+            icon: <Wallet className="text-emerald-600" />,
+            emoji: "🐿️",
+            animal: "squirrel",
+            animalColor: "text-emerald-600/[0.15]",
+            animalColorBack: "text-emerald-600/[0.12]",
+            role: "Wealth Builder",
+            hint: "Safe & Compound King",
+            description: "A true wealth builder. The Squirrel is obsessive about savings and protective of the future. Ideal for long-term compound growth.",
+            trait: "Compound Interest Optimizer",
+            color: "from-emerald-700/20 via-green-600/10 to-background",
+            iconBg: "bg-emerald-700/10",
+            traitBorder: "border-emerald-700/30 text-emerald-700 bg-emerald-700/5",
+            textColor: "text-emerald-600",
+            badgeBorder: "bg-[radial-gradient(rgb(5,150,105)_40%,transparent_60%)]",
+            badgeGlow: "shadow-[0_0_15px_-3px_rgba(5,150,105,0.4)] hover:shadow-[0_0_25px_rgba(5,150,105,0.6)]"
+        },
+        {
+            name: "The Peacock",
+            badgeName: "Peacock Critic",
+            icon: <Gem className="text-purple-600" />,
+            emoji: "🦚",
+            animal: "peacock",
+            animalColor: "text-purple-600/[0.15]",
+            animalColorBack: "text-purple-600/[0.12]",
+            role: "Luxury Spender",
+            hint: "Bold & Style-Conscious",
+            description: "Glamorous and brutally honest. The Peacock isn't afraid to call out overpriced vanity. Great for spenders who value quality.",
+            trait: "Reality Check Critic",
+            color: "from-purple-700/20 via-fuchsia-600/10 to-background",
+            iconBg: "bg-purple-700/10",
+            traitBorder: "border-purple-700/30 text-purple-700 bg-purple-700/5",
+            textColor: "text-purple-600",
+            badgeBorder: "bg-[radial-gradient(rgb(147,51,234)_40%,transparent_60%)]",
+            badgeGlow: "shadow-[0_0_15px_-3px_rgba(147,51,234,0.4)] hover:shadow-[0_0_25px_rgba(147,51,234,0.6)]"
+        },
+        {
+            name: "The Owl",
+            badgeName: "Owl Strategist",
+            icon: <Brain className="text-indigo-600" />,
+            emoji: "🦉",
+            animal: "owl",
+            animalColor: "text-indigo-600/[0.15]",
+            animalColorBack: "text-indigo-600/[0.12]",
+            role: "The Strategist",
+            hint: "Calm & Data Oracle",
+            description: "Intelligent, calm, and predictive. The Owl uses data to see what's coming before it happens. Perfect for meticulous planners.",
+            trait: "Predictive Foresight",
+            color: "from-indigo-800/20 via-blue-700/10 to-background",
+            iconBg: "bg-indigo-800/10",
+            traitBorder: "border-indigo-800/30 text-indigo-700 bg-indigo-800/5",
+            textColor: "text-indigo-600",
+            badgeBorder: "bg-[radial-gradient(rgb(79,70,229)_40%,transparent_60%)]",
+            badgeGlow: "shadow-[0_0_15px_-3px_rgba(79,70,229,0.4)] hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]"
+        },
     ];
+
+    const [personaIndex, setPersonaIndex] = useState(0);
 
     useEffect(() => {
         setMounted(true);
@@ -34,6 +302,100 @@ export default function LandingPageContent() {
         }, 3000);
         return () => clearInterval(interval);
     }, []);
+
+    // Flip Card Component for compatibility
+    const PersonaCard = ({ persona, index }: { persona: any, index: number }) => {
+        const [isFlipped, setIsFlipped] = useState(false);
+
+        return (
+            <div
+                className=" h-[400px] w-full group"
+                onClick={() => setIsFlipped(!isFlipped)}
+                onMouseEnter={() => setIsFlipped(true)}
+                onMouseLeave={() => setIsFlipped(false)}
+            >
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    animate={{ rotateY: isFlipped ? 180 : 0 }}
+                    transition={{
+                        rotateY: { duration: 0.6, ease: "easeInOut" },
+                        opacity: { delay: index * 0.1, duration: 0.5 },
+                        y: { delay: index * 0.1, duration: 0.5 }
+                    }}
+                    viewport={{ once: true }}
+                    style={{ transformStyle: "preserve-3d" }}
+                    className="relative w-full h-full cursor-pointer"
+                >
+                    {/* Front Face */}
+                    <div className={cn(
+                        "absolute inset-0 backface-hidden rounded-2xl border border-border/50 p-6 flex flex-col items-center justify-center text-center bg-gradient-to-br shadow-xl overflow-hidden",
+                        persona.color
+                    )}>
+                        {/* Animal silhouette watermark */}
+                        <AnimalSilhouette type={persona.animal} className={cn("w-[280px] h-[280px] -bottom-10 -right-10 transition-all duration-700 ease-out group-hover:scale-[1.15] group-hover:rotate-3", persona.animalColor)} />
+
+                        <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-500 shadow-inner relative z-10", persona.iconBg)}>
+                            {React.cloneElement(persona.icon as React.ReactElement<any>, {
+                                className: cn("w-8 h-8", (persona.icon as any).props.className)
+                            })}
+                        </div>
+                        <h3 className="text-2xl font-bold text-foreground mb-2 relative z-10">{persona.name}</h3>
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-primary relative z-10">{persona.role}</p>
+
+                        <div className="mt-auto pt-6 border-t border-border/10 w-full flex items-center justify-center gap-2 relative z-10">
+                            <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">{persona.hint}</span>
+                            <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse" />
+                        </div>
+
+                        <div className="absolute bottom-4 right-4 md:hidden z-10">
+                            <span className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-tighter">Tap to flip</span>
+                        </div>
+                    </div>
+
+                    {/* Back Face */}
+                    <div className={cn(
+                        "absolute inset-0 backface-hidden rounded-2xl border border-border/50 p-8 flex flex-col justify-center bg-gradient-to-br rotate-y-180 shadow-2xl overflow-hidden",
+                        persona.color
+                    )}>
+                        {/* Animal silhouette watermark - back */}
+                        <AnimalSilhouette type={persona.animal} className={cn("w-[220px] h-[220px] -top-4 -left-4 rotate-[15deg]", persona.animalColorBack)} />
+
+                        <div className="flex items-center gap-4 mb-6 relative z-10">
+                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shadow-lg", persona.iconBg)}>
+                                {React.cloneElement(persona.icon as React.ReactElement<any>, {
+                                    className: cn("w-5 h-5", (persona.icon as any).props.className)
+                                })}
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-bold text-foreground">{persona.name}</h4>
+                                <p className="text-[10px] uppercase font-black text-primary tracking-wider">{persona.role}</p>
+                            </div>
+                        </div>
+
+                        <p className="text-sm text-balance leading-relaxed text-muted-foreground mb-8 relative z-10">
+                            {persona.description}
+                        </p>
+
+                        <div className="space-y-3 mt-auto relative z-10">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-3 h-3 text-primary" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-foreground">Unique Intelligence</span>
+                            </div>
+                            <div className={cn("px-4 py-2 rounded-xl border text-[11px] font-bold shadow-sm", persona.traitBorder)}>
+                                {persona.trait}
+                            </div>
+                        </div>
+
+                        <div className="absolute top-4 right-4 z-10">
+                            <Crown className="w-4 h-4 text-primary/20" />
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    };
 
     // Map themes to their specific image URLs
     const themeImages: Record<string, string> = {
@@ -113,10 +475,10 @@ export default function LandingPageContent() {
                                         duration={3500}
                                         containerClassName={cn(
                                             "w-48 h-9 mb-6 mx-auto transition-all duration-700",
-                                            personas[personaIndex].glow
+                                            personas[personaIndex].badgeGlow
                                         )}
-                                        borderClassName={personas[personaIndex].border}
-                                        className={cn("font-bold flex items-center justify-center px-4 transition-colors duration-700", personas[personaIndex].color)}
+                                        borderClassName={personas[personaIndex].badgeBorder}
+                                        className={cn("font-bold flex items-center justify-center px-4 transition-colors duration-700", personas[personaIndex].textColor)}
                                     >
                                         <motion.span
                                             key={personaIndex}
@@ -125,7 +487,7 @@ export default function LandingPageContent() {
                                             className="flex items-center gap-2"
                                         >
                                             <span className="text-lg">{personas[personaIndex].icon}</span>
-                                            {personas[personaIndex].name}
+                                            {personas[personaIndex].badgeName}
                                         </motion.span>
                                     </MovingBorder>
                                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl 3xl:text-8xl 4xl:text-[10rem] drop-shadow-sm text-foreground">
@@ -147,7 +509,7 @@ export default function LandingPageContent() {
                                     transition={{ duration: 0.5, delay: 0.2 }}
                                     className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl 3xl:max-w-[1000px] 4xl:max-w-[1300px] leading-relaxed"
                                 >
-                                    Unlock the full potential of your finances. Precise tracking, intelligent forecasting, and <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">advanced financial personas</span> to help you build wealth faster.
+                                    Unlock the full potential of your Finances. Precise Tracking, Intelligent Forecasting, and <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Advanced Financial Personas</span> to help you build wealth faster.
                                 </motion.p>
                             </div>
                             <motion.div
@@ -281,120 +643,8 @@ export default function LandingPageContent() {
                         </div>
 
                         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                            {[
-                                {
-                                    name: "The Fox",
-                                    role: "Balanced Style",
-                                    icon: <Zap className="text-amber-500" />,
-                                    hint: "Agile & Opportunity Spotter",
-                                    description: "The Fox understands the balance of life. Quick to spot a deal and clever enough to avoid a trap. Perfect for those who want to live well.",
-                                    trait: "Opportunity Radar",
-                                    color: "from-orange-600/20 via-amber-500/10 to-background",
-                                    iconBg: "bg-orange-600/10",
-                                    traitBorder: "border-orange-600/30 text-orange-700 bg-orange-600/5"
-                                },
-                                {
-                                    name: "The Squirrel",
-                                    role: "Wealth Builder",
-                                    icon: <Wallet className="text-emerald-600" />,
-                                    hint: "Safe & Compound King",
-                                    description: "A true wealth builder. The Squirrel is obsessive about savings and protective of the future. Ideal for long-term compound growth.",
-                                    trait: "Compound Interest Optimizer",
-                                    color: "from-emerald-700/20 via-green-600/10 to-background",
-                                    iconBg: "bg-emerald-700/10",
-                                    traitBorder: "border-emerald-700/30 text-emerald-700 bg-emerald-700/5"
-                                },
-                                {
-                                    name: "The Peacock",
-                                    role: "Luxury Spender",
-                                    icon: <Gem className="text-purple-600" />,
-                                    hint: "Bold & Style-Conscious",
-                                    description: "Glamorous and brutally honest. The Peacock isn't afraid to call out overpriced vanity. Great for spenders who value quality.",
-                                    trait: "Reality Check Critic",
-                                    color: "from-purple-700/20 via-fuchsia-600/10 to-background",
-                                    iconBg: "bg-purple-700/10",
-                                    traitBorder: "border-purple-700/30 text-purple-700 bg-purple-700/5"
-                                },
-                                {
-                                    name: "The Owl",
-                                    role: "The Strategist",
-                                    icon: <Brain className="text-indigo-600" />,
-                                    hint: "Calm & Data Oracle",
-                                    description: "Intelligent, calm, and predictive. The Owl uses data to see what's coming before it happens. Perfect for meticulous planners.",
-                                    trait: "Predictive Foresight",
-                                    color: "from-indigo-800/20 via-blue-700/10 to-background",
-                                    iconBg: "bg-indigo-800/10",
-                                    traitBorder: "border-indigo-800/30 text-indigo-700 bg-indigo-800/5"
-                                }
-
-                            ].map((persona, i) => (
-                                <div key={persona.name} className="perspective-1000 h-[350px] w-full group">
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        whileHover={{ rotateY: 180 }}
-                                        transition={{
-                                            rotateY: { duration: 0.6, ease: "easeInOut" },
-                                            opacity: { delay: i * 0.1, duration: 0.5 },
-                                            y: { delay: i * 0.1, duration: 0.5 }
-                                        }}
-                                        viewport={{ once: true }}
-                                        style={{ transformStyle: "preserve-3d" }}
-                                        className="relative w-full h-full cursor-pointer"
-                                    >
-                                        {/* Front Face */}
-                                        <div className={cn(
-                                            "absolute inset-0 backface-hidden rounded-2xl border border-border/50 p-6 flex flex-col items-center justify-center text-center bg-gradient-to-br shadow-xl",
-                                            persona.color
-                                        )}>
-                                            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-500 shadow-inner", persona.iconBg)}>
-                                                {React.cloneElement(persona.icon as React.ReactElement<any>, { className: "w-8 h-8" })}
-                                            </div>
-                                            <h3 className="text-2xl font-bold text-foreground mb-2">{persona.name}</h3>
-                                            <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">{persona.role}</p>
-
-                                            <div className="mt-auto pt-6 border-t border-border/10 w-full flex items-center justify-center gap-2">
-                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse" />
-                                                <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">{persona.hint}</span>
-                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse" />
-                                            </div>
-                                        </div>
-
-                                        {/* Back Face */}
-                                        <div className={cn(
-                                            "absolute inset-0 backface-hidden rounded-2xl border border-border/50 p-8 flex flex-col justify-center bg-gradient-to-br rotate-y-180 shadow-2xl",
-                                            persona.color
-                                        )}>
-                                            <div className="flex items-center gap-4 mb-6">
-                                                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shadow-lg", persona.iconBg)}>
-                                                    {React.cloneElement(persona.icon as React.ReactElement<any>, { className: "w-5 h-5" })}
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-lg font-bold text-foreground">{persona.name}</h4>
-                                                    <p className="text-[10px] uppercase font-black text-primary tracking-wider">{persona.role}</p>
-                                                </div>
-                                            </div>
-
-                                            <p className="text-sm text-balance leading-relaxed text-muted-foreground mb-8">
-                                                {persona.description}
-                                            </p>
-
-                                            <div className="space-y-3 mt-auto">
-                                                <div className="flex items-center gap-2">
-                                                    <Sparkles className="w-3 h-3 text-primary" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-foreground">Unique Intelligence</span>
-                                                </div>
-                                                <div className={cn("px-4 py-2 rounded-xl border text-[11px] font-bold shadow-sm", persona.traitBorder)}>
-                                                    {persona.trait}
-                                                </div>
-                                            </div>
-
-                                            <div className="absolute top-4 right-4">
-                                                <Crown className="w-4 h-4 text-primary/20" />
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                </div>
+                            {personas.map((persona, i) => (
+                                <PersonaCard key={persona.name} persona={persona} index={i} />
                             ))}
                         </div>
                     </div>
@@ -505,6 +755,6 @@ export default function LandingPageContent() {
                     </div>
                 </div>
             </footer>
-        </div >
+        </div>
     );
 }
