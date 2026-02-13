@@ -47,16 +47,18 @@ export async function ChatWithAI(
 					orderBy: { date: "desc" },
 					take: 1000,
 					select: {
+						id: true,
 						amount: true,
 						description: true,
 						category: true,
+						categoryIcon: true,
 						date: true,
 						type: true,
 					},
 				}),
 				prisma.budget.findMany({
 					where: { userId: user.id },
-					select: { category: true, amount: true },
+					select: { id: true, category: true, amount: true },
 				}),
 				prisma.savingsGoal.findMany({
 					where: { userId: user.id },
@@ -139,9 +141,9 @@ User Currency: ${currency}
 User Financial Persona: ${persona}
 Available Categories: ${availableCategories.join(", ")}
 Recent Transactions:
-${transactions.map((t) => `- ${t.date.toISOString().split("T")[0]}: ${t.type} ${t.amount} (${t.category}) "${t.description}"`).join("\n")}
+${transactions.map((t) => `- ID[${t.id}] ${t.date.toISOString().split("T")[0]}: ${t.categoryIcon || ""} ${t.type} ${t.amount} (${t.category}) "${t.description}"`).join("\n")}
 Budgets:
-${budgets.map((b) => `- ${b.category}: ${b.amount}`).join("\n")}
+${budgets.map((b) => `- ID[${b.id}] ${b.category}: ${b.amount}`).join("\n")}
 Savings Goals:
 ${savingsGoals.map((s) => `- ${s.name}: ${s.currentAmount}/${s.targetAmount}`).join("\n")}
 `;
@@ -173,7 +175,11 @@ Use Markdown.
    - [MINI_TREND: { "data": [10, 25, 15, 40, 30], "label": "Recent activity" }]
    - [LINE_CHART: { "title": "7-Day Spending Trend", "data": [120, 450, 300, 800, 200, 600, 400], "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }]
 
-3. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
+3. **Interactive Components**: Use these to allow the user to take action directly:
+   - **Transaction Card**: Use when showing specific recent transactions. EMBED: [TRANSACTION_CARD: { "id": "uuid", "amount": 45, "description": "Coffee", "category": "Food", "categoryIcon": "☕", "type": "expense", "date": "2024-01-01" }]
+   - **Budget Adjuster**: Use when suggesting budget changes. EMBED: [BUDGET_ADJUSTER: { "id": "uuid", "category": "Food", "current": 500, "suggested": 600 }]
+
+4. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
 
 **How to Chart**:
 - Look at the 'Recent Transactions' in the context Data.
@@ -186,7 +192,7 @@ Use Markdown.
 
 **Smart Suggestions (IMPORTANT)**: 
 At the end of your response, strictly provide exactly 3 "Quick Action" buttons for follow-up questions in this format:
-[SUGGESTIONS: ["How can I save more?", "Show my top category", "Compare to last month"]]
+[SUGGESTIONS: ["Track my food expenses", "Show my spending trend", "Adjust my food budget"]]
 
 Data:
 ${contextData}`;

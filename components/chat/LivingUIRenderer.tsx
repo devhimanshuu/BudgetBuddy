@@ -2,10 +2,14 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, BarChart3, LineChart, Sparkles } from "lucide-react";
+import { TrendingUp, BarChart3, LineChart, Sparkles, Trash2, Edit2, Plus, Minus, Check, Calendar, Tag, CreditCard, Wallet, ArrowUpCircle, ArrowDownCircle, PieChart, Info, History } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { extractBalancedJson } from "./utils";
+import { BudgetAdjuster } from "./BudgetAdjuster";
+import { TransactionCard } from "./TransactionCard";
 
 interface LivingUIRendererProps {
     text: string;
@@ -375,11 +379,46 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
         } catch (e) { /* silent */ }
     }
 
+    // Match [BUDGET_ADJUSTER: {...}]
+    const budgetAdjusterMatches = extractBalancedJson(text, 'BUDGET_ADJUSTER');
+    for (const budgetMatch of budgetAdjusterMatches) {
+        try {
+            const data = JSON.parse(budgetMatch.json.trim());
+            components.push(
+                <BudgetAdjuster key={`budget-adj-${budgetMatch.index}`} data={data} />
+            );
+        } catch (e) { /* silent */ }
+    }
+
+    // Match [TRANSACTION_CARD: {...}]
+    const transactionCardMatches = extractBalancedJson(text, 'TRANSACTION_CARD');
+    for (const txMatch of transactionCardMatches) {
+        try {
+            const data = JSON.parse(txMatch.json.trim());
+            components.push(
+                <TransactionCard key={`tx-card-${txMatch.index}`} data={data} onSendSuggestion={onSendSuggestion} />
+            );
+        } catch (e) { /* silent */ }
+    }
+
     // Match [SUGGESTIONS: [...]]
     const suggestionRegex = /\[SUGGESTIONS:\s*(\[[\s\S]*?\])\s*\]/g;
     while ((match = suggestionRegex.exec(text)) !== null) {
         try {
             const suggestions = JSON.parse(match[1].trim());
+
+            // Icon mapping for common suggestion types
+            const getIcon = (text: string) => {
+                const lowerText = text.toLowerCase();
+                if (lowerText.includes("spend") || lowerText.includes("expense") || lowerText.includes("breakdown")) return <PieChart className="h-3 w-3" />;
+                if (lowerText.includes("trend") || lowerText.includes("compare") || lowerText.includes("history")) return <TrendingUp className="h-3 w-3" />;
+                if (lowerText.includes("budget") || lowerText.includes("limit") || lowerText.includes("adjust")) return <Wallet className="h-3 w-3" />;
+                if (lowerText.includes("track") || lowerText.includes("add") || lowerText.includes("log")) return <Plus className="h-3 w-3" />;
+                if (lowerText.includes("search") || lowerText.includes("find") || lowerText.includes("filter")) return <Tag className="h-3 w-3" />;
+                if (lowerText.includes("receipt") || lowerText.includes("scan")) return <Calendar className="h-3 w-3" />;
+                return <Sparkles className="h-3 w-3" />;
+            };
+
             components.push(
                 <div key={`sug-${match.index}`} className="mt-4 flex flex-wrap gap-2">
                     {suggestions.map((s: string, i: number) => (
@@ -388,7 +427,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                             onClick={() => onSendSuggestion(s)}
                             className="text-xs px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/20 border border-primary/20 transition-all hover:scale-105 active:scale-95 text-primary font-medium flex items-center gap-1.5 shadow-sm"
                         >
-                            <Sparkles className="h-3 w-3" />
+                            {getIcon(s)}
                             {s}
                         </button>
                     ))}
