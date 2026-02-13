@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -9,17 +9,30 @@ import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import FeatureCard from "@/components/landing/FeatureCard";
 import { motion } from "framer-motion";
 import { MovingBorder } from "@/components/landing/MovingBorder";
+import { cn } from "@/lib/utils";
 
 import { ThemeCustomizer } from "@/components/ThemeCustomizer";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function LandingPageContent() {
     const { theme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [personaIndex, setPersonaIndex] = useState(0);
+
+    const personas = [
+        { name: "Fox Analyst", icon: "🦊", color: "text-orange-600", border: "bg-[radial-gradient(rgb(234,88,12)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(234,88,12,0.4)] hover:shadow-[0_0_25px_rgba(234,88,12,0.6)]" },
+        { name: "Squirrel Advisor", icon: "🐿️", color: "text-emerald-600", border: "bg-[radial-gradient(rgb(5,150,105)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(5,150,105,0.4)] hover:shadow-[0_0_25px_rgba(5,150,105,0.6)]" },
+        { name: "Peacock Critic", icon: "🦚", color: "text-purple-600", border: "bg-[radial-gradient(rgb(147,51,234)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(147,51,234,0.4)] hover:shadow-[0_0_25px_rgba(147,51,234,0.6)]" },
+        { name: "Owl Strategist", icon: "🦉", color: "text-indigo-600", border: "bg-[radial-gradient(rgb(79,70,229)_40%,transparent_60%)]", glow: "shadow-[0_0_15px_-3px_rgba(79,70,229,0.4)] hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]" },
+    ];
 
     useEffect(() => {
         setMounted(true);
+        const interval = setInterval(() => {
+            setPersonaIndex((prev) => (prev + 1) % personas.length);
+        }, 3000);
+        return () => clearInterval(interval);
     }, []);
 
     // Map themes to their specific image URLs
@@ -98,11 +111,22 @@ export default function LandingPageContent() {
                                 >
                                     <MovingBorder
                                         duration={3500}
-                                        containerClassName="w-48 h-9 mb-6 mx-auto shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)] hover:shadow-[0_0_25px_-2px_rgba(16,185,129,0.6)] transition-all duration-300"
-                                        className="text-emerald-500 font-medium flex items-center justify-center px-4"
+                                        containerClassName={cn(
+                                            "w-48 h-9 mb-6 mx-auto transition-all duration-700",
+                                            personas[personaIndex].glow
+                                        )}
+                                        borderClassName={personas[personaIndex].border}
+                                        className={cn("font-bold flex items-center justify-center px-4 transition-colors duration-700", personas[personaIndex].color)}
                                     >
-                                        <span className="flex h-2 w-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-                                        AI Financial Analyst
+                                        <motion.span
+                                            key={personaIndex}
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <span className="text-lg">{personas[personaIndex].icon}</span>
+                                            {personas[personaIndex].name}
+                                        </motion.span>
                                     </MovingBorder>
                                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl 3xl:text-8xl 4xl:text-[10rem] drop-shadow-sm text-foreground">
                                         Master Your Money <br />
@@ -123,7 +147,7 @@ export default function LandingPageContent() {
                                     transition={{ duration: 0.5, delay: 0.2 }}
                                     className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl 3xl:max-w-[1000px] 4xl:max-w-[1300px] leading-relaxed"
                                 >
-                                    Unlock the full potential of your finances. Precise tracking, intelligent forecasting, and personalized insights to help you <span className="text-primary font-semibold">build wealth faster</span>.
+                                    Unlock the full potential of your finances. Precise tracking, intelligent forecasting, and <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">advanced financial personas</span> to help you build wealth faster.
                                 </motion.p>
                             </div>
                             <motion.div
@@ -187,9 +211,9 @@ export default function LandingPageContent() {
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                         <FeatureCard
                             delay={0.1}
-                            icon={<Zap className="h-full w-full" />}
-                            title="AI Financial Analyst"
-                            description="Chat with your finances. Ask questions like 'How much did I spend on food this month?' and get instant answers."
+                            icon={<Globe className="h-full w-full" />}
+                            title="Global Currency Reconciliation"
+                            description="Automatically detect and convert international receipts to your local currency with AI precision."
                         />
                         <FeatureCard
                             delay={0.2}
@@ -239,6 +263,140 @@ export default function LandingPageContent() {
                             title="Export & Reports"
                             description="Need to share data with your accountant? Export your financial reports in CSV, PDF, or Excel formats instantly."
                         />
+                    </div>
+                </section>
+
+                {/* AI Personalities Section */}
+                <section className="py-24 relative overflow-hidden bg-background">
+                    <div className="absolute top-0 left-1/2 -z-10 h-[500px] w-full -translate-x-1/2 blur-[120px] pointer-events-none opacity-20 bg-gradient-to-b from-primary/20 via-transparent to-transparent" />
+
+                    <div className="container px-4 md:px-6">
+                        <div className="text-center mb-16 space-y-4">
+                            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">
+                                Meet Your <span className="text-primary">AI Personalities</span>
+                            </h2>
+                            <p className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl leading-relaxed">
+                                Our AI adapts its personality based on your spending habits, providing advice that resonates with your financial style.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                            {[
+                                {
+                                    name: "The Fox",
+                                    role: "Balanced Style",
+                                    icon: <Zap className="text-amber-500" />,
+                                    hint: "Agile & Opportunity Spotter",
+                                    description: "The Fox understands the balance of life. Quick to spot a deal and clever enough to avoid a trap. Perfect for those who want to live well.",
+                                    trait: "Opportunity Radar",
+                                    color: "from-orange-600/20 via-amber-500/10 to-background",
+                                    iconBg: "bg-orange-600/10",
+                                    traitBorder: "border-orange-600/30 text-orange-700 bg-orange-600/5"
+                                },
+                                {
+                                    name: "The Squirrel",
+                                    role: "Wealth Builder",
+                                    icon: <Wallet className="text-emerald-600" />,
+                                    hint: "Safe & Compound King",
+                                    description: "A true wealth builder. The Squirrel is obsessive about savings and protective of the future. Ideal for long-term compound growth.",
+                                    trait: "Compound Interest Optimizer",
+                                    color: "from-emerald-700/20 via-green-600/10 to-background",
+                                    iconBg: "bg-emerald-700/10",
+                                    traitBorder: "border-emerald-700/30 text-emerald-700 bg-emerald-700/5"
+                                },
+                                {
+                                    name: "The Peacock",
+                                    role: "Luxury Spender",
+                                    icon: <Gem className="text-purple-600" />,
+                                    hint: "Bold & Style-Conscious",
+                                    description: "Glamorous and brutally honest. The Peacock isn't afraid to call out overpriced vanity. Great for spenders who value quality.",
+                                    trait: "Reality Check Critic",
+                                    color: "from-purple-700/20 via-fuchsia-600/10 to-background",
+                                    iconBg: "bg-purple-700/10",
+                                    traitBorder: "border-purple-700/30 text-purple-700 bg-purple-700/5"
+                                },
+                                {
+                                    name: "The Owl",
+                                    role: "The Strategist",
+                                    icon: <Brain className="text-indigo-600" />,
+                                    hint: "Calm & Data Oracle",
+                                    description: "Intelligent, calm, and predictive. The Owl uses data to see what's coming before it happens. Perfect for meticulous planners.",
+                                    trait: "Predictive Foresight",
+                                    color: "from-indigo-800/20 via-blue-700/10 to-background",
+                                    iconBg: "bg-indigo-800/10",
+                                    traitBorder: "border-indigo-800/30 text-indigo-700 bg-indigo-800/5"
+                                }
+
+                            ].map((persona, i) => (
+                                <div key={persona.name} className="perspective-1000 h-[350px] w-full group">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        whileHover={{ rotateY: 180 }}
+                                        transition={{
+                                            rotateY: { duration: 0.6, ease: "easeInOut" },
+                                            opacity: { delay: i * 0.1, duration: 0.5 },
+                                            y: { delay: i * 0.1, duration: 0.5 }
+                                        }}
+                                        viewport={{ once: true }}
+                                        style={{ transformStyle: "preserve-3d" }}
+                                        className="relative w-full h-full cursor-pointer"
+                                    >
+                                        {/* Front Face */}
+                                        <div className={cn(
+                                            "absolute inset-0 backface-hidden rounded-2xl border border-border/50 p-6 flex flex-col items-center justify-center text-center bg-gradient-to-br shadow-xl",
+                                            persona.color
+                                        )}>
+                                            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-500 shadow-inner", persona.iconBg)}>
+                                                {React.cloneElement(persona.icon as React.ReactElement<any>, { className: "w-8 h-8" })}
+                                            </div>
+                                            <h3 className="text-2xl font-bold text-foreground mb-2">{persona.name}</h3>
+                                            <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">{persona.role}</p>
+
+                                            <div className="mt-auto pt-6 border-t border-border/10 w-full flex items-center justify-center gap-2">
+                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse" />
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">{persona.hint}</span>
+                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse" />
+                                            </div>
+                                        </div>
+
+                                        {/* Back Face */}
+                                        <div className={cn(
+                                            "absolute inset-0 backface-hidden rounded-2xl border border-border/50 p-8 flex flex-col justify-center bg-gradient-to-br rotate-y-180 shadow-2xl",
+                                            persona.color
+                                        )}>
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shadow-lg", persona.iconBg)}>
+                                                    {React.cloneElement(persona.icon as React.ReactElement<any>, { className: "w-5 h-5" })}
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-lg font-bold text-foreground">{persona.name}</h4>
+                                                    <p className="text-[10px] uppercase font-black text-primary tracking-wider">{persona.role}</p>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-sm text-balance leading-relaxed text-muted-foreground mb-8">
+                                                {persona.description}
+                                            </p>
+
+                                            <div className="space-y-3 mt-auto">
+                                                <div className="flex items-center gap-2">
+                                                    <Sparkles className="w-3 h-3 text-primary" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-foreground">Unique Intelligence</span>
+                                                </div>
+                                                <div className={cn("px-4 py-2 rounded-xl border text-[11px] font-bold shadow-sm", persona.traitBorder)}>
+                                                    {persona.trait}
+                                                </div>
+                                            </div>
+
+                                            <div className="absolute top-4 right-4">
+                                                <Crown className="w-4 h-4 text-primary/20" />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </section>
 

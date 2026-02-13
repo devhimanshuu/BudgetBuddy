@@ -16,12 +16,14 @@ export function MovingBorder({
     duration = 2000,
     className,
     containerClassName,
+    borderClassName,
     ...otherProps
 }: {
     children: React.ReactNode;
     duration?: number;
     className?: string;
     containerClassName?: string;
+    borderClassName?: string;
     [key: string]: any;
 }) {
     return (
@@ -43,7 +45,7 @@ export function MovingBorder({
                     <div
                         className={cn(
                             "h-28 w-28 opacity-[0.8] bg-[radial-gradient(#10b981_40%,transparent_60%)]",
-                            className
+                            borderClassName
                         )}
                     />
                 </MovingBorderComponent>

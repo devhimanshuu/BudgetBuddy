@@ -195,6 +195,19 @@
 		perspective: 1000px;
 	}
 
+	.preserve-3d {
+		transform-style: preserve-3d;
+	}
+
+	.backface-hidden {
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+
+	.rotate-y-180 {
+		transform: rotateY(180deg);
+	}
+
 	.animate-pulse-slow {
 		animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
