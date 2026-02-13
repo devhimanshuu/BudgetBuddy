@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, BarChart3, LineChart, Sparkles, Trash2, Edit2, Plus, Minus, Check, Calendar, Tag, CreditCard, Wallet, ArrowUpCircle, ArrowDownCircle, PieChart, Info, History } from "lucide-react";
+import { TrendingUp, BarChart3, LineChart, Sparkles, Trash2, Edit2, Plus, Minus, Check, Calendar, Tag, CreditCard, Wallet, ArrowUpCircle, ArrowDownCircle, PieChart, Info, History, AlertTriangle, Target, Zap, Waves } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -401,6 +401,135 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
         } catch (e) { /* silent */ }
     }
 
+    // Match [ALERT: {...}]
+    const alertMatches = extractBalancedJson(text, 'ALERT');
+    for (const alertMatch of alertMatches) {
+        try {
+            const data = JSON.parse(alertMatch.json.trim());
+            const isWarning = data.type === 'warning';
+            const isDanger = data.type === 'danger';
+
+            components.push(
+                <div key={`alert-${alertMatch.index}`} className={cn(
+                    "mt-4 p-4 rounded-xl border animate-in slide-in-from-left-2 duration-500",
+                    isWarning && "bg-amber-500/10 border-amber-500/20 text-amber-900 dark:text-amber-200",
+                    isDanger && "bg-red-500/10 border-red-500/20 text-red-900 dark:text-red-200",
+                    !isWarning && !isDanger && "bg-blue-500/10 border-blue-500/20 text-blue-900 dark:text-blue-200"
+                )}>
+                    <div className="flex gap-3">
+                        {isWarning || isDanger ? <AlertTriangle className="h-5 w-5 shrink-0" /> : <Info className="h-5 w-5 shrink-0" />}
+                        <div>
+                            <p className="text-sm font-bold">{data.title || (isDanger ? "Urgent Alert" : "Spending Insight")}</p>
+                            <p className="text-xs mt-1 opacity-90">{data.message}</p>
+                            {data.amount && (
+                                <div className="mt-2 text-lg font-black tracking-tight">
+                                    ${data.amount.toFixed(2)}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
+
+    // Match [GOAL_PROGRESS: {...}]
+    const goalProgressMatches = extractBalancedJson(text, 'GOAL_PROGRESS');
+    for (const gpMatch of goalProgressMatches) {
+        try {
+            const data = JSON.parse(gpMatch.json.trim());
+            const percentage = Math.min((data.current / data.target) * 100, 100);
+
+            components.push(
+                <div key={`gp-${gpMatch.index}`} className="mt-4 p-4 rounded-xl bg-card border border-border shadow-md animate-in zoom-in-95 duration-500">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-bold">{data.name}</span>
+                        </div>
+                        <span className="text-xs font-bold text-primary">{percentage.toFixed(0)}%</span>
+                    </div>
+
+                    <div className="relative h-4 w-full bg-secondary rounded-full overflow-hidden mb-2">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percentage}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            className="h-full bg-primary"
+                        />
+                        {data.milestones?.map((m: number, i: number) => {
+                            const mPos = (m / data.target) * 100;
+                            if (mPos >= 100) return null;
+                            return (
+                                <div
+                                    key={i}
+                                    className="absolute top-0 bottom-0 w-0.5 bg-background/30"
+                                    style={{ left: `${mPos}%` }}
+                                />
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+                        <span>Current: ${data.current}</span>
+                        <span>Target: ${data.target}</span>
+                    </div>
+
+                    {percentage >= 100 && (
+                        <div className="mt-3 flex items-center gap-2 text-[10px] text-emerald-500 font-bold bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                            <Sparkles className="h-3 w-3" />
+                            Goal Completed! You're amazing!
+                        </div>
+                    )}
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
+
+    // Match [FORECAST: {...}]
+    const forecastMatches = extractBalancedJson(text, 'FORECAST');
+    for (const fcMatch of forecastMatches) {
+        try {
+            const data = JSON.parse(fcMatch.json.trim());
+            const isOver = data.projected > data.budget;
+
+            components.push(
+                <div key={`fc-${fcMatch.index}`} className="mt-4 p-4 rounded-xl bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-primary/20 shadow-md animate-in fade-in duration-700">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Zap className="h-4 w-4 text-amber-500" />
+                        <span className="text-sm font-bold tracking-tight">{data.category} Forecast</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Projected</p>
+                            <p className={cn("text-xl font-black mt-0.5", isOver ? "text-red-500" : "text-emerald-500")}>
+                                ${data.projected.toFixed(0)}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Budget</p>
+                            <p className="text-xl font-black mt-0.5">${data.budget.toFixed(0)}</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                        <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-muted-foreground">Confidence Score</span>
+                            <span className="font-bold">{((data.confidence || 0.8) * 100).toFixed(0)}%</span>
+                        </div>
+                        <Progress value={(data.confidence || 0.8) * 100} className="h-1 bg-primary/10" />
+                    </div>
+
+                    {isOver && (
+                        <div className="mt-4 p-2 rounded-lg bg-red-500/5 border border-red-500/10 text-[10px] text-red-600 font-medium">
+                            Warning: You might exceed your budget by ${Math.abs(data.projected - data.budget).toFixed(0)}.
+                        </div>
+                    )}
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
     // Match [SUGGESTIONS: [...]]
     const suggestionRegex = /\[SUGGESTIONS:\s*(\[[\s\S]*?\])\s*\]/g;
     while ((match = suggestionRegex.exec(text)) !== null) {

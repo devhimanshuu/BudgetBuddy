@@ -136,12 +136,61 @@ export async function ChatWithAI(
 				"USER PERSONA: Fox (Balanced). Be quick, clever, and help them maintain their steady financial balance. Personality: Agile, street-smart, and always looking for the best deal/opportunity.";
 		}
 
+		// --- INTELLIGENCE LOGIC (Anomalies & Forecasts) ---
+		const dayOfMonth = new Date().getDate();
+		const daysInMonth = new Date(
+			new Date().getFullYear(),
+			new Date().getMonth() + 1,
+			0,
+		).getDate();
+
+		const categoryInsights = availableCategories
+			.map((cat) => {
+				const catExpenses = transactions.filter(
+					(t) => t.category === cat && t.type === "expense",
+				);
+				const totalSpent = catExpenses.reduce((acc, t) => acc + t.amount, 0);
+				const budget = budgets.find((b) => b.category === cat)?.amount || 0;
+
+				// Simple Forecast
+				const projected = (totalSpent / dayOfMonth) * daysInMonth;
+
+				// Anomaly Detection (Simple: Check if any single transaction is > 3x the average for this category)
+				const avgTx =
+					catExpenses.length > 0 ? totalSpent / catExpenses.length : 0;
+				const anomalies = catExpenses
+					.filter((t) => t.amount > avgTx * 3)
+					.map((t) => ({
+						description: t.description,
+						amount: t.amount,
+						date: t.date.toISOString().split("T")[0],
+					}));
+
+				return {
+					category: cat,
+					spent: totalSpent,
+					budget,
+					projected,
+					anomalies,
+				};
+			})
+			.filter((insight) => insight.spent > 0 || insight.budget > 0);
+
 		contextData = `
 User Currency: ${currency}
 User Financial Persona: ${persona}
+Financial Health Score: ${Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100)}/100
 Available Categories: ${availableCategories.join(", ")}
+Insights (Forecasts & Anomalies):
+${categoryInsights.map((i) => `- ${i.category}: Spent ${i.spent}, Budget ${i.budget}, Forecast ${i.projected.toFixed(0)}${i.anomalies.length > 0 ? `, ANOMALIES found: ${i.anomalies.map((a) => `${a.description} (${a.amount})`).join(", ")}` : ""}`).join("\n")}
 Recent Transactions:
-${transactions.map((t) => `- ID[${t.id}] ${t.date.toISOString().split("T")[0]}: ${t.categoryIcon || ""} ${t.type} ${t.amount} (${t.category}) "${t.description}"`).join("\n")}
+${transactions
+	.slice(0, 50)
+	.map(
+		(t) =>
+			`- ID[${t.id}] ${t.date.toISOString().split("T")[0]}: ${t.categoryIcon || ""} ${t.type} ${t.amount} (${t.category}) "${t.description}"`,
+	)
+	.join("\n")}
 Budgets:
 ${budgets.map((b) => `- ID[${b.id}] ${b.category}: ${b.amount}`).join("\n")}
 Savings Goals:
@@ -179,7 +228,12 @@ Use Markdown.
    - **Transaction Card**: Use when showing specific recent transactions. EMBED: [TRANSACTION_CARD: { "id": "uuid", "amount": 45, "description": "Coffee", "category": "Food", "categoryIcon": "☕", "type": "expense", "date": "2024-01-01" }]
    - **Budget Adjuster**: Use when suggesting budget changes. EMBED: [BUDGET_ADJUSTER: { "id": "uuid", "category": "Food", "current": 500, "suggested": 600 }]
 
-4. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
+4. **Smart Insights**: Use these to provide proactive value:
+   - **Alert**: Detect unusual spending or critical issues. EMBED: [ALERT: { "type": "warning", "message": "You spent 3x more on dining this week", "amount": 450 }]
+   - **Goal Progress**: Show savings progress with milestones. EMBED: [GOAL_PROGRESS: { "name": "Vacation Fund", "current": 750, "target": 1000, "milestones": [250, 500, 750] }]
+   - **Forecast**: Predict end-of-month spending vs budget. EMBED: [FORECAST: { "category": "Food", "projected": 1200, "budget": 1000, "confidence": 0.85 }]
+
+5. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
 
 **How to Chart**:
 - Look at the 'Recent Transactions' in the context Data.
@@ -189,6 +243,7 @@ Use Markdown.
 - **Use PIE_CHART** for showing proportions/percentages (e.g., "spending breakdown")
 - **Use COMPARISON** for month-over-month or period comparisons
 - **Use HEATMAP** for showing activity patterns over time (requires date-value pairs)
+- **Use ALERT** when looking at anomalies in the Insights section.
 
 **Smart Suggestions (IMPORTANT)**: 
 At the end of your response, strictly provide exactly 3 "Quick Action" buttons for follow-up questions in this format:

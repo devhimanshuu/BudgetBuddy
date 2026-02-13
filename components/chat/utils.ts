@@ -56,6 +56,9 @@ export const stripComponentTags = (text: string): string => {
 		"SUGGESTIONS",
 		"BUDGET_ADJUSTER",
 		"TRANSACTION_CARD",
+		"ALERT",
+		"GOAL_PROGRESS",
+		"FORECAST",
 	];
 	for (const tag of tags) {
 		const prefix = `[${tag}:`;
