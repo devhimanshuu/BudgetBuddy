@@ -181,6 +181,29 @@
 	}
 }
 
+/* Custom Cursor Handling */
+@media (pointer: fine) {
+	.custom-cursor-active *,
+	.custom-cursor-active *::before,
+	.custom-cursor-active *::after {
+		cursor: none !important;
+	}
+
+	/* Re-enable text cursor for inputs within landing page */
+	.custom-cursor-active input[type="text"],
+	.custom-cursor-active input[type="email"],
+	.custom-cursor-active input[type="password"],
+	.custom-cursor-active input[type="search"],
+	.custom-cursor-active input[type="number"],
+	.custom-cursor-active input[type="tel"],
+	.custom-cursor-active input[type="url"],
+	.custom-cursor-active input:not([type]),
+	.custom-cursor-active textarea,
+	.custom-cursor-active [contenteditable="true"] {
+		cursor: text !important;
+	}
+}
+
 /* Custom Utilities for Glassmorphism and Effects */
 @layer utilities {
 	.glass {

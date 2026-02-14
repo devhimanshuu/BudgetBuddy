@@ -12,6 +12,7 @@ import { MovingBorder } from "@/components/landing/MovingBorder";
 import { cn } from "@/lib/utils";
 
 import { ThemeCustomizer } from "@/components/ThemeCustomizer";
+import { CustomCursor } from "@/components/CustomCursor";
 import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
 
@@ -421,7 +422,8 @@ export default function LandingPageContent() {
     const currentThemeImage = themeImages[activeTheme] || themeImages.dark;
 
     return (
-        <div className="flex min-h-screen flex-col text-foreground selection:bg-primary/20 relative overflow-x-hidden">
+        <div className="flex min-h-screen flex-col text-foreground selection:bg-primary/20 relative overflow-x-hidden custom-cursor-active">
+            <CustomCursor />
             <ParticlesBackground />
 
             {/* Navbar */}
