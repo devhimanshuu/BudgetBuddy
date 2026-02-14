@@ -16,9 +16,10 @@ interface TransactionCardProps {
         date: string;
     };
     onSendSuggestion: (text: string) => void;
+    currency: string;
 }
 
-export const TransactionCard = ({ data, onSendSuggestion }: TransactionCardProps) => {
+export const TransactionCard = ({ data, onSendSuggestion, currency }: TransactionCardProps) => {
     return (
         <div className="mt-4 p-4 rounded-xl bg-card border border-border shadow-sm group animate-in zoom-in-95 duration-300">
             <div className="flex items-start justify-between">
@@ -36,14 +37,14 @@ export const TransactionCard = ({ data, onSendSuggestion }: TransactionCardProps
                         "text-sm font-black",
                         data.type === "expense" ? "text-red-500" : "text-emerald-500"
                     )}>
-                        {data.type === "expense" ? "-" : "+"}${data.amount}
+                        {data.type === "expense" ? "-" : "+"}{currency}{data.amount}
                     </div>
                     <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-muted-foreground hover:text-primary"
-                            onClick={() => onSendSuggestion(`Edit transaction ${data.description}`)}
+                            onClick={() => onSendSuggestion(`Edit transaction ID[${data.id}]`)}
                         >
                             <Edit2 className="h-3 w-3" />
                         </Button>
@@ -51,7 +52,7 @@ export const TransactionCard = ({ data, onSendSuggestion }: TransactionCardProps
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                            onClick={() => onSendSuggestion(`Delete transaction ${data.description}`)}
+                            onClick={() => onSendSuggestion(`Delete transaction ID[${data.id}]`)}
                         >
                             <Trash2 className="h-3 w-3" />
                         </Button>

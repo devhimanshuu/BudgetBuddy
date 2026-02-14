@@ -54,9 +54,19 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     const [userPersona, setUserPersona] = useState<string | null>(null);
     const [healthScore, setHealthScore] = useState<number | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
+    const [currency, setCurrency] = useState("$");
 
     // Load history on mount
     useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const settings = await GetUserSettings();
+                setCurrency(settings.currency === "INR" ? "₹" : "$");
+            } catch (e) {
+                console.error("Failed to fetch settings", e);
+            }
+        };
+        fetchSettings();
         const savedPersona = localStorage.getItem("budget-buddy-user-persona");
         if (savedPersona) setUserPersona(savedPersona);
 
@@ -385,6 +395,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                             text={msg.parts[0].text}
                                             onSpeak={speakText}
                                             onSendSuggestion={handleSend}
+                                            currency={currency}
                                         />
                                     ))}
 

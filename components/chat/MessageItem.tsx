@@ -12,9 +12,10 @@ interface MessageItemProps {
     text: string;
     onSpeak: (text: string) => void;
     onSendSuggestion: (text: string) => void;
+    currency: string;
 }
 
-export const MessageItem = ({ role, text, onSpeak, onSendSuggestion }: MessageItemProps) => {
+export const MessageItem = ({ role, text, onSpeak, onSendSuggestion, currency }: MessageItemProps) => {
     return (
         <div className={cn("flex w-full gap-2", role === "user" ? "justify-end" : "justify-start")}>
             {role === "model" && (
@@ -66,7 +67,7 @@ export const MessageItem = ({ role, text, onSpeak, onSendSuggestion }: MessageIt
                     >
                         {stripComponentTags(text)}
                     </ReactMarkdown>
-                    <LivingUIRenderer text={text} onSendSuggestion={onSendSuggestion} />
+                    <LivingUIRenderer text={text} onSendSuggestion={onSendSuggestion} currency={currency} />
                 </div>
             </div>
             {role === "user" && (

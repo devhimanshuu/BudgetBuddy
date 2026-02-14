@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
 import { CreateTransaction } from "./transaction";
+import { UpdateTransaction } from "../transactions/_actions/updateTransaction";
+import { DeleteTransaction } from "../transactions/_actions/deleteTransaction";
 
 export async function ChatWithAI(
 	message: string,
@@ -251,7 +253,12 @@ Use Markdown.
    - **Streak**: Show consecutive days of good habits. EMBED: [STREAK: { "days": 7, "type": "budget_adherence", "reward": "🔥" }]
    - **Achievement**: Award badges for milestones. EMBED: [ACHIEVEMENT: { "name": "Savings Master", "description": "Saved 20% of income for 3 months", "points": 100 }]
 
-6. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
+6. **Transaction Management**: 
+   - Use 'edit_transaction' when requested to modify an existing item.
+   - Use 'delete_transaction' when requested to remove an item.
+   - User will typically provide an ID like ID[uuid].
+
+7. **Filtering Table View**: Use 'search_transactions' ONLY when the user explicitly wants to update the main transaction table (e.g., "filter the table", "find travel over $100 in the list"). **Do NOT use this for visualization requests.**
 
 **How to Chart**:
 - Look at the 'Recent Transactions' in the context Data.
@@ -317,6 +324,46 @@ ${contextData}`;
 					},
 				},
 			},
+			{
+				type: "function",
+				function: {
+					name: "edit_transaction",
+					description:
+						"Update an existing transaction. Use ID[uuid] provided in context.",
+					parameters: {
+						type: "object",
+						properties: {
+							id: {
+								type: "string",
+								description: "The UUID of the transaction to edit",
+							},
+							amount: { type: "number" },
+							description: { type: "string" },
+							date: { type: "string", description: "Date (YYYY-MM-DD)" },
+							category: { type: "string" },
+							type: { type: "string", enum: ["income", "expense"] },
+						},
+						required: ["id", "amount", "date", "category", "type"],
+					},
+				},
+			},
+			{
+				type: "function",
+				function: {
+					name: "delete_transaction",
+					description: "Delete a transaction by ID.",
+					parameters: {
+						type: "object",
+						properties: {
+							id: {
+								type: "string",
+								description: "The UUID of the transaction to delete",
+							},
+						},
+						required: ["id"],
+					},
+				},
+			},
 		];
 
 		// Attempt 1: Groq
@@ -360,7 +407,7 @@ ${contextData}`;
 									type: args.type,
 								});
 								return {
-									text: `✅ Created ${args.type} of ${args.amount} for "${args.description}"`,
+									text: `✅ Created ${args.type} of ${currency}${args.amount} for "${args.description}"`,
 									persona,
 									healthScore,
 								};
@@ -369,6 +416,32 @@ ${contextData}`;
 								return {
 									text: `🔍 Querying and filtering your view...`,
 									filter: JSON.parse(toolCall.function.arguments),
+									persona,
+									healthScore,
+								};
+							}
+							if (toolCall.function?.name === "edit_transaction") {
+								const args = JSON.parse(toolCall.function.arguments);
+								const cleanId = args.id.replace("ID[", "").replace("]", "");
+								await UpdateTransaction(cleanId, {
+									amount: args.amount,
+									description: args.description,
+									date: new Date(args.date),
+									category: args.category,
+									type: args.type,
+								});
+								return {
+									text: `✏️ Updated transaction "${args.description}" successfully!`,
+									persona,
+									healthScore,
+								};
+							}
+							if (toolCall.function?.name === "delete_transaction") {
+								const args = JSON.parse(toolCall.function.arguments);
+								const cleanId = args.id.replace("ID[", "").replace("]", "");
+								await DeleteTransaction(cleanId);
+								return {
+									text: `🗑️ Transaction deleted successfully.`,
 									persona,
 									healthScore,
 								};
@@ -424,7 +497,7 @@ ${contextData}`;
 							type: args.type,
 						});
 						return {
-							text: `✅ Created ${args.type} of ${args.amount}`,
+							text: `✅ Created ${args.type} of ${currency}${args.amount}`,
 							persona,
 							healthScore,
 						};
@@ -433,6 +506,32 @@ ${contextData}`;
 						return {
 							text: `🔍 Filtering view...`,
 							filter: JSON.parse(toolCall.function.arguments),
+							persona,
+							healthScore,
+						};
+					}
+					if (toolCall.function?.name === "edit_transaction") {
+						const args = JSON.parse(toolCall.function.arguments);
+						const cleanId = args.id.replace("ID[", "").replace("]", "");
+						await UpdateTransaction(cleanId, {
+							amount: args.amount,
+							description: args.description,
+							date: new Date(args.date),
+							category: args.category,
+							type: args.type,
+						});
+						return {
+							text: `✏️ Updated transaction "${args.description}".`,
+							persona,
+							healthScore,
+						};
+					}
+					if (toolCall.function?.name === "delete_transaction") {
+						const args = JSON.parse(toolCall.function.arguments);
+						const cleanId = args.id.replace("ID[", "").replace("]", "");
+						await DeleteTransaction(cleanId);
+						return {
+							text: `🗑️ Transaction deleted.`,
 							persona,
 							healthScore,
 						};

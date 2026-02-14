@@ -294,6 +294,7 @@ export default function LandingPageContent() {
     ];
 
     const [personaIndex, setPersonaIndex] = useState(0);
+    const [selectedPersona, setSelectedPersona] = useState<any>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -307,10 +308,18 @@ export default function LandingPageContent() {
     const PersonaCard = ({ persona, index }: { persona: any, index: number }) => {
         const [isFlipped, setIsFlipped] = useState(false);
 
+        const handleClick = () => {
+            if (isFlipped) {
+                setSelectedPersona(persona);
+            } else {
+                setIsFlipped(!isFlipped);
+            }
+        };
+
         return (
             <div
                 className=" h-[400px] w-full group"
-                onClick={() => setIsFlipped(!isFlipped)}
+                onClick={handleClick}
                 onMouseEnter={() => setIsFlipped(true)}
                 onMouseLeave={() => setIsFlipped(false)}
             >
@@ -648,10 +657,251 @@ export default function LandingPageContent() {
                             ))}
                         </div>
                     </div>
-                </section>
+
+                    {/* Persona Detail Modal */}
+                    {selectedPersona && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-lg"
+                            onClick={() => setSelectedPersona(null)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.8, opacity: 0, y: 50 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                className={cn(
+                                    "relative max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-3xl border-2 p-8 md:p-10 shadow-2xl bg-gradient-to-br",
+                                    selectedPersona.color
+                                )}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Close button */}
+                                <button
+                                    onClick={() => setSelectedPersona(null)}
+                                    className="absolute top-6 right-6 z-20 w-12 h-12 rounded-full bg-background/90 hover:bg-background flex items-center justify-center transition-all hover:scale-110 border-2 border-border/50 shadow-lg"
+                                >
+                                    <span className="text-3xl text-foreground font-light">×</span>
+                                </button>
+
+                                {/* Large Animal Silhouette Background */}
+                                <AnimalSilhouette
+                                    type={selectedPersona.animal}
+                                    className={cn("w-[500px] h-[500px] absolute -bottom-24 -right-24 opacity-[0.08] pointer-events-none")}
+                                />
+
+                                {/* Content */}
+                                <div className="relative z-10">
+                                    {/* Header */}
+                                    <div className="flex items-center gap-6 mb-10">
+                                        <div className={cn("w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl", selectedPersona.iconBg)}>
+                                            {React.cloneElement(selectedPersona.icon as React.ReactElement<any>, {
+                                                className: cn("w-12 h-12", (selectedPersona.icon as any).props.className)
+                                            })}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-5xl font-black text-foreground mb-2 leading-tight">{selectedPersona.name}</h3>
+                                            <p className="text-base font-black uppercase tracking-[0.25em] text-primary">{selectedPersona.role}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Description */}
+                                    <div className="mb-10">
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                            <Sparkles className="w-5 h-5" />
+                                            Personality Profile
+                                        </h4>
+                                        <p className="text-xl leading-relaxed text-foreground font-medium">
+                                            {selectedPersona.description}
+                                        </p>
+                                    </div>
+
+                                    {/* Trait Badge */}
+                                    <div className="mb-10">
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                            <Zap className="w-5 h-5" />
+                                            Core Strength
+                                        </h4>
+                                        <div className={cn("px-8 py-5 rounded-2xl border-2 text-lg font-bold shadow-xl", selectedPersona.traitBorder)}>
+                                            {selectedPersona.trait}
+                                        </div>
+                                    </div>
+
+                                    {/* Additional Details */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                                        <div className="p-6 rounded-2xl bg-background/70 border-2 border-border/50 shadow-lg">
+                                            <div className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">Style</div>
+                                            <div className="text-xl font-bold text-foreground">{selectedPersona.hint}</div>
+                                        </div>
+                                        <div className="p-6 rounded-2xl bg-background/70 border-2 border-border/50 shadow-lg">
+                                            <div className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">Best For</div>
+                                            <div className="text-xl font-bold text-foreground">
+                                                {selectedPersona.name === "The Fox" && "Balanced Budgeters"}
+                                                {selectedPersona.name === "The Squirrel" && "Serious Savers"}
+                                                {selectedPersona.name === "The Peacock" && "Luxury Lovers"}
+                                                {selectedPersona.name === "The Owl" && "Data Analysts"}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Key Features */}
+                                    <div className="mb-10">
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                            <Target className="w-5 h-5" />
+                                            Key Features
+                                        </h4>
+                                        <div className="space-y-3">
+                                            {selectedPersona.name === "The Fox" && (
+                                                <>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Identifies smart spending opportunities and warns against financial traps</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Balances enjoyment with financial responsibility</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Quick to adapt strategies based on changing circumstances</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {selectedPersona.name === "The Squirrel" && (
+                                                <>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Maximizes compound interest and long-term wealth building</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Protective of emergency funds and future security</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Encourages consistent saving habits and frugal living</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {selectedPersona.name === "The Peacock" && (
+                                                <>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Provides honest reality checks on luxury purchases</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Distinguishes between quality investments and wasteful vanity</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Helps maintain style while staying financially conscious</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {selectedPersona.name === "The Owl" && (
+                                                <>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Uses advanced analytics to predict future spending patterns</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Provides data-driven insights for strategic planning</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-3 p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                                                        <p className="text-base text-foreground/90">Calm, methodical approach to financial decision-making</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Communication Style */}
+                                    <div className="mb-10">
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                            <Brain className="w-5 h-5" />
+                                            Communication Style
+                                        </h4>
+                                        <div className="p-6 rounded-2xl bg-background/70 border-2 border-border/50 shadow-lg">
+                                            <p className="text-lg leading-relaxed text-foreground/90">
+                                                {selectedPersona.name === "The Fox" && "Witty and clever, offering practical advice with a touch of humor. Speaks in terms of opportunities and smart moves."}
+                                                {selectedPersona.name === "The Squirrel" && "Cautious and protective, emphasizing security and long-term thinking. Uses metaphors about preparation and future planning."}
+                                                {selectedPersona.name === "The Peacock" && "Bold and direct, not afraid to call out poor financial choices. Speaks with confidence about quality and value."}
+                                                {selectedPersona.name === "The Owl" && "Calm and analytical, presenting data-backed insights. Communicates with precision and foresight."}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Ideal Scenarios */}
+                                    <div>
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                            <Trophy className="w-5 h-5" />
+                                            Ideal Scenarios
+                                        </h4>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {selectedPersona.name === "The Fox" && (
+                                                <>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Finding Deals</p>
+                                                        <p className="text-sm text-muted-foreground">Perfect for spotting cashback opportunities and discount strategies</p>
+                                                    </div>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Balanced Lifestyle</p>
+                                                        <p className="text-sm text-muted-foreground">Great for those who want to enjoy life while staying financially smart</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {selectedPersona.name === "The Squirrel" && (
+                                                <>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Retirement Planning</p>
+                                                        <p className="text-sm text-muted-foreground">Excellent for long-term wealth accumulation and compound growth</p>
+                                                    </div>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Emergency Funds</p>
+                                                        <p className="text-sm text-muted-foreground">Ideal for building and maintaining financial safety nets</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {selectedPersona.name === "The Peacock" && (
+                                                <>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Luxury Purchases</p>
+                                                        <p className="text-sm text-muted-foreground">Helps evaluate if high-end items are worth the investment</p>
+                                                    </div>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Lifestyle Choices</p>
+                                                        <p className="text-sm text-muted-foreground">Perfect for maintaining quality of life while being financially aware</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {selectedPersona.name === "The Owl" && (
+                                                <>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Financial Forecasting</p>
+                                                        <p className="text-sm text-muted-foreground">Best for predicting trends and planning ahead strategically</p>
+                                                    </div>
+                                                    <div className="p-4 rounded-xl bg-background/50 border border-border/30">
+                                                        <p className="text-base font-semibold text-foreground mb-1">Complex Analysis</p>
+                                                        <p className="text-sm text-muted-foreground">Ideal for detailed budget optimization and data-driven decisions</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )
+                    }
+                </section >
 
                 {/* How It Works Section */}
-                <section className="bg-muted/30 py-24 relative border-y border-border/40">
+                < section className="bg-muted/30 py-24 relative border-y border-border/40" >
                     <div className="container px-4 md:px-6">
                         <div className="text-center mb-16">
                             <div className="inline-block rounded-lg bg-blue-500/10 px-3 py-1 text-sm text-blue-500 mb-4">
@@ -696,12 +946,12 @@ export default function LandingPageContent() {
                             </div>
                         </div>
                     </div>
-                </section>
+                </section >
 
                 {/* CTA Section */}
-                <section className="border-t border-border/40 bg-gradient-to-b from-background to-muted/50 py-24 relative overflow-hidden">
+                < section className="border-t border-border/40 bg-gradient-to-b from-background to-muted/50 py-24 relative overflow-hidden" >
                     {/* Background glow for CTA */}
-                    <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
+                    < div className="absolute inset-0 bg-primary/5 pointer-events-none" />
                     <div className="container px-4 md:px-6 relative z-10">
                         <div className="flex flex-col items-center space-y-4 text-center">
                             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">Ready to take control?</h2>
@@ -715,11 +965,11 @@ export default function LandingPageContent() {
                             </Link>
                         </div>
                     </div>
-                </section>
-            </main>
+                </section >
+            </main >
 
             {/* Footer */}
-            <footer className="border-t border-border/40 bg-background/80 backdrop-blur-md py-6 relative z-10">
+            < footer className="border-t border-border/40 bg-background/80 backdrop-blur-md py-6 relative z-10" >
                 <div className="container flex flex-col md:grid md:grid-cols-3 items-center gap-6 px-4 md:px-6">
                     <div className="flex justify-center md:justify-start w-full">
                         <Logo />
@@ -754,7 +1004,7 @@ export default function LandingPageContent() {
                         </p>
                     </div>
                 </div>
-            </footer>
-        </div>
+            </footer >
+        </div >
     );
 }

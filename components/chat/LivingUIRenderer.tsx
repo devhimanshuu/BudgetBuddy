@@ -15,9 +15,10 @@ import { TransactionCard } from "./TransactionCard";
 interface LivingUIRendererProps {
     text: string;
     onSendSuggestion: (text: string) => void;
+    currency: string;
 }
 
-export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererProps) => {
+export const LivingUIRenderer = ({ text, onSendSuggestion, currency }: LivingUIRendererProps) => {
     const components: React.ReactNode[] = [];
 
     // Match [PROGRESS_BAR: {...}]
@@ -36,8 +37,8 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                     </div>
                     <Progress value={(data.current / data.target) * 100} className={cn("h-1.5", data.color === "orange" ? "bg-orange-500/20" : "")} />
                     <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
-                        <span>{data.current} spent</span>
-                        <span>{data.target} budget</span>
+                        <span>{currency}{data.current} spent</span>
+                        <span>{currency}{data.target} budget</span>
                     </div>
                 </div>
             );
@@ -241,7 +242,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                         </div>
                         <div className="flex-1 text-right">
                             <div className="text-[10px] text-muted-foreground mb-1">Previous</div>
-                            <div className="text-2xl font-bold text-muted-foreground/60">{previous.toFixed(0)}</div>
+                            <div className="text-2xl font-bold text-muted-foreground/60">{currency}{previous.toFixed(0)}</div>
                         </div>
                     </div>
                 </div>
@@ -386,7 +387,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
         try {
             const data = JSON.parse(budgetMatch.json.trim());
             components.push(
-                <BudgetAdjuster key={`budget-adj-${budgetMatch.index}`} data={data} />
+                <BudgetAdjuster key={`budget-adj-${budgetMatch.index}`} data={data} currency={currency} />
             );
         } catch (e) { /* silent */ }
     }
@@ -397,7 +398,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
         try {
             const data = JSON.parse(txMatch.json.trim());
             components.push(
-                <TransactionCard key={`tx-card-${txMatch.index}`} data={data} onSendSuggestion={onSendSuggestion} />
+                <TransactionCard key={`tx-card-${txMatch.index}`} data={data} onSendSuggestion={onSendSuggestion} currency={currency} />
             );
         } catch (e) { /* silent */ }
     }
@@ -424,7 +425,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                             <p className="text-xs mt-1 opacity-90">{data.message}</p>
                             {data.amount && (
                                 <div className="mt-2 text-lg font-black tracking-tight">
-                                    ${data.amount.toFixed(2)}
+                                    {currency}{data.amount.toFixed(2)}
                                 </div>
                             )}
                         </div>
@@ -472,8 +473,8 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                     </div>
 
                     <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
-                        <span>Current: ${data.current}</span>
-                        <span>Target: ${data.target}</span>
+                        <span>Current: {currency}{data.current}</span>
+                        <span>Target: {currency}{data.target}</span>
                     </div>
 
                     {percentage >= 100 && (
@@ -505,12 +506,12 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
                         <div>
                             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Projected</p>
                             <p className={cn("text-xl font-black mt-0.5", isOver ? "text-red-500" : "text-emerald-500")}>
-                                ${data.projected.toFixed(0)}
+                                {currency}{data.projected.toFixed(0)}
                             </p>
                         </div>
                         <div>
                             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Budget</p>
-                            <p className="text-xl font-black mt-0.5">${data.budget.toFixed(0)}</p>
+                            <p className="text-xl font-black mt-0.5">{currency}{data.budget.toFixed(0)}</p>
                         </div>
                     </div>
 
@@ -524,7 +525,7 @@ export const LivingUIRenderer = ({ text, onSendSuggestion }: LivingUIRendererPro
 
                     {isOver && (
                         <div className="mt-4 p-2 rounded-lg bg-red-500/5 border border-red-500/10 text-[10px] text-red-600 font-medium">
-                            Warning: You might exceed your budget by ${Math.abs(data.projected - data.budget).toFixed(0)}.
+                            Warning: You might exceed your budget by {currency}{Math.abs(data.projected - data.budget).toFixed(0)}.
                         </div>
                     )}
                 </div>
