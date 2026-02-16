@@ -11,8 +11,24 @@ import {
 } from "@/components/ui/card";
 import { TransactionType } from "@/lib/type";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eraser, Loader2, Merge, Pencil, PlusSquare, Sparkles, TrashIcon, TrendingDown, TrendingUp } from "lucide-react";
-import React from "react";
+import {
+  Tag,
+  LayoutGrid,
+  List,
+  Smile,
+  Zap,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Settings2,
+  Eraser,
+  Loader2,
+  Merge,
+  Pencil,
+  PlusSquare,
+  TrashIcon,
+} from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 import CreateCategoryDialog from "../_components/CreateCategoryDialog";
 import EditCategoryDialog from "../_components/EditCategoryDialog";
@@ -24,8 +40,12 @@ import DeleteCategoryDialog from "../_components/DeleteCategoryDialog";
 import CreateTagDialog from "./_components/CreateTagDialog";
 import EditTagDialog from "./_components/EditTagDialog";
 import DeleteTagDialog from "./_components/DeleteTagDialog";
-import { Tag } from "lucide-react";
 import MergeCategoriesDialog from "./_components/MergeCategoriesDialog";
+import { useUIVibe } from "@/hooks/use-uivibe";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useHasHydrated } from "@/hooks/use-has-hydrated";
 
 const page = () => {
   return (
@@ -40,18 +60,25 @@ const page = () => {
           </div>
         </div>
       </div>
-      <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Currency</CardTitle>
-            <CardDescription>
-              Set your default currency for transactions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CurrencyComboBox />
-          </CardContent>
-        </Card>
+      <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                Currency Settings
+              </CardTitle>
+              <CardDescription>
+                Set your default currency for transactions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CurrencyComboBox />
+            </CardContent>
+          </Card>
+
+          <VibeControls />
+        </div>
         <CategoryList type="income" />
         <CategoryList type="expense" />
         <TagList />
@@ -60,10 +87,72 @@ const page = () => {
   );
 };
 
+function VibeControls() {
+  const { compactMode, setCompactMode, iconSet, setIconSet } = useUIVibe();
+  const hydrated = useHasHydrated();
+
+  if (!hydrated) return null;
+
+  return (
+    <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5 shadow-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Settings2 className="w-5 h-5" />
+          UI Vibe Controls
+        </CardTitle>
+        <CardDescription>
+          Customize how your dashboard and categories look
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-center justify-between rounded-xl border border-dashed border-primary/20 p-4 bg-background/50">
+          <div className="space-y-0.5">
+            <Label className="text-base flex items-center gap-2">
+              {compactMode ? <List className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+              Compact Mode
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Use smaller cards and denser layouts
+            </p>
+          </div>
+          <Switch
+            checked={compactMode}
+            onCheckedChange={setCompactMode}
+          />
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">
+            Icon Set Preference
+          </Label>
+          <Tabs
+            value={iconSet}
+            onValueChange={(v) => setIconSet(v as any)}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 h-12">
+              <TabsTrigger value="emoji" className="gap-2 text-sm">
+                <Smile className="w-4 h-4" />
+                Expressive Emoji
+              </TabsTrigger>
+              <TabsTrigger value="lucide" className="gap-2 text-sm">
+                <Zap className="w-4 h-4" />
+                Minimal Lucide
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default page;
 
 
 function CategoryList({ type }: { type: TransactionType }) {
+  const { compactMode } = useUIVibe();
+  const hydrated = useHasHydrated();
   const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
   const [cleanupMode, setCleanupMode] = React.useState(false);
 
@@ -239,7 +328,12 @@ function CategoryList({ type }: { type: TransactionType }) {
           </div>
         )}
         {dataAvailable && (
-          <div className="grid grid-flow-row gap-2 p-3 sm:grid-flow-row sm:grid-cols-2 sm:p-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className={cn(
+            "grid grid-flow-row gap-2 p-3 sm:grid-flow-row sm:p-4",
+            compactMode
+              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+              : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          )}>
             {sortedCategories.map((category: any) => (
               <CategoryCard category={category} key={category.name} />
             ))}
@@ -251,29 +345,63 @@ function CategoryList({ type }: { type: TransactionType }) {
 }
 
 function CategoryCard({ category }: { category: any }) {
+  const { compactMode, iconSet } = useUIVibe();
+  const hydrated = useHasHydrated();
+
+  const LucideIcon = category.type === "income" ? TrendingUp : TrendingDown;
+
+  if (!hydrated) return null;
+
   return (
-    <div className="flex border-separate flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]">
-      <div className="flex flex-col items-center gap-2 p-4">
-        <span className="text-3xl" role="img">
-          {category.icon}
+    <div className={cn(
+      "flex border-separate flex-col justify-between rounded-xl border shadow-sm transition-all hover:shadow-md",
+      compactMode ? "p-2" : "p-0"
+    )}>
+      <div className={cn(
+        "flex flex-col items-center gap-2",
+        compactMode ? "p-1" : "p-4"
+      )}>
+        <span className={cn(
+          "flex items-center justify-center rounded-lg bg-muted/50 transition-transform group-hover:scale-110",
+          compactMode ? "text-xl w-10 h-10" : "text-3xl w-16 h-16"
+        )} role="img">
+          {iconSet === "emoji" ? (
+            category.icon
+          ) : (
+            <LucideIcon className={cn(
+              compactMode ? "w-5 h-5" : "w-8 h-8",
+              category.type === "income" ? "text-emerald-500" : "text-red-500"
+            )} />
+          )}
         </span>
-        <span>{category.name}</span>
-        <span className="text-xs text-muted-foreground">
-          {category._count?.transactions || 0} transactions
-        </span>
+        <span className={cn(
+          "font-bold truncate w-full text-center",
+          compactMode ? "text-xs" : "text-sm"
+        )}>{category.name}</span>
+        {!compactMode && (
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {category._count?.transactions || 0} transactions
+          </span>
+        )}
       </div>
 
-      <div className="flex w-full flex-row gap-2 p-2 sm:flex-col">
+      <div className={cn(
+        "flex w-full gap-1 p-2",
+        compactMode ? "flex-row border-t mt-1 pt-2" : "flex-row sm:flex-col"
+      )}>
         <EditCategoryDialog
           category={category}
           trigger={
             <Button
-              className="w-full gap-2 text-muted-foreground hover:bg-blue-500/20"
+              className={cn(
+                "w-full gap-2 text-muted-foreground hover:bg-blue-500/20",
+                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+              )}
               variant={"secondary"}
               size="sm"
             >
-              <Pencil className="h-4 w-4 shrink-0" />
-              Edit
+              <Pencil className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+              {compactMode ? "" : "Edit"}
             </Button>
           }
         />
@@ -281,12 +409,15 @@ function CategoryCard({ category }: { category: any }) {
           category={category}
           trigger={
             <Button
-              className="w-full gap-2 text-muted-foreground hover:bg-red-500/20"
+              className={cn(
+                "w-full gap-2 text-muted-foreground hover:bg-red-500/20",
+                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+              )}
               variant={"secondary"}
               size="sm"
             >
-              <TrashIcon className="h-4 w-4 shrink-0" />
-              Remove
+              <TrashIcon className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+              {compactMode ? "" : "Remove"}
             </Button>
           }
         />
@@ -297,6 +428,8 @@ function CategoryCard({ category }: { category: any }) {
 
 
 function TagList() {
+  const { compactMode } = useUIVibe();
+  const hydrated = useHasHydrated();
   const [sortBy, setSortBy] = React.useState<"name" | "usage">("name");
   const [cleanupMode, setCleanupMode] = React.useState(false);
 
@@ -444,7 +577,12 @@ function TagList() {
           </div>
         )}
         {dataAvailable && (
-          <div className="grid grid-flow-row gap-2 p-3 sm:grid-flow-row sm:grid-cols-2 sm:p-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className={cn(
+            "grid grid-flow-row gap-2 p-3 sm:grid-flow-row sm:p-4",
+            compactMode
+              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+              : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          )}>
             {sortedTags.map((tag: any) => (
               <TagCard tag={tag} key={tag.id} />
             ))}
@@ -456,6 +594,8 @@ function TagList() {
 }
 
 function TagCard({ tag }: { tag: any }) {
+  const { compactMode } = useUIVibe();
+  const hydrated = useHasHydrated();
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -476,42 +616,65 @@ function TagCard({ tag }: { tag: any }) {
   });
 
   return (
-    <div className="flex border-separate flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]">
-      <div className="flex flex-col items-center gap-2 p-4">
+    <div className={cn(
+      "flex border-separate flex-col justify-between rounded-xl border shadow-sm transition-all hover:shadow-md",
+      compactMode ? "p-2" : "p-0"
+    )}>
+      <div className={cn(
+        "flex flex-col items-center gap-2",
+        compactMode ? "p-1" : "p-4"
+      )}>
         <div
-          className="h-8 w-8 rounded-full"
+          className={cn(
+            "rounded-full border shadow-inner",
+            compactMode ? "h-10 w-10" : "h-16 w-16"
+          )}
           style={{ backgroundColor: tag.color }}
         />
-        <span>{tag.name}</span>
-        <span className="text-xs text-muted-foreground">
-          {tag._count?.transactions || 0} transactions
-        </span>
+        <span className={cn(
+          "font-bold truncate w-full text-center",
+          compactMode ? "text-xs" : "text-sm"
+        )}>{tag.name}</span>
+        {!compactMode && (
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {tag._count?.transactions || 0} transactions
+          </span>
+        )}
       </div>
 
-      <div className="flex w-full flex-row gap-2 p-2 sm:flex-col">
+      <div className={cn(
+        "flex w-full gap-1 p-2",
+        compactMode ? "flex-row border-t mt-1 pt-2" : "flex-row sm:flex-col"
+      )}>
         <EditTagDialog
           tag={tag}
           trigger={
             <Button
-              className="w-full gap-2 text-muted-foreground hover:bg-blue-500/20"
+              className={cn(
+                "w-full gap-2 text-muted-foreground hover:bg-blue-500/20",
+                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+              )}
               variant="secondary"
               size="sm"
             >
-              <Pencil className="h-4 w-4 shrink-0" />
-              Edit
+              <Pencil className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+              {compactMode ? "" : "Edit"}
             </Button>
           }
         />
         <DeleteTagDialog
           trigger={
             <Button
-              className="w-full gap-2 text-muted-foreground hover:bg-red-500/20"
+              className={cn(
+                "w-full gap-2 text-muted-foreground hover:bg-red-500/20",
+                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+              )}
               variant="secondary"
               size="sm"
               disabled={deleteMutation.isPending}
             >
-              <TrashIcon className="h-4 w-4 shrink-0" />
-              Remove
+              <TrashIcon className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+              {compactMode ? "" : "Remove"}
             </Button>
           }
           tagName={tag.name}
