@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { UpdateAlertSettingsSchema } from "@/schema/UserSettings";
 
 export async function GetUserSettings() {
 	const user = await currentUser();
@@ -26,4 +27,29 @@ export async function GetUserSettings() {
 	}
 
 	return userSettings;
+}
+
+export async function UpdateAlertSettings(data: {
+	spendingLimitThreshold: number;
+	enableAnomalyDetection: boolean;
+	anomalyThreshold: number;
+}) {
+	const parsed = UpdateAlertSettingsSchema.safeParse(data);
+	if (!parsed.success) {
+		throw new Error("Invalid settings data");
+	}
+
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
+
+	return await prisma.userSettings.update({
+		where: {
+			userId: user.id,
+		},
+		data: {
+			...parsed.data,
+		},
+	});
 }

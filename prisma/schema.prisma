@@ -25,6 +25,10 @@ model UserSettings{
   lastActivityDate DateTime?
   totalPoints Int @default(0)
 
+  // ALERT & NOTIFICATION SETTINGS
+  spendingLimitThreshold Int     @default(80) // % of budget reached
+  enableAnomalyDetection Boolean @default(true)
+  anomalyThreshold       Float   @default(2.0) // Multiplier of average (e.g., 2x)
 }
 
 model Category {

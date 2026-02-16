@@ -46,6 +46,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";
+import AlertSettingsCard from "./_components/AlertSettingsCard";
 
 const page = () => {
   return (
@@ -79,6 +80,9 @@ const page = () => {
 
           <VibeControls />
         </div>
+
+        <AlertSettingsCard />
+
         <CategoryList type="income" />
         <CategoryList type="expense" />
         <TagList />

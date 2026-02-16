@@ -190,9 +190,9 @@ export default function MergeCategoriesDialog({ type, categories, trigger }: Pro
                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         </div>
                         <AlertDialogDescription>
-                            You are about to merge <span className="font-bold text-foreground">"{sourceCategory}"</span> into <span className="font-bold text-foreground">"{targetCategory}"</span>.
+                            You are about to merge <span className="font-bold text-foreground">&quot;{sourceCategory}&quot;</span> into <span className="font-bold text-foreground">&quot;{targetCategory}&quot;</span>.
                             <br /><br />
-                            This will move ALL transactions and delete <span className="font-bold text-foreground">"{sourceCategory}"</span>. This action cannot be undone.
+                            This will move ALL transactions and delete <span className="font-bold text-foreground">&quot;{sourceCategory}&quot;</span>. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
