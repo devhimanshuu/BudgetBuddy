@@ -303,7 +303,7 @@ export default function LandingPageContent() {
             setPersonaIndex((prev) => (prev + 1) % personas.length);
         }, 3000);
         return () => clearInterval(interval);
-    }, []);
+    }, [personas.length]);
 
     // Flip Card Component for compatibility
     const PersonaCard = ({ persona, index }: { persona: any, index: number }) => {

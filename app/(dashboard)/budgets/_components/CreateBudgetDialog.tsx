@@ -18,6 +18,8 @@ import { ReactNode, useState } from "react";
 import { toast } from "sonner";
 import CategoryPicker from "../../_components/CategoryPicker";
 
+import { useAchievementToast } from "@/hooks/use-achievement-toast";
+
 interface CreateBudgetDialogProps {
   trigger: ReactNode;
   month: number;
@@ -46,6 +48,7 @@ export default function CreateBudgetDialog({
   );
 
   const queryClient = useQueryClient();
+  const { showAchievement } = useAchievementToast();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: {
@@ -67,14 +70,20 @@ export default function CreateBudgetDialog({
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       toast.success(
         existingBudget
           ? "Budget updated successfully!"
           : "Budget created successfully!"
       );
+
+      if (data?.unlockedAchievements) {
+        showAchievement(data.unlockedAchievements);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
       queryClient.invalidateQueries({ queryKey: ["budget-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification"] });
       setOpen(false);
       resetForm();
     },

@@ -96,6 +96,16 @@ export const ACHIEVEMENTS = {
 		points: 15,
 		requirement: 10,
 	},
+	TRANSACTIONS_50: {
+		key: "transactions_50",
+		name: "Power User",
+		description: "Create 50 transactions",
+		icon: "⚡",
+		category: "general",
+		tier: "bronze",
+		points: 30,
+		requirement: 50,
+	},
 	TRANSACTIONS_100: {
 		key: "transactions_100",
 		name: "Transaction Pro",
@@ -291,6 +301,7 @@ export async function checkAchievements(
 			const achievementsToCheck = [
 				{ count: 1, achievement: ACHIEVEMENTS.FIRST_TRANSACTION },
 				{ count: 10, achievement: ACHIEVEMENTS.TRANSACTIONS_10 },
+				{ count: 50, achievement: ACHIEVEMENTS.TRANSACTIONS_50 },
 				{ count: 100, achievement: ACHIEVEMENTS.TRANSACTIONS_100 },
 				{ count: 1000, achievement: ACHIEVEMENTS.TRANSACTIONS_1000 },
 			];

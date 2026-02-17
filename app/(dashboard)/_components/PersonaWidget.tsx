@@ -30,7 +30,7 @@ export default function PersonaWidget({ data }: PersonaWidgetProps) {
     return (
         <GlassCard className="relative overflow-hidden group">
             <div className="flex flex-col md:flex-row gap-4 p-4 items-stretch">
-                
+
                 {/* Left Column: Icon & Primary Info */}
                 <div className="flex-shrink-0 flex md:flex-col items-center gap-3 md:w-40 lg:border-r border-border/50 pr-0 lg:pr-4">
                     <div
@@ -41,7 +41,7 @@ export default function PersonaWidget({ data }: PersonaWidgetProps) {
                     >
                         {config.icon}
                     </div>
-                    
+
                     <div className="text-center md:text-center flex-1 md:flex-none w-full">
                         <div className="flex items-center justify-center gap-2 mb-0.5">
                             <h3 className="text-xl font-bold tracking-tight">
@@ -52,7 +52,7 @@ export default function PersonaWidget({ data }: PersonaWidgetProps) {
                             {config.trait}
                         </p>
                         <p className="text-[10px] text-muted-foreground mt-1 italic px-1 hidden md:block leading-tight">
-                            "{data.personality}"
+                            &quot;{data.personality}&quot;
                         </p>
                     </div>
                 </div>
@@ -103,7 +103,7 @@ export default function PersonaWidget({ data }: PersonaWidgetProps) {
                                 {(data.metrics.luxuryRate * 100).toFixed(0)}%
                             </span>
                         </div>
-                         
+
                         <div className="flex flex-col items-center justify-center gap-0.5 border-l border-border/40">
                             <div className="p-1.5 rounded-full bg-blue-500/10 text-blue-500 mb-0.5">
                                 <Wallet className="w-4 h-4" />
@@ -132,8 +132,8 @@ export default function PersonaWidget({ data }: PersonaWidgetProps) {
                                 <span className="leading-snug">High luxury spending detected. Review your wants vs needs.</span>
                             </div>
                         )}
-                         {/* Fill empty space if few insights */}
-                         {data.insights.length < 2 && (
+                        {/* Fill empty space if few insights */}
+                        {data.insights.length < 2 && (
                             <div className="hidden sm:flex items-center justify-center text-[10px] text-muted-foreground bg-transparent p-2 rounded-lg border border-dashed border-border/40">
                                 <span>Keep tracking to unlock more insights</span>
                             </div>
@@ -141,7 +141,7 @@ export default function PersonaWidget({ data }: PersonaWidgetProps) {
                     </div>
                 </div>
             </div>
-            
+
             {/* Background Blob for aesthetics */}
             <div className={cn(
                 "absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-10 pointer-events-none",
