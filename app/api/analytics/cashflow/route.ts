@@ -64,18 +64,18 @@ export async function GET(request: Request) {
 		0,
 	);
 
-	const nodes: { name: string }[] = [];
+	const nodes: { name: string; type: "inflow" | "pipeline" | "outflow" }[] = [];
 	const links: { source: number; target: number; value: number }[] = [];
 
 	// 1. Central node
 	const ROOT_NODE_NAME = "Total Budget";
-	nodes.push({ name: ROOT_NODE_NAME });
+	nodes.push({ name: ROOT_NODE_NAME, type: "pipeline" });
 	const rootIdx = 0;
 
 	// 2. Income Nodes & Links
 	incomeCategories.forEach((inc) => {
 		const nodeIdx = nodes.length;
-		nodes.push({ name: inc.category });
+		nodes.push({ name: inc.category, type: "inflow" });
 		links.push({
 			source: nodeIdx,
 			target: rootIdx,
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
 	// 3. Expense Nodes & Links
 	expenseCategories.forEach((exp) => {
 		const nodeIdx = nodes.length;
-		nodes.push({ name: exp.category });
+		nodes.push({ name: exp.category, type: "outflow" });
 		links.push({
 			source: rootIdx,
 			target: nodeIdx,
@@ -97,7 +97,7 @@ export async function GET(request: Request) {
 	// 4. Savings / Surplus
 	if (totalIncome > totalExpense) {
 		const savingsIdx = nodes.length;
-		nodes.push({ name: "Savings/Surplus" });
+		nodes.push({ name: "Savings/Surplus", type: "outflow" });
 		links.push({
 			source: rootIdx,
 			target: savingsIdx,

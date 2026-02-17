@@ -27,8 +27,17 @@ const COLORS = [
 const CustomNode = (props: any) => {
     const { x, y, width, height, index, payload, containerWidth } = props;
     const isOut = x > containerWidth / 2;
-    const textAnchor = isOut ? "end" : "start";
-    const textX = isOut ? x - 6 : x + width + 6;
+    const isRightEdge = x > containerWidth - 150;
+
+    // Color based on type
+    let fill = COLORS[index % COLORS.length];
+    if (payload.type === "inflow") fill = "#10b981"; // Emerald
+    else if (payload.type === "pipeline") fill = "#3b82f6"; // Blue
+    else if (payload.type === "outflow") fill = "#ef4444"; // Red
+
+    const isLeftEdge = x < 150;
+    const textAnchor = isLeftEdge ? "start" : "end";
+    const textX = isLeftEdge ? x + width + 10 : x - 10;
 
     return (
         <Layer key={`node-${index}`}>
@@ -36,10 +45,10 @@ const CustomNode = (props: any) => {
                 x={x}
                 y={y}
                 width={width}
-                height={height}
-                fill={COLORS[index % COLORS.length]}
+                height={Math.max(height, 2)}
+                fill={fill}
                 fillOpacity={0.8}
-                rx={2}
+                rx={4}
             />
             <text
                 x={textX}
@@ -47,7 +56,7 @@ const CustomNode = (props: any) => {
                 fontSize="12"
                 textAnchor={textAnchor}
                 dominantBaseline="central"
-                className="fill-foreground font-medium"
+                className="fill-foreground font-semibold"
             >
                 {payload.name}
             </text>
@@ -55,17 +64,34 @@ const CustomNode = (props: any) => {
     );
 };
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload, isPrivacyMode }: any) => {
     if (active && payload && payload.length) {
+        const isLink = !!payload[0].payload.source;
         return (
-            <div className="bg-background/95 border p-2 rounded-lg shadow-xl backdrop-blur-sm">
-                <p className="text-sm font-bold">{payload[0].payload.name || payload[0].name}</p>
-                <p className="text-xs text-muted-foreground">
-                    Value: <span className="text-foreground font-semibold">
-                        {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                        }).format(payload[0].value)}
+            <div className="bg-background/95 border p-3 rounded-xl shadow-2xl backdrop-blur-md border-primary/20 min-w-[150px]">
+                <p className="text-sm font-bold flex items-center gap-2">
+                    {isLink ? (
+                        <>
+                            <span className="text-muted-foreground">{payload[0].payload.source.name}</span>
+                            <ArrowRightLeft className="h-3 w-3" />
+                            <span>{payload[0].payload.target.name}</span>
+                        </>
+                    ) : (
+                        payload[0].payload.name || payload[0].name
+                    )}
+                </p>
+                <p className="text-xs mt-1">
+                    <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-bold">Amount</span>
+                    <br />
+                    <span className="text-lg font-black text-primary">
+                        {isPrivacyMode ? (
+                            "••••••"
+                        ) : (
+                            new Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                            }).format(payload[0].value)
+                        )}
                     </span>
                 </p>
             </div>
@@ -87,33 +113,37 @@ export default function CashFlowSankey({ from, to, isPrivacyMode }: CashFlowSank
     const hasData = data && data.nodes && data.nodes.length > 0;
 
     return (
-        <Card className="col-span-1 md:col-span-12 overflow-hidden border-none bg-gradient-to-br from-card to-secondary/20 shadow-lg">
+        <Card className="col-span-1 md:col-span-12 overflow-hidden border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                 <div className="space-y-1">
-                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                        <ArrowRightLeft className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-2xl font-black flex items-center gap-2 tracking-tight">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mr-1">
+                            <ArrowRightLeft className="h-6 w-6 text-primary" />
+                        </div>
                         Cash Flow Dynamics
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm font-medium opacity-70">
                         Visualize how your money flows from income sources to expenses and savings
                     </CardDescription>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="h-5 w-5 text-primary" />
+                <div className="flex gap-2">
+                    <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">
+                        Live Flow
+                    </div>
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="h-[400px] w-full mt-4">
+                <div className="h-[500px] w-full mt-4">
                     {cashFlowQuery.isFetching ? (
                         <div className="flex flex-col space-y-3 h-full justify-center">
-                            <Skeleton className="h-[300px] w-full rounded-xl" />
+                            <Skeleton className="h-[400px] w-full rounded-2xl" />
                         </div>
                     ) : !hasData ? (
                         <div className="flex h-full flex-col items-center justify-center text-center space-y-4">
-                            <div className="rounded-full bg-muted p-6">
-                                <ArrowRightLeft className="h-12 w-12 text-muted-foreground opacity-20" />
+                            <div className="rounded-full bg-muted/30 p-8 border border-dashed border-muted-foreground/20">
+                                <ArrowRightLeft className="h-16 w-16 text-muted-foreground opacity-20" />
                             </div>
-                            <p className="text-muted-foreground">
+                            <p className="text-muted-foreground font-medium">
                                 No cash flow data available for the selected period
                             </p>
                         </div>
@@ -122,11 +152,16 @@ export default function CashFlowSankey({ from, to, isPrivacyMode }: CashFlowSank
                             <Sankey
                                 data={data}
                                 node={<CustomNode />}
-                                nodePadding={50}
-                                margin={{ top: 20, left: 20, right: 120, bottom: 20 }}
-                                link={{ stroke: "#3b82f6", strokeOpacity: 0.2 }}
+                                nodePadding={data.nodes.length > 10 ? 20 : 40}
+                                margin={{ top: 40, left: 20, right: 20, bottom: 40 }}
+                                link={{
+                                    stroke: "#3b82f6",
+                                    strokeOpacity: 0.4,
+                                    fill: "none"
+                                }}
+                                iterations={64}
                             >
-                                <Tooltip content={<CustomTooltip />} />
+                                <Tooltip content={<CustomTooltip isPrivacyMode={isPrivacyMode} />} />
                             </Sankey>
                         </ResponsiveContainer>
                     )}
