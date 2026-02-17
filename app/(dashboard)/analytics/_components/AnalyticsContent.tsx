@@ -8,6 +8,7 @@ import ComparisonChart from "./ComparisonChart";
 import SavingsImpactChart from "./SavingsImpactChart";
 import KPICards from "./KPICards";
 import CorrelationChart from "./CorrelationChart";
+import CashFlowSankey from "./CashFlowSankey";
 import {
   Select,
   SelectContent,
@@ -212,7 +213,11 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             tagIds={tagIds}
             isPrivacyMode={isPrivacyMode}
           />
-
+          <CashFlowSankey
+            from={dataRange.from}
+            to={dataRange.to}
+            isPrivacyMode={isPrivacyMode}
+          />
           {/* Year-over-Year Comparison */}
           <ComparisonChart
             userSettings={userSettings}
