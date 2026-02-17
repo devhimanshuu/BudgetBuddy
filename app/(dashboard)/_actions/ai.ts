@@ -8,6 +8,7 @@ import OpenAI from "openai";
 import { CreateTransaction } from "./transaction";
 import { UpdateTransaction } from "../transactions/_actions/updateTransaction";
 import { DeleteTransaction } from "../transactions/_actions/deleteTransaction";
+import { calculateLevel } from "@/lib/gamification";
 
 export async function ChatWithAI(
 	message: string,
@@ -192,6 +193,7 @@ export async function ChatWithAI(
 User Currency: ${currency}
 User Financial Persona: ${persona}
 Financial Health Score: ${Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100)}/100
+User Level: ${calculateLevel(userSettings?.totalPoints || 0).currentLevel.level} - ${calculateLevel(userSettings?.totalPoints || 0).currentLevel.title} (${userSettings?.totalPoints || 0} pts)
 User Streak: ${userSettings?.currentStreak || 0} days (Record: ${userSettings?.longestStreak || 0} days)
 Available Categories: ${availableCategories.join(", ")}
 Unlocked Achievements:

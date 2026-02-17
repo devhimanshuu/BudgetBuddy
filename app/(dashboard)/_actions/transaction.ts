@@ -150,12 +150,23 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 	});
 
 	// Update gamification (streaks and achievements)
+	let unlockedAchievements: any[] = [];
 	try {
 		await updateStreak(user.id);
-		await checkAchievements(user.id, { type: "transaction" });
-		await checkAchievements(user.id, { type: "streak" });
+		const tAchievements = await checkAchievements(user.id, {
+			type: "transaction",
+		});
+		const sAchievements = await checkAchievements(user.id, { type: "streak" });
+		const bAchievements = await checkAchievements(user.id, { type: "budget" });
+		unlockedAchievements = [
+			...tAchievements,
+			...sAchievements,
+			...bAchievements,
+		];
 	} catch (error) {
 		// Don't fail transaction creation if gamification fails
 		console.error("Gamification error:", error);
 	}
+
+	return { success: true, unlockedAchievements };
 }

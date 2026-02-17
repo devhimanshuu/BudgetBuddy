@@ -52,6 +52,7 @@ import FileUpload from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { useCheckBudgetAlert } from "@/lib/useCheckBudgetAlert";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAchievementToast } from "@/hooks/use-achievement-toast";
 
 interface Props {
   trigger?: ReactNode;
@@ -129,13 +130,18 @@ const CreateTransactionDialog = ({
   );
 
   const queryClient = useQueryClient();
+  const { showAchievement } = useAchievementToast();
 
   const { mutate, isPending } = useMutation({
     mutationFn: CreateTransaction,
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       toast.success("Transaction created Successfully", {
         id: "create-transaction",
       });
+
+      if (data?.unlockedAchievements) {
+        showAchievement(data.unlockedAchievements);
+      }
 
       // Show budget alert toast if there was a warning
       if (budgetAlertData?.hasAlert && budgetAlertData.alert) {
@@ -171,6 +177,9 @@ const CreateTransactionDialog = ({
       });
       queryClient.invalidateQueries({
         queryKey: ["budget-progress"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["gamification"],
       });
       setOpen(false);
     },

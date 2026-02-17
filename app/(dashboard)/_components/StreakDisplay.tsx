@@ -1,13 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Flame, Trophy, Target, TrendingUp } from "lucide-react";
+import { Flame, Trophy, TrendingUp, Crown, Zap, Target } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import CountUp from "react-countup";
 import { useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+interface LevelInfo {
+	level: number;
+	minPoints: number;
+	title: string;
+}
 
 interface GamificationStats {
 	currentStreak: number;
@@ -16,6 +22,9 @@ interface GamificationStats {
 	achievements: any[];
 	totalAchievements: number;
 	totalTransactions: number;
+	level: LevelInfo;
+	nextLevel: LevelInfo;
+	levelProgress: number;
 }
 
 export default function StreakDisplay() {
@@ -27,174 +36,123 @@ export default function StreakDisplay() {
 	const nextStreakMilestone = stats
 		? getNextMilestone(stats.currentStreak)
 		: null;
-	const progressToNext =
+
+	// Calculate streak progress relative to previous milestone (0) or simple percentage of next?
+	// Simple percentage of next milestone makes sense for streaks.
+	const streakProgress =
 		nextStreakMilestone && stats
 			? (stats.currentStreak / nextStreakMilestone) * 100
 			: 0;
 
 	return (
-		<div className="grid gap-3 md:grid-cols-3 3xl:gap-4">
+		<div className="grid gap-4 md:grid-cols-3">
+			{/* Current Streak */}
 			<SkeletonWrapper isLoading={isLoading}>
 				<StreakCard
+					label="Current Streak"
 					value={stats?.currentStreak || 0}
-					title="Current Streak"
-					subtitle="days in a row"
-					icon={<Flame className="h-5 w-5 text-white 3xl:h-5 3xl:w-5" />}
-					iconBg="from-orange-500 to-red-600"
-					gradientBg="from-orange-500/10 via-red-500/10 to-pink-500/10"
-					progress={progressToNext}
-					nextMilestone={nextStreakMilestone}
-					isActive={stats ? stats.currentStreak >= 7 : false}
-					activeMessage="You're on fire!"
+					subtext="days in a row"
+					icon={<Flame className="h-5 w-5 text-white" />}
+					iconGradient="from-orange-500 to-red-600"
+
+					progress={streakProgress}
+					progressLabel={nextStreakMilestone ? `Next: ${nextStreakMilestone} days` : undefined}
+
+					activeMessage={stats && stats.currentStreak >= 3 ? "You're on fire!" : undefined}
 				/>
 			</SkeletonWrapper>
 
+			{/* Total Points / Level */}
 			<SkeletonWrapper isLoading={isLoading}>
 				<StreakCard
-					value={stats?.longestStreak || 0}
-					title="Best Streak"
-					subtitle="personal record"
-					icon={<Trophy className="h-5 w-5 text-white 3xl:h-5 3xl:w-5" />}
-					iconBg="from-amber-500 to-yellow-600"
-					gradientBg="from-amber-500/10 via-yellow-500/10 to-orange-500/10"
-					isRecord={
-						stats
-							? stats.currentStreak === stats.longestStreak &&
-							stats.currentStreak > 0
-							: false
-					}
-					activeMessage="New record!"
-				/>
-			</SkeletonWrapper>
-
-			<SkeletonWrapper isLoading={isLoading}>
-				<StreakCard
+					label={`Level ${stats?.level?.level || 1}`}
 					value={stats?.totalPoints || 0}
-					title="Total Points"
-					subtitle={`${stats?.totalAchievements || 0} achievement${(stats?.totalAchievements || 0) !== 1 ? "s" : ""} unlocked`}
-					icon={<Target className="h-5 w-5 text-white 3xl:h-5 3xl:w-5" />}
-					iconBg="from-emerald-500 to-teal-600"
-					gradientBg="from-emerald-500/10 via-teal-500/10 to-cyan-500/10"
-					showTrend
-					trendValue={stats?.totalAchievements || 0}
+					subtext={stats?.level?.title || "Novice Saver"}
+					icon={<Crown className="h-5 w-5 text-white" />}
+					iconGradient="from-indigo-500 to-purple-600"
+
+					progress={stats?.levelProgress || 0}
+					progressLabel={stats?.nextLevel ? `${stats.totalPoints} / ${stats.nextLevel.minPoints} pts` : "Max Level"}
+
+					activeMessage={`${stats?.totalAchievements || 0} achievements unlocked`}
+				/>
+			</SkeletonWrapper>
+
+			{/* Best Streak / Records */}
+			<SkeletonWrapper isLoading={isLoading}>
+				<StreakCard
+					label="Best Streak"
+					value={stats?.longestStreak || 0}
+					subtext="personal record"
+					icon={<Trophy className="h-5 w-5 text-white" />}
+					iconGradient="from-amber-400 to-yellow-600"
+
+					activeMessage={stats && stats.currentStreak === stats.longestStreak && stats.currentStreak > 0 ? "New Record!" : undefined}
 				/>
 			</SkeletonWrapper>
 		</div>
 	);
 }
 
-function StreakCard({
-	value,
-	title,
-	subtitle,
-	icon,
-	iconBg,
-	gradientBg,
-	progress,
-	nextMilestone,
-	isActive,
-	isRecord,
-	activeMessage,
-	showTrend,
-	trendValue,
-}: {
+interface StreakCardProps {
+	label: string;
 	value: number;
-	title: string;
-	subtitle: string;
+	subtext: string;
 	icon: React.ReactNode;
-	iconBg: string;
-	gradientBg: string;
+	iconGradient: string;
+
 	progress?: number;
-	nextMilestone?: number | null;
-	isActive?: boolean;
-	isRecord?: boolean;
+	progressLabel?: string;
 	activeMessage?: string;
-	showTrend?: boolean;
-	trendValue?: number;
-}) {
-	const formatValue = useCallback((val: number) => {
-		return val.toLocaleString();
-	}, []);
+}
 
+function StreakCard({
+	label,
+	value,
+	subtext,
+	icon,
+	iconGradient,
+	progress,
+	progressLabel,
+	activeMessage
+}: StreakCardProps) {
 	return (
-		<Card className="group relative flex h-full flex-col overflow-hidden">
-			{/* Background gradient */}
-			<div
-				className={cn(
-					"pointer-events-none absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100",
-					gradientBg,
-				)}
-			/>
-
-			<CardHeader className="relative p-4 3xl:p-6 3xl:pb-3">
-				<CardTitle className="flex items-center gap-2 text-base font-semibold 3xl:text-base">
-					<div
-						className={cn(
-							"flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm transition-transform duration-300 group-hover:scale-105",
-							"3xl:h-10 3xl:w-10",
-							iconBg,
-						)}>
-						{icon}
+		<Card className="group relative overflow-hidden border-muted/50 transition-all hover:shadow-lg hover:border-muted-foreground/20">
+			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+				<div className="space-y-1">
+					<CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[10px]">
+						{label}
+					</CardTitle>
+					<div className="text-2xl font-bold">
+						<CountUp end={value} duration={2} separator="," />
 					</div>
-					<span>{title}</span>
-				</CardTitle>
+				</div>
+				<div className={cn("p-2.5 rounded-xl shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3 duration-300 bg-gradient-to-br", iconGradient)}>
+					{icon}
+				</div>
 			</CardHeader>
+			<CardContent className="relative z-10">
+				<p className="text-sm font-semibold text-foreground mb-4">
+					{subtext}
+				</p>
 
-			<CardContent className="relative flex flex-1 flex-col space-y-2 p-4 pt-0 3xl:p-6 3xl:pt-0">
-				{/* Value */}
-				<div>
-					<CountUp
-						preserveValue
-						redraw={false}
-						end={value}
-						decimals={0}
-						formattingFn={formatValue}
-						className="text-2xl font-bold 3xl:text-3xl"
-						duration={2}
-					/>
-					{subtitle && (
-						<p className="text-xs text-muted-foreground 3xl:text-sm">
-							{subtitle}
-						</p>
-					)}
-				</div>
-
-				{/* Progress Section */}
-				{progress !== undefined && nextMilestone ? (
-					<div className="space-y-1">
-						<div className="flex justify-between text-[9px] text-muted-foreground/80 uppercase tracking-wider">
-							<span>Progress</span>
-							<span>{Math.round(progress)}%</span>
-						</div>
-						<Progress value={progress} className="h-1" />
-						<p className="text-[9px] text-muted-foreground text-right mt-0.5">
-							Next: {nextMilestone} days
-						</p>
+				{progress !== undefined && (
+					<div className="space-y-1.5">
+						<Progress value={progress} className="h-1.5 bg-muted/50" indicator={cn("bg-gradient-to-r", iconGradient)} />
+						{progressLabel && (
+							<p className="text-[10px] text-muted-foreground text-right w-full">
+								{progressLabel}
+							</p>
+						)}
 					</div>
-				) : (
-					<div className="h-5" />
 				)}
 
-				{/* Active Message / Trend */}
-				<div className="mt-auto h-4 flex items-center">
-					{(isActive || isRecord) && activeMessage ? (
-						<div className="flex items-center gap-1 text-xs font-semibold text-emerald-500 animate-in fade-in slide-in-from-bottom-1">
-							{isActive ? (
-								<Flame className="h-3 w-3" />
-							) : (
-								<Trophy className="h-3 w-3" />
-							)}
-							{activeMessage}
-						</div>
-					) : showTrend && trendValue !== undefined && trendValue > 0 ? (
-						<div className="flex items-center gap-1 text-xs font-medium text-emerald-500 animate-in fade-in slide-in-from-bottom-1">
-							<TrendingUp className="h-3 w-3" />
-							<span>Unlocked recently</span>
-						</div>
-					) : (
-						<div className="h-3">&nbsp;</div>
-					)}
-				</div>
+				{activeMessage && (
+					<div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-500 animate-in fade-in slide-in-from-bottom-2">
+						<TrendingUp className="h-3.5 w-3.5" />
+						{activeMessage}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

@@ -10,6 +10,12 @@ import { ACHIEVEMENTS } from "@/lib/gamification";
 import GlassCard from "@/components/GlassCard";
 import { cn } from "@/lib/utils";
 
+interface LevelInfo {
+    level: number;
+    minPoints: number;
+    title: string;
+}
+
 interface Achievement {
     id: string;
     key: string;
@@ -30,6 +36,9 @@ interface GamificationStats {
     achievements: Achievement[];
     totalAchievements: number;
     totalTransactions: number;
+    level: LevelInfo;
+    nextLevel: LevelInfo;
+    levelProgress: number;
 }
 
 const TIER_COLORS = {
@@ -160,16 +169,35 @@ export default function AchievementsDisplay() {
                     </p>
                 </div>
 
-                <GlassCard className="px-6 py-4" hover={false}>
-                    <div className="text-center md:text-right">
-                        <div className="text-3xl font-bold text-primary md:text-4xl">
-                            {stats.totalPoints.toLocaleString()}
+                <div className="flex flex-col sm:flex-row gap-4 mt-2 md:mt-0">
+                    <GlassCard className="px-6 py-4" hover={false}>
+                        <div className="text-center sm:text-right">
+                            <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-purple-600 md:text-4xl">
+                                {stats.level?.level || 1}
+                            </div>
+                            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                Level
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1 font-semibold">
+                                {stats.level?.title || "Novice"}
+                            </div>
                         </div>
-                        <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                            Total Points
+                    </GlassCard>
+
+                    <GlassCard className="px-6 py-4" hover={false}>
+                        <div className="text-center sm:text-right">
+                            <div className="text-3xl font-bold text-primary md:text-4xl">
+                                {stats.totalPoints.toLocaleString()}
+                            </div>
+                            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                Total Points
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                                {stats.nextLevel ? `${stats.nextLevel.minPoints - stats.totalPoints} to Level ${stats.nextLevel.level}` : "Max Level"}
+                            </div>
                         </div>
-                    </div>
-                </GlassCard>
+                    </GlassCard>
+                </div>
             </div>
 
             <Tabs defaultValue="all" className="w-full">

@@ -1,6 +1,36 @@
 import prisma from "@/lib/prisma";
 import { differenceInDays, startOfDay } from "date-fns";
 
+// Level definitions
+export const LEVELS = [
+	{ level: 1, minPoints: 0, title: "Novice Saver" },
+	{ level: 2, minPoints: 100, title: "Budget Beginner" },
+	{ level: 3, minPoints: 300, title: "Smart Spender" },
+	{ level: 4, minPoints: 600, title: "Finance Fanatic" },
+	{ level: 5, minPoints: 1000, title: "Wealth Wizard" },
+	{ level: 6, minPoints: 1500, title: "Investment Icon" },
+	{ level: 7, minPoints: 2200, title: "Money Master" },
+	{ level: 8, minPoints: 3000, title: "Fiscal Legend" },
+	{ level: 9, minPoints: 4000, title: "Tycoon" },
+	{ level: 10, minPoints: 5000, title: "Grand Tycoon" },
+] as const;
+
+export function calculateLevel(points: number) {
+	const level =
+		LEVELS.slice()
+			.reverse()
+			.find((l) => points >= l.minPoints) || LEVELS[0];
+	const nextLevel = LEVELS.find((l) => l.level === level.level + 1);
+	return {
+		currentLevel: level,
+		nextLevel,
+		progress: nextLevel
+			? ((points - level.minPoints) / (nextLevel.minPoints - level.minPoints)) *
+				100
+			: 100,
+	};
+}
+
 // Achievement definitions
 export const ACHIEVEMENTS = {
 	// Streak achievements
@@ -91,7 +121,7 @@ export const ACHIEVEMENTS = {
 	BUDGET_HERO_1: {
 		key: "budget_hero_1",
 		name: "Budget Conscious",
-		description: "Stay under budget for 1 month",
+		description: "Spend less than you earn for 1 month",
 		icon: "🏆",
 		category: "budget",
 		tier: "bronze",
@@ -101,7 +131,7 @@ export const ACHIEVEMENTS = {
 	BUDGET_HERO_3: {
 		key: "budget_hero_3",
 		name: "Budget Hero",
-		description: "Stay under budget for 3 months in a row",
+		description: "Spend less than you earn for 3 months in a row",
 		icon: "🏆",
 		category: "budget",
 		tier: "silver",
@@ -111,7 +141,7 @@ export const ACHIEVEMENTS = {
 	BUDGET_HERO_6: {
 		key: "budget_hero_6",
 		name: "Budget Champion",
-		description: "Stay under budget for 6 months in a row",
+		description: "Spend less than you earn for 6 months in a row",
 		icon: "🏆",
 		category: "budget",
 		tier: "gold",
@@ -163,6 +193,9 @@ export const ACHIEVEMENTS = {
 		requirement: 1,
 	},
 } as const;
+
+export type AchievementKey = keyof typeof ACHIEVEMENTS;
+export type AchievementDef = (typeof ACHIEVEMENTS)[AchievementKey];
 
 /**
  * Update user's streak based on their last activity
@@ -227,6 +260,7 @@ export async function updateStreak(userId: string): Promise<{
 
 /**
  * Check and unlock achievements for a user
+ * Returns the LIST of achievements unlocked in this specific check
  */
 export async function checkAchievements(
 	userId: string,
@@ -234,8 +268,8 @@ export async function checkAchievements(
 		type: "transaction" | "budget" | "savings_goal" | "streak";
 		data?: any;
 	},
-): Promise<string[]> {
-	const unlockedAchievements: string[] = [];
+): Promise<AchievementDef[]> {
+	const unlockedAchievements: AchievementDef[] = [];
 
 	try {
 		// Get user's existing achievements
@@ -264,7 +298,7 @@ export async function checkAchievements(
 			for (const { count, achievement } of achievementsToCheck) {
 				if (transactionCount >= count && !existingKeys.has(achievement.key)) {
 					await unlockAchievement(userId, achievement);
-					unlockedAchievements.push(achievement.key);
+					unlockedAchievements.push(achievement);
 				}
 			}
 
@@ -272,11 +306,11 @@ export async function checkAchievements(
 			const hour = new Date().getHours();
 			if (hour < 8 && !existingKeys.has(ACHIEVEMENTS.EARLY_BIRD.key)) {
 				await unlockAchievement(userId, ACHIEVEMENTS.EARLY_BIRD);
-				unlockedAchievements.push(ACHIEVEMENTS.EARLY_BIRD.key);
+				unlockedAchievements.push(ACHIEVEMENTS.EARLY_BIRD);
 			}
 			if (hour >= 22 && !existingKeys.has(ACHIEVEMENTS.NIGHT_OWL.key)) {
 				await unlockAchievement(userId, ACHIEVEMENTS.NIGHT_OWL);
-				unlockedAchievements.push(ACHIEVEMENTS.NIGHT_OWL.key);
+				unlockedAchievements.push(ACHIEVEMENTS.NIGHT_OWL);
 			}
 		}
 
@@ -300,7 +334,7 @@ export async function checkAchievements(
 						!existingKeys.has(achievement.key)
 					) {
 						await unlockAchievement(userId, achievement);
-						unlockedAchievements.push(achievement.key);
+						unlockedAchievements.push(achievement);
 					}
 				}
 			}
@@ -320,7 +354,49 @@ export async function checkAchievements(
 			for (const { count, achievement } of goalAchievements) {
 				if (completedGoals >= count && !existingKeys.has(achievement.key)) {
 					await unlockAchievement(userId, achievement);
-					unlockedAchievements.push(achievement.key);
+					unlockedAchievements.push(achievement);
+				}
+			}
+		}
+
+		// Check budget/monthly history achievements
+		if (context.type === "budget" || context.type === "transaction") {
+			const monthlyHistory = await prisma.monthlyHistory.findMany({
+				where: { userId },
+				orderBy: { year: "desc", month: "desc" },
+			});
+
+			const currentMonth = new Date().getUTCMonth();
+			const currentYear = new Date().getUTCFullYear();
+
+			// Filter for completed months (months before current)
+			const completedMonths = monthlyHistory.filter(
+				(m) =>
+					m.year < currentYear ||
+					(m.year === currentYear && m.month < currentMonth),
+			);
+
+			// Count consecutive months where Income >= Expense
+			let consecutive = 0;
+			// Iterate from most recent backwards
+			for (const m of completedMonths) {
+				if (m.income >= m.expense) {
+					consecutive++;
+				} else {
+					break;
+				}
+			}
+
+			const budgetAchievements = [
+				{ count: 1, achievement: ACHIEVEMENTS.BUDGET_HERO_1 },
+				{ count: 3, achievement: ACHIEVEMENTS.BUDGET_HERO_3 },
+				{ count: 6, achievement: ACHIEVEMENTS.BUDGET_HERO_6 },
+			];
+
+			for (const { count, achievement } of budgetAchievements) {
+				if (consecutive >= count && !existingKeys.has(achievement.key)) {
+					await unlockAchievement(userId, achievement);
+					unlockedAchievements.push(achievement);
 				}
 			}
 		}
@@ -349,6 +425,18 @@ async function unlockAchievement(
 			data: achievementDef,
 		});
 	}
+
+	// Check if already unlocked (redundant safety)
+	const existing = await prisma.userAchievement.findUnique({
+		where: {
+			userId_achievementId: {
+				userId,
+				achievementId: achievement.id,
+			},
+		},
+	});
+
+	if (existing) return;
 
 	// Create user achievement
 	await prisma.userAchievement.create({
@@ -383,10 +471,16 @@ export async function getGamificationStats(userId: string) {
 		prisma.transaction.count({ where: { userId } }),
 	]);
 
+	const totalPoints = userSettings?.totalPoints || 0;
+	const levelInfo = calculateLevel(totalPoints);
+
 	return {
 		currentStreak: userSettings?.currentStreak || 0,
 		longestStreak: userSettings?.longestStreak || 0,
-		totalPoints: userSettings?.totalPoints || 0,
+		totalPoints,
+		level: levelInfo.currentLevel,
+		nextLevel: levelInfo.nextLevel,
+		levelProgress: levelInfo.progress,
 		achievements: achievements.map((ua) => ({
 			...ua.achievement,
 			unlockedAt: ua.unlockedAt,

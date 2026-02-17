@@ -19,6 +19,7 @@ import { Check } from "lucide-react";
 import { triggerGoalConfetti } from "@/lib/confetti";
 import { UserSettings } from "@prisma/client";
 import { GetFormatterForCurrency } from "@/lib/helper";
+import { useAchievementToast } from "@/hooks/use-achievement-toast";
 
 interface UpdateGoalDialogProps {
   goal: {
@@ -52,6 +53,7 @@ export default function UpdateGoalDialog({
   }, [goal.currentAmount]);
 
   const queryClient = useQueryClient();
+  const { showAchievement } = useAchievementToast();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: { id: string; currentAmount: number; isCompleted?: boolean }) => {
@@ -67,9 +69,15 @@ export default function UpdateGoalDialog({
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Goal updated successfully!");
+
+      if (data?.unlockedAchievements) {
+        showAchievement(data.unlockedAchievements);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification"] });
       onOpenChangeAction(false);
     },
     onError: () => {

@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import { toast } from "sonner";
+import { useAchievementToast } from "@/hooks/use-achievement-toast";
 
 interface CreateGoalDialogProps {
   trigger: ReactNode;
@@ -45,6 +46,7 @@ export default function CreateGoalDialog({ trigger }: CreateGoalDialogProps) {
   const [color, setColor] = useState(GOAL_COLORS[0]);
 
   const queryClient = useQueryClient();
+  const { showAchievement } = useAchievementToast();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: any) => {
@@ -60,9 +62,18 @@ export default function CreateGoalDialog({ trigger }: CreateGoalDialogProps) {
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Goal created successfully!");
+
+      // Check for unlock achievements (though POST typically doesn't unlock goal completion, but potentially "Created Goal" if we add that later)
+      // If we added "Goal Setter" achievement, this would work.
+      if (data?.unlockedAchievements) {
+        showAchievement(data.unlockedAchievements);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
+      queryClient.invalidateQueries({ queryKey: ["gamification"] });
+
       setOpen(false);
       resetForm();
     },
@@ -187,11 +198,10 @@ export default function CreateGoalDialog({ trigger }: CreateGoalDialogProps) {
                 <button
                   key={goalIcon}
                   type="button"
-                  className={`flex h-10 w-10 items-center justify-center rounded-md border-2 text-xl transition-all ${
-                    icon === goalIcon
+                  className={`flex h-10 w-10 items-center justify-center rounded-md border-2 text-xl transition-all ${icon === goalIcon
                       ? "scale-110 border-primary"
                       : "border-transparent hover:border-muted-foreground"
-                  }`}
+                    }`}
                   onClick={() => setIcon(goalIcon)}
                 >
                   {goalIcon}
@@ -207,11 +217,10 @@ export default function CreateGoalDialog({ trigger }: CreateGoalDialogProps) {
                 <button
                   key={goalColor}
                   type="button"
-                  className={`h-8 w-8 rounded-full border-2 transition-all ${
-                    color === goalColor
+                  className={`h-8 w-8 rounded-full border-2 transition-all ${color === goalColor
                       ? "scale-110 border-foreground"
                       : "border-transparent"
-                  }`}
+                    }`}
                   style={{ backgroundColor: goalColor }}
                   onClick={() => setColor(goalColor)}
                 />
