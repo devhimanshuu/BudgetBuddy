@@ -4,6 +4,10 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import {
+	processRecurringTransaction,
+	calculateNextDate,
+} from "@/lib/recurring-logic";
 
 export async function EditRecurringTransaction(
 	id: string,
@@ -158,29 +162,6 @@ export async function GetDueRecurringTransactions() {
 	});
 }
 
-// Helper to calculate next date
-function calculateNextDate(
-	currentDate: Date,
-	interval: RecurringInterval,
-): Date {
-	const nextDate = new Date(currentDate);
-	switch (interval) {
-		case "daily":
-			nextDate.setDate(nextDate.getDate() + 1);
-			break;
-		case "weekly":
-			nextDate.setDate(nextDate.getDate() + 7);
-			break;
-		case "monthly":
-			nextDate.setMonth(nextDate.getMonth() + 1);
-			break;
-		case "yearly":
-			nextDate.setFullYear(nextDate.getFullYear() + 1);
-			break;
-	}
-	return nextDate;
-}
-
 export async function ProcessRecurringTransaction(id: string) {
 	const user = await currentUser();
 	if (!user) {
@@ -297,11 +278,8 @@ export async function ProcessAllDueRecurringTransactions() {
 
 	if (due.length === 0) return;
 
-	// Loop through and process each
-	// In a real production app with massive numbers, you'd want a more optimized bulk update
-	// but for personal finance typical number of due transactions is small (< 100).
 	for (const transaction of due) {
-		await ProcessRecurringTransaction(transaction.id);
+		await processRecurringTransaction(transaction.id);
 	}
 
 	revalidatePath("/");
