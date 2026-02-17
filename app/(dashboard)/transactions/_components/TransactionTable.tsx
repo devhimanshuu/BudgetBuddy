@@ -349,10 +349,15 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
       categoryIcon: row.original.categoryIcon,
     }));
 
+    const { calculateLevel } = require("@/lib/gamification");
+    const levelInfo = calculateLevel(userSettings.data?.totalPoints || 0);
+
     exportTransactionsToPDF(filteredData, {
       title: "Transaction History",
       dateRange: { from, to },
       currency: userSettings.data.currency,
+      isAdvanced: levelInfo.currentLevel.level >= 7,
+      tier: levelInfo.tier,
     });
   };
 

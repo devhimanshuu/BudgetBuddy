@@ -70,6 +70,28 @@
 		--ring: 224 76% 48%;
 	}
 
+	.gold-standard {
+		--background: 45 40% 4%;
+		--foreground: 45 30% 98%;
+		--card: 45 40% 6%;
+		--card-foreground: 45 30% 98%;
+		--popover: 45 40% 4%;
+		--popover-foreground: 45 30% 98%;
+		--primary: 47 95% 50%;
+		--primary-foreground: 45 40% 4%;
+		--secondary: 45 30% 12%;
+		--secondary-foreground: 45 30% 98%;
+		--muted: 45 30% 12%;
+		--muted-foreground: 45 20% 60%;
+		--accent: 45 30% 15%;
+		--accent-foreground: 45 30% 98%;
+		--destructive: 0 63% 31%;
+		--destructive-foreground: 45 30% 98%;
+		--border: 45 30% 15%;
+		--input: 45 30% 15%;
+		--ring: 47 95% 50%;
+	}
+
 	.solaris {
 		--background: 20 14% 4%;
 		--foreground: 60 9% 98%;

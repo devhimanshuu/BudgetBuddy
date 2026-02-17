@@ -35,6 +35,9 @@ export async function ChatWithAI(
 	let availableCategories: string[] = [];
 
 	try {
+		let persona = "Fox";
+		let personaPersonality = "";
+
 		const twoMonthsAgo = new Date();
 		twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
@@ -128,25 +131,32 @@ export async function ChatWithAI(
 		const budgetAdherence =
 			budgets.length > 0 ? 1 - overBudgetCount / budgets.length : 1;
 
-		let persona = "Fox";
-		let personaPersonality = "";
+		const levelInfo = calculateLevel(userSettings?.totalPoints || 0);
+		const tier = levelInfo.tier;
+		const unlockedList = levelInfo.unlockedFeatures
+			.map((f) => f.name)
+			.join(", ");
+
+		const healthScore = Math.min(
+			Math.max(
+				Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100),
+				0,
+			),
+			100,
+		);
 
 		if (savingsRate > 0.3) {
 			persona = "Squirrel";
-			personaPersonality =
-				"USER PERSONA: Squirrel (Wealth Builder). Be encouraging, praise their discipline, and suggest how to optimize their growing savings. Personality: Wise, protective, and slightly obsessive about nuts (savings).";
+			personaPersonality = `USER PERSONA: ${tier} Squirrel (Wealth Builder). Be encouraging, praise their discipline, and suggest how to optimize their growing savings. Personality: Wise, protective, and slightly obsessive about nuts (savings). Unlocked: ${unlockedList}`;
 		} else if (luxuryRate > 0.4) {
 			persona = "Peacock";
-			personaPersonality =
-				"USER PERSONA: Peacock (Luxury Spender). Be a bit 'savage' and playfully roast their high-end spending. Urge them to find value and cut unnecessary waste. Personality: Glamorous, bold, but brutally honest about overpriced vanity.";
+			personaPersonality = `USER PERSONA: ${tier} Peacock (Luxury Spender). Be a bit 'savage' and playfully roast their high-end spending. Urge them to find value and cut unnecessary waste. Personality: Glamorous, bold, but brutally honest about overpriced vanity. Unlocked: ${unlockedList}`;
 		} else if (budgetAdherence > 0.9 && budgets.length > 0) {
 			persona = "Owl";
-			personaPersonality =
-				"USER PERSONA: Owl (The Strategist). They are perfect at budgeting. Be professional, data-driven, and provide high-level insights. Personality: Intelligent, calm, and focused on long-term foresight.";
+			personaPersonality = `USER PERSONA: ${tier} Owl (The Strategist). They are perfect at budgeting. Be professional, data-driven, and provide high-level insights. Personality: Intelligent, calm, and focused on long-term foresight. Unlocked: ${unlockedList}`;
 		} else {
 			persona = "Fox";
-			personaPersonality =
-				"USER PERSONA: Fox (Balanced). Be quick, clever, and help them maintain their steady financial balance. Personality: Agile, street-smart, and always looking for the best deal/opportunity.";
+			personaPersonality = `USER PERSONA: ${tier} Fox (Balanced). Be quick, clever, and help them maintain their steady financial balance. Personality: Agile, street-smart, and always looking for the best deal/opportunity. Unlocked: ${unlockedList}`;
 		}
 
 		// --- INTELLIGENCE LOGIC (Anomalies & Forecasts) ---
@@ -192,8 +202,8 @@ export async function ChatWithAI(
 		contextData = `
 User Currency: ${currency}
 User Financial Persona: ${persona}
-Financial Health Score: ${Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100)}/100
-User Level: ${calculateLevel(userSettings?.totalPoints || 0).currentLevel.level} - ${calculateLevel(userSettings?.totalPoints || 0).currentLevel.title} (${userSettings?.totalPoints || 0} pts)
+Financial Health Score: ${healthScore}/100
+User Level: ${levelInfo.currentLevel.level} - ${levelInfo.currentLevel.title} (${userSettings?.totalPoints || 0} pts)
 User Streak: ${userSettings?.currentStreak || 0} days (Record: ${userSettings?.longestStreak || 0} days)
 Available Categories: ${availableCategories.join(", ")}
 Unlocked Achievements:
@@ -214,16 +224,14 @@ Savings Goals:
 ${savingsGoals.map((s) => `- ${s.name}: ${s.currentAmount}/${s.targetAmount}`).join("\n")}
 `;
 
-		const healthScore = Math.min(
-			Math.max(
-				Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100),
-				0,
-			),
-			100,
-		);
-
 		const systemInstruction = `You are Budget Buddy, an expert financial analyst with a unique personality adapted to the user.
 ${personaPersonality}
+
+CURRENT USER TIER INFO:
+- Level: ${levelInfo.currentLevel.level} 
+- Tier: ${levelInfo.tier}
+
+${levelInfo.currentLevel.level >= 10 ? "**STRATEGIC POWER-UP UNLOCKED**: You now have access to the 'simulate_future' tool whenever the user asks 'what if', 'is it worth it', or about future impact of a purchase/income change. It will render a beautiful predictive chart." : "Note: Strategic Simulator (simulate_future) is currently LOCKED for this user (Requires Lvl 10)."}
 
 Use the provided data to answer user questions.
 Format amounts in ${currency}.
@@ -310,25 +318,6 @@ ${contextData}`;
 			{
 				type: "function",
 				function: {
-					name: "search_transactions",
-					description: "Filter and find specific transactions",
-					parameters: {
-						type: "object",
-						properties: {
-							query: { type: "string" },
-							category: { type: "string" },
-							type: { type: "string", enum: ["income", "expense"] },
-							minAmount: { type: "number" },
-							maxAmount: { type: "number" },
-							from: { type: "string" },
-							to: { type: "string" },
-						},
-					},
-				},
-			},
-			{
-				type: "function",
-				function: {
 					name: "edit_transaction",
 					description:
 						"Update an existing transaction. Use ID[uuid] provided in context.",
@@ -368,6 +357,40 @@ ${contextData}`;
 			},
 		];
 
+		if (levelInfo.currentLevel.level >= 10) {
+			tools.push({
+				type: "function",
+				function: {
+					name: "simulate_future",
+					description:
+						"Simulate the impact of a financial decision (e.g. buying a car, starting a subscription, saving more) over 12 months.",
+					parameters: {
+						type: "object",
+						properties: {
+							description: {
+								type: "string",
+								description:
+									"What the user is planning to do (e.g. 'Buying a Tesla')",
+							},
+							initialCost: {
+								type: "number",
+								description: "Upfront cost if any",
+							},
+							monthlyImpact: {
+								type: "number",
+								description: "Monthly change in income (+) or expense (-)",
+							},
+							months: {
+								type: "number",
+								description: "Duration to simulate, default 12",
+							},
+						},
+						required: ["description", "monthlyImpact"],
+					},
+				},
+			});
+		}
+
 		// Attempt 1: Groq
 		if (groqApiKey) {
 			try {
@@ -398,56 +421,64 @@ ${contextData}`;
 							responseMessage.tool_calls &&
 							responseMessage.tool_calls.length > 0
 						) {
-							const toolCall = responseMessage.tool_calls[0] as any;
-							if (toolCall.function?.name === "create_transaction") {
-								const args = JSON.parse(toolCall.function.arguments);
-								await CreateTransaction({
-									amount: args.amount,
-									description: args.description || "AI Created Transaction",
-									date: new Date(args.date),
-									category: args.category,
-									type: args.type,
-								});
-								return {
-									text: `✅ Created ${args.type} of ${currency}${args.amount} for "${args.description}"`,
-									persona,
-									healthScore,
-								};
+							let toolSummary = "";
+							let filter = undefined;
+							let component = undefined;
+
+							for (const toolCall of responseMessage.tool_calls) {
+								const tCall = toolCall as any;
+								const args = JSON.parse(tCall.function?.arguments || "{}");
+								const name = tCall.function?.name;
+
+								if (name === "create_transaction") {
+									await CreateTransaction({
+										amount: args.amount,
+										description: args.description || "AI Created",
+										date: new Date(args.date),
+										category: args.category,
+										type: args.type,
+									});
+									toolSummary += `✅ Created ${args.type} of ${currency}${args.amount} for "${args.description}"\n`;
+								} else if (name === "search_transactions") {
+									filter = args;
+									toolSummary += `🔍 Filtering transactions...\n`;
+								} else if (name === "simulate_future") {
+									const months = args.months || 12;
+									const totalImpact =
+										args.monthlyImpact * months - (args.initialCost || 0);
+									toolSummary += `📈 Simulation: "${args.description}" total impact ${currency}${totalImpact.toFixed(2)}.\n`;
+									component = `[SIMULATION_CARD: ${JSON.stringify({
+										description: args.description,
+										initialCost: args.initialCost || 0,
+										monthlyImpact: args.monthlyImpact,
+										totalImpact,
+										months,
+										currency,
+									})}]`;
+								} else if (name === "edit_transaction") {
+									const cleanId = args.id.replace("ID[", "").replace("]", "");
+									await UpdateTransaction(cleanId, {
+										amount: args.amount,
+										description: args.description,
+										date: new Date(args.date),
+										category: args.category,
+										type: args.type,
+									});
+									toolSummary += `✏️ Updated transaction "${args.description}".\n`;
+								} else if (name === "delete_transaction") {
+									const cleanId = args.id.replace("ID[", "").replace("]", "");
+									await DeleteTransaction(cleanId);
+									toolSummary += `🗑️ Transaction deleted.\n`;
+								}
 							}
-							if (toolCall.function?.name === "search_transactions") {
-								return {
-									text: `🔍 Querying and filtering your view...`,
-									filter: JSON.parse(toolCall.function.arguments),
-									persona,
-									healthScore,
-								};
-							}
-							if (toolCall.function?.name === "edit_transaction") {
-								const args = JSON.parse(toolCall.function.arguments);
-								const cleanId = args.id.replace("ID[", "").replace("]", "");
-								await UpdateTransaction(cleanId, {
-									amount: args.amount,
-									description: args.description,
-									date: new Date(args.date),
-									category: args.category,
-									type: args.type,
-								});
-								return {
-									text: `✏️ Updated transaction "${args.description}" successfully!`,
-									persona,
-									healthScore,
-								};
-							}
-							if (toolCall.function?.name === "delete_transaction") {
-								const args = JSON.parse(toolCall.function.arguments);
-								const cleanId = args.id.replace("ID[", "").replace("]", "");
-								await DeleteTransaction(cleanId);
-								return {
-									text: `🗑️ Transaction deleted successfully.`,
-									persona,
-									healthScore,
-								};
-							}
+
+							return {
+								text: toolSummary.trim() || responseMessage.content || "",
+								persona,
+								healthScore,
+								filter,
+								component,
+							};
 						}
 						return {
 							text: responseMessage.content || "",
@@ -488,56 +519,64 @@ ${contextData}`;
 					responseMessage.tool_calls &&
 					responseMessage.tool_calls.length > 0
 				) {
-					const toolCall = responseMessage.tool_calls[0] as any;
-					if (toolCall.function?.name === "create_transaction") {
-						const args = JSON.parse(toolCall.function.arguments);
-						await CreateTransaction({
-							amount: args.amount,
-							description: args.description || "AI Created",
-							date: new Date(args.date),
-							category: args.category,
-							type: args.type,
-						});
-						return {
-							text: `✅ Created ${args.type} of ${currency}${args.amount}`,
-							persona,
-							healthScore,
-						};
+					let toolSummary = "";
+					let filter = undefined;
+					let component = undefined;
+
+					for (const toolCall of responseMessage.tool_calls) {
+						const tCall = toolCall as any;
+						const args = JSON.parse(tCall.function?.arguments || "{}");
+						const name = tCall.function?.name;
+
+						if (name === "create_transaction") {
+							await CreateTransaction({
+								amount: args.amount,
+								description: args.description || "AI Created",
+								date: new Date(args.date),
+								category: args.category,
+								type: args.type,
+							});
+							toolSummary += `✅ Created ${args.type} of ${currency}${args.amount} for "${args.description}"\n`;
+						} else if (name === "search_transactions") {
+							filter = args;
+							toolSummary += `🔍 Filtering transactions...\n`;
+						} else if (name === "simulate_future") {
+							const months = args.months || 12;
+							const totalImpact =
+								args.monthlyImpact * months - (args.initialCost || 0);
+							toolSummary += `📈 Simulation: "${args.description}" total impact ${currency}${totalImpact.toFixed(2)}.\n`;
+							component = `[SIMULATION_CARD: ${JSON.stringify({
+								description: args.description,
+								initialCost: args.initialCost || 0,
+								monthlyImpact: args.monthlyImpact,
+								totalImpact,
+								months,
+								currency,
+							})}]`;
+						} else if (name === "edit_transaction") {
+							const cleanId = args.id.replace("ID[", "").replace("]", "");
+							await UpdateTransaction(cleanId, {
+								amount: args.amount,
+								description: args.description,
+								date: new Date(args.date),
+								category: args.category,
+								type: args.type,
+							});
+							toolSummary += `✏️ Updated transaction "${args.description}".\n`;
+						} else if (name === "delete_transaction") {
+							const cleanId = args.id.replace("ID[", "").replace("]", "");
+							await DeleteTransaction(cleanId);
+							toolSummary += `🗑️ Transaction deleted.\n`;
+						}
 					}
-					if (toolCall.function?.name === "search_transactions") {
-						return {
-							text: `🔍 Filtering view...`,
-							filter: JSON.parse(toolCall.function.arguments),
-							persona,
-							healthScore,
-						};
-					}
-					if (toolCall.function?.name === "edit_transaction") {
-						const args = JSON.parse(toolCall.function.arguments);
-						const cleanId = args.id.replace("ID[", "").replace("]", "");
-						await UpdateTransaction(cleanId, {
-							amount: args.amount,
-							description: args.description,
-							date: new Date(args.date),
-							category: args.category,
-							type: args.type,
-						});
-						return {
-							text: `✏️ Updated transaction "${args.description}".`,
-							persona,
-							healthScore,
-						};
-					}
-					if (toolCall.function?.name === "delete_transaction") {
-						const args = JSON.parse(toolCall.function.arguments);
-						const cleanId = args.id.replace("ID[", "").replace("]", "");
-						await DeleteTransaction(cleanId);
-						return {
-							text: `🗑️ Transaction deleted.`,
-							persona,
-							healthScore,
-						};
-					}
+
+					return {
+						text: toolSummary.trim() || responseMessage.content || "",
+						persona,
+						healthScore,
+						filter,
+						component,
+					};
 				}
 				return { text: responseMessage.content || "", persona, healthScore };
 			} catch (e) {

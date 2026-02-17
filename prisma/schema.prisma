@@ -29,6 +29,7 @@ model UserSettings{
   spendingLimitThreshold Int     @default(80) // % of budget reached
   enableAnomalyDetection Boolean @default(true)
   anomalyThreshold       Float   @default(2.0) // Multiplier of average (e.g., 2x)
+  activeTheme            String  @default("default") // "default", "midnight", "gold"
 }
 
 model Category {

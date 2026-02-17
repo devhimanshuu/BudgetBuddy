@@ -15,7 +15,7 @@ const RootProvider = ({ children }: { children: ReactNode }) => {
         defaultTheme="dark"
         enableSystem
         disableTransitionOnChange
-        themes={["light", "dark", "midnight", "solaris", "cyberpunk", "forest"]}
+        themes={["light", "dark", "midnight", "solaris", "cyberpunk", "forest", "gold-standard"]}
         value={{
           light: "light",
           dark: "dark",
@@ -23,6 +23,7 @@ const RootProvider = ({ children }: { children: ReactNode }) => {
           solaris: "solaris",
           cyberpunk: "cyberpunk",
           forest: "forest",
+          "gold-standard": "gold-standard",
         }}
       >
         <AccentProvider>

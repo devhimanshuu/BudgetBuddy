@@ -3,16 +3,121 @@ import { differenceInDays, startOfDay } from "date-fns";
 
 // Level definitions
 export const LEVELS = [
-	{ level: 1, minPoints: 0, title: "Novice Saver" },
-	{ level: 2, minPoints: 100, title: "Budget Beginner" },
-	{ level: 3, minPoints: 300, title: "Smart Spender" },
-	{ level: 4, minPoints: 600, title: "Finance Fanatic" },
-	{ level: 5, minPoints: 1000, title: "Wealth Wizard" },
-	{ level: 6, minPoints: 1500, title: "Investment Icon" },
-	{ level: 7, minPoints: 2200, title: "Money Master" },
-	{ level: 8, minPoints: 3000, title: "Fiscal Legend" },
-	{ level: 9, minPoints: 4000, title: "Tycoon" },
-	{ level: 10, minPoints: 5000, title: "Grand Tycoon" },
+	{
+		level: 1,
+		minPoints: 0,
+		title: "Novice Saver",
+		color: "text-slate-400",
+		tier: "Bronze",
+	},
+	{
+		level: 2,
+		minPoints: 100,
+		title: "Budget Beginner",
+		color: "text-slate-300",
+		tier: "Bronze",
+	},
+	{
+		level: 3,
+		minPoints: 300,
+		title: "Smart Spender",
+		color: "text-slate-200",
+		tier: "Bronze",
+	},
+	{
+		level: 4,
+		minPoints: 600,
+		title: "Finance Fanatic",
+		color: "text-amber-600",
+		tier: "Silver",
+	},
+	{
+		level: 5,
+		minPoints: 1000,
+		title: "Wealth Wizard",
+		color: "text-amber-500",
+		tier: "Silver",
+	},
+	{
+		level: 6,
+		minPoints: 1500,
+		title: "Investment Icon",
+		color: "text-amber-400",
+		tier: "Silver",
+	},
+	{
+		level: 7,
+		minPoints: 2200,
+		title: "Money Master",
+		color: "text-yellow-500",
+		tier: "Gold",
+	},
+	{
+		level: 8,
+		minPoints: 3000,
+		title: "Fiscal Legend",
+		color: "text-yellow-400",
+		tier: "Gold",
+	},
+	{
+		level: 9,
+		minPoints: 4000,
+		title: "Tycoon",
+		color: "text-cyan-400",
+		tier: "Platinum",
+	},
+	{
+		level: 10,
+		minPoints: 5000,
+		title: "Grand Tycoon",
+		color: "text-purple-500",
+		tier: "Mythic",
+	},
+] as const;
+
+export const UNLOCKS = [
+	{
+		level: 2,
+		type: "theme",
+		name: "Midnight Neon",
+		description: "Unlocks a vibrant dark theme with neon accents.",
+	},
+	{
+		level: 3,
+		type: "icons",
+		name: "Premium Pack",
+		description: "Unlocks 50+ hand-crafted financial category icons.",
+	},
+	{
+		level: 4,
+		type: "feature",
+		name: "Anomaly Detection",
+		description: "AI will now alert you to unusual spending patterns.",
+	},
+	{
+		level: 5,
+		type: "theme",
+		name: "Glassmorphism Pro",
+		description: "Unlocks a premium frosted-glass UI aesthetic.",
+	},
+	{
+		level: 7,
+		type: "feature",
+		name: "Advanced PDF Reports",
+		description: "Export high-end financial summaries with charts.",
+	},
+	{
+		level: 8,
+		type: "theme",
+		name: "Gold Standard",
+		description: "A luxurious interface for the financial elite.",
+	},
+	{
+		level: 10,
+		type: "powerup",
+		name: "AI Strategy Engine",
+		description: "Unlocks deep financial foresight and 'What-If' simulations.",
+	},
 ] as const;
 
 export function calculateLevel(points: number) {
@@ -21,6 +126,10 @@ export function calculateLevel(points: number) {
 			.reverse()
 			.find((l) => points >= l.minPoints) || LEVELS[0];
 	const nextLevel = LEVELS.find((l) => l.level === level.level + 1);
+
+	const unlockedFeatures = UNLOCKS.filter((u) => u.level <= level.level);
+	const nextUnlock = UNLOCKS.find((u) => u.level > level.level);
+
 	return {
 		currentLevel: level,
 		nextLevel,
@@ -28,6 +137,9 @@ export function calculateLevel(points: number) {
 			? ((points - level.minPoints) / (nextLevel.minPoints - level.minPoints)) *
 				100
 			: 100,
+		tier: level.tier,
+		unlockedFeatures,
+		nextUnlock,
 	};
 }
 

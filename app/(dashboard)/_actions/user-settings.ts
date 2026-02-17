@@ -44,12 +44,38 @@ export async function UpdateAlertSettings(data: {
 		redirect("/sign-in");
 	}
 
-	return await prisma.userSettings.update({
+	return await prisma.userSettings.upsert({
 		where: {
 			userId: user.id,
 		},
-		data: {
+		update: {
 			...parsed.data,
+		},
+		create: {
+			userId: user.id,
+			currency: "INR",
+			...parsed.data,
+		},
+	});
+}
+
+export async function UpdateActiveTheme(theme: string) {
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
+
+	return await prisma.userSettings.upsert({
+		where: {
+			userId: user.id,
+		},
+		update: {
+			activeTheme: theme,
+		},
+		create: {
+			userId: user.id,
+			currency: "INR",
+			activeTheme: theme,
 		},
 	});
 }

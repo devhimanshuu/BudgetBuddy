@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { calculateLevel } from "./gamification";
 
 export type PersonaType = "Squirrel" | "Peacock" | "Owl" | "Fox";
 
@@ -6,6 +7,15 @@ export interface PersonaData {
 	persona: PersonaType;
 	personality: string;
 	healthScore: number;
+	tier: string;
+	level: number;
+	points: number;
+	levelProgress: number;
+	nextUnlock?: {
+		level: number;
+		name: string;
+		description: string;
+	};
 	metrics: {
 		savingsRate: number;
 		luxuryRate: number;
@@ -131,7 +141,7 @@ export async function getPersona(userId: string): Promise<PersonaData> {
 	const twoMonthsAgo = new Date();
 	twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-	const [transactions, budgets] = await Promise.all([
+	const [transactions, budgets, userSettings] = await Promise.all([
 		prisma.transaction.findMany({
 			where: {
 				userId: userId,
@@ -143,6 +153,9 @@ export async function getPersona(userId: string): Promise<PersonaData> {
 		}),
 		prisma.budget.findMany({
 			where: { userId: userId },
+		}),
+		prisma.userSettings.findUnique({
+			where: { userId },
 		}),
 	]);
 
@@ -225,16 +238,23 @@ export async function getPersona(userId: string): Promise<PersonaData> {
 		100,
 	);
 
+	const levelInfo = calculateLevel(userSettings?.totalPoints || 0);
+
 	return {
 		persona,
 		personality: personaPersonality,
 		healthScore,
+		tier: levelInfo.tier,
+		level: levelInfo.currentLevel.level,
+		points: userSettings?.totalPoints || 0,
+		levelProgress: levelInfo.progress,
+		nextUnlock: levelInfo.nextUnlock,
 		metrics: {
 			savingsRate,
 			luxuryRate,
 			budgetAdherence,
 		},
-		insights,
+		insights: insights,
 		quote: getDailyQuote(),
 	};
 }

@@ -646,6 +646,87 @@ export const LivingUIRenderer = ({ text, onSendSuggestion, currency }: LivingUIR
         } catch (e) { /* silent */ }
     }
 
+    // Match [SIMULATION_CARD: {...}]
+    const simulationMatches = extractBalancedJson(text, 'SIMULATION_CARD');
+    for (const simMatch of simulationMatches) {
+        try {
+            const data = JSON.parse(simMatch.json.trim());
+            const months = data.months || 12;
+            const points: number[] = [];
+            let currentBalance = 0;
+            for (let i = 0; i <= months; i++) {
+                points.push(currentBalance);
+                currentBalance += data.monthlyImpact;
+                if (i === 0) currentBalance -= data.initialCost;
+            }
+            const width = 300, height = 80, step = width / months;
+            const min = Math.min(...points, 0);
+            const max = Math.max(...points, 1);
+            const range = max - min;
+            const pathData = points.map((p: number, i: number) =>
+                `${i === 0 ? 'M' : 'L'} ${i * step} ${height - ((p - min) / range) * height}`
+            ).join(' ');
+
+            components.push(
+                <div key={`sim-${simMatch.index}`} className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20 shadow-xl animate-in zoom-in-95 duration-500 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 p-2 opacity-10">
+                        <Zap className="w-16 h-16 text-blue-500" />
+                    </div>
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="bg-blue-500 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">AI Simulation</span>
+                            <h4 className="text-sm font-black tracking-tight">{data.description}</h4>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Monthly Impact</p>
+                                <p className={cn("text-xl font-black mt-0.5", data.monthlyImpact >= 0 ? "text-emerald-500" : "text-red-500")}>
+                                    {data.monthlyImpact >= 0 ? "+" : ""}{currency}{Math.abs(data.monthlyImpact).toFixed(0)}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">1-Year Effect</p>
+                                <p className={cn("text-xl font-black mt-0.5", data.totalImpact >= 0 ? "text-emerald-500" : "text-red-500")}>
+                                    {data.totalImpact >= 0 ? "+" : ""}{currency}{Math.abs(data.totalImpact).toFixed(0)}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="relative h-20 w-full mb-2">
+                            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+                                <motion.path
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
+                                    transition={{ duration: 2, ease: "easeInOut" }}
+                                    d={pathData}
+                                    fill="none"
+                                    stroke="#3b82f6"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                />
+                                {points.map((p, i) => (
+                                    (i === 0 || i === months || i === Math.floor(months / 2)) && (
+                                        <g key={i}>
+                                            <circle cx={i * step} cy={height - ((p - min) / range) * height} r="3" fill="#3b82f6" />
+                                            <text x={i * step} y={height - ((p - min) / range) * height - 8} fontSize="8" textAnchor="middle" fill="#3b82f6" fontWeight="bold">
+                                                {i === 0 ? "Now" : `M${i}`}
+                                            </text>
+                                        </g>
+                                    )
+                                ))}
+                            </svg>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] text-muted-foreground font-medium mt-2">
+                            <span>Today</span>
+                            <span>{months} Months Ahead</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        } catch (e) { /* silent */ }
+    }
+
     // Match [SUGGESTIONS: [...]]
     const suggestionRegex = /\[SUGGESTIONS:\s*(\[[\s\S]*?\])\s*\]/g;
     while ((match = suggestionRegex.exec(text)) !== null) {
