@@ -17,6 +17,8 @@ import { DueTransactionsPopup } from "../_components/DueTransactionsPopup";
 import { SubscriptionAlerts } from "../_components/SubscriptionAlerts";
 import StreakDisplay from "../_components/StreakDisplay";
 import { SmartNudge } from "../_components/SmartNudge";
+import PersonaWidget from "../_components/PersonaWidget";
+import { getPersona } from "@/lib/persona";
 
 async function page() {
     const user = await currentUser();
@@ -29,6 +31,8 @@ async function page() {
             userId: user.id,
         },
     });
+
+    const personaData = await getPersona(user.id);
 
     if (!userSettings) {
         redirect("/wizard");
@@ -76,6 +80,11 @@ async function page() {
                 {/* Gamification Streak Display */}
                 <div className="mb-4 3xl:mb-6">
                     <StreakDisplay />
+                </div>
+
+                {/* Persona Insights */}
+                <div className="mb-6 3xl:mb-8">
+                    <PersonaWidget data={personaData} />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 2xl:gap-6 4xl:gap-8">

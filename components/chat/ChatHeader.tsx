@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
+import { PERSONA_THEME, PersonaType } from "@/lib/persona";
 
 interface ChatHeaderProps {
     isMinimized: boolean;
@@ -76,23 +77,20 @@ export const ChatHeader = ({
                 <span className="font-bold text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                     Budget Buddy AI
                 </span>
-                {!isMinimized && userPersona && (
+                {!isMinimized && userPersona && PERSONA_THEME[userPersona as PersonaType] && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className={cn(
-                            "hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border shadow-sm ml-2",
-                            userPersona === "Squirrel" && "bg-amber-500/10 border-amber-500/20 text-amber-600",
-                            userPersona === "Peacock" && "bg-purple-500/10 border-purple-500/20 text-purple-600",
-                            userPersona === "Owl" && "bg-indigo-500/10 border-indigo-500/20 text-indigo-600",
-                            userPersona === "Fox" && "bg-orange-500/10 border-orange-500/20 text-orange-600"
+                            "flex items-center gap-1 px-2 py-0.5 rounded-full border shadow-sm ml-2 transition-colors duration-300 shrink-0",
+                            PERSONA_THEME[userPersona as PersonaType].bg,
+                            PERSONA_THEME[userPersona as PersonaType].border,
+                            PERSONA_THEME[userPersona as PersonaType].color
                         )}
                     >
-                        <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            {userPersona === "Squirrel" && <>🐿️ <span className="opacity-80">Squirrel</span></>}
-                            {userPersona === "Peacock" && <>🦚 <span className="opacity-80">Peacock</span></>}
-                            {userPersona === "Owl" && <>🦉 <span className="opacity-80">Owl</span></>}
-                            {userPersona === "Fox" && <>🦊 <span className="opacity-80">Fox</span></>}
+                        <span className="text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+                            <span className="text-sm leading-none filter drop-shadow-sm">{PERSONA_THEME[userPersona as PersonaType].icon}</span>
+                            <span>{userPersona}</span>
                         </span>
                     </motion.div>
                 )}
