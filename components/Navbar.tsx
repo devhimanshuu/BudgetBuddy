@@ -83,7 +83,14 @@ function NavbarActions() {
 				afterSignOutUrl="/sign-in"
 				appearance={{
 					elements: {
-						userButtonAvatarBox: "w-8 h-8",
+						userButtonAvatarBox: "w-8 h-8 3xl:w-10 3xl:h-10 4xl:w-12 4xl:h-12 border border-border hover:opacity-80 transition-all",
+						userButtonPopoverCard: "bg-background border border-border shadow-xl rounded-xl overflow-hidden",
+						userButtonPopoverFooter: "hidden", // Removes "Powered by Clerk"
+						userButtonPopoverActionButton: "hover:bg-muted/80 transition-colors",
+						userButtonPopoverActionButtonText: "text-foreground font-medium",
+						userButtonPopoverActionButtonIcon: "text-primary",
+						userButtonPopoverUserPreviewMainIdentifier: "text-foreground font-semibold",
+						userButtonPopoverUserPreviewSecondaryIdentifier: "text-muted-foreground text-xs",
 					},
 				}}
 			/>
