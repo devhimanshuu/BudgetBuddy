@@ -476,6 +476,7 @@ ${contextData}`;
 								text: toolSummary.trim() || responseMessage.content || "",
 								persona,
 								healthScore,
+								level: levelInfo.currentLevel.level,
 								filter,
 								component,
 							};
@@ -484,6 +485,7 @@ ${contextData}`;
 							text: responseMessage.content || "",
 							persona,
 							healthScore,
+							level: levelInfo.currentLevel.level,
 						};
 					} catch (e) {
 						continue;
@@ -574,11 +576,12 @@ ${contextData}`;
 						text: toolSummary.trim() || responseMessage.content || "",
 						persona,
 						healthScore,
+						level: levelInfo.currentLevel.level,
 						filter,
 						component,
 					};
 				}
-				return { text: responseMessage.content || "", persona, healthScore };
+				return { text: responseMessage.content || "", persona, healthScore, level: levelInfo.currentLevel.level };
 			} catch (e) {
 				console.error("OpenRouter Error", e);
 			}

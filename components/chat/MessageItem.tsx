@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { PERSONA_THEME, PersonaType } from "@/lib/persona";
 import { Bot, User, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
@@ -13,14 +13,31 @@ interface MessageItemProps {
     onSpeak: (text: string) => void;
     onSendSuggestion: (text: string) => void;
     currency: string;
+    persona?: string | null;
 }
 
-export const MessageItem = ({ role, text, onSpeak, onSendSuggestion, currency }: MessageItemProps) => {
+
+
+export const MessageItem = ({ role, text, onSpeak, onSendSuggestion, currency, persona }: MessageItemProps) => {
+    const personaConfig = persona ? PERSONA_THEME[persona as PersonaType] : null;
+
     return (
         <div className={cn("flex w-full gap-2", role === "user" ? "justify-end" : "justify-start")}>
             {role === "model" && (
-                <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-1">
-                    <Bot className="w-3.5 h-3.5 text-amber-500" />
+                <div className={cn(
+                    "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1 relative",
+                    personaConfig ? personaConfig.bg : "bg-amber-500/10"
+                )}>
+                    {personaConfig ? (
+                        <span className="text-sm z-10">{personaConfig.icon}</span>
+                    ) : (
+                        <Bot className="w-4 h-4 text-amber-500 z-10" />
+                    )}
+                    {/* Voice Pulse Effect */}
+                    <div className={cn(
+                        "absolute inset-0 rounded-full animate-ping opacity-20",
+                        personaConfig ? personaConfig.bg : "bg-amber-500"
+                    )} style={{ animationDuration: '3s' }} />
                 </div>
             )}
             <div

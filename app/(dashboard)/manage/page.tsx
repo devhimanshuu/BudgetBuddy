@@ -47,6 +47,16 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";
 import AlertSettingsCard from "./_components/AlertSettingsCard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const page = () => {
   return (
@@ -194,11 +204,14 @@ function CategoryList({ type }: { type: TransactionType }) {
       toast.success(data.message || "Cleanup completed");
       queryClient.invalidateQueries({ queryKey: ["categories", type] });
       setCleanupMode(false);
+      setShowConfirm(false);
     },
     onError: () => {
       toast.error("Cleanup failed");
     }
   });
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const totalCategories = categoriesQuery.data?.length || 0;
   const totalUsage = categoriesQuery.data?.reduce((acc: number, category: any) =>
@@ -285,21 +298,46 @@ function CategoryList({ type }: { type: TransactionType }) {
               </Button>
 
               {cleanupMode && sortedCategories.length > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="gap-2 animate-pulse"
-                  onClick={() => {
-                    if (confirm(`Are you sure you want to delete all ${sortedCategories.length} unused categories?`)) {
-                      cleanupMutation.mutate();
-                    }
-                  }}
-                  disabled={cleanupMutation.isPending}
-                >
-                  {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Sparkles className="h-4 w-4 shrink-0" />}
-                  <span className="hidden sm:inline">Delete All Unused</span>
-                  <span className="sm:hidden">Delete</span> ({sortedCategories.length})
-                </Button>
+                <>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="gap-2 animate-pulse"
+                    onClick={() => setShowConfirm(true)}
+                    disabled={cleanupMutation.isPending}
+                  >
+                    {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Sparkles className="h-4 w-4 shrink-0" />}
+                    <span className="hidden sm:inline">Delete All Unused</span>
+                    <span className="sm:hidden">Delete</span> ({sortedCategories.length})
+                  </Button>
+
+                  <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+                    <AlertDialogContent className="w-[95vw] max-w-[420px] rounded-2xl border-destructive/20 bg-gradient-to-b from-background to-destructive/5 backdrop-blur-xl">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                          <Eraser className="h-5 w-5" />
+                          Cleanup Categories
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-foreground/70">
+                          This will permanently delete all <strong className="text-foreground">{sortedCategories.length}</strong> categories that have zero transactions. This helps keep your dashboard organized.
+                          <br /><br />
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="flex-row gap-3 pt-2">
+                        <AlertDialogCancel className="flex-1 rounded-xl h-11">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => cleanupMutation.mutate()}
+                          disabled={cleanupMutation.isPending}
+                          className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl h-11 gap-2"
+                        >
+                          {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <TrashIcon className="h-4 w-4" />}
+                          Confirm Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
               )}
             </div>
           </div>
@@ -470,11 +508,14 @@ function TagList() {
       toast.success(data.message || "Cleanup completed");
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       setCleanupMode(false);
+      setShowConfirm(false);
     },
     onError: () => {
       toast.error("Cleanup failed");
     }
   });
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const totalTags = tagsQuery.data?.length || 0;
   const totalUsage = tagsQuery.data?.reduce((acc: number, tag: any) =>
@@ -543,21 +584,46 @@ function TagList() {
               </Button>
 
               {cleanupMode && sortedTags.length > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="gap-2 animate-pulse"
-                  onClick={() => {
-                    if (confirm(`Are you sure you want to delete all ${sortedTags.length} unused tags?`)) {
-                      cleanupMutation.mutate();
-                    }
-                  }}
-                  disabled={cleanupMutation.isPending}
-                >
-                  {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Sparkles className="h-4 w-4 shrink-0" />}
-                  <span className="hidden sm:inline">Delete All Unused</span>
-                  <span className="sm:hidden">Delete</span> ({sortedTags.length})
-                </Button>
+                <>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="gap-2 animate-pulse"
+                    onClick={() => setShowConfirm(true)}
+                    disabled={cleanupMutation.isPending}
+                  >
+                    {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Sparkles className="h-4 w-4 shrink-0" />}
+                    <span className="hidden sm:inline">Delete All Unused</span>
+                    <span className="sm:hidden">Delete</span> ({sortedTags.length})
+                  </Button>
+
+                  <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+                    <AlertDialogContent className="w-[95vw] max-w-[420px] rounded-2xl border-destructive/20 bg-gradient-to-b from-background to-destructive/5 backdrop-blur-xl">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                          <Eraser className="h-5 w-5" />
+                          Cleanup Tags
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-foreground/70">
+                          This will permanently delete all <strong className="text-foreground">{sortedTags.length}</strong> tags that are not attached to any transactions.
+                          <br /><br />
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="flex-row gap-3 pt-2">
+                        <AlertDialogCancel className="flex-1 rounded-xl h-11">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => cleanupMutation.mutate()}
+                          disabled={cleanupMutation.isPending}
+                          className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl h-11 gap-2"
+                        >
+                          {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <TrashIcon className="h-4 w-4" />}
+                          Confirm Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
               )}
             </div>
           </div>

@@ -21,6 +21,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
+import { PersonaType, PERSONA_THEME } from "@/lib/persona";
 
 // Refactored Components
 import { ChatHeader } from "./chat/ChatHeader";
@@ -32,6 +33,7 @@ import { detectVoiceCommand } from "./chat/utils";
 export interface Message {
     role: "user" | "model";
     parts: { text: string }[];
+    persona?: string | null;
 }
 
 interface AIChatWindowProps {
@@ -55,6 +57,8 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     const [healthScore, setHealthScore] = useState<number | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [currency, setCurrency] = useState("$");
+    const [isAutoSpeak, setIsAutoSpeak] = useState(false);
+    const [userLevel, setUserLevel] = useState(1);
 
     // Load history on mount
     useEffect(() => {
@@ -62,6 +66,11 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             try {
                 const settings = await GetUserSettings();
                 setCurrency(settings.currency === "INR" ? "₹" : "$");
+
+                // Fetch level info
+                const { calculateLevel } = await import("@/lib/gamification");
+                const levelInfo = calculateLevel(settings.totalPoints || 0);
+                setUserLevel(levelInfo.currentLevel.level);
             } catch (e) {
                 console.error("Failed to fetch settings", e);
             }
@@ -69,6 +78,9 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         fetchSettings();
         const savedPersona = localStorage.getItem("budget-buddy-user-persona");
         if (savedPersona) setUserPersona(savedPersona);
+
+        const autoSpeak = localStorage.getItem("budget-buddy-auto-speak");
+        if (autoSpeak === "true") setIsAutoSpeak(true);
 
         const saved = localStorage.getItem("budget-buddy-chat-history");
         if (saved) {
@@ -95,7 +107,8 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         if (userPersona) {
             localStorage.setItem("budget-buddy-user-persona", userPersona);
         }
-    }, [messages, userPersona]);
+        localStorage.setItem("budget-buddy-auto-speak", isAutoSpeak.toString());
+    }, [messages, userPersona, isAutoSpeak]);
 
     const clearHistory = () => {
         setMessages([]);
@@ -106,20 +119,49 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         toast.success("History cleared");
     };
 
-    const speakText = (text: string) => {
+    const speakText = (text: string, personaName?: string) => {
         if (typeof window !== "undefined" && window.speechSynthesis) {
             window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
+
+            // Strip markdown and component tags for cleaner speech
+            const cleanText = text.replace(/\[[\s\S]*?\]/g, "").replace(/[*_#]/g, "");
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+
+            // Get voice config from persona
+            const personaType = (personaName || userPersona || "Fox") as PersonaType;
+            const voiceConfig = PERSONA_THEME[personaType]?.voice || { pitch: 1.0, rate: 1.0 };
+
+            utterance.pitch = voiceConfig.pitch;
+            utterance.rate = voiceConfig.rate;
+
+            // Mythic Tier Effects: Deep, authoritative, or echoed
+            if (userPersona?.includes("Mythic") || userLevel >= 10) {
+                utterance.pitch = Math.max(0.5, utterance.pitch - 0.2);
+                utterance.rate = Math.max(0.7, utterance.rate - 0.1);
+            }
+
+            // Find a suitable voice if possible
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                // Prefer high-quality voices or specific genders based on persona names if wanted
+                // For now, just use default or first available
+                utterance.voice = voices.find(v => v.localService && v.lang.includes("en")) || voices[0];
+            }
+
             window.speechSynthesis.speak(utterance);
         } else {
             toast.error("Text-to-speech is not supported in your browser.");
         }
     };
 
-    const typeMessage = useCallback((fullText: string) => {
-        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }] }]);
+    const typeMessage = useCallback((fullText: string, personaName?: string) => {
+        setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }], persona: personaName }]);
+
+        if (isAutoSpeak) {
+            speakText(fullText, personaName);
+        }
+
         let i = 0;
         const speed = 10;
         const typeChar = () => {
@@ -141,7 +183,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             }
         };
         typeChar();
-    }, []);
+    }, [isAutoSpeak]);
 
     const handleSend = useCallback(async (overrideInput?: string) => {
         const messageText = overrideInput || input;
@@ -153,13 +195,14 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         setIsLoading(true);
 
         try {
-            const result = await ChatWithAI(messageText, messages);
+            const result = (await ChatWithAI(messageText, messages)) as any;
             if (result.error) {
-                typeMessage(result.error as string);
+                typeMessage(result.error as string, result.persona);
             } else if (result.text) {
-                typeMessage(result.text as string);
+                typeMessage(result.text as string, result.persona);
                 if (result.persona) setUserPersona(result.persona);
                 if (result.healthScore !== undefined) setHealthScore(result.healthScore);
+                if (result.level !== undefined) setUserLevel(result.level);
 
                 if (result.filter) {
                     const params = new URLSearchParams();
@@ -350,6 +393,14 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                         isExpanded={isExpanded}
                         userPersona={userPersona}
                         history={messages}
+                        isAutoSpeak={isAutoSpeak}
+                        onToggleAutoSpeak={() => {
+                            const newState = !isAutoSpeak;
+                            setIsAutoSpeak(newState);
+                            if (newState) {
+                                toast.success("Voice Mode Enabled", { icon: "🎙️" });
+                            }
+                        }}
                         onToggleMinimize={() => {
                             setIsMinimized(!isMinimized);
                             if (isExpanded) setIsExpanded(false);
@@ -396,6 +447,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                             onSpeak={speakText}
                                             onSendSuggestion={handleSend}
                                             currency={currency}
+                                            persona={msg.persona}
                                         />
                                     ))}
 

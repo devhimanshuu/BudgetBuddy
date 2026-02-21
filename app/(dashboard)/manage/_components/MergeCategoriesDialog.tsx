@@ -183,24 +183,25 @@ export default function MergeCategoriesDialog({ type, categories, trigger }: Pro
             </Dialog>
 
             <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-                <AlertDialogContent>
+                <AlertDialogContent className="w-[95vw] max-w-[420px] rounded-2xl border-orange-500/20 bg-gradient-to-b from-background to-orange-500/5 backdrop-blur-xl">
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-2">
-                            <AlertTriangle className="h-6 w-6 text-orange-500" />
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription>
-                            You are about to merge <span className="font-bold text-foreground">&quot;{sourceCategory}&quot;</span> into <span className="font-bold text-foreground">&quot;{targetCategory}&quot;</span>.
+                        <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
+                            <AlertTriangle className="h-5 w-5" />
+                            Final Confirmation
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-foreground/70">
+                            You are about to merge <strong className="text-foreground italic">&quot;{sourceCategory}&quot;</strong> into <strong className="text-foreground italic">&quot;{targetCategory}&quot;</strong>.
                             <br /><br />
-                            This will move ALL transactions and delete <span className="font-bold text-foreground">&quot;{sourceCategory}&quot;</span>. This action cannot be undone.
+                            This will move ALL transactions and permanently delete the source category. This action is irreversible.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogFooter className="flex-row gap-3 pt-2">
+                        <AlertDialogCancel className="flex-1 rounded-xl h-11">Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-11 gap-2"
                             onClick={() => mergeMutation.mutate()}
                         >
+                            <Merge className="h-4 w-4" />
                             Confirm Merge
                         </AlertDialogAction>
                     </AlertDialogFooter>

@@ -31,31 +31,31 @@ export default function DeleteTagDialog({
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-2xl border-destructive/20 bg-gradient-to-b from-background to-destructive/5 backdrop-blur-xl">
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Tag?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-destructive">Delete Tag?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-foreground/70">
                         Are you sure you want to delete the tag{" "}
-                        <span className="font-semibold text-foreground">&ldquo;{tagName}&rdquo;</span>?
+                        <strong className="text-foreground italic">&ldquo;{tagName}&rdquo;</strong>?
                         {transactionCount > 0 && (
                             <>
                                 <br />
                                 <br />
                                 This tag is currently used in{" "}
-                                <span className="font-semibold text-foreground">
+                                <span className="font-bold text-foreground">
                                     {transactionCount} {transactionCount === 1 ? "transaction" : "transactions"}
                                 </span>
-                                . The tag will be removed from all transactions, but the transactions themselves will not be deleted.
+                                . It will be removed from them, but transactions remain intact.
                             </>
                         )}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+                <AlertDialogFooter className="flex-row gap-3 pt-2">
+                    <AlertDialogCancel disabled={isPending} className="flex-1 rounded-xl h-11">Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         disabled={isPending}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl h-11"
                     >
                         {isPending ? "Deleting..." : "Delete Tag"}
                     </AlertDialogAction>

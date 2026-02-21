@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { PiggyBank, Trash2, Minimize2, Maximize2, X, FileDown, Download } from "lucide-react";
+import { PiggyBank, Trash2, Minimize2, Maximize2, X, FileDown, Download, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { jsPDF } from "jspdf";
@@ -15,6 +15,8 @@ interface ChatHeaderProps {
     isExpanded: boolean;
     userPersona: string | null;
     history: any[];
+    isAutoSpeak: boolean;
+    onToggleAutoSpeak: () => void;
     onToggleMinimize: () => void;
     onToggleExpand: () => void;
     onClearHistory: () => void;
@@ -25,6 +27,8 @@ export const ChatHeader = ({
     isExpanded,
     userPersona,
     history,
+    isAutoSpeak,
+    onToggleAutoSpeak,
     onToggleMinimize,
     onToggleExpand,
     onClearHistory,
@@ -98,6 +102,18 @@ export const ChatHeader = ({
             <div className="flex items-center gap-1">
                 {!isMinimized && (
                     <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onToggleAutoSpeak}
+                            className={cn(
+                                "h-8 w-8 transition-colors",
+                                isAutoSpeak ? "text-primary" : "text-muted-foreground"
+                            )}
+                            title={isAutoSpeak ? "Voice Mode: ON" : "Voice Mode: OFF"}
+                        >
+                            {isAutoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                        </Button>
                         <Button
                             variant="ghost"
                             size="icon"

@@ -36,6 +36,7 @@ export const PERSONA_THEME = {
 		border: "border-emerald-500/20",
 		trait: "The Wealth Builder",
 		gradient: "from-emerald-400 to-emerald-600",
+		voice: { pitch: 1.4, rate: 1.1 },
 	},
 	Peacock: {
 		icon: "🦚",
@@ -44,6 +45,7 @@ export const PERSONA_THEME = {
 		border: "border-rose-500/20",
 		trait: "The Luxury Spender",
 		gradient: "from-rose-400 to-pink-600",
+		voice: { pitch: 0.8, rate: 0.9 },
 	},
 	Owl: {
 		icon: "🦉",
@@ -52,6 +54,7 @@ export const PERSONA_THEME = {
 		border: "border-blue-500/20",
 		trait: "The Strategist",
 		gradient: "from-blue-400 to-indigo-600",
+		voice: { pitch: 0.6, rate: 0.8 },
 	},
 	Fox: {
 		icon: "🦊",
@@ -60,6 +63,7 @@ export const PERSONA_THEME = {
 		border: "border-amber-500/20",
 		trait: "The Balanced",
 		gradient: "from-amber-400 to-orange-600",
+		voice: { pitch: 1.0, rate: 1.2 },
 	},
 };
 
