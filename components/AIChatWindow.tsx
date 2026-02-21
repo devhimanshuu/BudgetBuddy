@@ -379,7 +379,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                         scale: 1,
                         height: isMinimized ? "60px" : (isExpanded ? "85vh" : "auto"),
                         maxHeight: isMinimized ? "60px" : (isExpanded ? "85vh" : "min(600px, 70vh)"),
-                        width: isMinimized ? "200px" : (isExpanded ? "min(95vw, 1000px)" : "min(90vw, 380px)"),
+                        width: isMinimized ? "200px" : (isExpanded ? "min(95vw, 1000px)" : "min(90vw, 440px)"),
                     }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     className={cn(

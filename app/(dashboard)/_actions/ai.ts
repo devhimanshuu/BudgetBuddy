@@ -235,6 +235,7 @@ ${levelInfo.currentLevel.level >= 10 ? "**STRATEGIC POWER-UP UNLOCKED**: You now
 
 Use the provided data to answer user questions.
 Format amounts in ${currency}.
+**CRITICAL**: NEVER show internal IDs (e.g., ID[...]) to the user in your text response. These are for your internal tool use only.
 Be concise and helpful.
 Use Markdown.
 
@@ -581,7 +582,12 @@ ${contextData}`;
 						component,
 					};
 				}
-				return { text: responseMessage.content || "", persona, healthScore, level: levelInfo.currentLevel.level };
+				return {
+					text: responseMessage.content || "",
+					persona,
+					healthScore,
+					level: levelInfo.currentLevel.level,
+				};
 			} catch (e) {
 				console.error("OpenRouter Error", e);
 			}

@@ -121,6 +121,11 @@ export const stripComponentTags = (text: string): string => {
 			}
 		}
 	}
+	// Strip internal IDs like ID[uuid] or (ID: uuid)
+	cleaned = cleaned.replace(/ID\[[a-f0-9-]+\]/gi, "");
+	cleaned = cleaned.replace(/\(ID:\s*[a-f0-9-]+\)/gi, "");
+	cleaned = cleaned.replace(/ID:\s*[a-f0-9-]+/gi, "");
+
 	return cleaned.trim();
 };
 

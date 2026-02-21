@@ -71,10 +71,10 @@ export const ChatHeader = ({
     };
     return (
         <div className={cn(
-            "p-3 border-b border-border flex items-center justify-between bg-primary/5 shrink-0 transition-all duration-300",
+            "p-4 border-b border-border flex items-center justify-between bg-primary/5 shrink-0 transition-all duration-300",
             isMinimized && "h-full border-b-0 justify-center"
         )}>
-            <div className={cn("flex items-center gap-2", isMinimized && "mr-auto")}>
+            <div className={cn("flex items-center gap-3", isMinimized && "mr-auto")}>
                 <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
                     <PiggyBank className="w-4 h-4 text-amber-500" />
                 </div>
@@ -99,9 +99,9 @@ export const ChatHeader = ({
                     </motion.div>
                 )}
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
                 {!isMinimized && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                         <Button
                             variant="ghost"
                             size="icon"
