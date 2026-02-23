@@ -71,67 +71,67 @@ export const ChatHeader = ({
     };
     return (
         <div className={cn(
-            "p-4 border-b border-border flex items-center justify-between bg-primary/5 shrink-0 transition-all duration-300",
+            "p-2.5 sm:p-4 border-b border-border flex items-center justify-between bg-primary/5 shrink-0 transition-all duration-300",
             isMinimized && "h-full border-b-0 justify-center"
         )}>
-            <div className={cn("flex items-center gap-3", isMinimized && "mr-auto")}>
-                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                    <PiggyBank className="w-4 h-4 text-amber-500" />
+            <div className={cn("flex items-center gap-1.5 sm:gap-3", isMinimized && "mr-auto")}>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                    <PiggyBank className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
                 </div>
-                <span className="font-bold text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
-                    Budget Buddy AI
+                <span className="font-bold text-xs sm:text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                    Budget Buddy AI<span className="hidden sm:inline"> AI</span>
                 </span>
                 {!isMinimized && userPersona && PERSONA_THEME[userPersona as PersonaType] && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className={cn(
-                            "flex items-center gap-1 px-2 py-0.5 rounded-full border shadow-sm ml-2 transition-colors duration-300 shrink-0",
+                            "flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full border shadow-sm ml-0.5 sm:ml-2 transition-colors duration-300 shrink-0",
                             PERSONA_THEME[userPersona as PersonaType].bg,
                             PERSONA_THEME[userPersona as PersonaType].border,
                             PERSONA_THEME[userPersona as PersonaType].color
                         )}
                     >
-                        <span className="text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
-                            <span className="text-sm leading-none filter drop-shadow-sm">{PERSONA_THEME[userPersona as PersonaType].icon}</span>
-                            <span>{userPersona}</span>
+                        <span className="text-[9px] font-black uppercase tracking-wider flex items-center gap-0.5 sm:gap-1">
+                            <span className="text-xs sm:text-sm leading-none filter drop-shadow-sm">{PERSONA_THEME[userPersona as PersonaType].icon}</span>
+                            <span className="hidden sm:inline">{userPersona}</span>
                         </span>
                     </motion.div>
                 )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
                 {!isMinimized && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5 sm:gap-1.5">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={onToggleAutoSpeak}
                             className={cn(
-                                "h-8 w-8 transition-colors",
+                                "h-7 w-7 sm:h-8 sm:w-8 transition-colors",
                                 isAutoSpeak ? "text-primary" : "text-muted-foreground"
                             )}
                             title={isAutoSpeak ? "Voice Mode: ON" : "Voice Mode: OFF"}
                         >
-                            {isAutoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                            {isAutoSpeak ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={handleExportPDF}
-                            className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors"
+                            className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-primary transition-colors"
                             title="Export PDF Report"
                             disabled={history.length === 0}
                         >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={onClearHistory}
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+                            className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive transition-colors"
                             title="Clear history"
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
                     </div>
                 )}

@@ -18,6 +18,8 @@ import { useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
+import EditAssetDialog from "./EditAssetDialog";
+import DeleteAssetDialog from "./DeleteAssetDialog";
 
 interface AssetListProps {
     userSettings: UserSettings;
@@ -58,28 +60,6 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
 
-    const deleteMutation = useMutation({
-        mutationFn: async (id: string) => {
-            const response = await fetch(`/api/assets/${id}`, {
-                method: "DELETE",
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Failed to delete");
-            }
-
-            return response.json();
-        },
-        onSuccess: () => {
-            toast.success(`${type === "asset" ? "Asset" : "Liability"} deleted`);
-            queryClient.invalidateQueries({ queryKey: ["assets"] });
-            queryClient.invalidateQueries({ queryKey: ["net-worth"] });
-        },
-        onError: (error: Error) => {
-            toast.error(error.message);
-        },
-    });
 
     // Ensure assets is always an array
     const assets = Array.isArray(assetsQuery.data) ? assetsQuery.data : [];
@@ -195,17 +175,29 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        <Pencil className="mr-2 h-4 w-4" />
-                                                        Edit
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        className="text-destructive"
-                                                        onClick={() => deleteMutation.mutate(asset.id)}
-                                                    >
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
+                                                    <EditAssetDialog
+                                                        asset={asset}
+                                                        trigger={
+                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                Edit
+                                                            </DropdownMenuItem>
+                                                        }
+                                                    />
+                                                    <DeleteAssetDialog
+                                                        assetId={asset.id}
+                                                        assetName={asset.name}
+                                                        assetType={asset.type as "asset" | "liability"}
+                                                        trigger={
+                                                            <DropdownMenuItem
+                                                                className="text-destructive"
+                                                                onSelect={(e) => e.preventDefault()}
+                                                            >
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        }
+                                                    />
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </div>
