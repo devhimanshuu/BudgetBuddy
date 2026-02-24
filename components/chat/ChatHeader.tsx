@@ -79,8 +79,8 @@ export const ChatHeader = ({
                     <PiggyBank className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
                 </div>
                 <span className="font-bold text-xs sm:text-sm whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
-                    Budget Buddy AI<span className="hidden sm:inline"> AI</span>
-                </span>
+                    Budget Buddy<span className="hidden sm:inline"> AI</span>
+                </span> 
                 {!isMinimized && userPersona && PERSONA_THEME[userPersona as PersonaType] && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
