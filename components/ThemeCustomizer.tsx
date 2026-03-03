@@ -11,14 +11,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
-import { useAccent, AccentColor } from "@/components/providers/AccentProvider";
-import { Moon, Sun, Paintbrush, Check, CloudMoon, Eclipse, Cpu, Droplets, Trees } from "lucide-react";
+import { usePersonaTheme } from "@/components/providers/PersonaThemeProvider";
+import { Switch } from "@/components/ui/switch";
+import { Moon, Sun, Paintbrush, Check, CloudMoon, Eclipse, Cpu, Droplets, Trees, Sparkles, Shield, Gem, Brain, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 export function ThemeCustomizer() {
     const { theme, setTheme } = useTheme();
-    const { accent, setAccent } = useAccent();
+    const { isMorphingEnabled, setIsMorphingEnabled, personaData } = usePersonaTheme();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -34,16 +35,6 @@ export function ThemeCustomizer() {
         { name: "Forest", value: "forest", icon: Trees },
     ];
 
-    const accents: { name: string; value: AccentColor; color: string }[] = [
-        { name: "Default", value: "default", color: "bg-primary" },
-        { name: "Yellow", value: "yellow", color: "bg-yellow-500" },
-        { name: "Green", value: "green", color: "bg-green-600" },
-        { name: "Emerald", value: "emerald", color: "bg-emerald-600" },
-        { name: "Blue", value: "blue", color: "bg-blue-600" },
-        { name: "Violet", value: "violet", color: "bg-violet-600" },
-        { name: "Orange", value: "orange", color: "bg-orange-500" },
-        { name: "Rose", value: "rose", color: "bg-rose-500" },
-    ];
 
     if (!mounted) {
         return (
@@ -66,7 +57,7 @@ export function ThemeCustomizer() {
                 <DialogHeader>
                     <DialogTitle>Customize Appearance</DialogTitle>
                     <DialogDescription>
-                        Personalize your workspace with custom themes and accent colors.
+                        Personalize your workspace with custom themes and persona-based morphing.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -89,25 +80,50 @@ export function ThemeCustomizer() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Accent Color</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {accents.map((a) => (
-                                <Button
-                                    key={a.value}
-                                    variant="outline"
-                                    className={cn(
-                                        "h-8 w-full justify-start px-2",
-                                        accent === a.value && "border-2 border-primary"
-                                    )}
-                                    onClick={() => setAccent(a.value)}
-                                >
-                                    <div className={cn("mr-2 h-4 w-4 rounded-full border", a.color)} />
-                                    <span className="text-xs">{a.name}</span>
-                                    {accent === a.value && <Check className="ml-auto h-3 w-3" />}
-                                </Button>
-                            ))}
+
+                    <div className="pt-4 border-t">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="space-y-0.5">
+                                <Label className="text-sm font-bold flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-primary" />
+                                    Persona UI Morphing
+                                </Label>
+                                <p className="text-[12px] text-muted-foreground">
+                                    Adapts the entire app theme to your {personaData?.persona || "financial"} persona.
+                                </p>
+                            </div>
+                            <Switch
+                                checked={isMorphingEnabled}
+                                onCheckedChange={setIsMorphingEnabled}
+                            />
                         </div>
+
+                        {isMorphingEnabled && personaData && (
+                            <div className={cn(
+                                "p-3 rounded-xl border flex items-center gap-3 bg-muted/30",
+                                personaData.persona === "Squirrel" && "border-emerald-500/30 bg-emerald-500/5",
+                                personaData.persona === "Peacock" && "border-purple-500/30 bg-purple-500/5",
+                                personaData.persona === "Owl" && "border-blue-500/30 bg-blue-500/5",
+                                personaData.persona === "Fox" && "border-orange-500/30 bg-orange-500/5",
+                            )}>
+                                <div className={cn(
+                                    "w-10 h-10 rounded-full flex items-center justify-center",
+                                    personaData.persona === "Squirrel" && "bg-emerald-500/20 text-emerald-500",
+                                    personaData.persona === "Peacock" && "bg-purple-500/20 text-purple-500",
+                                    personaData.persona === "Owl" && "bg-blue-500/20 text-blue-500",
+                                    personaData.persona === "Fox" && "bg-orange-500/20 text-orange-500",
+                                )}>
+                                    {personaData.persona === "Squirrel" && <Shield className="w-5 h-5" />}
+                                    {personaData.persona === "Peacock" && <Gem className="w-5 h-5" />}
+                                    {personaData.persona === "Owl" && <Brain className="w-5 h-5" />}
+                                    {personaData.persona === "Fox" && <Zap className="w-5 h-5" />}
+                                </div>
+                                <div className="space-y-0.5">
+                                    <p className="text-sm font-black">Active: {personaData.persona}</p>
+                                    <p className="text-[10px] text-muted-foreground line-clamp-1">{personaData.personality}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </DialogContent>

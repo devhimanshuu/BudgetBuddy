@@ -157,40 +157,80 @@
 		--ring: 142 70% 50%;
 	}
 
-	/* Accent Colors */
-	.accent-yellow {
-		--primary: 45 93% 47%;
-		--ring: 45 93% 47%;
-	}
+	/* PERSONA MORPHING THEMES */
 
-	.accent-green {
-		--primary: 142 71% 45%;
-		--ring: 142 71% 45%;
-	}
-
-	.accent-emerald {
+	/* Squirrel - The Fortress */
+	.persona-squirrel {
+		--background: 140 30% 8%;
+		--foreground: 140 20% 98%;
+		--card: 140 30% 10%;
+		--card-foreground: 140 20% 98%;
+		--popover: 140 30% 8%;
+		--popover-foreground: 140 20% 98%;
 		--primary: 158 64% 52%;
+		--primary-foreground: 140 30% 8%;
+		--secondary: 140 20% 20%;
+		--secondary-foreground: 140 20% 98%;
+		--muted: 140 20% 15%;
+		--muted-foreground: 140 10% 70%;
+		--accent: 140 20% 20%;
+		--accent-foreground: 140 20% 98%;
+		--border: 140 30% 15%;
+		--input: 140 30% 15%;
 		--ring: 158 64% 52%;
+		--radius: 0.2rem; /* Sturdy, sharp corners */
 	}
 
-	.accent-blue {
-		--primary: 221 83% 53%;
-		--ring: 221 83% 53%;
+	/* Peacock - The Gala */
+	.persona-peacock {
+		--background: 280 50% 5%;
+		--foreground: 45 40% 98%;
+		--card: 280 50% 7%;
+		--card-foreground: 45 40% 98%;
+		--popover: 280 50% 5%;
+		--popover-foreground: 45 40% 98%;
+		--primary: 47 95% 50%; /* Gold */
+		--primary-foreground: 280 50% 5%;
+		--secondary: 260 50% 15%;
+		--secondary-foreground: 45 40% 98%;
+		--muted: 260 50% 15%;
+		--muted-foreground: 280 20% 70%;
+		--accent: 320 100% 60%; /* Bright Pink/Purple accent */
+		--accent-foreground: 0 0% 100%;
+		--border: 47 95% 30%;
+		--input: 47 95% 30%;
+		--ring: 47 95% 50%;
+		--radius: 1.5rem; /* Flourished, very rounded */
 	}
 
-	.accent-violet {
-		--primary: 262 83% 58%;
-		--ring: 262 83% 58%;
+	/* Owl - The Laboratory */
+	.persona-owl {
+		--background: 0 0% 0%; /* Pure tech black */
+		--foreground: 210 100% 90%;
+		--card: 0 0% 5%;
+		--card-foreground: 210 100% 90%;
+		--popover: 0 0% 0%;
+		--popover-foreground: 210 100% 90%;
+		--primary: 210 100% 50%; /* Scientific Blue */
+		--primary-foreground: 0 0% 0%;
+		--secondary: 210 20% 15%;
+		--secondary-foreground: 210 100% 90%;
+		--muted: 210 20% 15%;
+		--muted-foreground: 210 10% 60%;
+		--accent: 180 100% 50%; /* Teal/Cyan secondary */
+		--accent-foreground: 0 0% 0%;
+		--border: 210 50% 20%;
+		--input: 210 50% 20%;
+		--ring: 210 100% 50%;
+		--radius: 0rem; /* Technical, zero radius */
 	}
 
-	.accent-orange {
-		--primary: 25 95% 53%;
+	/* Fox - Balanced */
+	.persona-fox {
+		--background: 25 15% 5%;
+		--foreground: 25 20% 98%;
+		--primary: 25 95% 53%; /* Orange */
 		--ring: 25 95% 53%;
-	}
-
-	.accent-rose {
-		--primary: 343 89% 56%;
-		--ring: 343 89% 56%;
 	}
 }
 
@@ -324,5 +364,21 @@
 	}
 	:root.light .dashboard-preview-dark {
 		display: none;
+	}
+
+	/* PERSONA TYPOGRAPHY & OVERRIDES */
+	.persona-owl * {
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+			"Courier New", monospace !important;
+		letter-spacing: -0.02em;
+	}
+
+	.persona-peacock * {
+		transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+	}
+
+	.persona-squirrel * {
+		font-weight: 500 !important;
 	}
 }
