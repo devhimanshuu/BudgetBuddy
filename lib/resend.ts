@@ -3,28 +3,28 @@ import { Resend } from "resend";
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendInviteEmailParams {
-	to: string;
-	inviterName: string;
-	workspaceName: string;
-	role: string;
-	inviteLink: string;
+  to: string;
+  inviterName: string;
+  workspaceName: string;
+  role: string;
+  inviteLink: string;
 }
 
 export async function sendInviteEmail({
-	to,
-	inviterName,
-	workspaceName,
-	role,
-	inviteLink,
+  to,
+  inviterName,
+  workspaceName,
+  role,
+  inviteLink,
 }: SendInviteEmailParams) {
-	const roleLabel =
-		role === "ADMIN" ? "Admin" : role === "EDITOR" ? "Editor" : "Viewer";
+  const roleLabel =
+    role === "ADMIN" ? "Admin" : role === "EDITOR" ? "Editor" : "Viewer";
 
-	const { data, error } = await resend.emails.send({
-		from: "BudgetBuddy <onboarding@resend.dev>",
-		to: [to],
-		subject: `${inviterName} invited you to "${workspaceName}" on BudgetBuddy`,
-		html: `
+  const { data, error } = await resend.emails.send({
+    from: "Budget Buddy <onboarding@resend.dev>",
+    to: [to],
+    subject: `${inviterName} invited you to "${workspaceName}" on Budget Buddy`,
+    html: `
       <!DOCTYPE html>
       <html>
         <head>
@@ -39,8 +39,11 @@ export async function sendInviteEmail({
                   <!-- Header -->
                   <tr>
                     <td style="padding:32px 32px 0;text-align:center;">
-                      <div style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:12px 16px;border-radius:12px;margin-bottom:24px;">
-                        <span style="font-size:24px;font-weight:800;color:white;letter-spacing:-0.5px;">💰 BudgetBuddy</span>
+                      <div style="display:inline-block;margin-bottom:24px;">
+                        <span style="font-size:28px;font-weight:900;letter-spacing:-0.5px;">
+                            <span style="color:#fbbf24;font-size:26px;vertical-align:middle;margin-right:6px;">💰</span>
+                            <span style="background:-webkit-linear-gradient(0deg, #fbbf24, #f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;color:#f97316;vertical-align:middle;">Budget Buddy</span>
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -59,13 +62,13 @@ export async function sendInviteEmail({
                       <div style="background-color:#262626;border:1px solid #333;border-radius:12px;padding:20px;margin-bottom:24px;">
                         <p style="margin:0 0 4px;font-size:12px;color:#737373;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Workspace</p>
                         <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#f5f5f5;">${workspaceName}</p>
-                        <div style="display:inline-block;background-color:#1a1a2e;border:1px solid #6366f140;border-radius:6px;padding:4px 10px;">
-                          <span style="font-size:12px;font-weight:600;color:#818cf8;">${roleLabel} Access</span>
+                        <div style="display:inline-block;background-color:#451a03;border:1px solid rgba(249, 115, 22, 0.3);border-radius:6px;padding:4px 10px;">
+                          <span style="font-size:12px;font-weight:600;color:#fbbf24;">${roleLabel} Access</span>
                         </div>
                       </div>
                       
                       <!-- CTA Button -->
-                      <a href="${inviteLink}" style="display:block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;text-decoration:none;text-align:center;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:0.3px;">
+                      <a href="${inviteLink}" style="display:block;background:linear-gradient(135deg, #fbbf24, #ea580c);color:#000000;text-decoration:none;text-align:center;padding:14px 24px;border-radius:10px;font-size:16px;font-weight:700;letter-spacing:0.3px;margin-bottom:8px;">
                         Accept Invitation →
                       </a>
                       
@@ -79,8 +82,8 @@ export async function sendInviteEmail({
                   <!-- Footer -->
                   <tr>
                     <td style="padding:20px 32px;border-top:1px solid #2a2a2a;">
-                      <p style="margin:0;font-size:11px;color:#404040;text-align:center;">
-                        Sent by BudgetBuddy • Budget smarter, together.
+                      <p style="margin:0;font-size:11px;color:#525252;text-align:center;">
+                        Sent by <b>Budget Buddy</b> • Budget smarter, together.
                       </p>
                     </td>
                   </tr>
@@ -91,12 +94,12 @@ export async function sendInviteEmail({
         </body>
       </html>
     `,
-	});
+  });
 
-	if (error) {
-		console.error("Failed to send invite email:", error);
-		throw new Error("Failed to send invite email");
-	}
+  if (error) {
+    console.error("Failed to send invite email:", error);
+    throw new Error("Failed to send invite email");
+  }
 
-	return data;
+  return data;
 }

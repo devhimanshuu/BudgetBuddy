@@ -166,7 +166,15 @@ export async function InviteMember(
 	});
 
 	// Send email via Resend
-	const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/join?token=${token}`;
+	const getAppUrl = () => {
+		if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+		if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
+			return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+		if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+		return "http://localhost:3000";
+	};
+
+	const inviteLink = `${getAppUrl()}/join?token=${token}`;
 
 	// Get workspace details for the email
 	const workspace = await prisma.workspace.findUnique({
