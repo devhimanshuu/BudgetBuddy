@@ -1,5 +1,7 @@
 "use client";
 
+import { PermissionGuard } from "@/components/PermissionGuard";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
@@ -141,43 +143,45 @@ export default function BudgetProgressCards({
                         }
                       />
 
-                      <EditBudgetDialog
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        }
-                        budget={{
-                          id: budget.id,
-                          category: budget.category,
-                          categoryIcon: budget.categoryIcon,
-                          budgetAmount: budget.budgetAmount,
-                        }}
-                        month={month}
-                        year={year}
-                      />
-                      <DeleteBudgetDialog
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        }
-                        budget={{
-                          id: budget.id,
-                          category: budget.category,
-                          categoryIcon: budget.categoryIcon,
-                        }}
-                        month={month}
-                        year={year}
-                      />
+                      <PermissionGuard>
+                        <EditBudgetDialog
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          }
+                          budget={{
+                            id: budget.id,
+                            category: budget.category,
+                            categoryIcon: budget.categoryIcon,
+                            budgetAmount: budget.budgetAmount,
+                          }}
+                          month={month}
+                          year={year}
+                        />
+                        <DeleteBudgetDialog
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          }
+                          budget={{
+                            id: budget.id,
+                            category: budget.category,
+                            categoryIcon: budget.categoryIcon,
+                          }}
+                          month={month}
+                          year={year}
+                        />
+                      </PermissionGuard>
                     </div>
                   </CardTitle>
                 </CardHeader>

@@ -1,5 +1,7 @@
 "use client";
 
+import { PermissionGuard } from "@/components/PermissionGuard";
+
 import { Button } from "@/components/ui/button";
 import { UserSettings } from "@prisma/client";
 import { Copy, PlusCircle } from "lucide-react";
@@ -122,37 +124,39 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
               </Select>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => copyPreviousMonthMutation.mutate()}
-                disabled={copyPreviousMonthMutation.isPending}
-                className="flex-1 sm:flex-none"
-              >
-                <Copy className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy Previous"}
-                </span>
-                <span className="sm:hidden">
-                  {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy"}
-                </span>
-              </Button>
+            <PermissionGuard>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => copyPreviousMonthMutation.mutate()}
+                  disabled={copyPreviousMonthMutation.isPending}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy Previous"}
+                  </span>
+                  <span className="sm:hidden">
+                    {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy"}
+                  </span>
+                </Button>
 
-              <CreateBudgetDialog
-                trigger={
-                  <Button className="flex-1 sm:flex-none">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Create Budget</span>
-                    <span className="sm:hidden">Create</span>
-                  </Button>
-                }
-                month={selectedMonth}
-                year={selectedYear}
-              />
-            </div>
+                <CreateBudgetDialog
+                  trigger={
+                    <Button className="flex-1 sm:flex-none">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Create Budget</span>
+                      <span className="sm:hidden">Create</span>
+                    </Button>
+                  }
+                  month={selectedMonth}
+                  year={selectedYear}
+                />
+              </div>
+            </PermissionGuard>
           </div>
         </div>
-      </div>
+      </div >
 
       <div className="container py-4 md:py-6">
         <BudgetProgressCards

@@ -1,5 +1,7 @@
 "use client";
 
+import { PermissionGuard } from "@/components/PermissionGuard";
+
 import GlassCard from "@/components/GlassCard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
@@ -168,38 +170,40 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                                                 )}
                                             </div>
 
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <EditAssetDialog
-                                                        asset={asset}
-                                                        trigger={
-                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                                <Pencil className="mr-2 h-4 w-4" />
-                                                                Edit
-                                                            </DropdownMenuItem>
-                                                        }
-                                                    />
-                                                    <DeleteAssetDialog
-                                                        assetId={asset.id}
-                                                        assetName={asset.name}
-                                                        assetType={asset.type as "asset" | "liability"}
-                                                        trigger={
-                                                            <DropdownMenuItem
-                                                                className="text-destructive"
-                                                                onSelect={(e) => e.preventDefault()}
-                                                            >
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                Delete
-                                                            </DropdownMenuItem>
-                                                        }
-                                                    />
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                            <PermissionGuard>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <EditAssetDialog
+                                                            asset={asset}
+                                                            trigger={
+                                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                                    Edit
+                                                                </DropdownMenuItem>
+                                                            }
+                                                        />
+                                                        <DeleteAssetDialog
+                                                            assetId={asset.id}
+                                                            assetName={asset.name}
+                                                            assetType={asset.type as "asset" | "liability"}
+                                                            trigger={
+                                                                <DropdownMenuItem
+                                                                    className="text-destructive"
+                                                                    onSelect={(e) => e.preventDefault()}
+                                                                >
+                                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                                    Delete
+                                                                </DropdownMenuItem>
+                                                            }
+                                                        />
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </PermissionGuard>
                                         </div>
                                     </div>
                                 );

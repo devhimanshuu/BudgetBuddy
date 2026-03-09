@@ -1,5 +1,7 @@
 "use client";
 
+import { PermissionGuard } from "@/components/PermissionGuard";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -129,14 +131,16 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                   </CardDescription>
                 </div>
               </div>
-              <CreateGoalDialog
-                trigger={
-                  <Button className="gap-2 3xl:text-base">
-                    <Plus className="h-4 w-4 3xl:h-5 3xl:w-5" />
-                    New Goal
-                  </Button>
-                }
-              />
+              <PermissionGuard>
+                <CreateGoalDialog
+                  trigger={
+                    <Button className="gap-2 3xl:text-base">
+                      <Plus className="h-4 w-4 3xl:h-5 3xl:w-5" />
+                      New Goal
+                    </Button>
+                  }
+                />
+              </PermissionGuard>
             </div>
           </CardHeader>
           <CardContent className="3xl:p-8 3xl:pt-0">
@@ -368,25 +372,27 @@ function GoalCard({
         )}
 
         {/* Actions */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 3xl:text-base"
-            onClick={onUpdate}
-          >
-            <TrendingUp className="mr-2 h-4 w-4 3xl:mr-3 3xl:h-5 3xl:w-5" />
-            Update
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onDelete}
-            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4 3xl:h-5 3xl:w-5" />
-          </Button>
-        </div>
+        <PermissionGuard>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 3xl:text-base"
+              onClick={onUpdate}
+            >
+              <TrendingUp className="mr-2 h-4 w-4 3xl:mr-3 3xl:h-5 3xl:w-5" />
+              Update
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onDelete}
+              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4 3xl:h-5 3xl:w-5" />
+            </Button>
+          </div>
+        </PermissionGuard>
       </CardContent>
     </Card>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { PermissionGuard } from "@/components/PermissionGuard";
+
 import { getTransactionHistoryResponseType } from "@/app/api/transaction-history/route";
 import { DateToUTCDate, GetFormatterForCurrency, GetPrivacyMask } from "@/lib/helper";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -527,24 +529,26 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setShowBulkTagDialog(true)}
-            >
-              <Tag className="mr-2 h-4 w-4" />
-              Update Tags
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={handleBulkDelete}
-            >
-              <TrashIcon className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
+          <PermissionGuard>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowBulkTagDialog(true)}
+              >
+                <Tag className="mr-2 h-4 w-4" />
+                Update Tags
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleBulkDelete}
+              >
+                <TrashIcon className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
+          </PermissionGuard>
         </div>
       )}
       <SkeletonWrapper isLoading={history.isFetching}>
@@ -633,7 +637,7 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   return (
-    <>
+    <PermissionGuard>
       <EditTransactionDialog
         open={showEditDialog}
         setOpen={setShowEditDialog}
@@ -674,7 +678,7 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </>
+    </PermissionGuard>
   );
 }
 

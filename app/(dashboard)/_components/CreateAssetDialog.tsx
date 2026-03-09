@@ -1,5 +1,7 @@
 "use client";
 
+import { PermissionGuard } from "@/components/PermissionGuard";
+
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -161,8 +163,9 @@ export default function CreateAssetDialog({ trigger, open: externalOpen, onOpenC
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            {trigger !== null && (
+        <PermissionGuard>
+            <Dialog open={open} onOpenChange={setOpen}>
+                {trigger !== null && (
                 <DialogTrigger asChild>
                     {trigger ? (
                         trigger
@@ -494,5 +497,6 @@ export default function CreateAssetDialog({ trigger, open: externalOpen, onOpenC
                 </Form>
             </DialogContent>
         </Dialog>
+        </PermissionGuard>
     );
 }
