@@ -31,8 +31,7 @@ export async function GET(request: Request) {
 
 	const budgets = await prisma.budget.findMany({
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId: user.id }),
 			month: parseInt(queryParams.data.month),
 			year: parseInt(queryParams.data.year),
 		},
@@ -234,3 +233,4 @@ export async function DELETE(request: Request) {
 
 	return Response.json({ success: true });
 }
+

@@ -53,8 +53,7 @@ async function getCategoriesStats(
 	const stats = await prisma.transaction.groupBy({
 		by: ["type", "category", "categoryIcon"],
 		where: {
-			userId,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId }),
 			date: {
 				gte: from,
 				lte: to,

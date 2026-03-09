@@ -74,7 +74,7 @@ function JoinContent() {
 
                     {status === "unauthenticated" && (
                         <div className="flex w-full gap-3 mt-4">
-                             <Button
+                            <Button
                                 variant="outline"
                                 className="flex-1"
                                 onClick={() => router.push(`/sign-in?redirect_url=/join?token=${token}`)}
@@ -96,7 +96,7 @@ function JoinContent() {
                             <p className="text-center text-muted-foreground">{message}</p>
                             <Button
                                 className="w-full mt-2"
-                                onClick={() => router.push("/dashboard")}
+                                onClick={() => window.location.href = "/dashboard"}
                             >
                                 Go to Dashboard
                             </Button>

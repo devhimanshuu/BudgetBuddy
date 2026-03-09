@@ -3,12 +3,16 @@ import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schema/overview";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
 	const from = searchParams.get("from");
@@ -27,6 +31,7 @@ export async function GET(request: Request) {
 
 	const transaction = await getTransactionHistory(
 		user.id,
+		workspaceId || undefined,
 		queryParams.data.from,
 		queryParams.data.to,
 	);
@@ -37,7 +42,12 @@ export type getTransactionHistoryResponseType = Awaited<
 	ReturnType<typeof getTransactionHistory>
 >;
 
-async function getTransactionHistory(userId: string, from: Date, to: Date) {
+async function getTransactionHistory(
+	userId: string,
+	workspaceId: string | undefined,
+	from: Date,
+	to: Date,
+) {
 	const [userSettings, transactions] = await Promise.all([
 		prisma.userSettings.findUnique({
 			where: {
@@ -46,7 +56,7 @@ async function getTransactionHistory(userId: string, from: Date, to: Date) {
 		}),
 		prisma.transaction.findMany({
 			where: {
-				userId,
+				...(workspaceId ? { workspaceId } : { userId }),
 				date: {
 					gte: from,
 					lte: to,

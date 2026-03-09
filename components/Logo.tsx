@@ -4,9 +4,9 @@ import React from "react";
 
 const Logo = () => {
   return (
-    <Link href="/" className="flex items-center gap-2">
-      <PiggyBank className="stroke h-9 w-9 stroke-amber-500 stroke-[1.5] lg:h-11 lg:w-11 4xl:h-14 4xl:w-14" />
-      <p className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-2xl font-bold leading-tight tracking-tighter text-transparent lg:text-3xl 4xl:text-4xl">
+    <Link href="/" className="flex items-center gap-2 shrink-0">
+      <PiggyBank className="stroke shrink-0 h-9 w-9 stroke-amber-500 stroke-[1.5] lg:h-11 lg:w-11 4xl:h-14 4xl:w-14" />
+      <p className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-2xl font-bold leading-tight tracking-tighter text-transparent lg:text-3xl 4xl:text-4xl whitespace-nowrap">
         Budget Buddy
       </p>
     </Link>

@@ -81,10 +81,13 @@ function NavbarActions() {
 	if (!isMounted) return null;
 
 	return (
-		<div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4">
+		<div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4 shrink-0">
 			{role === "VIEWER" && (
-				<Badge variant="secondary" className="hidden lg:flex gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider">
-					<Eye className="w-2.5 h-2.5" />
+				<Badge
+					variant="outline"
+					className="hidden lg:flex gap-1.5 bg-gradient-to-r from-amber-400/10 to-orange-500/10 text-orange-500 border-orange-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
+				>
+					<Eye className="w-3 h-3 text-amber-500" />
 					Viewer
 				</Badge>
 			)}

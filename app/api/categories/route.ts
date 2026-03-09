@@ -28,8 +28,7 @@ export async function GET(request: Request) {
 	const type = queryParams.data;
 	const categories = await prisma.category.findMany({
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId: user.id }),
 			...(type && { type }),
 		},
 		orderBy: {
@@ -41,8 +40,7 @@ export async function GET(request: Request) {
 	const transactionCounts = await prisma.transaction.groupBy({
 		by: ["category", "type"],
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId: user.id }),
 			...(type && { type }),
 		},
 		_count: {
@@ -67,3 +65,4 @@ export async function GET(request: Request) {
 
 	return Response.json(categoriesWithCounts);
 }
+

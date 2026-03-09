@@ -41,8 +41,7 @@ export async function GET(request: Request) {
 	const getPeriodStats = async (start: Date, end: Date) => {
 		const stats = await prisma.monthlyHistory.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 			},
 		});
 
@@ -95,3 +94,4 @@ export async function GET(request: Request) {
 		},
 	});
 }
+

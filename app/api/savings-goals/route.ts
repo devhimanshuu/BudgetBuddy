@@ -19,8 +19,7 @@ export async function GET(request: Request) {
 
 	const goals = await prisma.savingsGoal.findMany({
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId: user.id }),
 			...(includeCompleted ? {} : { isCompleted: false }),
 		},
 		orderBy: [{ isCompleted: "asc" }, { targetDate: "asc" }],
@@ -157,3 +156,4 @@ export async function DELETE(request: Request) {
 
 	return Response.json({ success: true });
 }
+

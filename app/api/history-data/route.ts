@@ -92,8 +92,7 @@ async function getYearHistoryData(
 	const result = await prisma.yearHistory.groupBy({
 		by: ["month"],
 		where: {
-			userId,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId }),
 			year,
 		},
 		_sum: {
@@ -141,8 +140,7 @@ async function getMonthHistoryData(
 	const result = await prisma.monthlyHistory.groupBy({
 		by: ["day"],
 		where: {
-			userId,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId }),
 			year,
 			month,
 		},

@@ -15,8 +15,7 @@ export async function GET(request: Request) {
 
 	const tags = await prisma.tag.findMany({
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId: user.id }),
 		},
 		orderBy: {
 			name: "asc",
@@ -125,3 +124,4 @@ export async function DELETE(request: Request) {
 
 	return Response.json({ success: true });
 }
+

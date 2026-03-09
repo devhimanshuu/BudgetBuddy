@@ -36,8 +36,7 @@ export async function GET(request: Request) {
 		// Get all assets and liabilities
 		const assets = await prisma.asset.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				type: "asset",
 			},
 			include: {
@@ -56,8 +55,7 @@ export async function GET(request: Request) {
 
 		const liabilities = await prisma.asset.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				type: "liability",
 			},
 			include: {
@@ -77,8 +75,7 @@ export async function GET(request: Request) {
 		// Get transaction history for cash flow
 		const transactions = await prisma.transaction.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				date: {
 					gte: startDate,
 				},
@@ -196,3 +193,4 @@ export async function GET(request: Request) {
 		);
 	}
 }
+

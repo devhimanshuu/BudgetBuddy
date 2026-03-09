@@ -14,8 +14,7 @@ export async function GET(request: Request) {
 
 	const transactions = await prisma.transaction.findMany({
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId: user.id }),
 		},
 		orderBy: { date: "desc" },
 		take: 5,
@@ -23,3 +22,4 @@ export async function GET(request: Request) {
 
 	return NextResponse.json(transactions);
 }
+

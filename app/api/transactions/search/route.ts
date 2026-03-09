@@ -26,8 +26,7 @@ export async function GET(request: Request) {
 
 	// Build where clause
 	const where: any = {
-		userId: user.id,
-		...(workspaceId && { workspaceId }),
+		...(workspaceId ? { workspaceId } : { userId: user.id }),
 	};
 
 	// Full-text search across description and notes
@@ -167,3 +166,4 @@ export async function GET(request: Request) {
 		count: formattedTransactions.length,
 	});
 }
+

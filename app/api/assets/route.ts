@@ -20,8 +20,7 @@ export async function GET(request: Request) {
 	try {
 		const assets = await prisma.asset.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				...(type && { type }),
 			},
 			orderBy: {
@@ -110,3 +109,4 @@ export async function POST(request: Request) {
 		);
 	}
 }
+

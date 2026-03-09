@@ -24,16 +24,14 @@ export async function GET(request: Request) {
 	const [currentStats, previousStats] = await Promise.all([
 		prisma.monthlyHistory.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				month: currentMonth,
 				year: currentYear,
 			},
 		}),
 		prisma.monthlyHistory.findMany({
 			where: {
-				userId: user.id,
-				...(workspaceId && { workspaceId }),
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				month: previousMonth,
 				year: previousYear,
 			},
@@ -55,3 +53,4 @@ export async function GET(request: Request) {
 		previousBalance,
 	});
 }
+

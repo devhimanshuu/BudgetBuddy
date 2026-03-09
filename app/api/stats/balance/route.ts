@@ -47,8 +47,7 @@ async function getBalanceStats(
 	const totals = await prisma.transaction.groupBy({
 		by: ["type"],
 		where: {
-			userId,
-			...(workspaceId && { workspaceId }),
+			...(workspaceId ? { workspaceId } : { userId }),
 			date: {
 				gte: from,
 				lte: to,
