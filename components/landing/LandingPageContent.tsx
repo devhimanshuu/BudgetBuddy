@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown, Radar } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown, Radar, Users } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -626,15 +626,15 @@ export default function LandingPageContent() {
                         />
                         <FeatureCard
                             delay={0.8}
-                            icon={<Bell className="h-full w-full" />}
-                            title="Bill Reminders"
-                            description="Get timely notifications for upcoming bills and subscription renewals so you never pay late fees again."
-                        />
-                        <FeatureCard
-                            delay={0.9}
                             icon={<FileText className="h-full w-full" />}
                             title="Export & Reports"
                             description="Need to share data with your accountant? Export your financial reports in CSV, PDF, or Excel formats instantly."
+                        />
+                        <FeatureCard
+                            delay={0.9}
+                            icon={<Users className="h-full w-full" />}
+                            title="Collaborative Workspaces"
+                            description="Manage finances together in isolated 'Family Mode' workspaces with real-time activity feeds and role-based permissions."
                         />
                     </div>
                 </section>

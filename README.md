@@ -6,6 +6,13 @@ BudgetBuddy is a modern personal finance tracker designed to help you master you
 
 ## 🌟 What's New
 
+### 👨‍👩‍👧‍👦 Collaborative Workspaces (Family Mode)
+Manage finances together in isolated, shared environments with role-based access control.
+- **Multiple Workspaces**: Create separate workspaces for Family, Business, or Personal use.
+- **Role-Based Access Control**: Invite members via email with specific roles (Admin, Editor, Viewer).
+- **Real-Time Activity Feed**: Track exactly who added, edited, or deleted transactions within the workspace.
+- **Workspace-Scoped Data**: Transactions, budgets, categories, and analytics are securely isolated per workspace.
+
 ### 🤖 AI Financial Command Center
 
 BudgetBuddy features a world-class **AI Financial Analyst** that evolves with your spending habits. It's not just a chatbot; it's a proactive intelligence engine.
