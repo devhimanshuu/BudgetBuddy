@@ -70,7 +70,7 @@ export async function ChatWithAI(
 			}),
 			prisma.budget.findMany({
 				where: { userId: user.id },
-				select: { id: true, category: true, amount: true },
+				select: { category: true, amount: true },
 			}),
 			prisma.savingsGoal.findMany({
 				where: { userId: user.id },
@@ -219,7 +219,7 @@ ${transactions
 	)
 	.join("\n")}
 Budgets:
-${budgets.map((b) => `- ID[${b.id}] ${b.category}: ${b.amount}`).join("\n")}
+${budgets.map((b) => `- ${b.category}: ${b.amount}`).join("\n")}
 Savings Goals:
 ${savingsGoals.map((s) => `- ${s.name}: ${s.currentAmount}/${s.targetAmount}`).join("\n")}
 `;

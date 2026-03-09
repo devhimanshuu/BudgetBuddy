@@ -96,7 +96,7 @@ export async function GET(request: Request) {
 		const isProjectedToOverspend = projectedSpending > budget.amount;
 
 		return {
-			id: budget.id,
+			id: `${budget.userId}-${budget.category}-${budget.month}-${budget.year}`,
 			category: budget.category,
 			categoryIcon: budget.categoryIcon,
 			budgetAmount: budget.amount,
