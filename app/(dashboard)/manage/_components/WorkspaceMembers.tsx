@@ -91,34 +91,67 @@ const ROLE_CONFIG: Record<
 };
 
 export function WorkspaceMembers() {
+    const { data: workspaces, isLoading: isLoadingWorkspaces } = useQuery({
+        queryKey: ["workspaces"],
+        queryFn: () => GetWorkspaces(),
+    });
+
+    if (isLoadingWorkspaces) {
+        return (
+            <Card className="border border-border bg-card/50 backdrop-blur-sm">
+                <CardContent className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </CardContent>
+            </Card>
+        );
+    }
+
+    const personalWorkspaces = workspaces?.filter((w: any) => w.role === "ADMIN") || [];
+    const joinedWorkspaces = workspaces?.filter((w: any) => w.role !== "ADMIN") || [];
+
+    return (
+        <div className="space-y-6">
+            {personalWorkspaces.length > 0 && (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold">Your Workspace</h3>
+                    {personalWorkspaces.map((workspace: any) => (
+                        <WorkspaceCard key={workspace.id} workspace={workspace} />
+                    ))}
+                </div>
+            )}
+
+            {joinedWorkspaces.length > 0 && (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold">Joined Workspaces</h3>
+                    {joinedWorkspaces.map((workspace: any) => (
+                        <WorkspaceCard key={workspace.id} workspace={workspace} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function WorkspaceCard({ workspace }: { workspace: any }) {
     const queryClient = useQueryClient();
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState("VIEWER");
     const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
-    // Get the user's workspaces and find the active one
-    const { data: workspaces, isLoading: isLoadingWorkspaces } = useQuery({
-        queryKey: ["workspaces"],
-        queryFn: () => GetWorkspaces(),
-    });
-
-    // Default to the first workspace (the user's personal one)
-    const activeWorkspace = workspaces?.[0];
-
     const { data: members, isLoading: isMembersLoading } = useQuery({
-        queryKey: ["workspace-members", activeWorkspace?.id],
-        queryFn: () => GetWorkspaceMembers(activeWorkspace!.id),
-        enabled: !!activeWorkspace?.id,
+        queryKey: ["workspace-members", workspace.id],
+        queryFn: () => GetWorkspaceMembers(workspace.id),
+        enabled: !!workspace.id,
     });
 
     const { data: invites, isLoading: isInvitesLoading } = useQuery({
-        queryKey: ["workspace-invites", activeWorkspace?.id],
-        queryFn: () => GetPendingInvites(activeWorkspace!.id),
-        enabled: !!activeWorkspace?.id,
+        queryKey: ["workspace-invites", workspace.id],
+        queryFn: () => GetPendingInvites(workspace.id),
+        enabled: !!workspace.id,
     });
 
-    const isAdmin = activeWorkspace?.role === "ADMIN";
+    const isAdmin = workspace.role === "ADMIN";
 
     const inviteMutation = useMutation({
         mutationFn: ({
@@ -127,7 +160,7 @@ export function WorkspaceMembers() {
         }: {
             email: string;
             role: string;
-        }) => InviteMember(activeWorkspace!.id, email, role),
+        }) => InviteMember(workspace.id, email, role),
         onSuccess: (data) => {
             toast.success("Invite sent!", {
                 description: "The invite link has been generated.",
@@ -154,7 +187,7 @@ export function WorkspaceMembers() {
 
     const removeMutation = useMutation({
         mutationFn: (memberUserId: string) =>
-            RemoveMember(activeWorkspace!.id, memberUserId),
+            RemoveMember(workspace.id, memberUserId),
         onSuccess: () => {
             toast.success("Member removed");
             queryClient.invalidateQueries({
@@ -173,7 +206,7 @@ export function WorkspaceMembers() {
         }: {
             userId: string;
             role: string;
-        }) => UpdateMemberRole(activeWorkspace!.id, userId, role),
+        }) => UpdateMemberRole(workspace.id, userId, role),
         onSuccess: () => {
             toast.success("Role updated");
             queryClient.invalidateQueries({
@@ -210,15 +243,7 @@ export function WorkspaceMembers() {
         []
     );
 
-    if (isLoadingWorkspaces) {
-        return (
-            <Card className="border border-border bg-card/50 backdrop-blur-sm">
-                <CardContent className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </CardContent>
-            </Card>
-        );
-    }
+
 
     return (
         <Card className="border border-border bg-card/50 backdrop-blur-sm">
@@ -233,7 +258,7 @@ export function WorkspaceMembers() {
                                 Workspace & Family
                             </CardTitle>
                             <CardDescription>
-                                {activeWorkspace?.name || "Personal Workspace"} •{" "}
+                                {workspace?.name || "Personal Workspace"} •{" "}
                                 {members?.length || 0} member
                                 {(members?.length || 0) !== 1 ? "s" : ""}
                             </CardDescription>
@@ -381,8 +406,8 @@ export function WorkspaceMembers() {
                                         <div
                                             key={member.id}
                                             className={`flex items-center justify-between p-3 ${index !== 0
-                                                    ? "border-t border-border"
-                                                    : ""
+                                                ? "border-t border-border"
+                                                : ""
                                                 } hover:bg-muted/30 transition-colors`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -524,8 +549,8 @@ export function WorkspaceMembers() {
                                     <div
                                         key={invite.id}
                                         className={`flex items-center justify-between p-3 ${index !== 0
-                                                ? "border-t border-border"
-                                                : ""
+                                            ? "border-t border-border"
+                                            : ""
                                             } hover:bg-muted/30 transition-colors`}
                                     >
                                         <div className="flex items-center gap-3">
