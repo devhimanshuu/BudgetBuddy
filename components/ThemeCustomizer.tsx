@@ -13,13 +13,15 @@ import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { usePersonaTheme } from "@/components/providers/PersonaThemeProvider";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Paintbrush, Check, CloudMoon, Eclipse, Cpu, Droplets, Trees, Sparkles, Shield, Gem, Brain, Zap } from "lucide-react";
+import { Moon, Sun, Paintbrush, Check, CloudMoon, Eclipse, Cpu, Droplets, Trees, Sparkles, Shield, Gem, Brain, Zap, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export function ThemeCustomizer() {
     const { theme, setTheme } = useTheme();
     const { isMorphingEnabled, setIsMorphingEnabled, personaData } = usePersonaTheme();
+    const { isSignedIn } = useUser();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -81,50 +83,52 @@ export function ThemeCustomizer() {
                     </div>
 
 
-                    <div className="pt-4 border-t">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="space-y-0.5">
-                                <Label className="text-sm font-bold flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-primary" />
-                                    Persona UI Morphing
-                                </Label>
-                                <p className="text-[12px] text-muted-foreground">
-                                    Adapts the entire app theme to your {personaData?.persona || "financial"} persona.
-                                </p>
-                            </div>
-                            <Switch
-                                checked={isMorphingEnabled}
-                                onCheckedChange={setIsMorphingEnabled}
-                            />
-                        </div>
-
-                        {isMorphingEnabled && personaData && (
-                            <div className={cn(
-                                "p-3 rounded-xl border flex items-center gap-3 bg-muted/30",
-                                personaData.persona === "Squirrel" && "border-emerald-500/30 bg-emerald-500/5",
-                                personaData.persona === "Peacock" && "border-purple-500/30 bg-purple-500/5",
-                                personaData.persona === "Owl" && "border-blue-500/30 bg-blue-500/5",
-                                personaData.persona === "Fox" && "border-orange-500/30 bg-orange-500/5",
-                            )}>
-                                <div className={cn(
-                                    "w-10 h-10 rounded-full flex items-center justify-center",
-                                    personaData.persona === "Squirrel" && "bg-emerald-500/20 text-emerald-500",
-                                    personaData.persona === "Peacock" && "bg-purple-500/20 text-purple-500",
-                                    personaData.persona === "Owl" && "bg-blue-500/20 text-blue-500",
-                                    personaData.persona === "Fox" && "bg-orange-500/20 text-orange-500",
-                                )}>
-                                    {personaData.persona === "Squirrel" && <Shield className="w-5 h-5" />}
-                                    {personaData.persona === "Peacock" && <Gem className="w-5 h-5" />}
-                                    {personaData.persona === "Owl" && <Brain className="w-5 h-5" />}
-                                    {personaData.persona === "Fox" && <Zap className="w-5 h-5" />}
-                                </div>
+                    {isSignedIn && (
+                        <div className="pt-4 border-t">
+                            <div className="flex items-center justify-between mb-4">
                                 <div className="space-y-0.5">
-                                    <p className="text-sm font-black">Active: {personaData.persona}</p>
-                                    <p className="text-[10px] text-muted-foreground line-clamp-1">{personaData.personality}</p>
+                                    <Label className="text-sm font-bold flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-primary" />
+                                        Persona UI Morphing
+                                    </Label>
+                                    <p className="text-[12px] text-muted-foreground">
+                                        Adapts the entire app theme to your {personaData?.persona || "financial"} persona.
+                                    </p>
                                 </div>
+                                <Switch
+                                    checked={isMorphingEnabled}
+                                    onCheckedChange={setIsMorphingEnabled}
+                                />
                             </div>
-                        )}
-                    </div>
+
+                            {isMorphingEnabled && personaData && (
+                                <div className={cn(
+                                    "p-3 rounded-xl border flex items-center gap-3 bg-muted/30",
+                                    personaData.persona === "Squirrel" && "border-emerald-500/30 bg-emerald-500/5",
+                                    personaData.persona === "Peacock" && "border-purple-500/30 bg-purple-500/5",
+                                    personaData.persona === "Owl" && "border-blue-500/30 bg-blue-500/5",
+                                    personaData.persona === "Fox" && "border-orange-500/30 bg-orange-500/5",
+                                )}>
+                                    <div className={cn(
+                                        "w-10 h-10 rounded-full flex items-center justify-center",
+                                        personaData.persona === "Squirrel" && "bg-emerald-500/20 text-emerald-500",
+                                        personaData.persona === "Peacock" && "bg-purple-500/20 text-purple-500",
+                                        personaData.persona === "Owl" && "bg-blue-500/20 text-blue-500",
+                                        personaData.persona === "Fox" && "bg-orange-500/20 text-orange-500",
+                                    )}>
+                                        {personaData.persona === "Squirrel" && <Shield className="w-5 h-5" />}
+                                        {personaData.persona === "Peacock" && <Gem className="w-5 h-5" />}
+                                        {personaData.persona === "Owl" && <Brain className="w-5 h-5" />}
+                                        {personaData.persona === "Fox" && <Zap className="w-5 h-5" />}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        <p className="text-sm font-black">Active: {personaData.persona}</p>
+                                        <p className="text-[10px] text-muted-foreground line-clamp-1">{personaData.personality}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

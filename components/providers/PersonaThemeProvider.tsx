@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PersonaData } from "@/lib/persona";
+import { useAuth } from "@clerk/nextjs";
 
 interface PersonaThemeContextType {
     isMorphingEnabled: boolean;
@@ -15,6 +16,7 @@ const PersonaThemeContext = createContext<PersonaThemeContextType | undefined>(u
 
 export const PersonaThemeProvider = ({ children }: { children: ReactNode }) => {
     const [isMorphingEnabled, setIsMorphingEnabled] = useState<boolean>(false);
+    const { userId } = useAuth();
 
     // Load preference from localStorage
     useEffect(() => {
@@ -36,7 +38,7 @@ export const PersonaThemeProvider = ({ children }: { children: ReactNode }) => {
             if (!res.ok) throw new Error("Failed to fetch persona");
             return res.json();
         },
-        enabled: true, // Always fetch to have data ready, but only apply if enabled
+        enabled: !!userId, // Only fetch if user is logged in
     });
 
     useEffect(() => {
