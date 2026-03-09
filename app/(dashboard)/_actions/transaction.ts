@@ -9,6 +9,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { updateStreak, checkAchievements } from "@/lib/gamification";
 
+import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
 	const parsedBody = CreateTransactionSchema.safeParse(form);
 	if (!parsedBody.success) {
@@ -18,6 +20,18 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
+	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace) {
+		throw new Error("No active workspace found");
+	}
+
+	// Check permissions
+	if (workspace.role === "VIEWER") {
+		throw new Error(
+			"You do not have permission to add transactions to this workspace",
+		);
 	}
 
 	const {
@@ -31,23 +45,24 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		attachments,
 		splits,
 	} = parsedBody.data;
+
 	const categoryRow = await prisma.category.findFirst({
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			name: category,
 		},
 	});
+
 	if (!categoryRow) {
-		throw new Error("category not found");
+		throw new Error("category not found in this workspace");
 	}
 
-	//NOTE: dont make confusion between transaction (prisma) and prisma.transaction (table)
-
 	await prisma.$transaction(async (tx) => {
-		//create user transaction
+		//create workspace transaction
 		const transaction = await tx.transaction.create({
 			data: {
 				userId: user.id,
+				workspaceId: workspace.id,
 				amount,
 				date,
 				description: description || "",
@@ -98,6 +113,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		await tx.monthlyHistory.upsert({
 			where: {
 				day_month_year_userId: {
+					// This composite key still has userId, we might need to change it later
 					userId: user.id,
 					day: date.getUTCDate(),
 					month: date.getUTCMonth(),
@@ -106,6 +122,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 			},
 			create: {
 				userId: user.id,
+				workspaceId: workspace.id,
 				day: date.getUTCDate(),
 				month: date.getUTCMonth(),
 				year: date.getUTCFullYear(),
@@ -113,6 +130,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				income: type === "income" ? amount : 0,
 			},
 			update: {
+				workspaceId: workspace.id, // Update workspaceId if it was null
 				expense: {
 					increment: type === "expense" ? amount : 0,
 				},
@@ -133,12 +151,14 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 			},
 			create: {
 				userId: user.id,
+				workspaceId: workspace.id,
 				month: date.getUTCMonth(),
 				year: date.getUTCFullYear(),
 				expense: type === "expense" ? amount : 0,
 				income: type === "income" ? amount : 0,
 			},
 			update: {
+				workspaceId: workspace.id,
 				expense: {
 					increment: type === "expense" ? amount : 0,
 				},
@@ -167,6 +187,20 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		// Don't fail transaction creation if gamification fails
 		console.error("Gamification error:", error);
 	}
+
+	// Log activity
+	await logActivity({
+		workspaceId: workspace.id,
+		userId: user.id,
+		type: "TRANSACTION_CREATED",
+		description: `Added ${type} transaction: ${description || category} ($${amount})`,
+		metadata: {
+			amount,
+			type,
+			category,
+			transactionId: "placeholder", // We could get the ID from the transaction object if needed
+		},
+	});
 
 	return { success: true, unlockedAchievements };
 }

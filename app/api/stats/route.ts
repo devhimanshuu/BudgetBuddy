@@ -1,12 +1,16 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const now = new Date();
 	const currentMonth = now.getMonth();
@@ -21,6 +25,7 @@ export async function GET(request: Request) {
 		prisma.monthlyHistory.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 				month: currentMonth,
 				year: currentYear,
 			},
@@ -28,6 +33,7 @@ export async function GET(request: Request) {
 		prisma.monthlyHistory.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 				month: previousMonth,
 				year: previousYear,
 			},

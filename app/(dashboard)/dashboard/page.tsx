@@ -13,6 +13,7 @@ import TopCategories from "../_components/TopCategories";
 import SavingsRate from "../_components/SavingsRate";
 import SavingsGoals from "../_components/SavingsGoals";
 import RecentTransactions from "../_components/RecentTransactions";
+import ActivityFeed from "@/components/ActivityFeed";
 import { DueTransactionsPopup } from "../_components/DueTransactionsPopup";
 import { SubscriptionAlerts } from "../_components/SubscriptionAlerts";
 import StreakDisplay from "../_components/StreakDisplay";
@@ -103,8 +104,13 @@ async function page() {
                 </div>
             </div>
 
-            <div className="container py-0 mb-6 4xl:mb-10">
-                <RecentTransactions userSettings={userSettings} />
+            <div className="container py-0 mb-6 4xl:mb-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <RecentTransactions userSettings={userSettings} />
+                </div>
+                <div className="lg:col-span-1">
+                    <ActivityFeed />
+                </div>
             </div>
 
             <Overview userSettings={userSettings} />

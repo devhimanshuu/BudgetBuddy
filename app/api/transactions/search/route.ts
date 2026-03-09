@@ -3,12 +3,16 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { GetFormatterForCurrency } from "@/lib/helper";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
 	const query = searchParams.get("query");
@@ -23,6 +27,7 @@ export async function GET(request: Request) {
 	// Build where clause
 	const where: any = {
 		userId: user.id,
+		...(workspaceId && { workspaceId }),
 	};
 
 	// Full-text search across description and notes

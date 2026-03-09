@@ -22,6 +22,7 @@ import { UserButton } from "@clerk/nextjs";
 import { ThemeCustomizer } from "./ThemeCustomizer";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { usePrivacyMode } from "./providers/PrivacyProvider";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 const Navbar = () => {
 	return (
@@ -66,8 +67,12 @@ const items = [
 	{ label: "Manage", link: "/manage", icon: <Settings className="h-4 w-4" /> },
 ];
 
+import { useWorkspaceRole } from "./PermissionGuard";
+import { Badge } from "./ui/badge";
+
 function NavbarActions() {
 	const [isMounted, setIsMounted] = useState(false);
+	const role = useWorkspaceRole();
 
 	React.useEffect(() => {
 		setIsMounted(true);
@@ -77,8 +82,21 @@ function NavbarActions() {
 
 	return (
 		<div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4">
-			<PrivacyModeToggle />
-			<ThemeCustomizer />
+			{role === "VIEWER" && (
+				<Badge variant="secondary" className="hidden lg:flex gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider">
+					<Eye className="w-2.5 h-2.5" />
+					Viewer
+				</Badge>
+			)}
+			<div className="hidden sm:block">
+				<WorkspaceSwitcher />
+			</div>
+			<div className="hidden sm:block">
+				<PrivacyModeToggle />
+			</div>
+			<div className="hidden sm:block">
+				<ThemeCustomizer />
+			</div>
 			<UserButton
 				afterSignOutUrl="/sign-in"
 				appearance={{
@@ -100,14 +118,15 @@ function NavbarActions() {
 
 function MobileNavbar() {
 	const [isOpen, setIsOpen] = useState(false);
+	const role = useWorkspaceRole();
 
 	return (
-		<div className="block border-separate bg-background/80 backdrop-blur-md md:hidden fixed top-0 left-0 right-0 z-50 border-b shadow-sm">
-			<nav className="container flex items-center justify-between px-8">
+		<div className="block border-separate bg-background/80 backdrop-blur-md xl:hidden fixed top-0 left-0 right-0 z-50 border-b shadow-sm">
+			<nav className="container flex items-center justify-between px-4">
 				<Sheet open={isOpen} onOpenChange={setIsOpen}>
 					<SheetTrigger asChild>
 						<Button variant={"ghost"} size={"icon"}>
-							<Menu />
+							<Menu className="h-5 w-5" />
 						</Button>
 					</SheetTrigger>
 					<SheetContent className="w-[320px] sm:w-[540px]" side={"left"}>
@@ -124,6 +143,36 @@ function MobileNavbar() {
 								/>
 							))}
 						</div>
+						<div className="pt-4 border-t border-border mt-4 sm:hidden">
+							{role === "VIEWER" && (
+								<div className="mb-4 px-2">
+									<Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
+										<Eye className="w-2.5 h-2.5" />
+										Viewer
+									</Badge>
+								</div>
+							)}
+							<div className="mb-4">
+								<p className="text-xs text-muted-foreground mb-2 px-2">Workspace</p>
+								<div className="px-2">
+									<WorkspaceSwitcher />
+								</div>
+							</div>
+							<div className="flex flex-row items-center justify-start gap-8 px-2">
+								<div className="flex flex-col gap-2">
+									<p className="text-xs text-muted-foreground">Privacy</p>
+									<div className="flex justify-start">
+										<PrivacyModeToggle />
+									</div>
+								</div>
+								<div className="flex flex-col gap-2">
+									<p className="text-xs text-muted-foreground">Theme</p>
+									<div className="flex justify-start">
+										<ThemeCustomizer />
+									</div>
+								</div>
+							</div>
+						</div>
 					</SheetContent>
 				</Sheet>
 				<div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
@@ -137,7 +186,7 @@ function MobileNavbar() {
 
 function DesktopNavbar() {
 	return (
-		<div className="hidden border-separate border-b bg-background/80 backdrop-blur-md md:block fixed top-0 left-0 right-0 z-50 shadow-sm">
+		<div className="hidden border-separate border-b bg-background/80 backdrop-blur-md xl:block fixed top-0 left-0 right-0 z-50 shadow-sm">
 			<nav className="container flex items-center justify-between px-8 3xl:px-12 4xl:px-16">
 				<div className="flex h-[25px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6 4xl:h-[120px] 4xl:gap-x-8">
 					<Logo />
@@ -177,7 +226,7 @@ function NavbarItem({
 				href={link}
 				className={cn(
 					buttonVariants({ variant: "ghost" }),
-					"w-full justify-start text-lg text-muted-foreground hover:text-foreground 3xl:text-xl 4xl:text-2xl gap-2",
+					"w-full justify-start text-sm text-muted-foreground hover:text-foreground 3xl:text-base 4xl:text-lg gap-2",
 					isActive && "text-foreground",
 				)}
 				onClick={() => {

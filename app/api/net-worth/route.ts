@@ -2,12 +2,16 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
 	const period = searchParams.get("period") || "year"; // "month", "year", "all"
@@ -33,6 +37,7 @@ export async function GET(request: Request) {
 		const assets = await prisma.asset.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 				type: "asset",
 			},
 			include: {
@@ -52,6 +57,7 @@ export async function GET(request: Request) {
 		const liabilities = await prisma.asset.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 				type: "liability",
 			},
 			include: {
@@ -72,6 +78,7 @@ export async function GET(request: Request) {
 		const transactions = await prisma.transaction.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 				date: {
 					gte: startDate,
 				},

@@ -2,109 +2,126 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
-  const user = await currentUser();
-  if (!user) {
-    redirect("/sign-in");
-  }
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
 
-  const tags = await prisma.tag.findMany({
-    where: {
-      userId: user.id,
-    },
-    orderBy: {
-      name: "asc",
-    },
-    include: {
-      _count: {
-        select: {
-          transactions: true,
-        },
-      },
-    },
-  });
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
-  return Response.json(tags);
+	const tags = await prisma.tag.findMany({
+		where: {
+			userId: user.id,
+			...(workspaceId && { workspaceId }),
+		},
+		orderBy: {
+			name: "asc",
+		},
+		include: {
+			_count: {
+				select: {
+					transactions: true,
+				},
+			},
+		},
+	});
+
+	return Response.json(tags);
 }
 
 export async function POST(request: Request) {
-  const user = await currentUser();
-  if (!user) {
-    redirect("/sign-in");
-  }
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
 
-  const body = await request.json();
+	const workspace = await getActiveWorkspace();
+	if (!workspace) throw new Error("No active workspace");
+	if (workspace.role === "VIEWER") {
+		return Response.json({ error: "Forbidden" }, { status: 403 });
+	}
 
-  const bodySchema = z.object({
-    name: z.string().min(1).max(50),
-    color: z
-      .string()
-      .regex(/^#[0-9A-F]{6}$/i)
-      .optional(),
-  });
+	const body = await request.json();
 
-  const parsedBody = bodySchema.safeParse(body);
+	const bodySchema = z.object({
+		name: z.string().min(1).max(50),
+		color: z
+			.string()
+			.regex(/^#[0-9A-F]{6}$/i)
+			.optional(),
+	});
 
-  if (!parsedBody.success) {
-    return Response.json(parsedBody.error, { status: 400 });
-  }
+	const parsedBody = bodySchema.safeParse(body);
 
-  const { name, color } = parsedBody.data;
+	if (!parsedBody.success) {
+		return Response.json(parsedBody.error, { status: 400 });
+	}
 
-  // Check if tag already exists
-  const existingTag = await prisma.tag.findUnique({
-    where: {
-      name_userId: {
-        name,
-        userId: user.id,
-      },
-    },
-  });
+	const { name, color } = parsedBody.data;
 
-  if (existingTag) {
-    return Response.json(
-      { error: "Tag with this name already exists" },
-      { status: 409 }
-    );
-  }
+	// Check if tag already exists in this workspace
+	const existingTag = await prisma.tag.findFirst({
+		where: {
+			name,
+			userId: user.id,
+			workspaceId: workspace.id,
+		},
+	});
 
-  const tag = await prisma.tag.create({
-    data: {
-      name,
-      color: color || "#3b82f6",
-      userId: user.id,
-    },
-  });
+	if (existingTag) {
+		return Response.json(
+			{ error: "Tag with this name already exists" },
+			{ status: 409 },
+		);
+	}
 
-  return Response.json(tag, { status: 201 });
+	const tag = await prisma.tag.create({
+		data: {
+			name,
+			color: color || "#3b82f6",
+			userId: user.id,
+			workspaceId: workspace.id,
+		},
+	});
+
+	return Response.json(tag, { status: 201 });
 }
 
 export async function DELETE(request: Request) {
-  const user = await currentUser();
-  if (!user) {
-    redirect("/sign-in");
-  }
+	const user = await currentUser();
+	if (!user) {
+		redirect("/sign-in");
+	}
 
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+	const workspace = await getActiveWorkspace();
+	if (!workspace) throw new Error("No active workspace");
+	if (workspace.role === "VIEWER") {
+		return Response.json({ error: "Forbidden" }, { status: 403 });
+	}
 
-  if (!id) {
-    return Response.json({ error: "Tag ID is required" }, { status: 400 });
-  }
+	const { searchParams } = new URL(request.url);
+	const id = searchParams.get("id");
 
-  // Verify ownership
-  const tag = await prisma.tag.findUnique({
-    where: { id },
-  });
+	if (!id) {
+		return Response.json({ error: "Tag ID is required" }, { status: 400 });
+	}
 
-  if (!tag || tag.userId !== user.id) {
-    return Response.json({ error: "Tag not found" }, { status: 404 });
-  }
+	// Verify ownership and workspace
+	const tag = await prisma.tag.findUnique({
+		where: { id },
+	});
 
-  await prisma.tag.delete({
-    where: { id },
-  });
+	if (!tag || tag.userId !== user.id) {
+		return Response.json({ error: "Tag not found" }, { status: 404 });
+	}
 
-  return Response.json({ success: true });
+	await prisma.tag.delete({
+		where: { id },
+	});
+
+	return Response.json({ success: true });
 }

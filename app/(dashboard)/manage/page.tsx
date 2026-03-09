@@ -47,6 +47,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";
 import AlertSettingsCard from "./_components/AlertSettingsCard";
+import { WorkspaceMembers } from "./_components/WorkspaceMembers";
+import { PermissionGuard } from "@/components/PermissionGuard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,6 +94,8 @@ const page = () => {
         </div>
 
         <AlertSettingsCard />
+
+        <WorkspaceMembers />
 
         <CategoryList type="income" />
         <CategoryList type="expense" />
@@ -238,26 +242,28 @@ function CategoryList({ type }: { type: TransactionType }) {
             </div>
 
             <div className="flex w-full flex-shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap">
-              <MergeCategoriesDialog
-                type={type}
-                categories={categoriesQuery.data || []}
-                trigger={
-                  <Button variant="outline" size="sm" className="w-full gap-2 sm:w-auto">
-                    <Merge className="h-4 w-4 shrink-0" />
-                    Merge
-                  </Button>
-                }
-              />
-              <CreateCategoryDialog
-                type={type}
-                successCallback={() => categoriesQuery.refetch()}
-                trigger={
-                  <Button className="w-full gap-2 text-sm sm:w-auto" size="sm">
-                    <PlusSquare className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Create Category</span>
-                  </Button>
-                }
-              />
+              <PermissionGuard>
+                <MergeCategoriesDialog
+                  type={type}
+                  categories={categoriesQuery.data || []}
+                  trigger={
+                    <Button variant="outline" size="sm" className="w-full gap-2 sm:w-auto">
+                      <Merge className="h-4 w-4 shrink-0" />
+                      Merge
+                    </Button>
+                  }
+                />
+                <CreateCategoryDialog
+                  type={type}
+                  successCallback={() => categoriesQuery.refetch()}
+                  trigger={
+                    <Button className="w-full gap-2 text-sm sm:w-auto" size="sm">
+                      <PlusSquare className="h-4 w-4 shrink-0" />
+                      <span className="truncate">Create Category</span>
+                    </Button>
+                  }
+                />
+              </PermissionGuard>
             </div>
           </CardTitle>
         </CardHeader>
@@ -431,38 +437,40 @@ function CategoryCard({ category }: { category: any }) {
         "flex w-full gap-1 p-2",
         compactMode ? "flex-row border-t mt-1 pt-2" : "flex-row sm:flex-col"
       )}>
-        <EditCategoryDialog
-          category={category}
-          trigger={
-            <Button
-              className={cn(
-                "w-full gap-2 text-muted-foreground hover:bg-blue-500/20",
-                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
-              )}
-              variant={"secondary"}
-              size="sm"
-            >
-              <Pencil className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
-              {compactMode ? "" : "Edit"}
-            </Button>
-          }
-        />
-        <DeleteCategoryDialog
-          category={category}
-          trigger={
-            <Button
-              className={cn(
-                "w-full gap-2 text-muted-foreground hover:bg-red-500/20",
-                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
-              )}
-              variant={"secondary"}
-              size="sm"
-            >
-              <TrashIcon className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
-              {compactMode ? "" : "Remove"}
-            </Button>
-          }
-        />
+        <PermissionGuard>
+          <EditCategoryDialog
+            category={category}
+            trigger={
+              <Button
+                className={cn(
+                  "w-full gap-2 text-muted-foreground hover:bg-blue-500/20",
+                  compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+                )}
+                variant={"secondary"}
+                size="sm"
+              >
+                <Pencil className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+                {compactMode ? "" : "Edit"}
+              </Button>
+            }
+          />
+          <DeleteCategoryDialog
+            category={category}
+            trigger={
+              <Button
+                className={cn(
+                  "w-full gap-2 text-muted-foreground hover:bg-red-500/20",
+                  compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+                )}
+                variant={"secondary"}
+                size="sm"
+              >
+                <TrashIcon className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+                {compactMode ? "" : "Remove"}
+              </Button>
+            }
+          />
+        </PermissionGuard>
       </div>
     </div>
   );
@@ -537,14 +545,16 @@ function TagList() {
               </div>
             </div>
 
-            <CreateTagDialog
-              trigger={
-                <Button className="w-full gap-2 text-sm sm:w-auto" size="sm">
-                  <PlusSquare className="h-4 w-4 shrink-0" />
-                  <span className="truncate">Create Tag</span>
-                </Button>
-              }
-            />
+            <PermissionGuard>
+              <CreateTagDialog
+                trigger={
+                  <Button className="w-full gap-2 text-sm sm:w-auto" size="sm">
+                    <PlusSquare className="h-4 w-4 shrink-0" />
+                    <span className="truncate">Create Tag</span>
+                  </Button>
+                }
+              />
+            </PermissionGuard>
           </CardTitle>
         </CardHeader>
         <Separator />
@@ -716,42 +726,44 @@ function TagCard({ tag }: { tag: any }) {
         "flex w-full gap-1 p-2",
         compactMode ? "flex-row border-t mt-1 pt-2" : "flex-row sm:flex-col"
       )}>
-        <EditTagDialog
-          tag={tag}
-          trigger={
-            <Button
-              className={cn(
-                "w-full gap-2 text-muted-foreground hover:bg-blue-500/20",
-                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
-              )}
-              variant="secondary"
-              size="sm"
-            >
-              <Pencil className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
-              {compactMode ? "" : "Edit"}
-            </Button>
-          }
-        />
-        <DeleteTagDialog
-          trigger={
-            <Button
-              className={cn(
-                "w-full gap-2 text-muted-foreground hover:bg-red-500/20",
-                compactMode ? "h-7 px-2 text-[10px]" : "h-9"
-              )}
-              variant="secondary"
-              size="sm"
-              disabled={deleteMutation.isPending}
-            >
-              <TrashIcon className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
-              {compactMode ? "" : "Remove"}
-            </Button>
-          }
-          tagName={tag.name}
-          transactionCount={tag._count?.transactions || 0}
-          onConfirm={() => deleteMutation.mutate(tag.id)}
-          isPending={deleteMutation.isPending}
-        />
+        <PermissionGuard>
+          <EditTagDialog
+            tag={tag}
+            trigger={
+              <Button
+                className={cn(
+                  "w-full gap-2 text-muted-foreground hover:bg-blue-500/20",
+                  compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+                )}
+                variant="secondary"
+                size="sm"
+              >
+                <Pencil className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+                {compactMode ? "" : "Edit"}
+              </Button>
+            }
+          />
+          <DeleteTagDialog
+            trigger={
+              <Button
+                className={cn(
+                  "w-full gap-2 text-muted-foreground hover:bg-red-500/20",
+                  compactMode ? "h-7 px-2 text-[10px]" : "h-9"
+                )}
+                variant="secondary"
+                size="sm"
+                disabled={deleteMutation.isPending}
+              >
+                <TrashIcon className={cn(compactMode ? "h-3 w-3" : "h-4 w-4", "shrink-0")} />
+                {compactMode ? "" : "Remove"}
+              </Button>
+            }
+            tagName={tag.name}
+            transactionCount={tag._count?.transactions || 0}
+            onConfirm={() => deleteMutation.mutate(tag.id)}
+            isPending={deleteMutation.isPending}
+          />
+        </PermissionGuard>
       </div>
     </div>
   );

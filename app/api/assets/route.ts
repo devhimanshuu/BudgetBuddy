@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -10,13 +11,17 @@ export async function GET(request: Request) {
 		redirect("/sign-in");
 	}
 
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
+
 	const { searchParams } = new URL(request.url);
-	const type = searchParams.get("type"); // "asset" or "liability" or null for all
+	const type = searchParams.get("type");
 
 	try {
 		const assets = await prisma.asset.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 				...(type && { type }),
 			},
 			orderBy: {
@@ -59,6 +64,15 @@ export async function POST(request: Request) {
 		redirect("/sign-in");
 	}
 
+	const workspace = await getActiveWorkspace();
+	if (!workspace)
+		return NextResponse.json({ error: "No active workspace" }, { status: 400 });
+	if (workspace.role === "VIEWER")
+		return NextResponse.json(
+			{ error: "Viewers cannot create assets" },
+			{ status: 403 },
+		);
+
 	try {
 		const body = await request.json();
 		const validatedData = createAssetSchema.parse(body);
@@ -66,6 +80,7 @@ export async function POST(request: Request) {
 		const asset = await prisma.asset.create({
 			data: {
 				userId: user.id,
+				workspaceId: workspace.id,
 				...validatedData,
 			},
 		});

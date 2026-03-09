@@ -3,12 +3,16 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkAchievements } from "@/lib/gamification";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
 	const month = searchParams.get("month");
@@ -28,6 +32,7 @@ export async function GET(request: Request) {
 	const budgets = await prisma.budget.findMany({
 		where: {
 			userId: user.id,
+			...(workspaceId && { workspaceId }),
 			month: parseInt(queryParams.data.month),
 			year: parseInt(queryParams.data.year),
 		},
@@ -44,6 +49,15 @@ export async function POST(request: Request) {
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace)
+		return Response.json({ error: "No active workspace" }, { status: 400 });
+	if (workspace.role === "VIEWER")
+		return Response.json(
+			{ error: "Viewers cannot create budgets" },
+			{ status: 403 },
+		);
 
 	const body = await request.json();
 
@@ -76,9 +90,11 @@ export async function POST(request: Request) {
 		update: {
 			amount,
 			categoryIcon,
+			workspaceId: workspace.id,
 		},
 		create: {
 			userId: user.id,
+			workspaceId: workspace.id,
 			category,
 			categoryIcon,
 			amount,
@@ -101,16 +117,21 @@ export async function PATCH(request: Request) {
 		redirect("/sign-in");
 	}
 
-	const { searchParams } = new URL(request.url);
-	const id = searchParams.get("id");
-
-	if (!id) {
-		return Response.json({ error: "Budget ID is required" }, { status: 400 });
-	}
+	const workspace = await getActiveWorkspace();
+	if (!workspace)
+		return Response.json({ error: "No active workspace" }, { status: 400 });
+	if (workspace.role === "VIEWER")
+		return Response.json(
+			{ error: "Viewers cannot update budgets" },
+			{ status: 403 },
+		);
 
 	const body = await request.json();
 
 	const bodySchema = z.object({
+		category: z.string(),
+		month: z.number(),
+		year: z.number(),
 		amount: z.number().positive(),
 		categoryIcon: z.string().optional(),
 	});
@@ -121,25 +142,36 @@ export async function PATCH(request: Request) {
 		return Response.json(parsedBody.error, { status: 400 });
 	}
 
+	const { category, month, year, amount, categoryIcon } = parsedBody.data;
+
 	// Verify ownership before updating
 	const existingBudget = await prisma.budget.findUnique({
-		where: { id },
+		where: {
+			userId_category_month_year: {
+				userId: user.id,
+				category,
+				month,
+				year,
+			},
+		},
 	});
 
-	if (!existingBudget || existingBudget.userId !== user.id) {
+	if (!existingBudget) {
 		return Response.json({ error: "Budget not found" }, { status: 404 });
 	}
 
-	const updateData: { amount: number; categoryIcon?: string } = {
-		amount: parsedBody.data.amount,
-	};
-
-	if (parsedBody.data.categoryIcon) {
-		updateData.categoryIcon = parsedBody.data.categoryIcon;
-	}
+	const updateData: { amount: number; categoryIcon?: string } = { amount };
+	if (categoryIcon) updateData.categoryIcon = categoryIcon;
 
 	const budget = await prisma.budget.update({
-		where: { id },
+		where: {
+			userId_category_month_year: {
+				userId: user.id,
+				category,
+				month,
+				year,
+			},
+		},
 		data: updateData,
 	});
 
@@ -152,24 +184,52 @@ export async function DELETE(request: Request) {
 		redirect("/sign-in");
 	}
 
-	const { searchParams } = new URL(request.url);
-	const id = searchParams.get("id");
+	const workspace = await getActiveWorkspace();
+	if (!workspace)
+		return Response.json({ error: "No active workspace" }, { status: 400 });
+	if (workspace.role === "VIEWER")
+		return Response.json(
+			{ error: "Viewers cannot delete budgets" },
+			{ status: 403 },
+		);
 
-	if (!id) {
-		return Response.json({ error: "Budget ID is required" }, { status: 400 });
+	const { searchParams } = new URL(request.url);
+	const category = searchParams.get("category");
+	const month = searchParams.get("month");
+	const year = searchParams.get("year");
+
+	if (!category || !month || !year) {
+		return Response.json(
+			{ error: "category, month, and year are required" },
+			{ status: 400 },
+		);
 	}
 
 	// Verify ownership before deleting
 	const budget = await prisma.budget.findUnique({
-		where: { id },
+		where: {
+			userId_category_month_year: {
+				userId: user.id,
+				category,
+				month: parseInt(month),
+				year: parseInt(year),
+			},
+		},
 	});
 
-	if (!budget || budget.userId !== user.id) {
+	if (!budget) {
 		return Response.json({ error: "Budget not found" }, { status: 404 });
 	}
 
 	await prisma.budget.delete({
-		where: { id },
+		where: {
+			userId_category_month_year: {
+				userId: user.id,
+				category,
+				month: parseInt(month),
+				year: parseInt(year),
+			},
+		},
 	});
 
 	return Response.json({ success: true });

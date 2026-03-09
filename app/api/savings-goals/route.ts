@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkAchievements } from "@/lib/gamification";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -10,12 +11,16 @@ export async function GET(request: Request) {
 		redirect("/sign-in");
 	}
 
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
+
 	const { searchParams } = new URL(request.url);
 	const includeCompleted = searchParams.get("includeCompleted") === "true";
 
 	const goals = await prisma.savingsGoal.findMany({
 		where: {
 			userId: user.id,
+			...(workspaceId && { workspaceId }),
 			...(includeCompleted ? {} : { isCompleted: false }),
 		},
 		orderBy: [{ isCompleted: "asc" }, { targetDate: "asc" }],
@@ -29,6 +34,15 @@ export async function POST(request: Request) {
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace)
+		return Response.json({ error: "No active workspace" }, { status: 400 });
+	if (workspace.role === "VIEWER")
+		return Response.json(
+			{ error: "Viewers cannot create goals" },
+			{ status: 403 },
+		);
 
 	const body = await request.json();
 
@@ -52,6 +66,7 @@ export async function POST(request: Request) {
 	const goal = await prisma.savingsGoal.create({
 		data: {
 			userId: user.id,
+			workspaceId: workspace.id,
 			name: parsedBody.data.name,
 			description: parsedBody.data.description,
 			targetAmount: parsedBody.data.targetAmount,

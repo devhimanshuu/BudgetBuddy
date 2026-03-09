@@ -1,0 +1,591 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+    GetWorkspaces,
+    GetWorkspaceMembers,
+    GetPendingInvites,
+    InviteMember,
+    RemoveMember,
+    UpdateMemberRole,
+    RevokeInvite,
+} from "@/app/(dashboard)/_actions/workspaces";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+    Users,
+    UserPlus,
+    Crown,
+    Shield,
+    Eye,
+    Pencil,
+    Trash2,
+    Mail,
+    Copy,
+    Check,
+    Clock,
+    X,
+    Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
+
+const ROLE_CONFIG: Record<
+    string,
+    { label: string; icon: React.ReactNode; color: string; description: string }
+> = {
+    ADMIN: {
+        label: "Admin",
+        icon: <Crown className="h-3.5 w-3.5" />,
+        color: "bg-amber-500/15 text-amber-600 border-amber-500/30",
+        description: "Full access. Can invite, edit, delete, and manage members.",
+    },
+    EDITOR: {
+        label: "Editor",
+        icon: <Pencil className="h-3.5 w-3.5" />,
+        color: "bg-blue-500/15 text-blue-600 border-blue-500/30",
+        description: "Can add, edit, and delete transactions and budgets.",
+    },
+    VIEWER: {
+        label: "Viewer",
+        icon: <Eye className="h-3.5 w-3.5" />,
+        color: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30",
+        description: "Read-only access. Can view data but not make changes.",
+    },
+};
+
+export function WorkspaceMembers() {
+    const queryClient = useQueryClient();
+    const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState("");
+    const [inviteRole, setInviteRole] = useState("VIEWER");
+    const [copiedLink, setCopiedLink] = useState<string | null>(null);
+
+    // Get the user's workspaces and find the active one
+    const { data: workspaces, isLoading: isLoadingWorkspaces } = useQuery({
+        queryKey: ["workspaces"],
+        queryFn: () => GetWorkspaces(),
+    });
+
+    // Default to the first workspace (the user's personal one)
+    const activeWorkspace = workspaces?.[0];
+
+    const { data: members, isLoading: isMembersLoading } = useQuery({
+        queryKey: ["workspace-members", activeWorkspace?.id],
+        queryFn: () => GetWorkspaceMembers(activeWorkspace!.id),
+        enabled: !!activeWorkspace?.id,
+    });
+
+    const { data: invites, isLoading: isInvitesLoading } = useQuery({
+        queryKey: ["workspace-invites", activeWorkspace?.id],
+        queryFn: () => GetPendingInvites(activeWorkspace!.id),
+        enabled: !!activeWorkspace?.id,
+    });
+
+    const isAdmin = activeWorkspace?.role === "ADMIN";
+
+    const inviteMutation = useMutation({
+        mutationFn: ({
+            email,
+            role,
+        }: {
+            email: string;
+            role: string;
+        }) => InviteMember(activeWorkspace!.id, email, role),
+        onSuccess: (data) => {
+            toast.success("Invite sent!", {
+                description: "The invite link has been generated.",
+            });
+            setInviteEmail("");
+            setInviteRole("VIEWER");
+            setInviteDialogOpen(false);
+            queryClient.invalidateQueries({
+                queryKey: ["workspace-invites"],
+            });
+
+            // Copy the invite link
+            if (data.inviteLink) {
+                navigator.clipboard.writeText(data.inviteLink);
+                toast.info("Invite link copied to clipboard!", {
+                    description: "Share this link with the person you want to invite.",
+                });
+            }
+        },
+        onError: (e: Error) => {
+            toast.error(e.message || "Failed to send invite");
+        },
+    });
+
+    const removeMutation = useMutation({
+        mutationFn: (memberUserId: string) =>
+            RemoveMember(activeWorkspace!.id, memberUserId),
+        onSuccess: () => {
+            toast.success("Member removed");
+            queryClient.invalidateQueries({
+                queryKey: ["workspace-members"],
+            });
+        },
+        onError: (e: Error) => {
+            toast.error(e.message || "Failed to remove member");
+        },
+    });
+
+    const roleMutation = useMutation({
+        mutationFn: ({
+            userId,
+            role,
+        }: {
+            userId: string;
+            role: string;
+        }) => UpdateMemberRole(activeWorkspace!.id, userId, role),
+        onSuccess: () => {
+            toast.success("Role updated");
+            queryClient.invalidateQueries({
+                queryKey: ["workspace-members"],
+            });
+        },
+        onError: (e: Error) => {
+            toast.error(e.message || "Failed to update role");
+        },
+    });
+
+    const revokeInviteMutation = useMutation({
+        mutationFn: (inviteId: string) => RevokeInvite(inviteId),
+        onSuccess: () => {
+            toast.success("Invite revoked");
+            queryClient.invalidateQueries({
+                queryKey: ["workspace-invites"],
+            });
+        },
+        onError: (e: Error) => {
+            toast.error(e.message || "Failed to revoke invite");
+        },
+    });
+
+    const handleCopyLink = useCallback(
+        async (token: string) => {
+            const link = `${window.location.origin
+                }/join?token=${token}`;
+            await navigator.clipboard.writeText(link);
+            setCopiedLink(token);
+            toast.success("Invite link copied!");
+            setTimeout(() => setCopiedLink(null), 2000);
+        },
+        []
+    );
+
+    if (isLoadingWorkspaces) {
+        return (
+            <Card className="border border-border bg-card/50 backdrop-blur-sm">
+                <CardContent className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </CardContent>
+            </Card>
+        );
+    }
+
+    return (
+        <Card className="border border-border bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Users className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg">
+                                Workspace & Family
+                            </CardTitle>
+                            <CardDescription>
+                                {activeWorkspace?.name || "Personal Workspace"} •{" "}
+                                {members?.length || 0} member
+                                {(members?.length || 0) !== 1 ? "s" : ""}
+                            </CardDescription>
+                        </div>
+                    </div>
+
+                    {isAdmin && (
+                        <Dialog
+                            open={inviteDialogOpen}
+                            onOpenChange={setInviteDialogOpen}
+                        >
+                            <DialogTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    className="gap-2 bg-primary hover:bg-primary/90"
+                                >
+                                    <UserPlus className="h-4 w-4" />
+                                    <span className="hidden sm:inline">
+                                        Invite Member
+                                    </span>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Invite a Member</DialogTitle>
+                                    <DialogDescription>
+                                        Invite someone to collaborate on your
+                                        budget. They&apos;ll receive a link to
+                                        join.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex flex-col gap-4 py-4">
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">
+                                            Email Address
+                                        </label>
+                                        <Input
+                                            placeholder="partner@example.com"
+                                            value={inviteEmail}
+                                            onChange={(e) =>
+                                                setInviteEmail(e.target.value)
+                                            }
+                                            type="email"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">
+                                            Role
+                                        </label>
+                                        <Select
+                                            value={inviteRole}
+                                            onValueChange={setInviteRole}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.entries(ROLE_CONFIG).map(
+                                                    ([key, config]) => (
+                                                        <SelectItem
+                                                            key={key}
+                                                            value={key}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                {config.icon}
+                                                                <span>
+                                                                    {
+                                                                        config.label
+                                                                    }
+                                                                </span>
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    —{" "}
+                                                                    {
+                                                                        config.description
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() =>
+                                            setInviteDialogOpen(false)
+                                        }
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={() =>
+                                            inviteMutation.mutate({
+                                                email: inviteEmail,
+                                                role: inviteRole,
+                                            })
+                                        }
+                                        disabled={
+                                            !inviteEmail ||
+                                            inviteMutation.isPending
+                                        }
+                                    >
+                                        {inviteMutation.isPending ? (
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                        ) : (
+                                            <Mail className="h-4 w-4 mr-2" />
+                                        )}
+                                        Send Invite
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    )}
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {/* Members List */}
+                <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        Members
+                    </h4>
+                    <div className="rounded-lg border border-border overflow-hidden">
+                        {isMembersLoading ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : (
+                            members?.map(
+                                (
+                                    member: {
+                                        userId: string;
+                                        role: string;
+                                        id: string;
+                                    },
+                                    index: number
+                                ) => {
+                                    const roleConfig =
+                                        ROLE_CONFIG[member.role] ||
+                                        ROLE_CONFIG.VIEWER;
+                                    return (
+                                        <div
+                                            key={member.id}
+                                            className={`flex items-center justify-between p-3 ${index !== 0
+                                                    ? "border-t border-border"
+                                                    : ""
+                                                } hover:bg-muted/30 transition-colors`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <span className="text-sm font-medium text-primary">
+                                                        {member.userId
+                                                            .slice(-2)
+                                                            .toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        {member.userId.slice(
+                                                            0,
+                                                            16
+                                                        )}
+                                                        ...
+                                                    </p>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={`text-xs ${roleConfig.color}`}
+                                                    >
+                                                        {roleConfig.icon}
+                                                        <span className="ml-1">
+                                                            {roleConfig.label}
+                                                        </span>
+                                                    </Badge>
+                                                </div>
+                                            </div>
+
+                                            {isAdmin &&
+                                                member.role !== "ADMIN" && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Select
+                                                            value={member.role}
+                                                            onValueChange={(
+                                                                newRole
+                                                            ) =>
+                                                                roleMutation.mutate(
+                                                                    {
+                                                                        userId: member.userId,
+                                                                        role: newRole,
+                                                                    }
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger className="h-8 w-[110px]">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="EDITOR">
+                                                                    Editor
+                                                                </SelectItem>
+                                                                <SelectItem value="VIEWER">
+                                                                    Viewer
+                                                                </SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>
+                                                                        Remove
+                                                                        member?
+                                                                    </AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This
+                                                                        person
+                                                                        will
+                                                                        lose
+                                                                        access
+                                                                        to this
+                                                                        workspace.
+                                                                        They
+                                                                        can be
+                                                                        re-invited
+                                                                        later.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>
+                                                                        Cancel
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                        onClick={() =>
+                                                                            removeMutation.mutate(
+                                                                                member.userId
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Remove
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                )}
+                                        </div>
+                                    );
+                                }
+                            )
+                        )}
+                    </div>
+                </div>
+
+                {/* Pending Invites */}
+                {isAdmin && invites && invites.length > 0 && (
+                    <div className="space-y-2">
+                        <Separator />
+                        <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2 pt-2">
+                            <Clock className="h-4 w-4" />
+                            Pending Invites
+                        </h4>
+                        <div className="rounded-lg border border-border overflow-hidden">
+                            {invites.map(
+                                (
+                                    invite: {
+                                        id: string;
+                                        email: string;
+                                        role: string;
+                                        token: string;
+                                        expiresAt: Date;
+                                    },
+                                    index: number
+                                ) => (
+                                    <div
+                                        key={invite.id}
+                                        className={`flex items-center justify-between p-3 ${index !== 0
+                                                ? "border-t border-border"
+                                                : ""
+                                            } hover:bg-muted/30 transition-colors`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium">
+                                                    {invite.email}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {
+                                                        ROLE_CONFIG[invite.role]
+                                                            ?.label
+                                                    }{" "}
+                                                    • Expires{" "}
+                                                    {new Date(
+                                                        invite.expiresAt
+                                                    ).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() =>
+                                                    handleCopyLink(
+                                                        invite.token
+                                                    )
+                                                }
+                                            >
+                                                {copiedLink ===
+                                                    invite.token ? (
+                                                    <Check className="h-4 w-4 text-emerald-500" />
+                                                ) : (
+                                                    <Copy className="h-4 w-4" />
+                                                )}
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                                onClick={() =>
+                                                    revokeInviteMutation.mutate(
+                                                        invite.id
+                                                    )
+                                                }
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}

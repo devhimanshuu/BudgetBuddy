@@ -1,25 +1,30 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
-		return new NextResponse("Unauthorized", { status: 401 });
+		redirect("/sign-in");
 	}
 
 	const workspace = await getActiveWorkspace();
 	const workspaceId = workspace?.id;
 
-	const transactions = await prisma.transaction.findMany({
+	if (!workspaceId) {
+		return Response.json([]);
+	}
+
+	const activities = await prisma.activity.findMany({
 		where: {
-			userId: user.id,
-			...(workspaceId && { workspaceId }),
+			workspaceId,
 		},
-		orderBy: { date: "desc" },
-		take: 5,
+		orderBy: {
+			createdAt: "desc",
+		},
+		take: 10,
 	});
 
-	return NextResponse.json(transactions);
+	return Response.json(activities);
 }

@@ -8,6 +8,7 @@ import {
 	processRecurringTransaction,
 	calculateNextDate,
 } from "@/lib/recurring-logic";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function EditRecurringTransaction(
 	id: string,
@@ -78,11 +79,16 @@ export async function CreateRecurringTransaction(
 		redirect("/sign-in");
 	}
 
+	const workspace = await getActiveWorkspace();
+	if (!workspace) throw new Error("No active workspace");
+	if (workspace.role === "VIEWER")
+		throw new Error("Viewers cannot create recurring transactions");
+
 	const { amount, category, date, description, interval, type } = form;
 
 	const categoryRow = await prisma.category.findFirst({
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			name: category,
 		},
 	});
@@ -94,6 +100,7 @@ export async function CreateRecurringTransaction(
 	await prisma.recurringTransaction.create({
 		data: {
 			userId: user.id,
+			workspaceId: workspace.id,
 			amount,
 			date,
 			description: description || "",
@@ -182,8 +189,9 @@ export async function ProcessRecurringTransaction(id: string) {
 		await tx.transaction.create({
 			data: {
 				userId: user.id,
+				workspaceId: recurring.workspaceId,
 				amount: recurring.amount,
-				date: recurring.date, // Use the due date as the transaction date
+				date: recurring.date,
 				description: recurring.description,
 				notes: `Recurring transaction: ${recurring.interval}`,
 				type: recurring.type,

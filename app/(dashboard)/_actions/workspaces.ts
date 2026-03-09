@@ -1,0 +1,371 @@
+"use server";
+
+import prisma from "@/lib/prisma";
+import { currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
+import {
+	getActiveWorkspace,
+	checkPermissions,
+	logActivity,
+} from "@/lib/workspaces";
+import { sendInviteEmail } from "@/lib/resend";
+
+export async function GetWorkspaces() {
+	const user = await currentUser();
+	if (!user) return [];
+
+	const memberships = await prisma.workspaceMember.findMany({
+		where: { userId: user.id },
+		include: {
+			workspace: true,
+		},
+	});
+
+	return memberships.map((m: { workspace: any; role: string }) => ({
+		...m.workspace,
+		role: m.role,
+	}));
+}
+
+export async function SwitchWorkspace(workspaceId: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const membership = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: user.id,
+			},
+		},
+	});
+
+	if (!membership) throw new Error("Unauthorized");
+
+	const cookieStore = await cookies();
+	cookieStore.set("active_workspace_id", workspaceId, {
+		path: "/",
+		maxAge: 60 * 60 * 24 * 30, // 30 days
+	});
+
+	revalidatePath("/");
+	return { success: true };
+}
+
+export async function CreateWorkspace(name: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const settings = await prisma.userSettings.findUnique({
+		where: { userId: user.id },
+	});
+
+	const workspace = await prisma.workspace.create({
+		data: {
+			name,
+			ownerId: user.id,
+			currency: settings?.currency || "USD",
+			members: {
+				create: {
+					userId: user.id,
+					role: "ADMIN",
+				},
+			},
+		},
+	});
+
+	await logActivity({
+		workspaceId: workspace.id,
+		userId: user.id,
+		type: "WORKSPACE_CREATED",
+		description: `Created workspace: ${name}`,
+	});
+
+	return workspace;
+}
+
+export async function GetWorkspaceMembers(workspaceId: string) {
+	const user = await currentUser();
+	if (!user) return [];
+
+	// Verify the current user is a member of this workspace
+	const membership = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: user.id,
+			},
+		},
+	});
+
+	if (!membership) return [];
+
+	const members = await prisma.workspaceMember.findMany({
+		where: { workspaceId },
+		orderBy: { createdAt: "asc" },
+	});
+
+	return members;
+}
+
+export async function GetPendingInvites(workspaceId: string) {
+	const user = await currentUser();
+	if (!user) return [];
+
+	const canInvite = await checkPermissions(workspaceId, ["ADMIN"]);
+	if (!canInvite) return [];
+
+	const invites = await prisma.invite.findMany({
+		where: {
+			workspaceId,
+			expiresAt: { gt: new Date() },
+		},
+		orderBy: { createdAt: "desc" },
+	});
+
+	return invites;
+}
+
+export async function InviteMember(
+	workspaceId: string,
+	email: string,
+	role: string = "VIEWER",
+) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const canInvite = await checkPermissions(workspaceId, ["ADMIN"]);
+	if (!canInvite) throw new Error("Only admins can invite members");
+
+	// Check if an active invite already exists for this email
+	const existingInvite = await prisma.invite.findFirst({
+		where: {
+			workspaceId,
+			email,
+			expiresAt: { gt: new Date() },
+		},
+	});
+
+	if (existingInvite) {
+		throw new Error("An invite for this email already exists");
+	}
+
+	const token = randomUUID();
+	const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
+
+	const invite = await prisma.invite.create({
+		data: {
+			email,
+			workspaceId,
+			role,
+			token,
+			expiresAt,
+		},
+	});
+
+	// Send email via Resend
+	const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/join?token=${token}`;
+
+	// Get workspace details for the email
+	const workspace = await prisma.workspace.findUnique({
+		where: { id: workspaceId },
+	});
+	const inviterName = user.firstName
+		? `${user.firstName}${user.lastName ? " " + user.lastName : ""}`
+		: user.emailAddresses?.[0]?.emailAddress || "Someone";
+
+	try {
+		await sendInviteEmail({
+			to: email,
+			inviterName,
+			workspaceName: workspace?.name || "Budget Workspace",
+			role,
+			inviteLink,
+		});
+	} catch (emailError) {
+		console.error(
+			"Email send failed, but invite was still created:",
+			emailError,
+		);
+		// Don't throw — the invite is still valid, just copy the link manually
+	}
+
+	revalidatePath("/manage");
+
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "MEMBER_INVITED",
+		description: `Invited ${email} as ${role}`,
+		metadata: { email, role },
+	});
+
+	return { success: true, inviteLink, token };
+}
+
+export async function AcceptInvite(token: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("You must be signed in to accept an invite");
+
+	const invite = await prisma.invite.findUnique({
+		where: { token },
+		include: { workspace: true },
+	});
+
+	if (!invite) throw new Error("Invalid invite link");
+	if (invite.expiresAt < new Date()) throw new Error("This invite has expired");
+
+	// Check if already a member
+	const existingMember = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId: invite.workspaceId,
+				userId: user.id,
+			},
+		},
+	});
+
+	if (existingMember) {
+		// Already a member, delete the invite and return
+		await prisma.invite.delete({ where: { id: invite.id } });
+		return {
+			success: true,
+			workspaceId: invite.workspaceId,
+			alreadyMember: true,
+		};
+	}
+
+	// Create membership and delete invite in a transaction
+	await prisma.$transaction([
+		prisma.workspaceMember.create({
+			data: {
+				workspaceId: invite.workspaceId,
+				userId: user.id,
+				role: invite.role,
+			},
+		}),
+		prisma.invite.delete({ where: { id: invite.id } }),
+	]);
+
+	await logActivity({
+		workspaceId: invite.workspaceId,
+		userId: user.id,
+		type: "MEMBER_JOINED",
+		description: `Joined the workspace via invite`,
+	});
+
+	revalidatePath("/");
+	return {
+		success: true,
+		workspaceId: invite.workspaceId,
+		workspaceName: invite.workspace.name,
+	};
+}
+
+export async function RemoveMember(workspaceId: string, memberUserId: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const canManage = await checkPermissions(workspaceId, ["ADMIN"]);
+	if (!canManage) throw new Error("Only admins can remove members");
+
+	// Can't remove yourself if you're the workspace owner
+	const workspace = await prisma.workspace.findUnique({
+		where: { id: workspaceId },
+	});
+	if (workspace?.ownerId === memberUserId) {
+		throw new Error("Cannot remove the workspace owner");
+	}
+
+	await prisma.workspaceMember.delete({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: memberUserId,
+			},
+		},
+	});
+
+	revalidatePath("/manage");
+
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "MEMBER_REMOVED",
+		description: `Removed a member from the workspace`,
+		metadata: { removedUserId: memberUserId },
+	});
+
+	return { success: true };
+}
+
+export async function UpdateMemberRole(
+	workspaceId: string,
+	memberUserId: string,
+	newRole: string,
+) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const canManage = await checkPermissions(workspaceId, ["ADMIN"]);
+	if (!canManage) throw new Error("Only admins can change roles");
+
+	const workspace = await prisma.workspace.findUnique({
+		where: { id: workspaceId },
+	});
+	if (workspace?.ownerId === memberUserId && newRole !== "ADMIN") {
+		throw new Error("Cannot change the owner's role");
+	}
+
+	await prisma.workspaceMember.update({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: memberUserId,
+			},
+		},
+		data: { role: newRole },
+	});
+
+	revalidatePath("/manage");
+
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "ROLE_UPDATED",
+		description: `Updated a member's role to ${newRole}`,
+		metadata: { memberUserId, newRole },
+	});
+
+	return { success: true };
+}
+
+export async function RevokeInvite(inviteId: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const invite = await prisma.invite.findUnique({
+		where: { id: inviteId },
+	});
+
+	if (!invite) throw new Error("Invite not found");
+
+	const canManage = await checkPermissions(invite.workspaceId, ["ADMIN"]);
+	if (!canManage) throw new Error("Only admins can revoke invites");
+
+	await prisma.invite.delete({ where: { id: inviteId } });
+
+	revalidatePath("/manage");
+
+	await logActivity({
+		workspaceId: invite.workspaceId,
+		userId: user.id,
+		type: "INVITE_REVOKED",
+		description: `Revoked invite for ${invite.email}`,
+		metadata: { email: invite.email },
+	});
+
+	return { success: true };
+}

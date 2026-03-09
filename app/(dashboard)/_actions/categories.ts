@@ -11,6 +11,8 @@ import {
 } from "@/schema/categories";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getActiveWorkspace } from "@/lib/workspaces";
+
 export async function CreateCategory(form: CreateCategorySchemaType) {
 	const parsedBody = CreateCategorySchema.safeParse(form);
 	if (!parsedBody.success) {
@@ -20,6 +22,12 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace) throw new Error("No active workspace");
+	if (workspace.role === "VIEWER")
+		throw new Error("Viewers cannot create categories");
+
 	const { name, icon, type } = parsedBody.data;
 	try {
 		return await prisma.category.upsert({
@@ -32,9 +40,11 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 			},
 			update: {
 				icon,
+				workspaceId: workspace.id,
 			},
 			create: {
 				userId: user.id,
+				workspaceId: workspace.id,
 				name,
 				icon,
 				type,
@@ -56,6 +66,11 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace) throw new Error("No active workspace");
+	if (workspace.role === "VIEWER")
+		throw new Error("Viewers cannot delete categories");
 
 	return await prisma.category.delete({
 		where: {
@@ -79,6 +94,11 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 		redirect("/sign-in");
 	}
 
+	const workspace = await getActiveWorkspace();
+	if (!workspace) throw new Error("No active workspace");
+	if (workspace.role === "VIEWER")
+		throw new Error("Viewers cannot update categories");
+
 	const { oldName, name, icon, type } = parsedBody.data;
 
 	try {
@@ -100,9 +120,7 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 		}
 
 		// Delete the old category and create a new one with updated values
-		// This is necessary because name is part of the unique constraint
 		await prisma.$transaction(async (tx) => {
-			// Get the old category to preserve any relationships if needed
 			const oldCategory = await tx.category.findUnique({
 				where: {
 					name_userId_type: {
@@ -122,6 +140,7 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 				await tx.transaction.updateMany({
 					where: {
 						userId: user.id,
+						workspaceId: workspace.id,
 						category: oldName,
 						type,
 					},
@@ -146,6 +165,7 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 			return await tx.category.create({
 				data: {
 					userId: user.id,
+					workspaceId: workspace.id,
 					name,
 					icon,
 					type,

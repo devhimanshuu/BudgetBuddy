@@ -3,12 +3,16 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { differenceInDays, subDays } from "date-fns";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
 	const from = searchParams.get("from");
@@ -38,6 +42,7 @@ export async function GET(request: Request) {
 		const stats = await prisma.monthlyHistory.findMany({
 			where: {
 				userId: user.id,
+				...(workspaceId && { workspaceId }),
 			},
 		});
 

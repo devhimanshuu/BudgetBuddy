@@ -2,12 +2,16 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
 	}
+
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
 
@@ -25,7 +29,8 @@ export async function GET(request: Request) {
 	const categories = await prisma.category.findMany({
 		where: {
 			userId: user.id,
-			...(type && { type }), //include type in the filters if it's included
+			...(workspaceId && { workspaceId }),
+			...(type && { type }),
 		},
 		orderBy: {
 			name: "asc",
@@ -37,6 +42,7 @@ export async function GET(request: Request) {
 		by: ["category", "type"],
 		where: {
 			userId: user.id,
+			...(workspaceId && { workspaceId }),
 			...(type && { type }),
 		},
 		_count: {
