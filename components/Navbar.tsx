@@ -18,6 +18,7 @@ import {
 	Eye,
 	EyeOff,
 	Pencil,
+	ShieldCheck,
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeCustomizer } from "./ThemeCustomizer";
@@ -83,13 +84,13 @@ function NavbarActions() {
 
 	return (
 		<div className="flex items-center gap-2 3xl:gap-3 4xl:gap-4 shrink-0">
-			{role === "VIEWER" && (
+			{role === "ADMIN" && (
 				<Badge
 					variant="outline"
-					className="flex gap-1.5 bg-gradient-to-r from-amber-400/10 to-orange-500/10 text-orange-500 border-orange-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
+					className="flex gap-1.5 bg-gradient-to-r from-emerald-400/10 to-green-500/10 text-emerald-500 border-emerald-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
 				>
-					<Eye className="w-3 h-3 text-amber-500" />
-					Viewer
+					<ShieldCheck className="w-3 h-3 text-emerald-500" />
+					Admin
 				</Badge>
 			)}
 			{role === "EDITOR" && (
@@ -99,6 +100,15 @@ function NavbarActions() {
 				>
 					<Pencil className="w-3 h-3 text-blue-500" />
 					Editor
+				</Badge>
+			)}
+			{role === "VIEWER" && (
+				<Badge
+					variant="outline"
+					className="flex gap-1.5 bg-gradient-to-r from-amber-400/10 to-orange-500/10 text-orange-500 border-orange-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
+				>
+					<Eye className="w-3 h-3 text-amber-500" />
+					Viewer
 				</Badge>
 			)}
 			<div className="hidden sm:block">
@@ -157,11 +167,11 @@ function MobileNavbar() {
 							))}
 						</div>
 						<div className="pt-4 border-t border-border mt-4 sm:hidden">
-							{role === "VIEWER" && (
+							{role === "ADMIN" && (
 								<div className="mb-4 px-2">
-									<Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
-										<Eye className="w-2.5 h-2.5" />
-										Viewer
+									<Badge variant="secondary" className="gap-1 bg-emerald-500/10 text-emerald-500 border-emerald-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
+										<ShieldCheck className="w-2.5 h-2.5" />
+										Admin
 									</Badge>
 								</div>
 							)}
@@ -170,6 +180,14 @@ function MobileNavbar() {
 									<Badge variant="secondary" className="gap-1 bg-blue-500/10 text-blue-500 border-blue-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
 										<Pencil className="w-2.5 h-2.5" />
 										Editor
+									</Badge>
+								</div>
+							)}
+							{role === "VIEWER" && (
+								<div className="mb-4 px-2">
+									<Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
+										<Eye className="w-2.5 h-2.5" />
+										Viewer
 									</Badge>
 								</div>
 							)}

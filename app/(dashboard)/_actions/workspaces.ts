@@ -29,6 +29,10 @@ export async function GetWorkspaces() {
 	}));
 }
 
+export async function GetActiveWorkspace() {
+	return await getActiveWorkspace();
+}
+
 export async function SwitchWorkspace(workspaceId: string) {
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { GetWorkspaces } from "@/app/(dashboard)/_actions/workspaces";
+import { GetWorkspaces, GetActiveWorkspace } from "@/app/(dashboard)/_actions/workspaces";
 import React from "react";
 
 interface PermissionGuardProps {
@@ -28,18 +28,13 @@ export function PermissionGuard({
     fallback = null,
     children,
 }: PermissionGuardProps) {
-    const { data: workspaces } = useQuery({
-        queryKey: ["workspaces"],
-        queryFn: () => GetWorkspaces(),
+    const { data: activeWorkspace } = useQuery({
+        queryKey: ["active-workspace"],
+        queryFn: () => GetActiveWorkspace(),
     });
-
-    // Default to the first workspace (active one)
-    const activeWorkspace = workspaces?.[0];
 
     // While loading, show children to avoid flicker. The server actions
     // have their own RBAC checks as a safety net.
-    if (!workspaces) return <>{children}</>;
-
     if (!activeWorkspace) return <>{children}</>;
 
     if (allowedRoles.includes(activeWorkspace.role)) {
@@ -53,10 +48,10 @@ export function PermissionGuard({
  * Hook to get the current user's role in the active workspace.
  */
 export function useWorkspaceRole(): string | null {
-    const { data: workspaces } = useQuery({
-        queryKey: ["workspaces"],
-        queryFn: () => GetWorkspaces(),
+    const { data: activeWorkspace } = useQuery({
+        queryKey: ["active-workspace"],
+        queryFn: () => GetActiveWorkspace(),
     });
 
-    return workspaces?.[0]?.role ?? null;
+    return activeWorkspace?.role ?? null;
 }
