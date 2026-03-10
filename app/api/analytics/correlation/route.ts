@@ -3,11 +3,17 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { eachDayOfInterval, format, parseISO, startOfDay } from "date-fns";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
+	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace) {
+		throw new Error("No active workspace found");
 	}
 
 	const { searchParams } = new URL(request.url);
@@ -37,7 +43,7 @@ export async function GET(request: Request) {
 	// Fetch transactions for both categories
 	const transactions = await prisma.transaction.findMany({
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			category: {
 				in: [queryParams.data.cat1, queryParams.data.cat2],
 			},

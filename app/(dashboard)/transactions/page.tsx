@@ -10,6 +10,7 @@ import { ManageRecurringTransactions } from "./_components/ManageRecurringTransa
 import { DetectSubscriptionDialog } from "./_components/DetectSubscriptionDialog";
 import AdvancedSearch, { SearchFilters } from "../_components/AdvancedSearch";
 import { useQuery } from "@tanstack/react-query";
+import { PermissionGuard } from "@/components/PermissionGuard";
 import CSVImportDialog from "./_components/CSVImportDialog";
 
 const TransactionPage = () => {
@@ -59,9 +60,13 @@ const TransactionPage = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <DetectSubscriptionDialog />
-            <ManageRecurringTransactions />
-            <CSVImportDialog />
+            <PermissionGuard>
+              <div className="flex flex-wrap items-center gap-2">
+                <DetectSubscriptionDialog />
+                <ManageRecurringTransactions />
+                <CSVImportDialog />
+              </div>
+            </PermissionGuard>
             {searchFilters &&
               Object.values(searchFilters).some(
                 (val) =>

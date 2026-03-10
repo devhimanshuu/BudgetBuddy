@@ -1,12 +1,16 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
   const user = await currentUser();
   if (!user) {
     redirect("/sign-in");
   }
+
+  const workspace = await getActiveWorkspace();
+  const workspaceId = workspace?.id;
 
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -30,7 +34,7 @@ export async function GET(request: Request) {
   const currentTransactions = await prisma.transaction.groupBy({
     by: ["category", "categoryIcon"],
     where: {
-      userId: user.id,
+      ...(workspaceId ? { workspaceId } : { userId: user.id }),
       type: "expense",
       date: {
         gte: currentMonthStart,
@@ -56,7 +60,7 @@ export async function GET(request: Request) {
   const previousTransactions = await prisma.transaction.groupBy({
     by: ["category", "categoryIcon"],
     where: {
-      userId: user.id,
+      ...(workspaceId ? { workspaceId } : { userId: user.id }),
       type: "expense",
       date: {
         gte: previousMonthStart,

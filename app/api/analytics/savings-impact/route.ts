@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { differenceInMonths, addMonths, differenceInDays } from "date-fns";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -9,11 +10,16 @@ export async function GET(request: Request) {
 		redirect("/sign-in");
 	}
 
+	const workspace = await getActiveWorkspace();
+	if (!workspace) {
+		throw new Error("No active workspace found");
+	}
+
 	// 1. Calculate average monthly savings (Income - Expense) over last 3 months
 	const now = new Date();
 	const history = await prisma.yearHistory.findMany({
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			OR: [
 				{
 					year: now.getFullYear(),
@@ -39,7 +45,7 @@ export async function GET(request: Request) {
 	// 2. Fetch active savings goals
 	const goals = await prisma.savingsGoal.findMany({
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			isCompleted: false,
 		},
 		orderBy: {

@@ -3,11 +3,17 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getDaysInMonth } from "date-fns";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
   const user = await currentUser();
   if (!user) {
     redirect("/sign-in");
+  }
+
+  const workspace = await getActiveWorkspace();
+  if (!workspace) {
+    throw new Error("No active workspace found");
   }
 
   const { searchParams } = new URL(request.url);
@@ -31,7 +37,7 @@ export async function GET(request: Request) {
   // Get daily aggregated data - query all data and filter in memory
   const stats = await prisma.monthlyHistory.findMany({
     where: {
-      userId: user.id,
+      workspaceId: workspace.id,
     },
     orderBy: [{ year: "asc" }, { month: "asc" }, { day: "asc" }],
   });

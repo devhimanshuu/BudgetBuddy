@@ -2,11 +2,17 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
+	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace) {
+		throw new Error("No active workspace found");
 	}
 
 	const { searchParams } = new URL(request.url);
@@ -33,7 +39,7 @@ export async function GET(request: Request) {
 	const incomeCategories = await prisma.transaction.groupBy({
 		by: ["category"],
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			type: "income",
 			date: dateRange,
 		},
@@ -46,7 +52,7 @@ export async function GET(request: Request) {
 	const expenseCategories = await prisma.transaction.groupBy({
 		by: ["category"],
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			type: "expense",
 			date: dateRange,
 		},

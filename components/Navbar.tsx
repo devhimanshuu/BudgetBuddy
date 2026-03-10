@@ -17,6 +17,7 @@ import {
 	TrendingUp,
 	Eye,
 	EyeOff,
+	Pencil,
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeCustomizer } from "./ThemeCustomizer";
@@ -91,6 +92,15 @@ function NavbarActions() {
 					Viewer
 				</Badge>
 			)}
+			{role === "EDITOR" && (
+				<Badge
+					variant="outline"
+					className="flex gap-1.5 bg-gradient-to-r from-blue-400/10 to-cyan-500/10 text-cyan-500 border-cyan-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
+				>
+					<Pencil className="w-3 h-3 text-blue-500" />
+					Editor
+				</Badge>
+			)}
 			<div className="hidden sm:block">
 				<WorkspaceSwitcher />
 			</div>
@@ -152,6 +162,14 @@ function MobileNavbar() {
 									<Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-500 border-amber-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
 										<Eye className="w-2.5 h-2.5" />
 										Viewer
+									</Badge>
+								</div>
+							)}
+							{role === "EDITOR" && (
+								<div className="mb-4 px-2">
+									<Badge variant="secondary" className="gap-1 bg-blue-500/10 text-blue-500 border-blue-500/20 h-6 px-1.5 text-[10px] uppercase font-bold tracking-wider inline-flex">
+										<Pencil className="w-2.5 h-2.5" />
+										Editor
 									</Badge>
 								</div>
 							)}

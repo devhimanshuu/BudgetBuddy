@@ -112,20 +112,22 @@ export default function BudgetProgressCards({
                       )}
 
                       {/* Quick-Add Expense Button */}
-                      <CreateTransactionDialog
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        }
-                        type="expense"
-                        initialCategory={budget.category}
-                        initialCategoryIcon={budget.categoryIcon}
-                      />
+                      <PermissionGuard>
+                        <CreateTransactionDialog
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          }
+                          type="expense"
+                          initialCategory={budget.category}
+                          initialCategoryIcon={budget.categoryIcon}
+                        />
+                      </PermissionGuard>
 
                       <BudgetTransactionDialog
                         category={budget.category}

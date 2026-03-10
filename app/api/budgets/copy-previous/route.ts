@@ -2,11 +2,21 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function POST(request: Request) {
   const user = await currentUser();
   if (!user) {
     redirect("/sign-in");
+  }
+
+  const workspace = await getActiveWorkspace();
+  if (!workspace) {
+    return Response.json({ error: "No active workspace found" }, { status: 400 });
+  }
+
+  if (workspace.role === "VIEWER") {
+    return Response.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const body = await request.json();
@@ -36,7 +46,7 @@ export async function POST(request: Request) {
   // Check if target month already has budgets
   const existingBudgets = await prisma.budget.findMany({
     where: {
-      userId: user.id,
+      workspaceId: workspace.id,
       month: targetMonth,
       year: targetYear,
     },
@@ -55,7 +65,7 @@ export async function POST(request: Request) {
   // Get previous month's budgets
   const previousBudgets = await prisma.budget.findMany({
     where: {
-      userId: user.id,
+      workspaceId: workspace.id,
       month: previousMonth,
       year: previousYear,
     },
@@ -72,6 +82,7 @@ export async function POST(request: Request) {
   const newBudgets = await prisma.budget.createMany({
     data: previousBudgets.map((budget) => ({
       userId: user.id,
+      workspaceId: workspace.id,
       category: budget.category,
       categoryIcon: budget.categoryIcon,
       amount: budget.amount,

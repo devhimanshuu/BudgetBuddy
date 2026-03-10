@@ -4,11 +4,17 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { startOfMonth, endOfMonth, eachDayOfInterval, format } from "date-fns";
 import { CalendarDayData } from "@/lib/type";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
 	if (!user) {
 		redirect("/sign-in");
+	}
+
+	const workspace = await getActiveWorkspace();
+	if (!workspace) {
+		throw new Error("No active workspace found");
 	}
 
 	const { searchParams } = new URL(request.url);
@@ -39,7 +45,7 @@ export async function GET(request: Request) {
 	// Fetch all transactions for the month
 	const transactions = await prisma.transaction.findMany({
 		where: {
-			userId: user.id,
+			workspaceId: workspace.id,
 			date: {
 				gte: startDate,
 				lte: endDate,
