@@ -48,6 +48,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";
 import AlertSettingsCard from "./_components/AlertSettingsCard";
 import { WorkspaceMembers } from "./_components/WorkspaceMembers";
+import ActivityFeed from "./_components/ActivityFeed";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import {
   AlertDialog,
@@ -96,6 +97,7 @@ const page = () => {
         <AlertSettingsCard />
 
         <WorkspaceMembers />
+        <ActivityFeed />
 
         <CategoryList type="income" />
         <CategoryList type="expense" />
@@ -292,19 +294,21 @@ function CategoryList({ type }: { type: TransactionType }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant={cleanupMode ? "destructive" : "outline"}
-                size="sm"
-                className="gap-2"
-                onClick={() => setCleanupMode(!cleanupMode)}
-              >
-                <Eraser className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">{cleanupMode ? "Exit Cleanup" : "Cleanup Mode"}</span>
-                <span className="sm:hidden">{cleanupMode ? "Exit" : "Cleanup"}</span>
-              </Button>
+              <PermissionGuard>
+                <Button
+                  variant={cleanupMode ? "destructive" : "outline"}
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setCleanupMode(!cleanupMode)}
+                >
+                  <Eraser className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">{cleanupMode ? "Exit Cleanup" : "Cleanup Mode"}</span>
+                  <span className="sm:hidden">{cleanupMode ? "Exit" : "Cleanup"}</span>
+                </Button>
+              </PermissionGuard>
 
               {cleanupMode && sortedCategories.length > 0 && (
-                <>
+                <PermissionGuard>
                   <Button
                     variant="destructive"
                     size="sm"
@@ -343,7 +347,7 @@ function CategoryList({ type }: { type: TransactionType }) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </>
+                </PermissionGuard>
               )}
             </div>
           </div>
@@ -582,19 +586,21 @@ function TagList() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant={cleanupMode ? "destructive" : "outline"}
-                size="sm"
-                className="gap-2"
-                onClick={() => setCleanupMode(!cleanupMode)}
-              >
-                <Eraser className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">{cleanupMode ? "Exit Cleanup" : "Cleanup Mode"}</span>
-                <span className="sm:hidden">{cleanupMode ? "Exit" : "Cleanup"}</span>
-              </Button>
+              <PermissionGuard>
+                <Button
+                  variant={cleanupMode ? "destructive" : "outline"}
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setCleanupMode(!cleanupMode)}
+                >
+                  <Eraser className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">{cleanupMode ? "Exit Cleanup" : "Cleanup Mode"}</span>
+                  <span className="sm:hidden">{cleanupMode ? "Exit" : "Cleanup"}</span>
+                </Button>
+              </PermissionGuard>
 
               {cleanupMode && sortedTags.length > 0 && (
-                <>
+                <PermissionGuard>
                   <Button
                     variant="destructive"
                     size="sm"
@@ -633,7 +639,7 @@ function TagList() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </>
+                </PermissionGuard>
               )}
             </div>
           </div>

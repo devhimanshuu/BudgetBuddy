@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { UpdateAlertSettings } from "../../_actions/user-settings";
 import { useState, useEffect } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { PermissionGuard } from "@/components/PermissionGuard";
 
 export default function AlertSettingsCard() {
     const queryClient = useQueryClient();
@@ -91,14 +92,25 @@ export default function AlertSettingsCard() {
                             </div>
                         </div>
                         <div className="pt-2">
-                            <Slider
-                                value={[spendingLimitThreshold]}
-                                onValueChange={(vals) => setSpendingLimitThreshold(vals[0])}
-                                max={100}
-                                min={50}
-                                step={5}
-                                className="py-4"
-                            />
+                            <PermissionGuard fallback={
+                                <div className="py-4 px-1">
+                                    <div className="h-2 w-full bg-orange-500/20 rounded-full relative">
+                                        <div 
+                                            className="h-2 bg-orange-500 rounded-full" 
+                                            style={{ width: `${spendingLimitThreshold}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            }>
+                                <Slider
+                                    value={[spendingLimitThreshold]}
+                                    onValueChange={(vals) => setSpendingLimitThreshold(vals[0])}
+                                    max={100}
+                                    min={50}
+                                    step={5}
+                                    className="py-4"
+                                />
+                            </PermissionGuard>
                             <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
                                 <span>Cautious (50%)</span>
                                 <span>Critical (100%)</span>
@@ -120,10 +132,14 @@ export default function AlertSettingsCard() {
                                     Detect and notify about unusually large transactions
                                 </p>
                             </div>
-                            <Switch
-                                checked={enableAnomalyDetection}
-                                onCheckedChange={setEnableAnomalyDetection}
-                            />
+                            <PermissionGuard fallback={
+                                <Switch checked={enableAnomalyDetection} disabled />
+                            }>
+                                <Switch
+                                    checked={enableAnomalyDetection}
+                                    onCheckedChange={setEnableAnomalyDetection}
+                                />
+                            </PermissionGuard>
                         </div>
 
                         {enableAnomalyDetection && (
@@ -135,14 +151,25 @@ export default function AlertSettingsCard() {
                                     </p>
                                 </div>
                                 <div className="pt-2">
-                                    <Slider
-                                        value={[anomalyThreshold]}
-                                        onValueChange={(vals) => setAnomalyThreshold(vals[0])}
-                                        max={10.0}
-                                        min={1.5}
-                                        step={0.5}
-                                        className="py-4"
-                                    />
+                                    <PermissionGuard fallback={
+                                        <div className="py-4 px-1">
+                                            <div className="h-2 w-full bg-blue-500/20 rounded-full relative">
+                                                <div 
+                                                    className="h-2 bg-blue-500 rounded-full" 
+                                                    style={{ width: `${(anomalyThreshold - 1.5) / 8.5 * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    }>
+                                        <Slider
+                                            value={[anomalyThreshold]}
+                                            onValueChange={(vals) => setAnomalyThreshold(vals[0])}
+                                            max={10.0}
+                                            min={1.5}
+                                            step={0.5}
+                                            className="py-4"
+                                        />
+                                    </PermissionGuard>
                                     <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
                                         <span>Sensitive (1.5x)</span>
                                         <span>Relaxed (10x)</span>
@@ -152,24 +179,26 @@ export default function AlertSettingsCard() {
                         )}
                     </div>
 
-                    <div className="pt-2">
-                        <Button
-                            className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold shadow-lg shadow-orange-500/20 rounded-xl"
-                            onClick={() => mutation.mutate({
-                                spendingLimitThreshold,
-                                enableAnomalyDetection,
-                                anomalyThreshold
-                            })}
-                            disabled={mutation.isPending || !hasChanges}
-                        >
-                            {mutation.isPending ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            ) : (
-                                <Save className="w-4 h-4 mr-2" />
-                            )}
-                            Save Alert Settings
-                        </Button>
-                    </div>
+                    <PermissionGuard>
+                        <div className="pt-2">
+                            <Button
+                                className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold shadow-lg shadow-orange-500/20 rounded-xl"
+                                onClick={() => mutation.mutate({
+                                    spendingLimitThreshold,
+                                    enableAnomalyDetection,
+                                    anomalyThreshold
+                                })}
+                                disabled={mutation.isPending || !hasChanges}
+                            >
+                                {mutation.isPending ? (
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                    <Save className="w-4 h-4 mr-2" />
+                                )}
+                                Save Alert Settings
+                            </Button>
+                        </div>
+                    </PermissionGuard>
                 </CardContent>
             </Card>
         </SkeletonWrapper>

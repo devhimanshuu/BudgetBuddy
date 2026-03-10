@@ -11,6 +11,7 @@ import {
     UpdateMemberRole,
     RevokeInvite,
 } from "@/app/(dashboard)/_actions/workspaces";
+import CreateWorkspaceDialog from "@/components/CreateWorkspaceDialog";
 import {
     Card,
     CardContent,
@@ -113,7 +114,10 @@ export function WorkspaceMembers() {
         <div className="space-y-6">
             {personalWorkspaces.length > 0 && (
                 <div className="space-y-4">
-                    <h3 className="text-xl font-bold">Your Workspace</h3>
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-bold">Your Workspace</h3>
+                        <CreateWorkspaceDialog />
+                    </div>
                     {personalWorkspaces.map((workspace: any) => (
                         <WorkspaceCard key={workspace.id} workspace={workspace} />
                     ))}

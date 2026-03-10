@@ -85,7 +85,7 @@ function NavbarActions() {
 			{role === "VIEWER" && (
 				<Badge
 					variant="outline"
-					className="hidden lg:flex gap-1.5 bg-gradient-to-r from-amber-400/10 to-orange-500/10 text-orange-500 border-orange-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
+					className="flex gap-1.5 bg-gradient-to-r from-amber-400/10 to-orange-500/10 text-orange-500 border-orange-500/30 h-[26px] px-2 text-[10px] uppercase font-bold tracking-widest shrink-0 glass"
 				>
 					<Eye className="w-3 h-3 text-amber-500" />
 					Viewer

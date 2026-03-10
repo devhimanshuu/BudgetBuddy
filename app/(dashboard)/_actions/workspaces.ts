@@ -62,6 +62,10 @@ export async function CreateWorkspace(name: string) {
 		where: { userId: user.id },
 	});
 
+	const userName = user.firstName
+		? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+		: user.emailAddresses[0].emailAddress.split("@")[0];
+
 	const workspace = await prisma.workspace.create({
 		data: {
 			name,
@@ -80,7 +84,8 @@ export async function CreateWorkspace(name: string) {
 		workspaceId: workspace.id,
 		userId: user.id,
 		type: "WORKSPACE_CREATED",
-		description: `Created workspace: ${name}`,
+		description: `${userName} created workspace: ${name}`,
+		metadata: { userName },
 	});
 
 	return workspace;
@@ -202,12 +207,16 @@ export async function InviteMember(
 
 	revalidatePath("/manage");
 
+	const userName = user.firstName
+		? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+		: user.emailAddresses[0].emailAddress.split("@")[0];
+
 	await logActivity({
 		workspaceId,
 		userId: user.id,
 		type: "MEMBER_INVITED",
-		description: `Invited ${email} as ${role}`,
-		metadata: { email, role },
+		description: `${userName} invited ${email} as ${role}`,
+		metadata: { email, role, userName },
 	});
 
 	return { success: true, inviteLink, token };
@@ -257,11 +266,16 @@ export async function AcceptInvite(token: string) {
 		prisma.invite.delete({ where: { id: invite.id } }),
 	]);
 
+	const userName = user.firstName
+		? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+		: user.emailAddresses[0].emailAddress.split("@")[0];
+
 	await logActivity({
 		workspaceId: invite.workspaceId,
 		userId: user.id,
 		type: "MEMBER_JOINED",
-		description: `Joined the workspace via invite`,
+		description: `${userName} joined the workspace via invite`,
+		metadata: { userName },
 	});
 
 	const cookieStore = await cookies();

@@ -22,6 +22,10 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		redirect("/sign-in");
 	}
 
+	const userName = user.firstName
+		? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+		: user.emailAddresses[0].emailAddress.split("@")[0];
+
 	const workspace = await getActiveWorkspace();
 	if (!workspace) {
 		throw new Error("No active workspace found");
@@ -193,8 +197,9 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		workspaceId: workspace.id,
 		userId: user.id,
 		type: "TRANSACTION_CREATED",
-		description: `Added ${type} transaction: ${description || category} ($${amount})`,
+		description: `${userName} added a ${type} transaction: ${description || category} ($${amount})`,
 		metadata: {
+			userName,
 			amount,
 			type,
 			category,
