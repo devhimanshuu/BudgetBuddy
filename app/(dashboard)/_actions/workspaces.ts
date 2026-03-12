@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
@@ -23,10 +23,50 @@ export async function GetWorkspaces() {
 		},
 	});
 
-	return memberships.map((m: { workspace: any; role: string }) => ({
-		...m.workspace,
-		role: m.role,
-	}));
+	// Get clerk client to fetch owner names for shared workspaces
+	const client = await clerkClient();
+
+	// Find unique owner IDs for workspaces where the user is not the owner
+	// and the workspace has a generic name or needs owner identification
+	const otherOwnerIds = Array.from(
+		new Set(
+			memberships
+				.filter((m) => m.workspace.ownerId !== user.id)
+				.map((m) => m.workspace.ownerId),
+		),
+	);
+
+	const owners =
+		otherOwnerIds.length > 0
+			? await client.users.getUserList({ userId: otherOwnerIds })
+			: { data: [] };
+
+	const ownerMap = new Map();
+	owners.data.forEach((u) => {
+		const name = u.firstName
+			? u.lastName
+				? `${u.firstName} ${u.lastName}`
+				: u.firstName
+			: (u.emailAddresses[0]?.emailAddress.split("@")[0] || "Member");
+		ownerMap.set(u.id, name);
+	});
+
+	return memberships.map((m) => {
+		let name = m.workspace.name;
+
+		// If it's a shared workspace and the name is generic, or if the user specifically
+		// requested "Inviter's Workspace" style for shared ones
+		if (m.userId !== m.workspace.ownerId && name === "Personal Workspace") {
+			const ownerName = ownerMap.get(m.workspace.ownerId) || "Admin";
+			name = `${ownerName}'s Workspace`;
+		}
+
+		return {
+			...m.workspace,
+			name,
+			role: m.role,
+		};
+	});
 }
 
 export async function GetActiveWorkspace() {

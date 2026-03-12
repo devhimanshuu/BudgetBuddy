@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
@@ -26,8 +26,20 @@ export async function getActiveWorkspace() {
 		});
 
 		if (membership) {
+			let name = membership.workspace.name;
+			if (membership.userId !== membership.workspace.ownerId && name === "Personal Workspace") {
+				try {
+					const client = await clerkClient();
+					const owner = await client.users.getUser(membership.workspace.ownerId);
+					const ownerName = owner.firstName ? (owner.lastName ? `${owner.firstName} ${owner.lastName}` : owner.firstName) : (owner.emailAddresses[0]?.emailAddress.split("@")[0] || "Admin");
+					name = `${ownerName}'s Workspace`;
+				} catch (error) {
+					console.error("Failed to fetch workspace owner:", error);
+				}
+			}
 			return {
 				...membership.workspace,
+				name,
 				role: membership.role,
 			};
 		}
@@ -65,8 +77,21 @@ export async function getActiveWorkspace() {
 		return { ...workspace, role: "ADMIN" };
 	}
 
+	let name = firstMembership.workspace.name;
+	if (firstMembership.userId !== firstMembership.workspace.ownerId && name === "Personal Workspace") {
+		try {
+			const client = await clerkClient();
+			const owner = await client.users.getUser(firstMembership.workspace.ownerId);
+			const ownerName = owner.firstName ? (owner.lastName ? `${owner.firstName} ${owner.lastName}` : owner.firstName) : (owner.emailAddresses[0]?.emailAddress.split("@")[0] || "Admin");
+			name = `${ownerName}'s Workspace`;
+		} catch (error) {
+			console.error("Failed to fetch workspace owner:", error);
+		}
+	}
+
 	return {
 		...firstMembership.workspace,
+		name,
 		role: firstMembership.role,
 	};
 }
