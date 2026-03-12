@@ -80,25 +80,8 @@ const page = () => {
           <PermissionGuard allowedRoles={["ADMIN"]}>
             <WorkspaceSettingsCard />
           </PermissionGuard>
-          <VibeControls />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-500" />
-                Personal Currency
-              </CardTitle>
-              <CardDescription>
-                Default currency for your personal spaces
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CurrencyComboBox />
-            </CardContent>
-          </Card>
           <AlertSettingsCard />
+          <VibeControls />
         </div>
 
         <WorkspaceMembers />
@@ -119,17 +102,31 @@ function VibeControls() {
   if (!hydrated) return null;
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5 shadow-lg">
+    <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5 shadow-xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-primary">
           <Settings2 className="w-5 h-5" />
-          UI Vibe Controls
+          Personal Preferences
         </CardTitle>
         <CardDescription>
-          Customize how your dashboard and categories look
+          Customize your experience, currency, and UI appearance
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Personal Currency */}
+        <div className="space-y-2 pb-2">
+          <Label className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80 flex items-center gap-2">
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+            Default Currency
+          </Label>
+          <CurrencyComboBox />
+          <p className="text-[10px] text-muted-foreground">
+            Currency for your personal dashboard and transactions
+          </p>
+        </div>
+
+        <div className="h-px bg-border/50" />
+
         <div className="flex items-center justify-between rounded-xl border border-dashed border-primary/20 p-4 bg-background/50">
           <div className="space-y-0.5">
             <Label className="text-base flex items-center gap-2">

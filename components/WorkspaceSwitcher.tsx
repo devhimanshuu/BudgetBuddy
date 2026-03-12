@@ -41,6 +41,12 @@ interface WorkspaceItem {
     updatedAt: Date;
 }
 
+const ROLE_STYLES: Record<string, string> = {
+    ADMIN: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    EDITOR: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    VIEWER: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+};
+
 export function WorkspaceSwitcher() {
     const [open, setOpen] = useState(false);
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
@@ -103,7 +109,7 @@ export function WorkspaceSwitcher() {
                     <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity ml-1" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[240px] p-0 border-border bg-background/95 backdrop-blur-md shadow-2xl rounded-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[260px] p-0 border-border bg-background/95 backdrop-blur-md shadow-2xl rounded-xl" align="start" sideOffset={8}>
                 <Command className="bg-transparent">
                     <div className="p-2 border-b border-border/50">
                         <CommandInput placeholder="Search workspace..." className="h-8 border-none focus:ring-0 text-xs" />
@@ -119,18 +125,23 @@ export function WorkspaceSwitcher() {
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className={cn(
-                                            "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border border-border/50",
-                                            activeWorkspace?.id === workspace.id ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground"
+                                            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border border-border/50 shadow-sm",
+                                            activeWorkspace?.id === workspace.id ? "bg-primary/10 text-primary border-primary/20" : "bg-muted/50 text-muted-foreground"
                                         )}>
-                                            <LayoutDashboard className="h-3.5 w-3.5" />
+                                            <LayoutDashboard className="h-4 w-4" />
                                         </div>
-                                        <div className="flex flex-col min-w-0">
-                                            <span className="text-sm font-semibold truncate leading-none mb-1">{workspace.name}</span>
-                                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{workspace.role}</span>
+                                        <div className="flex flex-col min-w-0 gap-0.5">
+                                            <span className="text-sm font-semibold truncate leading-none">{workspace.name}</span>
+                                            <div className={cn(
+                                                "w-fit px-1 py-0 rounded border text-[8px] font-black uppercase tracking-tighter",
+                                                ROLE_STYLES[workspace.role] || "bg-muted text-muted-foreground"
+                                            )}>
+                                                {workspace.role}
+                                            </div>
                                         </div>
                                     </div>
                                     {activeWorkspace?.id === workspace.id && (
-                                        <div className="bg-primary/10 rounded-full p-1">
+                                        <div className="bg-primary/10 rounded-full p-1 border border-primary/20">
                                             <Check className="h-3 w-3 text-primary" />
                                         </div>
                                     )}
