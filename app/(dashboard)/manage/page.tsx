@@ -48,6 +48,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";
 import AlertSettingsCard from "./_components/AlertSettingsCard";
 import { WorkspaceMembers } from "./_components/WorkspaceMembers";
+import { WorkspaceSettingsCard } from "./_components/WorkspaceSettingsCard";
 import ActivityFeed from "./_components/ActivityFeed";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import {
@@ -76,25 +77,29 @@ const page = () => {
       </div>
       <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <PermissionGuard allowedRoles={["ADMIN"]}>
+            <WorkspaceSettingsCard />
+          </PermissionGuard>
+          <VibeControls />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-500" />
-                Currency Settings
+                Personal Currency
               </CardTitle>
               <CardDescription>
-                Set your default currency for transactions
+                Default currency for your personal spaces
               </CardDescription>
             </CardHeader>
             <CardContent>
               <CurrencyComboBox />
             </CardContent>
           </Card>
-
-          <VibeControls />
+          <AlertSettingsCard />
         </div>
-
-        <AlertSettingsCard />
 
         <WorkspaceMembers />
         <ActivityFeed />

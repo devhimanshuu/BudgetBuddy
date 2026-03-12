@@ -141,14 +141,14 @@ function getDailyQuote() {
 	return QUOTES[index];
 }
 
-export async function getPersona(userId: string): Promise<PersonaData> {
+export async function getPersona(userId: string, workspaceId?: string): Promise<PersonaData> {
 	const twoMonthsAgo = new Date();
 	twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
 	const [transactions, budgets, userSettings] = await Promise.all([
 		prisma.transaction.findMany({
 			where: {
-				userId: userId,
+				...(workspaceId ? { workspaceId } : { userId: userId }),
 				date: {
 					gte: twoMonthsAgo,
 				},
@@ -156,7 +156,7 @@ export async function getPersona(userId: string): Promise<PersonaData> {
 			orderBy: { date: "desc" },
 		}),
 		prisma.budget.findMany({
-			where: { userId: userId },
+			where: { ...(workspaceId ? { workspaceId } : { userId: userId }) },
 		}),
 		prisma.userSettings.findUnique({
 			where: { userId },

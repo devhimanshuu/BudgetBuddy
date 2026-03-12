@@ -38,7 +38,7 @@ async function page() {
         getActiveWorkspace()
     ]);
 
-    const personaData = await getPersona(user.id);
+    const personaData = await getPersona(user.id, workspace?.id);
 
     if (!userSettings) {
         redirect("/wizard");
@@ -51,9 +51,16 @@ async function page() {
     return (
         <div className="h-full bg-background ">
             <DueTransactionsPopup userSettings={userSettings} />
-            <div className="border-b bg-card">
+            <div className="border-b bg-card shadow-sm">
                 <div className="container flex flex-wrap items-center justify-between gap-6 py-4 3xl:gap-8 4xl:py-8">
-                    <p className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl">Hello, {user.firstName}</p>
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                            <span className="hover:text-primary cursor-default transition-colors">{workspace?.name || "Personal Workspace"}</span>
+                            <span>/</span>
+                            <span className="text-primary/60">Dashboard</span>
+                        </div>
+                        <p className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Hello, {user.firstName}</p>
+                    </div>
 
                     <div className="flex items-center gap-3 3xl:gap-4 4xl:gap-6">
                         <CreateTransactionDialog

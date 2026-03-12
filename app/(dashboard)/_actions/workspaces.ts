@@ -156,7 +156,26 @@ export async function GetWorkspaceMembers(workspaceId: string) {
 		orderBy: { createdAt: "asc" },
 	});
 
-	return members;
+	// Enrich with Clerk data
+	const client = await clerkClient();
+	const userIds = members.map((m) => m.userId);
+	const clerkUsers = await client.users.getUserList({ userId: userIds });
+
+	return members.map((m) => {
+		const clerkUser = clerkUsers.data.find((u) => u.id === m.userId);
+		return {
+			...m,
+			name: clerkUser
+				? clerkUser.firstName
+					? clerkUser.lastName
+						? `${clerkUser.firstName} ${clerkUser.lastName}`
+						: clerkUser.firstName
+					: clerkUser.emailAddresses[0]?.emailAddress.split("@")[0]
+				: "Unknown User",
+			email: clerkUser?.emailAddresses[0]?.emailAddress || "No email",
+			imageUrl: clerkUser?.imageUrl,
+		};
+	});
 }
 
 export async function GetPendingInvites(workspaceId: string) {
@@ -440,4 +459,29 @@ export async function RevokeInvite(inviteId: string) {
 	});
 
 	return { success: true };
+}
+export async function UpdateWorkspace(workspaceId: string, data: { name?: string; currency?: string }) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const canManage = await checkPermissions(workspaceId, ["ADMIN"]);
+	if (!canManage) throw new Error("Only admins can update workspace settings");
+
+	const updatedWorkspace = await prisma.workspace.update({
+		where: { id: workspaceId },
+		data,
+	});
+
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "WORKSPACE_UPDATED",
+		description: `Updated workspace settings`,
+		metadata: data,
+	});
+
+	revalidatePath("/manage");
+	revalidatePath("/dashboard");
+
+	return updatedWorkspace;
 }

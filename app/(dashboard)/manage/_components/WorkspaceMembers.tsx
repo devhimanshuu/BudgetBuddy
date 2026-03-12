@@ -400,6 +400,9 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                                         userId: string;
                                         role: string;
                                         id: string;
+                                        name: string;
+                                        email: string;
+                                        imageUrl?: string;
                                     },
                                     index: number
                                 ) => {
@@ -415,24 +418,29 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                                                 } hover:bg-muted/30 transition-colors`}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                    <span className="text-sm font-medium text-primary">
-                                                        {member.userId
-                                                            .slice(-2)
-                                                            .toUpperCase()}
-                                                    </span>
-                                                </div>
+                                                {member.imageUrl ? (
+                                                    <img
+                                                        src={member.imageUrl}
+                                                        alt={member.name}
+                                                        className="h-8 w-8 rounded-full border border-border"
+                                                    />
+                                                ) : (
+                                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                        <span className="text-xs font-medium text-primary uppercase">
+                                                            {member.name.slice(0, 2)}
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 <div>
-                                                    <p className="text-sm font-medium">
-                                                        {member.userId.slice(
-                                                            0,
-                                                            16
-                                                        )}
-                                                        ...
+                                                    <p className="text-sm font-medium leading-none mb-1">
+                                                        {member.name}
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground leading-none mb-1">
+                                                        {member.email}
                                                     </p>
                                                     <Badge
                                                         variant="outline"
-                                                        className={`text-xs ${roleConfig.color}`}
+                                                        className={`text-[10px] h-4 py-0 ${roleConfig.color}`}
                                                     >
                                                         {roleConfig.icon}
                                                         <span className="ml-1">

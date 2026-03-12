@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
   const user = await currentUser();
@@ -23,6 +24,12 @@ export async function GET(request: Request) {
         currency: "USD",
       },
     });
+  }
+
+  const workspace = await getActiveWorkspace();
+  if (workspace?.currency) {
+    // Override with workspace currency for consistent client-side UI
+    userSettings.currency = workspace.currency;
   }
 
   //Revalidate the home page that uses the user currency
