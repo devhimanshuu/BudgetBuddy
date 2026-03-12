@@ -31,10 +31,12 @@ const typeMap: Record<string, { icon: any; color: string }> = {
 };
 
 export default function ActivityFeed() {
-    const { data: activities, isLoading } = useQuery({
+    const { data, isLoading } = useQuery<{ activities: any[], currency: string }>({
         queryKey: ["workspace-activity"],
         queryFn: () => fetch("/api/activities").then((res) => res.json()),
     });
+
+    const activities = data?.activities;
 
     if (isLoading) {
         return (
@@ -76,7 +78,7 @@ export default function ActivityFeed() {
                     </div>
                 ) : (
                     <div className="divide-y divide-border/50">
-                        {activities.map((activity: any) => {
+                        {activities?.map((activity: any) => {
                             const meta = typeMap[activity.type] || { icon: Clock, color: "text-muted-foreground" };
                             const Icon = meta.icon;
 

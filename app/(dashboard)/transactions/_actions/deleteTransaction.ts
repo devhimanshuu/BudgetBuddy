@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function DeleteTransaction(id: string) {
 	const user = await currentUser();
@@ -92,11 +93,14 @@ export async function DeleteTransaction(id: string) {
 		}),
 	]);
 
+	const formatter = GetFormatterForCurrency(workspace.currency);
+	const formattedAmount = formatter.format(transaction.amount);
+
 	await logActivity({
 		workspaceId: workspaceId,
 		userId: user.id,
 		type: "TRANSACTION_DELETED",
-		description: `Deleted ${transaction.type} transaction: ${transaction.description || transaction.category} ($${transaction.amount})`,
+		description: `Deleted ${transaction.type} transaction: ${transaction.description || transaction.category} (${formattedAmount})`,
 		metadata: {
 			amount: transaction.amount,
 			type: transaction.type,

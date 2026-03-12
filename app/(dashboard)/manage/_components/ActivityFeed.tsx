@@ -12,6 +12,7 @@ import {
     Tag,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { GetFormatterForCurrency } from "@/lib/helper";
 import { 
     Card, 
     CardContent, 
@@ -33,10 +34,13 @@ interface Activity {
 }
 
 export default function ActivityFeed() {
-    const { data: activities, isLoading } = useQuery<Activity[]>({
+    const { data, isLoading } = useQuery<{ activities: Activity[], currency: string }>({
         queryKey: ["workspace-activities"],
         queryFn: () => fetch("/api/activities").then((res) => res.json()),
     });
+
+    const activities = data?.activities;
+    const currency = data?.currency || "USD";
 
     return (
         <Card className="border-primary/10 bg-gradient-to-br from-card to-primary/5">
@@ -62,7 +66,8 @@ export default function ActivityFeed() {
                                 <ActivityItem 
                                     key={activity.id} 
                                     activity={activity} 
-                                    isLast={idx === activities.length - 1}
+                                    currency={currency}
+                                    isLast={idx === (activities?.length || 0) - 1}
                                 />
                             ))
                         ) : (
@@ -79,9 +84,10 @@ export default function ActivityFeed() {
     );
 }
 
-function ActivityItem({ activity, isLast }: { activity: Activity; isLast: boolean }) {
+function ActivityItem({ activity, isLast, currency }: { activity: Activity; isLast: boolean; currency: string }) {
     const Icon = getActivityIcon(activity.type);
     const color = getActivityColor(activity.type);
+    const formatter = GetFormatterForCurrency(currency);
     
     return (
         <div className="flex gap-4 group">
@@ -122,7 +128,7 @@ function ActivityItem({ activity, isLast }: { activity: Activity; isLast: boolea
                                     : "border-red-500/30 text-red-500 bg-red-500/5"
                             )}
                         >
-                            {activity.metadata.type === "income" ? "+" : "-"}${activity.metadata.amount.toLocaleString()}
+                            {activity.metadata.type === "income" ? "+" : "-"}{formatter.format(activity.metadata.amount)}
                         </Badge>
                     )}
                 </div>

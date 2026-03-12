@@ -19,6 +19,7 @@ export async function GET(request: Request) {
 	const activities = await prisma.activity.findMany({
 		where: {
 			workspaceId,
+			...(workspace.role !== "ADMIN" ? { userId: user.id } : {}),
 		},
 		orderBy: {
 			createdAt: "desc",
@@ -26,5 +27,8 @@ export async function GET(request: Request) {
 		take: 10,
 	});
 
-	return Response.json(activities);
+	return Response.json({
+		activities,
+		currency: workspace.currency
+	});
 }

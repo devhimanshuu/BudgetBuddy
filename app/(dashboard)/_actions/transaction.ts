@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { updateStreak, checkAchievements } from "@/lib/gamification";
 
 import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
 	const parsedBody = CreateTransactionSchema.safeParse(form);
@@ -192,12 +193,15 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		console.error("Gamification error:", error);
 	}
 
+	const formatter = GetFormatterForCurrency(workspace.currency);
+	const formattedAmount = formatter.format(amount);
+
 	// Log activity
 	await logActivity({
 		workspaceId: workspace.id,
 		userId: user.id,
 		type: "TRANSACTION_CREATED",
-		description: `${userName} added a ${type} transaction: ${description || category} ($${amount})`,
+		description: `${userName} added a ${type} transaction: ${description || category} (${formattedAmount})`,
 		metadata: {
 			userName,
 			amount,

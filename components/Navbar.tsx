@@ -141,7 +141,14 @@ function NavbarActions() {
 
 function MobileNavbar() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 	const role = useWorkspaceRole();
+
+	React.useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
+	if (!isMounted) return null;
 
 	return (
 		<div className="block border-separate bg-background/80 backdrop-blur-md xl:hidden fixed top-0 left-0 right-0 z-50 border-b shadow-sm">

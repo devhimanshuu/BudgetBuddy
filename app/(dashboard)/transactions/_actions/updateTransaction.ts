@@ -9,6 +9,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function UpdateTransaction(
 	id: string,
@@ -278,11 +279,14 @@ export async function UpdateTransaction(
 		);
 	}
 
+	const formatter = GetFormatterForCurrency(workspace.currency);
+	const formattedAmount = formatter.format(amount);
+
 	await logActivity({
 		workspaceId: workspaceId,
 		userId: user.id,
 		type: "TRANSACTION_UPDATED",
-		description: `Updated ${type} transaction: ${description || category} ($${amount})`,
+		description: `Updated ${type} transaction: ${description || category} (${formattedAmount})`,
 		metadata: {
 			amount,
 			type,
