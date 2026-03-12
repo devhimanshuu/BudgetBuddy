@@ -44,23 +44,23 @@ export default function ActivityFeed() {
 
     return (
         <Card className="border-primary/10 bg-gradient-to-br from-card to-primary/5">
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 border-b border-border/10 shrink-0">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                        <ActivityIcon className="w-5 h-5 text-primary" />
+                    <CardTitle className="flex items-center gap-2 text-xl font-bold text-primary">
+                        <ActivityIcon className="w-5 h-5" />
                         Workspace Activity
                     </CardTitle>
-                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] h-5">
                         Live Feed
                     </Badge>
                 </div>
-                <CardDescription>
-                    Recent actions and updates across your workspace
+                <CardDescription className="text-xs">
+                    Comprehensive log of all actions within this workspace
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 overflow-y-auto max-h-[500px] custom-scrollbar bg-background/5">
                 <SkeletonWrapper isLoading={isLoading}>
-                    <div className="space-y-4">
+                    <div className="divide-y divide-border/30">
                         {activities && activities.length > 0 ? (
                             activities.map((activity, idx) => (
                                 <ActivityItem 
@@ -90,46 +90,47 @@ function ActivityItem({ activity, isLast, currency }: { activity: Activity; isLa
     const formatter = GetFormatterForCurrency(currency);
     
     return (
-        <div className="flex gap-4 group">
-            <div className="flex flex-col items-center">
+        <div className="flex gap-4 p-4 transition-all hover:bg-muted/40 group relative overflow-hidden">
+            <div className="shrink-0 flex flex-col items-center">
                 <div className={cn(
-                    "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm border",
+                    "w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-border/50 bg-background",
                     color
                 )}>
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-5 h-5 transition-transform group-hover:scale-110" />
                 </div>
-                {!isLast && <div className="w-px flex-grow bg-border my-1 group-hover:bg-primary/30 transition-colors" />}
             </div>
-            <div className="pb-6 w-full min-w-0">
+            <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                        <p className="text-sm font-semibold leading-none mb-1.5 truncate">
+                        <p className="text-sm font-bold text-foreground leading-snug mb-1 group-hover:text-primary transition-colors">
                             {activity.description}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1 opacity-80">
-                                <User className="w-3 h-3" />
+                        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                            <span className="flex items-center gap-1.5 font-medium">
+                                <User className="w-3 h-3 text-primary/60" />
                                 {activity.userId === "system" ? "System" : (activity.metadata?.userName || "Member")}
                             </span>
                             <span className="w-1 h-1 rounded-full bg-border" />
-                            <span className="flex items-center gap-1 opacity-80">
-                                <Clock className="w-3 h-3" />
+                            <span className="flex items-center gap-1.5">
+                                <Clock className="w-3 h-3 text-primary/60" />
                                 {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                             </span>
                         </div>
                     </div>
                     {activity.metadata?.amount && (
-                        <Badge 
-                            variant="outline" 
-                            className={cn(
-                                "shrink-0 font-mono",
-                                activity.metadata.type === "income" 
-                                    ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5" 
-                                    : "border-red-500/30 text-red-500 bg-red-500/5"
-                            )}
-                        >
-                            {activity.metadata.type === "income" ? "+" : "-"}{formatter.format(activity.metadata.amount)}
-                        </Badge>
+                        <div className="text-right shrink-0">
+                            <Badge 
+                                variant="outline" 
+                                className={cn(
+                                    "font-mono text-xs font-bold",
+                                    activity.metadata.type === "income" 
+                                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5" 
+                                        : "border-red-500/30 text-red-500 bg-red-500/5"
+                                )}
+                            >
+                                {activity.metadata.type === "income" ? "+" : "-"}{formatter.format(activity.metadata.amount)}
+                            </Badge>
+                        </div>
                     )}
                 </div>
             </div>

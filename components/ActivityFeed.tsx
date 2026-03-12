@@ -64,16 +64,16 @@ export default function ActivityFeed() {
     }
 
     return (
-        <Card className="border-none shadow-md bg-white/50 dark:bg-black/20 backdrop-blur-xl transition-all duration-300 hover:shadow-lg h-full overflow-hidden flex flex-col">
-            <CardHeader className="pb-3 px-6 shrink-0">
+        <Card className="border-none shadow-md bg-white/50 dark:bg-black/20 backdrop-blur-xl transition-all duration-300 hover:shadow-lg flex flex-col h-full overflow-hidden">
+            <CardHeader className="pb-3 px-6 shrink-0 border-b border-border/10">
                 <CardTitle className="text-lg font-bold flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-primary" />
+                    <div className="flex items-center gap-2 text-primary">
+                        <Clock className="w-5 h-5" />
                         Recent Activity
                     </div>
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 overflow-y-auto grow custom-scrollbar">
+            <CardContent className="p-0 overflow-y-auto max-h-[450px] custom-scrollbar bg-background/5">
                 {!activities || activities.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground/60 italic px-6">
                         <div className="h-16 w-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
