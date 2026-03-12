@@ -16,6 +16,7 @@ import { TrendingUp, ArrowRightLeft } from "lucide-react";
 interface CashFlowSankeyProps {
     from: Date;
     to: Date;
+    tagIds?: string[];
     isPrivacyMode: boolean;
 }
 
@@ -100,14 +101,18 @@ const CustomTooltip = ({ active, payload, isPrivacyMode }: any) => {
     return null;
 };
 
-export default function CashFlowSankey({ from, to, isPrivacyMode }: CashFlowSankeyProps) {
-    const cashFlowQuery = useQuery({
-        queryKey: ["analytics", "cashflow", from, to],
+export default function CashFlowSankey({ from, to, tagIds = [], isPrivacyMode }: CashFlowSankeyProps) {
+    const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
+
+    const summaryQuery = useQuery({
+        queryKey: ["analytics-summary", from, to, tagIds],
         queryFn: () =>
-            fetch(`/api/analytics/cashflow?from=${from.toISOString()}&to=${to.toISOString()}`).then(
+            fetch(`/api/analytics/summary?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`).then(
                 (res) => res.json()
             ),
     });
+
+    const cashFlowQuery = { data: summaryQuery.data?.cashflow, isFetching: summaryQuery.isFetching };
 
     const data = cashFlowQuery.data;
     const hasData = data && data.nodes && data.nodes.length > 0;

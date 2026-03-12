@@ -22,13 +22,15 @@ export default function KPICards({ userSettings, from, to, isPrivacyMode = false
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
 
-    const statsQuery = useQuery({
-        queryKey: ["analytics", "stats", from, to],
+    const summaryQuery = useQuery({
+        queryKey: ["analytics-summary", from, to, []],
         queryFn: () =>
             fetch(
-                `/api/analytics/stats?from=${from.toISOString()}&to=${to.toISOString()}`
+                `/api/analytics/summary?from=${from.toISOString()}&to=${to.toISOString()}`
             ).then((res) => res.json()),
     });
+
+    const statsQuery = { data: summaryQuery.data?.stats, isFetching: summaryQuery.isFetching };
 
     const data = statsQuery.data;
 

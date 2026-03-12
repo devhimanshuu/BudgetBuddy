@@ -23,13 +23,13 @@ interface Transaction {
 
 export default function RecentTransactions({ userSettings }: { userSettings: any }) {
    const { isPrivacyMode } = usePrivacyMode();
-   const transactionsQuery = useQuery<Transaction[]>({
-      queryKey: ["recent-transactions"],
-      queryFn: () => fetch("/api/transactions/recent").then((res) => res.json()),
+   const summaryQuery = useQuery({
+      queryKey: ["dashboard-summary"],
+      queryFn: () => fetch("/api/dashboard/summary").then((res) => res.json()),
    });
 
    const formatter = GetFormatterForCurrency(userSettings?.currency || "USD");
-   const transactions = transactionsQuery.data || [];
+   const transactions = (summaryQuery.data?.recentTransactions as Transaction[]) || [];
 
    return (
       <Card className="h-full">
@@ -40,7 +40,7 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
             </Button>
          </CardHeader>
          <CardContent className="flex flex-col gap-4">
-            <SkeletonWrapper isLoading={transactionsQuery.isFetching}>
+            <SkeletonWrapper isLoading={summaryQuery.isFetching}>
                {transactions.length === 0 && <div className="text-muted-foreground text-center py-4">No recent transactions</div>}
                {transactions.map(t => (
                   <div key={t.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">

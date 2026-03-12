@@ -19,13 +19,15 @@ interface Props {
 }
 const StatsCards = ({ from, to, userSettings }: Props) => {
   const { isPrivacyMode } = usePrivacyMode();
-  const stateQuery = useQuery<GetBalanceStatsResponseType>({
-    queryKey: ["overview", "stats", from.toISOString(), to.toISOString()],
+  const summaryQuery = useQuery({
+    queryKey: ["overview-summary", from.toISOString(), to.toISOString()],
     queryFn: () =>
       fetch(
-        `/api/stats/balance?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`
+        `/api/overview/summary?from=${DateToUTCDate(from)}&to=${DateToUTCDate(to)}`
       ).then((res) => res.json()),
   });
+
+  const stateQuery = { data: summaryQuery.data?.balance as GetBalanceStatsResponseType, isFetching: summaryQuery.isFetching };
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);

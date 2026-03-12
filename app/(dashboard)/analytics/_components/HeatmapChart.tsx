@@ -24,13 +24,15 @@ export default function HeatmapChart({ from, to, userSettings, tagIds = [], isPr
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const heatmapQuery = useQuery({
-    queryKey: ["analytics", "heatmap", from, to, tagIds],
+  const summaryQuery = useQuery({
+    queryKey: ["analytics-summary", from, to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/heatmap?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
+        `/api/analytics/summary?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
+
+  const heatmapQuery = { data: summaryQuery.data?.heatmap, isFetching: summaryQuery.isFetching };
 
   const maxValue = useMemo(() => {
     if (!heatmapQuery.data) return 0;

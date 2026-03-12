@@ -25,9 +25,9 @@ interface CategoryTrend {
 
 export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
   const { isPrivacyMode } = usePrivacyMode();
-  const trendsQuery = useQuery<CategoryTrend[]>({
-    queryKey: ["spending-trends"],
-    queryFn: () => fetch("/api/stats/trends").then((res) => res.json()),
+  const summaryQuery = useQuery({
+    queryKey: ["dashboard-summary"],
+    queryFn: () => fetch("/api/dashboard/summary").then((res) => res.json()),
   });
 
   const formatter = useMemo(() => {
@@ -35,10 +35,10 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
   }, [userSettings.currency]);
 
   const significantTrends =
-    trendsQuery.data?.filter((t) => Math.abs(t.changePercent) >= 10) || [];
+    (summaryQuery.data?.trends as CategoryTrend[])?.filter((t) => Math.abs(t.changePercent) >= 10) || [];
 
   return (
-    <SkeletonWrapper isLoading={trendsQuery.isFetching}>
+    <SkeletonWrapper isLoading={summaryQuery.isFetching}>
       <Card className="h-full">
         <CardHeader className="3xl:p-8">
           <CardTitle className="flex items-center gap-2 3xl:text-2xl 3xl:gap-3">

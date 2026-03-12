@@ -26,16 +26,16 @@ interface SavingsData {
 
 export default function SavingsRate({ userSettings }: SavingsRateProps) {
   const { isPrivacyMode } = usePrivacyMode();
-  const savingsQuery = useQuery<SavingsData>({
-    queryKey: ["savings-rate"],
-    queryFn: () => fetch("/api/stats/savings").then((res) => res.json()),
+  const summaryQuery = useQuery({
+    queryKey: ["dashboard-summary"],
+    queryFn: () => fetch("/api/dashboard/summary").then((res) => res.json()),
   });
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const data = savingsQuery.data;
+  const data = summaryQuery.data?.stats;
   const savingsRate = data?.savingsRate || 0;
   const savings = data?.savings || 0;
   const income = data?.income || 0;
@@ -53,7 +53,7 @@ export default function SavingsRate({ userSettings }: SavingsRateProps) {
   const health = getSavingsHealth(savingsRate);
 
   return (
-    <SkeletonWrapper isLoading={savingsQuery.isFetching}>
+    <SkeletonWrapper isLoading={summaryQuery.isFetching}>
       <Card className="h-full">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">

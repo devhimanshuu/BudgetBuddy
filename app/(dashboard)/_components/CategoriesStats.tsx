@@ -22,15 +22,17 @@ interface Props {
 
 function CategoriesStats({ userSettings, from, to }: Props) {
   const { isPrivacyMode } = usePrivacyMode();
-  const statsQuery = useQuery<GetCategoriesStatsResponseType>({
-    queryKey: ["overview", "stats", "categories", from.toISOString(), to.toISOString()],
+  const summaryQuery = useQuery({
+    queryKey: ["overview-summary", from.toISOString(), to.toISOString()],
     queryFn: () =>
       fetch(
-        `/api/stats/categories?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
+        `/api/overview/summary?from=${DateToUTCDate(from)}&to=${DateToUTCDate(
           to
         )}`
       ).then((res) => res.json()),
   });
+
+  const statsQuery = { data: summaryQuery.data?.categories as GetCategoriesStatsResponseType, isFetching: summaryQuery.isFetching };
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);

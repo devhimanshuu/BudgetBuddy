@@ -60,23 +60,17 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
   const tagIds = selectedTags.map(tag => tag.id);
   const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
 
-  // Fetch category breakdown data for expense
-  const categoryDataQuery = useQuery({
-    queryKey: ["analytics", "category-breakdown", "expense", dataRange.from, dataRange.to, tagIds],
+  // Fetch completely optimized summary
+  const summaryQuery = useQuery({
+    queryKey: ["analytics-summary", dataRange.from, dataRange.to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/category-breakdown?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}&type=expense${tagQueryParam}`
+        `/api/analytics/summary?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
 
-  // Fetch trends data
-  const trendsDataQuery = useQuery({
-    queryKey: ["analytics", "trends", dataRange.from, dataRange.to, tagIds],
-    queryFn: () =>
-      fetch(
-        `/api/analytics/trends?from=${dataRange.from.toISOString()}&to=${dataRange.to.toISOString()}${tagQueryParam}`
-      ).then((res) => res.json()),
-  });
+  const categoryDataQuery = { data: summaryQuery.data?.categoryBreakdown?.expense, isFetching: summaryQuery.isFetching };
+  const trendsDataQuery = { data: summaryQuery.data?.trends, isFetching: summaryQuery.isFetching };
 
   const handleExportPDF = () => {
     if (!categoryDataQuery.data || !trendsDataQuery.data) {
@@ -216,6 +210,7 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
           <CashFlowSankey
             from={dataRange.from}
             to={dataRange.to}
+            tagIds={tagIds}
             isPrivacyMode={isPrivacyMode}
           />
           {/* Year-over-Year Comparison */}

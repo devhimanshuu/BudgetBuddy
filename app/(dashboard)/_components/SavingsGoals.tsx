@@ -71,10 +71,12 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const goalsQuery = useQuery<SavingsGoal[]>({
-    queryKey: ["savings-goals"],
-    queryFn: () => fetch("/api/savings-goals").then((res) => res.json()),
+  const summaryQuery = useQuery({
+    queryKey: ["dashboard-summary"],
+    queryFn: () => fetch("/api/dashboard/summary").then((res) => res.json()),
   });
+  
+  const goalsData = summaryQuery.data?.savingsGoals as SavingsGoal[];
 
   const queryClient = useQueryClient();
 
@@ -88,6 +90,7 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
     },
     onSuccess: () => {
       toast.success("Goal deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
       queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
     },
     onError: () => {
@@ -113,12 +116,12 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
     }
   };
 
-  const activeGoals = goalsQuery.data?.filter((g) => !g.isCompleted) || [];
-  const completedGoals = goalsQuery.data?.filter((g) => g.isCompleted) || [];
+  const activeGoals = goalsData?.filter((g) => !g.isCompleted) || [];
+  const completedGoals = goalsData?.filter((g) => g.isCompleted) || [];
 
   return (
     <>
-      <SkeletonWrapper isLoading={goalsQuery.isFetching}>
+      <SkeletonWrapper isLoading={summaryQuery.isFetching}>
         <Card>
           <CardHeader className="3xl:p-8">
             <div className="flex items-center justify-between">

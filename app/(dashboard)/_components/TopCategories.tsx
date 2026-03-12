@@ -24,21 +24,21 @@ interface CategoryData {
 
 export default function TopCategories({ userSettings }: TopCategoriesProps) {
   const { isPrivacyMode } = usePrivacyMode();
-  const categoriesQuery = useQuery<CategoryData[]>({
-    queryKey: ["top-categories"],
-    queryFn: () => fetch("/api/stats/top-categories").then((res) => res.json()),
+  const summaryQuery = useQuery({
+    queryKey: ["dashboard-summary"],
+    queryFn: () => fetch("/api/dashboard/summary").then((res) => res.json()),
   });
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const topCategories = categoriesQuery.data?.slice(0, 3) || [];
+  const topCategories = (summaryQuery.data?.topCategories as CategoryData[])?.slice(0, 3) || [];
   const totalAmount =
-    categoriesQuery.data?.reduce((sum, cat) => sum + cat.amount, 0) || 0;
+    (summaryQuery.data?.topCategories as CategoryData[])?.reduce((sum, cat) => sum + cat.amount, 0) || 0;
 
   return (
-    <SkeletonWrapper isLoading={categoriesQuery.isFetching}>
+    <SkeletonWrapper isLoading={summaryQuery.isFetching}>
       <Card className="h-full">
         <CardHeader className="3xl:p-8">
           <CardTitle className="flex items-center gap-2 3xl:text-2xl 3xl:gap-3">

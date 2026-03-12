@@ -39,14 +39,13 @@ export default function BudgetOverview({ userSettings }: BudgetOverviewProps) {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const { data: budgetProgress, isFetching } = useQuery<BudgetProgress[]>({
-    queryKey: ["budget-progress", month, year],
+  const { data: summaryData, isFetching } = useQuery({
+    queryKey: ["dashboard-summary"],
     queryFn: () =>
-      fetch(`/api/budgets/progress?month=${month}&year=${year}`).then((res) =>
-        res.json()
-      ),
+      fetch(`/api/dashboard/summary`).then((res) => res.json()),
   });
 
+  const budgetProgress = summaryData?.budgetProgress as BudgetProgress[];
   const dataAvailable = budgetProgress && budgetProgress.length > 0;
 
   // Get budgets that need attention (over budget or near limit)

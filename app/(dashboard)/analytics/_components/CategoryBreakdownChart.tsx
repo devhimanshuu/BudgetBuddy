@@ -50,13 +50,15 @@ export default function CategoryBreakdownChart({
 
   const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
 
-  const categoryBreakdownQuery = useQuery({
-    queryKey: ["analytics", "category-breakdown", type, from, to, tagIds],
+  const summaryQuery = useQuery({
+    queryKey: ["analytics-summary", from, to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/category-breakdown?from=${from.toISOString()}&to=${to.toISOString()}&type=${type}${tagQueryParam}`
+        `/api/analytics/summary?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
+
+  const categoryBreakdownQuery = { data: summaryQuery.data?.categoryBreakdown?.[type] || [], isFetching: summaryQuery.isFetching };
 
   const dataAvailable =
     categoryBreakdownQuery.data && categoryBreakdownQuery.data.length > 0;

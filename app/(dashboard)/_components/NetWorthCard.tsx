@@ -17,25 +17,25 @@ interface NetWorthCardProps {
 
 export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
   const { isPrivacyMode } = usePrivacyMode();
-  const statsQuery = useQuery({
-    queryKey: ["overview", "stats"],
-    queryFn: () => fetch("/api/stats").then((res) => res.json()),
+  const summaryQuery = useQuery({
+    queryKey: ["dashboard-summary"],
+    queryFn: () => fetch("/api/dashboard/summary").then((res) => res.json()),
   });
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  const income = statsQuery.data?.income || 0;
-  const expense = statsQuery.data?.expense || 0;
+  const income = summaryQuery.data?.stats?.income || 0;
+  const expense = summaryQuery.data?.stats?.expense || 0;
   const balance = income - expense;
-  const previousBalance = statsQuery.data?.previousBalance || 0;
+  const previousBalance = summaryQuery.data?.stats?.previousBalance || 0;
   const balanceChange = balance - previousBalance;
   const balanceChangePercent =
     previousBalance !== 0 ? (balanceChange / previousBalance) * 100 : 0;
 
   return (
-    <SkeletonWrapper isLoading={statsQuery.isFetching}>
+    <SkeletonWrapper isLoading={summaryQuery.isFetching}>
       <GlassCard className="h-full">
         <div className="flex flex-col h-full">
           {/* Background gradient */}

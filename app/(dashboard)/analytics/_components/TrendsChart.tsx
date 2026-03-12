@@ -35,13 +35,15 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [], isPri
 
   const tagQueryParam = tagIds.length > 0 ? `&tags=${tagIds.join(',')}` : '';
 
-  const trendsQuery = useQuery({
-    queryKey: ["analytics", "trends", from, to, tagIds],
+  const summaryQuery = useQuery({
+    queryKey: ["analytics-summary", from, to, tagIds],
     queryFn: () =>
       fetch(
-        `/api/analytics/trends?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
+        `/api/analytics/summary?from=${from.toISOString()}&to=${to.toISOString()}${tagQueryParam}`
       ).then((res) => res.json()),
   });
+
+  const trendsQuery = { data: summaryQuery.data?.trends, isFetching: summaryQuery.isFetching };
 
   const dataAvailable = trendsQuery.data && trendsQuery.data.length > 0;
 
