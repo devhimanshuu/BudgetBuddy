@@ -21,22 +21,32 @@ import { SmartNudge } from "../_components/SmartNudge";
 import PersonaWidget from "../_components/PersonaWidget";
 import { getPersona } from "@/lib/persona";
 
+import { getActiveWorkspace } from "@/lib/workspaces";
+
 async function page() {
     const user = await currentUser();
     if (!user) {
         redirect("/sign-in");
     }
 
-    const userSettings = await prisma.userSettings.findUnique({
-        where: {
-            userId: user.id,
-        },
-    });
+    const [userSettings, workspace] = await Promise.all([
+        prisma.userSettings.findUnique({
+            where: {
+                userId: user.id,
+            },
+        }),
+        getActiveWorkspace()
+    ]);
 
     const personaData = await getPersona(user.id);
 
     if (!userSettings) {
         redirect("/wizard");
+    }
+
+    // Override currency with active workspace currency for consistency across members
+    if (workspace) {
+        userSettings.currency = workspace.currency;
     }
     return (
         <div className="h-full bg-background ">
