@@ -67,7 +67,9 @@ export async function GET(request: Request) {
     workspaceId ? prisma.activity.findMany({
       where: { 
         workspaceId,
-        ...(workspace?.role !== "ADMIN" ? { userId: user.id } : {}),
+        ...(workspace?.role !== "ADMIN" ? { 
+          userId: { in: [user.id, workspace.ownerId] } 
+        } : {}),
       },
       orderBy: { createdAt: "desc" },
       take: 10,
