@@ -43,6 +43,8 @@ import { cn } from "@/lib/utils";
 
 interface VaultEntry {
 	id: string;
+	userId: string;
+	workspaceId: string | null;
 	title: string;
 	content: string;
 	category: string;

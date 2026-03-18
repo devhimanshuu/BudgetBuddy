@@ -24,7 +24,20 @@ export async function GET(request: Request) {
 		orderBy: [{ sensitivity: "desc" }, { updatedAt: "desc" }],
 	});
 
-	return Response.json(entries);
+	// Mask content for Viewers
+	const role = workspace?.role || "VIEWER";
+	const processedEntries = entries.map((entry) => {
+		if (role === "VIEWER") {
+			return {
+				...entry,
+				content: "●●●●●●●● (Restricted to Viewers)",
+				notes: entry.notes ? "●●●● (Restricted)" : null,
+			};
+		}
+		return entry;
+	});
+
+	return Response.json(processedEntries);
 }
 
 export async function POST(request: Request) {
@@ -126,13 +139,22 @@ export async function PATCH(request: Request) {
 		return Response.json(parsedBody.error, { status: 400 });
 	}
 
-	// Verify ownership
+	// Verify authorization
+	const workspace = await getActiveWorkspace();
 	const entry = await prisma.vaultEntry.findUnique({
 		where: { id: parsedBody.data.id },
 	});
 
-	if (!entry || entry.userId !== user.id) {
+	if (!entry) {
 		return Response.json({ error: "Entry not found" }, { status: 404 });
+	}
+
+	const isOwner = entry.userId === user.id;
+	const isAdmin = workspace?.role === "ADMIN";
+	const isEditor = workspace?.role === "EDITOR";
+
+	if (!isAdmin && !isEditor && !isOwner) {
+		return Response.json({ error: "Unauthorized to update" }, { status: 401 });
 	}
 
 	const { id, ...updateData } = parsedBody.data;
@@ -171,12 +193,22 @@ export async function PUT(request: Request) {
 		return Response.json({ error: parsed.error.errors[0].message }, { status: 400 });
 	}
 
+	// Verify authorization
+	const workspace = await getActiveWorkspace();
 	const entry = await prisma.vaultEntry.findUnique({
 		where: { id: parsed.data.id },
 	});
 
-	if (!entry || entry.userId !== user.id) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	if (!entry) {
+		return Response.json({ error: "Entry not found" }, { status: 404 });
+	}
+
+	const isOwner = entry.userId === user.id;
+	const isAdmin = workspace?.role === "ADMIN";
+	const isEditor = workspace?.role === "EDITOR";
+
+	if (!isAdmin && !isEditor && !isOwner) {
+		return Response.json({ error: "Unauthorized to update" }, { status: 401 });
 	}
 
 	const updated = await prisma.vaultEntry.update({
@@ -206,13 +238,24 @@ export async function DELETE(request: Request) {
 		);
 	}
 
-	// Verify ownership
+	// Verify authorization
+	const workspace = await getActiveWorkspace();
 	const entry = await prisma.vaultEntry.findUnique({
 		where: { id },
 	});
 
-	if (!entry || entry.userId !== user.id) {
+	if (!entry) {
 		return Response.json({ error: "Entry not found" }, { status: 404 });
+	}
+
+	const isOwner = entry.userId === user.id;
+	const isAdmin = workspace?.role === "ADMIN";
+
+	if (!isAdmin && !isOwner) {
+		return Response.json(
+			{ error: "Unauthorized to delete" },
+			{ status: 401 },
+		);
 	}
 
 	await prisma.vaultEntry.delete({

@@ -238,7 +238,7 @@ export default function BeneficiaryManager({
 								</CardDescription>
 							</div>
 						</div>
-						<PermissionGuard>
+						<PermissionGuard allowedRoles={["ADMIN"]}>
 							<Dialog
 								open={addDialogOpen}
 								onOpenChange={setAddDialogOpen}
@@ -527,7 +527,7 @@ export default function BeneficiaryManager({
 																</Badge>
 															</div>
 														</div>
-														<PermissionGuard>
+														<PermissionGuard allowedRoles={["ADMIN"]}>
 															<Button
 																variant="ghost"
 																size="icon"

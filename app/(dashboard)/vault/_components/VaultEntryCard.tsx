@@ -40,7 +40,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays } from "date-fns";
-import { PermissionGuard } from "@/components/PermissionGuard";
+import { PermissionGuard, useWorkspaceRole } from "@/components/PermissionGuard";
+import { useUser } from "@clerk/nextjs";
 import {
 	CATEGORY_CONFIG,
 	SENSITIVITY_CONFIG,
@@ -54,10 +55,21 @@ interface VaultEntryCardProps {
 }
 
 export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
+	const { user } = useUser();
+	const role = useWorkspaceRole();
 	const [isRevealed, setIsRevealed] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const queryClient = useQueryClient();
+
+	const isOwner = user?.id === entry.userId;
+	const isAdmin = role === "ADMIN";
+	const isEditor = role === "EDITOR";
+	const isViewer = role === "VIEWER";
+
+	const canEdit = isOwner || isAdmin || isEditor;
+	const canDelete = isOwner || isAdmin;
+	const canReveal = !isViewer;
 
 	const categoryConfig = CATEGORY_CONFIG[entry.category] || CATEGORY_CONFIG.other;
 	const sensitivityConfig =
@@ -172,49 +184,52 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 							</div>
 						</div>
 
-						<PermissionGuard>
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-8 w-8 shrink-0"
-									>
-										<MoreVertical className="h-4 w-4" />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end">
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-8 w-8 shrink-0"
+								>
+									<MoreVertical className="h-4 w-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								{canEdit && (
 									<DropdownMenuItem
-										onClick={() =>
-											setEditDialogOpen(true)
-										}
+										onClick={() => setEditDialogOpen(true)}
 										className="gap-2"
 									>
 										<Eye className="h-4 w-4" />
 										Edit Entry
 									</DropdownMenuItem>
+								)}
+								{canEdit && (
 									<DropdownMenuItem
-										onClick={() =>
-											verifyMutation.mutate()
-										}
+										onClick={() => verifyMutation.mutate()}
 										className="gap-2"
 									>
 										<ShieldCheck className="h-4 w-4" />
 										Mark as Verified
 									</DropdownMenuItem>
-									<DropdownMenuSeparator />
+								)}
+								{(canEdit || canDelete) && <DropdownMenuSeparator />}
+								{canDelete && (
 									<DropdownMenuItem
-										onClick={() =>
-											setDeleteDialogOpen(true)
-										}
+										onClick={() => setDeleteDialogOpen(true)}
 										className="gap-2 text-red-600 focus:text-red-600"
 									>
 										<Trash2 className="h-4 w-4" />
 										Delete
 									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</PermissionGuard>
+								)}
+								{!canEdit && !canDelete && (
+									<DropdownMenuItem disabled className="text-xs">
+										Viewer (Read Only)
+									</DropdownMenuItem>
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 				</CardHeader>
 
@@ -223,10 +238,10 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 					<div
 						className={cn(
 							"relative rounded-lg border bg-muted/50 p-3 transition-all 3xl:p-4",
-							!isRevealed && "select-none",
+							(!isRevealed || isViewer) && "select-none",
 						)}
 					>
-						{isRevealed ? (
+						{isRevealed && !isViewer ? (
 							<p className="text-sm whitespace-pre-wrap break-words 3xl:text-base">
 								{entry.content}
 							</p>
@@ -234,10 +249,12 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 							<div className="flex flex-col items-center gap-2 py-2">
 								<div className="flex items-center gap-1.5 text-sm text-muted-foreground 3xl:text-base">
 									<EyeOff className="h-4 w-4 3xl:h-5 3xl:w-5" />
-									Content hidden
+									{isViewer ? "Content Restricted" : "Content hidden"}
 								</div>
 								<p className="text-xs text-muted-foreground/70 3xl:text-sm">
-									Click reveal to view sensitive information
+									{isViewer 
+										? "Only Editors can see secret details" 
+										: "Click reveal to view sensitive information"}
 								</p>
 							</div>
 						)}
@@ -247,10 +264,20 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 					<Button
 						variant="outline"
 						size="sm"
-						onClick={() => setIsRevealed(!isRevealed)}
-						className="w-full gap-2 3xl:text-base"
+						onClick={() => {
+							if (isViewer) {
+								toast.error("Viewers cannot reveal secret content");
+								return;
+							}
+							setIsRevealed(!isRevealed);
+						}}
+						disabled={isViewer}
+						className={cn(
+							"w-full gap-2 3xl:text-base",
+							isViewer && "opacity-50 cursor-not-allowed"
+						)}
 					>
-						{isRevealed ? (
+						{isRevealed && !isViewer ? (
 							<>
 								<EyeOff className="h-4 w-4 3xl:h-5 3xl:w-5" />{" "}
 								Hide Content
@@ -258,7 +285,7 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 						) : (
 							<>
 								<Eye className="h-4 w-4 3xl:h-5 3xl:w-5" />{" "}
-								Reveal Content
+								{isViewer ? "Restricted View" : "Reveal Content"}
 							</>
 						)}
 					</Button>

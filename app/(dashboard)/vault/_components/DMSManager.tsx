@@ -79,7 +79,7 @@ export default function DMSManager() {
 						</Badge>
 					</div>
 					<CardDescription>
-						Monitor your vault's emergency readiness and heartbeat.
+						Monitor your vault&apos;s emergency readiness and heartbeat.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -130,7 +130,7 @@ export default function DMSManager() {
 						<div className="flex items-center gap-2 rounded-lg bg-red-500/10 p-3 text-red-600">
 							<AlertTriangle className="h-4 w-4" />
 							<p className="text-xs font-semibold">
-								Urgent: Dead man's switch will activate soon!
+								Urgent: Dead man&apos;s switch will activate soon!
 							</p>
 						</div>
 					) : (
@@ -159,7 +159,7 @@ export default function DMSManager() {
 					<div className="flex items-center justify-between space-x-2 rounded-lg border p-4 shadow-sm">
 						<div className="flex flex-col space-y-1">
 							<Label htmlFor="dms-switch" className="text-base font-semibold">
-								Dead Man's Switch (DMS)
+								Dead Man&apos;s Switch (DMS)
 							</Label>
 							<p className="text-xs text-muted-foreground">
 								Once disarmed, your beneficiaries will NOT receive access automatically.
@@ -199,7 +199,7 @@ export default function DMSManager() {
 							className={cn(!settings?.dmsEnabled && "opacity-50")}
 						/>
 						<p className="text-xs text-muted-foreground italic">
-							* If you don't engage with the vault for {settings?.dmsThresholdDays} days,
+							* If you don&apos;t engage with the vault for {settings?.dmsThresholdDays} days,
 							access will be granted on{" "}
 							{format(
 								addDays(new Date(settings?.lastVaultActivity || new Date()), settings?.dmsThresholdDays || 30),

@@ -32,9 +32,9 @@ export async function POST(request: Request) {
 	const workspace = await getActiveWorkspace();
 	if (!workspace)
 		return Response.json({ error: "No active workspace" }, { status: 400 });
-	if (workspace.role === "VIEWER")
+	if (workspace.role === "VIEWER" || workspace.role === "EDITOR")
 		return Response.json(
-			{ error: "Viewers cannot add beneficiaries" },
+			{ error: "Only admins can add beneficiaries" },
 			{ status: 403 },
 		);
 
@@ -103,14 +103,22 @@ export async function DELETE(request: Request) {
 		);
 	}
 
+	const workspace = await getActiveWorkspace();
 	const beneficiary = await prisma.beneficiary.findUnique({
 		where: { id },
 	});
 
-	if (!beneficiary || beneficiary.userId !== user.id) {
+	if (!beneficiary) {
+		return Response.json({ error: "Beneficiary not found" }, { status: 404 });
+	}
+
+	const isOwner = beneficiary.userId === user.id;
+	const isAdmin = workspace?.role === "ADMIN";
+
+	if (!isAdmin && !isOwner) {
 		return Response.json(
-			{ error: "Beneficiary not found" },
-			{ status: 404 },
+			{ error: "Unauthorized to delete" },
+			{ status: 401 },
 		);
 	}
 
