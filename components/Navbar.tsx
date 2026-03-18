@@ -66,6 +66,11 @@ const items = [
 		link: "/analytics",
 		icon: <LineChart className="h-4 w-4" />,
 	},
+	{
+		label: "Vault",
+		link: "/vault",
+		icon: <ShieldCheck className="h-4 w-4" />,
+	},
 	{ label: "Manage", link: "/manage", icon: <Settings className="h-4 w-4" /> },
 ];
 

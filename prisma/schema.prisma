@@ -30,6 +30,10 @@ model UserSettings{
   enableAnomalyDetection Boolean @default(true)
   anomalyThreshold       Float   @default(2.0) // Multiplier of average (e.g., 2x)
   activeTheme            String  @default("default") // "default", "midnight", "gold"
+
+  // VAULT PIN SETTINGS
+  vaultPin               String?  // SHA-256 hashed PIN (null = not set)
+  vaultPinEnabled        Boolean @default(false)
 }
 
 model Workspace {
@@ -52,6 +56,8 @@ model Workspace {
   monthlyHistory        MonthlyHistory[]
   yearHistory           YearHistory[]
   activities            Activity[]
+  vaultEntries          VaultEntry[]
+  beneficiaries         Beneficiary[]
 }
 
 model WorkspaceMember {
@@ -358,6 +364,46 @@ model Activity {
   description String
   metadata    Json?    // Optional extra info like transaction amount or member email
   createdAt   DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model VaultEntry {
+  id            String   @id @default(uuid())
+  userId        String
+  workspaceId   String?
+  title         String
+  content       String   // Encrypted content (instructions, secrets, locations)
+  category      String   // "insurance", "legal", "crypto", "banking", "property", "medical", "other"
+  icon          String   @default("🔒")
+  sensitivity   String   @default("high") // "low", "medium", "high", "critical"
+  notes         String?
+  lastVerified  DateTime? // When user last confirmed info is still valid
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model Beneficiary {
+  id            String   @id @default(uuid())
+  userId        String
+  workspaceId   String?
+  name          String
+  email         String
+  relationship  String   // "spouse", "child", "parent", "sibling", "lawyer", "accountant", "other"
+  phone         String?
+  notes         String?
+  accessLevel   String   @default("full") // "full", "partial", "emergency-only"
+  isVerified    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
   @@index([userId])
