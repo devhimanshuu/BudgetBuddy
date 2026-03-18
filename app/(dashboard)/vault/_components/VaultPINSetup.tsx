@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type SetupStep = "enter" | "confirm" | "success";
+type SetupStep = "verify_old" | "enter" | "confirm" | "success";
 
 interface VaultPINSetupProps {
 	onComplete: () => void;
@@ -28,14 +28,29 @@ export default function VaultPINSetup({
 	onBack,
 	mode,
 }: VaultPINSetupProps) {
-	const [step, setStep] = useState<SetupStep>("enter");
+	const [step, setStep] = useState<SetupStep>(
+		mode === "change" ? "verify_old" : "enter",
+	);
+	const [oldPin, setOldPin] = useState("");
 	const [firstPin, setFirstPin] = useState("");
 	const [confirmPin, setConfirmPin] = useState("");
 	const [mismatch, setMismatch] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
+	const [isVerifying, setIsVerifying] = useState(false);
 
-	const activePin = step === "enter" ? firstPin : confirmPin;
-	const setActivePin = step === "enter" ? setFirstPin : setConfirmPin;
+	const activePin =
+		step === "verify_old"
+			? oldPin
+			: step === "enter"
+				? firstPin
+				: confirmPin;
+
+	const setActivePin =
+		step === "verify_old"
+			? setOldPin
+			: step === "enter"
+				? setFirstPin
+				: setConfirmPin;
 
 	const handleDigit = useCallback(
 		(digit: string) => {
@@ -52,6 +67,32 @@ export default function VaultPINSetup({
 	}, [setActivePin]);
 
 	const handleContinue = useCallback(async () => {
+		if (step === "verify_old") {
+			if (oldPin.length < 4) return;
+			setIsVerifying(true);
+			try {
+				const res = await fetch("/api/vault/pin", {
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ pin: oldPin }),
+				});
+
+				if (res.ok) {
+					setStep("enter");
+					toast.success("Current PIN verified");
+				} else {
+					setMismatch(true);
+					setOldPin("");
+					toast.error("Incorrect current PIN");
+				}
+			} catch {
+				toast.error("Failed to verify PIN");
+			} finally {
+				setIsVerifying(false);
+			}
+			return;
+		}
+
 		if (step === "enter") {
 			if (firstPin.length < 4) return;
 			setStep("confirm");
@@ -87,7 +128,7 @@ export default function VaultPINSetup({
 				setIsSaving(false);
 			}
 		}
-	}, [step, firstPin, confirmPin, onComplete]);
+	}, [step, oldPin, firstPin, confirmPin, onComplete]);
 
 	// Keyboard support
 	useEffect(() => {
@@ -107,9 +148,8 @@ export default function VaultPINSetup({
 		["", "0", "⌫"],
 	];
 
-	const currentPin = step === "enter" ? firstPin : confirmPin;
-	const displayDots = Array.from({ length: Math.max(currentPin.length, 4) }).map(
-		(_, i) => i < currentPin.length,
+	const displayDots = Array.from({ length: Math.max(activePin.length, 4) }).map(
+		(_, i) => i < activePin.length,
 	);
 
 	return (
@@ -183,18 +223,22 @@ export default function VaultPINSetup({
 									<h2 className="text-xl font-bold">
 										{step === "success"
 											? "PIN Set Successfully"
-											: step === "confirm"
-												? "Confirm Your PIN"
-												: mode === "change"
-													? "Enter New PIN"
-													: "Create a PIN"}
+											: step === "verify_old"
+												? "Verify Current PIN"
+												: step === "confirm"
+													? "Confirm New PIN"
+													: mode === "change"
+														? "Enter New PIN"
+														: "Create a PIN"}
 									</h2>
 									<p className="mt-1 text-sm text-muted-foreground">
 										{step === "success"
 											? "Your vault is now protected"
-											: step === "confirm"
-												? "Re-enter your PIN to confirm"
-												: "Choose a 4–8 digit PIN to protect your Legacy Vault"}
+											: step === "verify_old"
+												? "Enter your current PIN to authenticate"
+												: step === "confirm"
+													? "Re-enter your new PIN to confirm"
+													: "Choose a 4–8 digit PIN to protect your Legacy Vault"}
 									</p>
 								</motion.div>
 							</AnimatePresence>
@@ -275,10 +319,10 @@ export default function VaultPINSetup({
 						{step !== "success" && (
 							<Button
 								onClick={handleContinue}
-								disabled={currentPin.length < 4 || isSaving}
+								disabled={activePin.length < 4 || isSaving || isVerifying}
 								className="w-full gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/20 hover:from-violet-700 hover:to-purple-700"
 							>
-								{isSaving ? (
+								{isSaving || isVerifying ? (
 									<>
 										<motion.div
 											animate={{ rotate: 360 }}
@@ -289,17 +333,17 @@ export default function VaultPINSetup({
 											}}
 											className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white"
 										/>
-										Saving...
+										{isSaving ? "Saving..." : "Verifying..."}
 									</>
-								) : step === "enter" ? (
-									<>
-										<ShieldCheck className="h-4 w-4" />
-										Continue
-									</>
-								) : (
+								) : step === "confirm" ? (
 									<>
 										<Lock className="h-4 w-4" />
 										Set PIN
+									</>
+								) : (
+									<>
+										<ShieldCheck className="h-4 w-4" />
+										Continue
 									</>
 								)}
 							</Button>

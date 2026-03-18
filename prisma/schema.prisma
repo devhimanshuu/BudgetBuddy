@@ -34,6 +34,11 @@ model UserSettings{
   // VAULT PIN SETTINGS
   vaultPin               String?  // SHA-256 hashed PIN (null = not set)
   vaultPinEnabled        Boolean @default(false)
+
+  // DEAD MAN'S SWITCH (DMS) SETTINGS
+  lastVaultActivity      DateTime @default(now())
+  dmsEnabled             Boolean @default(false)
+  dmsThresholdDays       Int     @default(30) // Initial threshold (30 days)
 }
 
 model Workspace {

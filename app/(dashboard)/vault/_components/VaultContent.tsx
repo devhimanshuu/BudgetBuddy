@@ -1,30 +1,45 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 import {
 	Shield,
-	Users,
-	Lock,
-	ShieldCheck,
-	AlertTriangle,
 	FileText,
-	Landmark,
 	Bitcoin,
+	Landmark,
 	Building,
 	Heart,
 	HelpCircle,
-	Plus,
+	Lock,
+	Users,
+	ShieldCheck,
+	ArrowUpDown,
+	Search,
+	Activity,
+	FileDown,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import VaultEntryCard from "./VaultEntryCard";
 import BeneficiaryManager from "./BeneficiaryManager";
 import CreateVaultEntryDialog from "./CreateVaultEntryDialog";
 import VaultOverview from "./VaultOverview";
+import DMSManager from "./DMSManager";
+import VaultPrintView from "./VaultPrintView";
+import { useUser } from "@clerk/nextjs";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface VaultEntry {
 	id: string;
@@ -125,8 +140,11 @@ export { CATEGORY_CONFIG, SENSITIVITY_CONFIG };
 export type { VaultEntry, Beneficiary };
 
 export default function VaultContent() {
+	const { user } = useUser();
 	const [activeTab, setActiveTab] = useState("overview");
 	const [categoryFilter, setCategoryFilter] = useState("all");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [sortBy, setSortBy] = useState("newest");
 
 	const entriesQuery = useQuery<VaultEntry[]>({
 		queryKey: ["vault-entries"],
@@ -142,10 +160,38 @@ export default function VaultContent() {
 	const entries = entriesQuery.data || [];
 	const beneficiaries = beneficiariesQuery.data || [];
 
-	const filteredEntries =
-		categoryFilter === "all"
-			? entries
-			: entries.filter((e) => e.category === categoryFilter);
+	const filteredEntries = entries
+		.filter((e) => {
+			const isCategory =
+				categoryFilter === "all" || e.category === categoryFilter;
+			const isSearch =
+				e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				e.content.toLowerCase().includes(searchQuery.toLowerCase());
+			return isCategory && isSearch;
+		})
+		.sort((a, b) => {
+			if (sortBy === "newest")
+				return (
+					new Date(b.createdAt).getTime() -
+					new Date(a.createdAt).getTime()
+				);
+			if (sortBy === "oldest")
+				return (
+					new Date(a.createdAt).getTime() -
+					new Date(b.createdAt).getTime()
+				);
+			if (sortBy === "title") return a.title.localeCompare(b.title);
+			if (sortBy === "sensitivity") {
+				const order: Record<string, number> = {
+					critical: 4,
+					high: 3,
+					medium: 2,
+					low: 1,
+				};
+				return (order[b.sensitivity] || 0) - (order[a.sensitivity] || 0);
+			}
+			return 0;
+		});
 
 	const categoryCounts = entries.reduce(
 		(acc, entry) => {
@@ -155,6 +201,13 @@ export default function VaultContent() {
 		{} as Record<string, number>,
 	);
 
+	const handleExport = () => {
+		toast.info("Preparing your secure vault summary...");
+		setTimeout(() => {
+			window.print();
+		}, 500);
+	};
+
 	return (
 		<Tabs
 			value={activeTab}
@@ -162,7 +215,7 @@ export default function VaultContent() {
 			className="space-y-6"
 		>
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex">
+				<TabsList className="grid w-full grid-cols-4 sm:w-auto sm:flex">
 					<TabsTrigger
 						value="overview"
 						className="gap-2 3xl:text-base"
@@ -181,30 +234,41 @@ export default function VaultContent() {
 						<Users className="h-4 w-4" />
 						Beneficiaries
 					</TabsTrigger>
+					<TabsTrigger
+						value="inheritance"
+						className="gap-2 3xl:text-base"
+					>
+						<Activity className="h-4 w-4" />
+						Inheritance
+					</TabsTrigger>
 				</TabsList>
 
-				{activeTab === "vault" && (
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						className="gap-2 h-9 3xl:h-12 3xl:text-base"
+						onClick={handleExport}
+					>
+						<FileDown className="h-4 w-4" />
+						Export Secure PDF
+					</Button>
 					<PermissionGuard>
 						<CreateVaultEntryDialog
 							trigger={
-								<Button className="gap-2 3xl:text-base">
-									<Plus className="h-4 w-4 3xl:h-5 3xl:w-5" />
-									Add Entry
+								<Button className="gap-2 h-9 3xl:h-12 3xl:text-base bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 transition-all active:scale-95 group">
+									<Lock className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+									Add New Entry
 								</Button>
 							}
 						/>
 					</PermissionGuard>
-				)}
+				</div>
 			</div>
 
 			{/* Overview Tab */}
 			<TabsContent value="overview" className="space-y-6">
-				<SkeletonWrapper
-					isLoading={
-						entriesQuery.isFetching ||
-						beneficiariesQuery.isFetching
-					}
-				>
+				<SkeletonWrapper isLoading={entriesQuery.isFetching}>
 					<VaultOverview
 						entries={entries}
 						beneficiaries={beneficiaries}
@@ -216,44 +280,70 @@ export default function VaultContent() {
 
 			{/* Vault Entries Tab */}
 			<TabsContent value="vault" className="space-y-6">
-				{/* Category Filter */}
 				<div className="flex flex-wrap gap-2">
 					<Button
-						variant={
-							categoryFilter === "all" ? "default" : "outline"
-						}
+						variant={categoryFilter === "all" ? "default" : "outline"}
 						size="sm"
 						onClick={() => setCategoryFilter("all")}
-						className="gap-1.5 3xl:text-base"
+						className="rounded-full 3xl:text-base 3xl:h-11"
 					>
-						All
-						<span className="ml-1 rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-xs">
+						All Entries
+						<Badge
+							variant="secondary"
+							className="ml-2 bg-white/20 text-white"
+						>
 							{entries.length}
-						</span>
+						</Badge>
 					</Button>
 					{Object.entries(CATEGORY_CONFIG).map(([key, config]) => {
 						const count = categoryCounts[key] || 0;
 						if (count === 0) return null;
+
 						return (
 							<Button
 								key={key}
 								variant={
-									categoryFilter === key
-										? "default"
-										: "outline"
+									categoryFilter === key ? "default" : "outline"
 								}
 								size="sm"
 								onClick={() => setCategoryFilter(key)}
-								className="gap-1.5 3xl:text-base"
+								className="rounded-full gap-2 3xl:text-base 3xl:h-11"
 							>
 								{config.icon}
 								{config.label}
-								<span className="ml-1 rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-xs">
+								<Badge variant="secondary" className="ml-1">
 									{count}
-								</span>
+								</Badge>
 							</Button>
 						);
 					})}
+				</div>
+
+				{/* Search & Sort Bar */}
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="relative flex-1 max-w-sm">
+						<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+						<Input
+							placeholder="Search in vault..."
+							className="pl-8 3xl:text-base 3xl:h-11 shadow-sm"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+						/>
+					</div>
+					<div className="flex items-center gap-2">
+						<ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+						<Select value={sortBy} onValueChange={setSortBy}>
+							<SelectTrigger className="w-[140px] 3xl:w-[180px] 3xl:h-11 3xl:text-base shadow-sm">
+								<SelectValue placeholder="Sort by" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="newest">Newest</SelectItem>
+								<SelectItem value="oldest">Oldest</SelectItem>
+								<SelectItem value="title">Title (A-Z)</SelectItem>
+								<SelectItem value="sensitivity">Sensitivity</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 
 				<SkeletonWrapper isLoading={entriesQuery.isFetching}>
@@ -261,50 +351,35 @@ export default function VaultContent() {
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							className="flex h-60 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border p-8"
+							className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-muted p-12 text-center"
 						>
-							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-								<Lock className="h-8 w-8 text-muted-foreground" />
+							<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 text-muted-foreground mb-4">
+								<Lock className="h-8 w-8" />
 							</div>
-							<div className="text-center">
-								<p className="text-lg font-semibold 3xl:text-xl">
-									No vault entries yet
-								</p>
-								<p className="text-sm text-muted-foreground 3xl:text-base">
-									Add your first entry to start securing your
-									legacy information
-								</p>
-							</div>
-							<PermissionGuard>
-								<CreateVaultEntryDialog
-									trigger={
-										<Button
-											variant="outline"
-											className="gap-2 mt-2"
-										>
-											<Plus className="h-4 w-4" />
-											Create First Entry
-										</Button>
-									}
-								/>
-							</PermissionGuard>
+							<h3 className="text-xl font-bold">No entries found</h3>
+							<p className="text-muted-foreground max-w-xs mx-auto">
+								{searchQuery
+									? `No results for "${searchQuery}" in this category.`
+									: "Start securing your digital heritage by adding your first vault entry."}
+							</p>
+							{!searchQuery && (
+								<div className="mt-6">
+									<CreateVaultEntryDialog
+										trigger={
+											<Button className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600">
+												<Lock className="h-4 w-4" />
+												Create your first entry
+											</Button>
+										}
+									/>
+								</div>
+							)}
 						</motion.div>
 					) : (
-						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 3xl:gap-6">
-							<AnimatePresence>
-								{filteredEntries.map((entry, index) => (
-									<motion.div
-										key={entry.id}
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, scale: 0.95 }}
-										transition={{
-											delay: index * 0.05,
-											duration: 0.3,
-										}}
-									>
-										<VaultEntryCard entry={entry} />
-									</motion.div>
+						<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+							<AnimatePresence mode="popLayout">
+								{filteredEntries.map((entry) => (
+									<VaultEntryCard key={entry.id} entry={entry} />
 								))}
 							</AnimatePresence>
 						</div>
@@ -318,6 +393,40 @@ export default function VaultContent() {
 					<BeneficiaryManager beneficiaries={beneficiaries} />
 				</SkeletonWrapper>
 			</TabsContent>
+
+			{/* Inheritance Tab */}
+			<TabsContent value="inheritance" className="space-y-6">
+				<DMSManager />
+			</TabsContent>
+
+			{/* Hidden Print View */}
+			<VaultPrintView
+				entries={entries}
+				userName={user?.fullName || "BudgetBuddy User"}
+			/>
 		</Tabs>
+	);
+}
+
+function Badge({
+	children,
+	className,
+	variant = "default",
+}: {
+	children: React.ReactNode;
+	className?: string;
+	variant?: "default" | "secondary";
+}) {
+	return (
+		<span
+			className={cn(
+				"inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+				variant === "default" && "bg-primary text-primary-foreground",
+				variant === "secondary" && "bg-secondary text-secondary-foreground",
+				className,
+			)}
+		>
+			{children}
+		</span>
 	);
 }

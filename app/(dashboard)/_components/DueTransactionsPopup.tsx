@@ -27,20 +27,27 @@ import { GetFormatterForCurrency } from "@/lib/helper";
 
 export function DueTransactionsPopup({ userSettings }: { userSettings: UserSettings }) {
     const [open, setOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const { data: dueTransactions, isLoading, refetch } = useQuery<RecurringTransaction[]>({
         queryKey: ["due-recurring-transactions"],
         queryFn: () => GetDueRecurringTransactions(),
         staleTime: 0, // Always fetch fresh on mount
+        enabled: isMounted, // Only run on client
     });
 
     useEffect(() => {
+        if (!isMounted) return;
         if (dueTransactions && dueTransactions.length > 0) {
             setOpen(true);
         } else {
             setOpen(false);
         }
-    }, [dueTransactions]);
+    }, [dueTransactions, isMounted]);
 
     const queryClient = useQueryClient();
 
@@ -81,7 +88,7 @@ export function DueTransactionsPopup({ userSettings }: { userSettings: UserSetti
         return GetFormatterForCurrency(userSettings.currency);
     }, [userSettings.currency]);
 
-    if (isLoading) return null;
+    if (!isMounted || isLoading) return null;
 
     const isPending = processMutation.isPending || skipMutation.isPending || processAllMutation.isPending;
 

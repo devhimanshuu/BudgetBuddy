@@ -60,6 +60,8 @@ export default function VaultPINOverlay({
 
 				if (res.ok) {
 					setSuccess(true);
+					// Ping the Heartbeat to reset Dead Man's Switch timer
+					fetch("/api/vault/dms", { method: "PUT" });
 					setTimeout(() => {
 						onUnlocked();
 					}, 600);
@@ -305,17 +307,45 @@ export default function VaultPINOverlay({
 						)}
 
 						{/* Setup link (if no PIN yet, shouldn't appear here, but as fallback) */}
-						{!isPINSet && !success && (
-							<p className="text-center text-xs text-muted-foreground">
-								No PIN set?{" "}
-								<button
-									onClick={onSetup}
-									className="font-medium text-violet-500 underline-offset-2 hover:underline"
-								>
-									Set one now
-								</button>
-							</p>
-						)}
+						<div className="flex flex-col gap-2 mt-2">
+							{!isPINSet && !success && (
+								<p className="text-center text-xs text-muted-foreground">
+									No PIN set?{" "}
+									<button
+										onClick={onSetup}
+										className="font-medium text-violet-500 underline-offset-2 hover:underline"
+									>
+										Set one now
+									</button>
+								</p>
+							)}
+							{isPINSet && !success && (
+								<p className="text-center text-xs text-muted-foreground">
+									Forgot PIN?{" "}
+									<button
+										onClick={() => {
+											if (
+												confirm(
+													"For security, resetting your PIN will disable the vault lock temporarily. You will need to set a new PIN. Proceed?",
+												)
+											) {
+												fetch("/api/vault/pin", {
+													method: "DELETE",
+												}).then(() => {
+													toast.success(
+														"Vault lock disabled. Please set a new PIN.",
+													);
+													window.location.reload();
+												});
+											}
+										}}
+										className="font-medium text-violet-500 underline-offset-2 hover:underline"
+									>
+										Reset PIN
+									</button>
+								</p>
+							)}
+						</div>
 					</div>
 				</div>
 			</motion.div>

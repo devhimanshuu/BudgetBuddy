@@ -150,6 +150,46 @@ export async function PATCH(request: Request) {
 	return Response.json(updatedEntry);
 }
 
+/** PUT — Update an existing entry */
+export async function PUT(request: Request) {
+	const user = await currentUser();
+	if (!user) redirect("/sign-in");
+
+	const body = await request.json();
+	const schema = z.object({
+		id: z.string().uuid(),
+		title: z.string().min(1).max(200),
+		content: z.string().min(1),
+		category: z.string().min(1),
+		sensitivity: z.string().min(1),
+		icon: z.string().min(1),
+		notes: z.string().optional(),
+	});
+
+	const parsed = schema.safeParse(body);
+	if (!parsed.success) {
+		return Response.json({ error: parsed.error.errors[0].message }, { status: 400 });
+	}
+
+	const entry = await prisma.vaultEntry.findUnique({
+		where: { id: parsed.data.id },
+	});
+
+	if (!entry || entry.userId !== user.id) {
+		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const updated = await prisma.vaultEntry.update({
+		where: { id: parsed.data.id },
+		data: {
+			...parsed.data,
+			updatedAt: new Date(),
+		},
+	});
+
+	return Response.json(updated);
+}
+
 export async function DELETE(request: Request) {
 	const user = await currentUser();
 	if (!user) {

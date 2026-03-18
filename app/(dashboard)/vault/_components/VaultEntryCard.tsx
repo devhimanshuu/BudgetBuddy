@@ -47,6 +47,8 @@ import {
 } from "./VaultContent";
 import type { VaultEntry } from "./VaultContent";
 
+import EditVaultEntryDialog from "./EditVaultEntryDialog";
+
 interface VaultEntryCardProps {
 	entry: VaultEntry;
 }
@@ -54,6 +56,7 @@ interface VaultEntryCardProps {
 export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 	const [isRevealed, setIsRevealed] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const queryClient = useQueryClient();
 
 	const categoryConfig = CATEGORY_CONFIG[entry.category] || CATEGORY_CONFIG.other;
@@ -181,6 +184,15 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
+									<DropdownMenuItem
+										onClick={() =>
+											setEditDialogOpen(true)
+										}
+										className="gap-2"
+									>
+										<Eye className="h-4 w-4" />
+										Edit Entry
+									</DropdownMenuItem>
 									<DropdownMenuItem
 										onClick={() =>
 											verifyMutation.mutate()
@@ -342,6 +354,13 @@ export default function VaultEntryCard({ entry }: VaultEntryCardProps) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			{/* Edit Dialog */}
+			<EditVaultEntryDialog
+				entry={entry}
+				open={editDialogOpen}
+				onOpenChange={setEditDialogOpen}
+			/>
 		</>
 	);
 }
