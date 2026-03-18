@@ -65,6 +65,14 @@ The AI embeds functional, reactive components directly in your chat:
 - **Budgeting**: Create monthly budgets for specific categories and get alerted when you're close to limits.
 - **Savings Goals**: specific financial milestones (e.g., "New Car") and track contribution progress.
 - **Asset Tracking**: Monitor your net worth by tracking assets alongside your cash flow.
+- **Legacy Vault**: A secure sanctuary for your digital heritage, crypto keys, and medical records.
+
+### 🛡️ Advanced Security & Heritage
+
+- **PIN-Protected Access**: Secure sensitive vault data with a dedicated, multi-layered PIN system.
+- **Beneficiary Trust**: Designate trusted contacts to access your vital information in case of emergencies.
+- **Privacy Mode**: Instantly mask sensitive numbers and balances for safe use in public spaces.
+- **Bank-Grade Encryption**: Your financial data is protected with industry-leading security protocols.
 
 ### 📈 Deep Analytics & Insights
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, Smartphone, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown, Radar, Users } from "lucide-react";
+import { ArrowRight, BarChart3, Lock, PieChart, Shield, ShieldCheck, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown, Radar, Users } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -614,9 +614,9 @@ export default function LandingPageContent() {
                         />
                         <FeatureCard
                             delay={0.6}
-                            icon={<Lock className="h-full w-full" />}
-                            title="Secure Authentication"
-                            description="Powered by Clerk for seamless and secure sign-in options including Google, GitHub, and more."
+                            icon={<ShieldCheck className="h-full w-full" />}
+                            title="Legacy Vault"
+                            description="Secure your digital heritage, crypto keys, and medical records with bank-grade PIN protection."
                         />
                         <FeatureCard
                             delay={0.7}
@@ -636,6 +636,183 @@ export default function LandingPageContent() {
                             title="Collaborative Workspaces"
                             description="Manage finances together in isolated 'Family Mode' workspaces with real-time activity feeds and role-based permissions."
                         />
+                    </div>
+                </section>
+
+                {/* Legacy Vault Showcase */}
+                <section className="bg-muted/30 py-24 relative border-y border-border/40 overflow-hidden">
+                    {/* Background glow matching other sections */}
+                    <div className="absolute top-1/2 left-1/2 -z-10 h-[600px] w-full -translate-x-1/2 -translate-y-1/2 blur-[140px] pointer-events-none opacity-15 bg-gradient-to-br from-violet-500/30 via-purple-500/20 to-fuchsia-500/10" />
+
+                    <div className="container px-4 md:px-6">
+                        <div className="grid gap-16 lg:grid-cols-2 lg:gap-20 items-center">
+
+                            {/* Left: Visual Mockup */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -30 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.7, ease: "easeOut" }}
+                                viewport={{ once: true }}
+                                className="relative order-2 lg:order-1"
+                            >
+                                {/* Outer glow card */}
+                                <div className="relative rounded-2xl border border-border/60 bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-xl p-6 shadow-2xl overflow-hidden group">
+                                    {/* Spotlight hover effect matching FeatureCard */}
+                                    <div className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition duration-500"
+                                        style={{ background: "radial-gradient(600px circle at 50% 50%, rgba(139,92,246,.08), transparent 60%)" }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+
+                                    {/* Header row */}
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/25">
+                                                <Lock className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-foreground text-sm">Legacy Vault</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Secure Heritage</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 border border-emerald-500/20">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">PIN Active</span>
+                                        </div>
+                                    </div>
+
+                                    {/* PIN dots row */}
+                                    <div className="flex items-center justify-center gap-4 py-5 mb-6 rounded-xl border border-border/50 bg-muted/30">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ scale: 0 }}
+                                                whileInView={{ scale: 1 }}
+                                                transition={{ delay: 0.4 + i * 0.1, type: "spring", stiffness: 200 }}
+                                                viewport={{ once: true }}
+                                                className="w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_rgba(139,92,246,0.6)]"
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Vault entry cards */}
+                                    <div className="space-y-3">
+                                        {[
+                                            { icon: "🔐", label: "Crypto Wallet Keys", cat: "Crypto", color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", sensitivity: "Critical" },
+                                            { icon: "📄", label: "Will & Testament", cat: "Legal", color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20", sensitivity: "High" },
+                                            { icon: "🏦", label: "Primary Bank Account", cat: "Banking", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", sensitivity: "High" },
+                                            { icon: "❤️", label: "Medical Records", cat: "Medical", color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-500/20", sensitivity: "Medium" },
+                                        ].map((entry, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ opacity: 0, x: -10 }}
+                                                whileInView={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.5 + i * 0.08 }}
+                                                viewport={{ once: true }}
+                                                className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background/50 hover:bg-background/80 hover:border-border/70 transition-all duration-200 group/entry"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${entry.bg} border ${entry.border} text-base`}>
+                                                        {entry.icon}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-foreground leading-none">{entry.label}</p>
+                                                        <p className={`text-[10px] font-bold mt-0.5 ${entry.color}`}>{entry.cat}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-muted-foreground/60 bg-muted/60 px-2 py-0.5 rounded-full border border-border/30">{entry.sensitivity}</span>
+                                                    <Lock className="h-3.5 w-3.5 text-muted-foreground/40 group-hover/entry:text-primary transition-colors" />
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+
+                                    {/* Beneficiaries footer row */}
+                                    <div className="mt-5 flex items-center justify-between pt-4 border-t border-border/30">
+                                        <div className="flex -space-x-2">
+                                            {["#7c3aed", "#2563eb", "#059669"].map((color, i) => (
+                                                <div key={i} className="w-7 h-7 rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: color }}>
+                                                    {["M", "S", "A"][i]}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <p className="text-[11px] text-muted-foreground font-medium">3 Beneficiaries Trusted</p>
+                                    </div>
+                                </div>
+
+                                {/* Decorative floating badge */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8, duration: 0.5 }}
+                                    viewport={{ once: true }}
+                                    className="absolute -bottom-4 -right-4 z-10 rounded-xl border border-border/50 bg-background/90 backdrop-blur-lg px-4 py-2 shadow-xl flex items-center gap-2"
+                                >
+                                    <ShieldCheck className="h-4 w-4 text-primary" />
+                                    <span className="text-xs font-bold text-foreground">Bank-Grade Encrypted</span>
+                                </motion.div>
+                            </motion.div>
+
+                            {/* Right: Copy */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 30 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.7, ease: "easeOut" }}
+                                viewport={{ once: true }}
+                                className="space-y-6 order-1 lg:order-2"
+                            >
+                                <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary mb-2">
+                                    Legacy Vault
+                                </div>
+                                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">
+                                    Your Digital{" "}
+                                    <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                                        Heritage
+                                    </span>
+                                    , <br />
+                                    Safeguarded Forever.
+                                </h2>
+                                <p className="text-lg md:text-xl 3xl:text-3xl 4xl:text-4xl text-muted-foreground leading-relaxed max-w-[520px]">
+                                    A high-security sanctuary for your most critical life documents and financial assets — protected by a dedicated PIN lock and accessible only to you and your trusted beneficiaries.
+                                </p>
+                                <ul className="space-y-5 pt-2">
+                                    {[
+                                        {
+                                            icon: <Lock className="h-4 w-4" />,
+                                            title: "PIN-Protected Access",
+                                            desc: "A standalone security layer for critical data, separate from your main account login."
+                                        },
+                                        {
+                                            icon: <Users className="h-4 w-4" />,
+                                            title: "Beneficiary Designations",
+                                            desc: "Define trusted family members with access in an emergency, ensuring nothing is ever lost."
+                                        },
+                                        {
+                                            icon: <Shield className="h-4 w-4" />,
+                                            title: "7 Asset Categories",
+                                            desc: "Organize insurance, legal, crypto, banking, property, and medical records with sensitivity levels."
+                                        },
+                                    ].map((item, i) => (
+                                        <motion.li
+                                            key={i}
+                                            initial={{ opacity: 0, y: 12 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.2 + i * 0.1 }}
+                                            viewport={{ once: true }}
+                                            className="flex gap-4 group/item"
+                                        >
+                                            <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-primary/10 text-primary ring-1 ring-primary/25 flex items-center justify-center transition-transform group-hover/item:scale-110 duration-300">
+                                                {item.icon}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-foreground 3xl:text-2xl 4xl:text-3xl group-hover/item:text-primary transition-colors">{item.title}</h4>
+                                                <p className="text-sm text-muted-foreground 3xl:text-lg 4xl:text-xl leading-relaxed">{item.desc}</p>
+                                            </div>
+                                        </motion.li>
+                                    ))}
+                                </ul>
+                            </motion.div>
+                        </div>
                     </div>
                 </section>
 
