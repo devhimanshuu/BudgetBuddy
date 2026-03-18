@@ -6,6 +6,13 @@ BudgetBuddy is a modern personal finance tracker designed to help you master you
 
 ## 🌟 What's New
 
+### 🏛️ Legacy Vault
+Secure your digital heritage and emergency information with bank-grade PIN protection.
+- **PIN-Based Access**: Multi-layered security with a dedicated PIN overlay for sensitive data.
+- **Digital Heritage**: Store insurance, legal, crypto, and medical records securely.
+- **Beneficiary Management**: Designate trusted contacts to access your vault in case of emergencies.
+- **Categorized Security**: Organize sensitive information with custom sensitivity levels and categories.
+
 ### 👨‍👩‍👧‍👦 Collaborative Workspaces (Family Mode)
 Manage finances together in isolated, shared environments with role-based access control.
 - **Multiple Workspaces**: Create separate workspaces for Family, Business, or Personal use.
