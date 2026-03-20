@@ -3,8 +3,13 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
-export async function getActiveWorkspace(userId: string) {
-	if (!userId) return null;
+export async function getActiveWorkspace(userId?: string) {
+	let finalUserId = userId;
+	if (!finalUserId) {
+		const user = await currentUser();
+		if (!user) return null;
+		finalUserId = user.id;
+	}
 
 	// Try to get workspaceId from cookies
 	const cookieStore = await cookies(); // Note: cookies() is now async in some Next versions, or returns a promise
@@ -16,7 +21,7 @@ export async function getActiveWorkspace(userId: string) {
 			where: {
 				workspaceId_userId: {
 					workspaceId: workspaceCookie,
-				userId: userId,
+				userId: finalUserId,
 				},
 			},
 			include: {
@@ -46,7 +51,7 @@ export async function getActiveWorkspace(userId: string) {
 
 	// Default to the first workspace where the user is a member
 	const firstMembership = await prisma.workspaceMember.findFirst({
-		where: { userId: userId },
+		where: { userId: finalUserId },
 		include: {
 			workspace: true,
 		},
@@ -58,16 +63,16 @@ export async function getActiveWorkspace(userId: string) {
 	if (!firstMembership) {
 		// This shouldn't happen after migration, but if it does, create a default one
 		const settings = await prisma.userSettings.findUnique({
-			where: { userId: userId },
+			where: { userId: finalUserId },
 		});
 		const workspace = await prisma.workspace.create({
 			data: {
 				name: "Personal Workspace",
-				ownerId: userId,
+				ownerId: finalUserId,
 				currency: settings?.currency || "USD",
 				members: {
 					create: {
-					userId: userId,
+					userId: finalUserId,
 						role: "ADMIN",
 					},
 				},

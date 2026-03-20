@@ -23,7 +23,7 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 		redirect("/sign-in");
 	}
 
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	if (!workspace) throw new Error("No active workspace");
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot create categories");
@@ -67,7 +67,7 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
 		redirect("/sign-in");
 	}
 
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	if (!workspace) throw new Error("No active workspace");
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot delete categories");
@@ -94,7 +94,7 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 		redirect("/sign-in");
 	}
 
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	if (!workspace) throw new Error("No active workspace");
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot update categories");

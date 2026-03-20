@@ -70,7 +70,8 @@ export async function GetWorkspaces() {
 }
 
 export async function GetActiveWorkspace() {
-	return await getActiveWorkspace();
+	const user = await currentUser();
+	return await getActiveWorkspace(user?.id);
 }
 
 export async function SwitchWorkspace(workspaceId: string) {
@@ -182,7 +183,7 @@ export async function GetPendingInvites(workspaceId: string) {
 	const user = await currentUser();
 	if (!user) return [];
 
-	const canInvite = await checkPermissions(workspaceId, ["ADMIN"]);
+	const canInvite = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
 	if (!canInvite) return [];
 
 	const invites = await prisma.invite.findMany({
@@ -204,7 +205,7 @@ export async function InviteMember(
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");
 
-	const canInvite = await checkPermissions(workspaceId, ["ADMIN"]);
+	const canInvite = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
 	if (!canInvite) throw new Error("Only admins can invite members");
 
 	// Check if an active invite already exists for this email
@@ -359,7 +360,7 @@ export async function RemoveMember(workspaceId: string, memberUserId: string) {
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");
 
-	const canManage = await checkPermissions(workspaceId, ["ADMIN"]);
+	const canManage = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
 	if (!canManage) throw new Error("Only admins can remove members");
 
 	// Can't remove yourself if you're the workspace owner
@@ -400,7 +401,7 @@ export async function UpdateMemberRole(
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");
 
-	const canManage = await checkPermissions(workspaceId, ["ADMIN"]);
+	const canManage = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
 	if (!canManage) throw new Error("Only admins can change roles");
 
 	const workspace = await prisma.workspace.findUnique({
@@ -443,7 +444,7 @@ export async function RevokeInvite(inviteId: string) {
 
 	if (!invite) throw new Error("Invite not found");
 
-	const canManage = await checkPermissions(invite.workspaceId, ["ADMIN"]);
+	const canManage = await checkPermissions(invite.workspaceId, user.id, ["ADMIN"]);
 	if (!canManage) throw new Error("Only admins can revoke invites");
 
 	await prisma.invite.delete({ where: { id: inviteId } });
@@ -464,7 +465,7 @@ export async function UpdateWorkspace(workspaceId: string, data: { name?: string
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");
 
-	const canManage = await checkPermissions(workspaceId, ["ADMIN"]);
+	const canManage = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
 	if (!canManage) throw new Error("Only admins can update workspace settings");
 
 	const updatedWorkspace = await prisma.workspace.update({
