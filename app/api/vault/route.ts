@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 		redirect("/sign-in");
 	}
 
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	const workspaceId = workspace?.id;
 
 	const { searchParams } = new URL(request.url);
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 		redirect("/sign-in");
 	}
 
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	if (!workspace)
 		return Response.json({ error: "No active workspace" }, { status: 400 });
 	if (workspace.role === "VIEWER")
@@ -140,7 +140,7 @@ export async function PATCH(request: Request) {
 	}
 
 	// Verify authorization
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	const entry = await prisma.vaultEntry.findUnique({
 		where: { id: parsedBody.data.id },
 	});
@@ -194,7 +194,7 @@ export async function PUT(request: Request) {
 	}
 
 	// Verify authorization
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	const entry = await prisma.vaultEntry.findUnique({
 		where: { id: parsed.data.id },
 	});
@@ -239,7 +239,7 @@ export async function DELETE(request: Request) {
 	}
 
 	// Verify authorization
-	const workspace = await getActiveWorkspace();
+	const workspace = await getActiveWorkspace(user.id);
 	const entry = await prisma.vaultEntry.findUnique({
 		where: { id },
 	});

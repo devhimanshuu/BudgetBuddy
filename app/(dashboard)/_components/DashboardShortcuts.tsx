@@ -9,6 +9,8 @@ import {
 import QuickAddWidget from "@/components/QuickAddWidget";
 import CreateTransactionDialog from "@/app/(dashboard)/_components/CreateTransactionDialog";
 import CreateAssetDialog from "@/app/(dashboard)/_components/CreateAssetDialog";
+import CreateVaultEntryDialog from "@/app/(dashboard)/vault/_components/CreateVaultEntryDialog";
+import CreateWorkspaceDialog from "@/components/CreateWorkspaceDialog";
 import { CommandPalette } from "@/components/CommandPalette";
 
 export default function DashboardShortcuts({
@@ -23,6 +25,8 @@ export default function DashboardShortcuts({
   const [showIncomeDialog, setShowIncomeDialog] = useState(false);
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [showAssetDialog, setShowAssetDialog] = useState(false);
+  const [showVaultEntryDialog, setShowVaultEntryDialog] = useState(false);
+  const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   const shortcuts = [
@@ -71,6 +75,21 @@ export default function DashboardShortcuts({
       description: "Go to Dashboard",
       action: () => router.push("/"),
     },
+    {
+      key: "V",
+      description: "Go to Vault",
+      action: () => router.push("/vault"),
+    },
+    {
+      key: "L",
+      description: "New Vault Entry",
+      action: () => setShowVaultEntryDialog(true),
+    },
+    {
+      key: "W",
+      description: "New Workspace",
+      action: () => setShowWorkspaceDialog(true),
+    },
   ];
 
   const { showHelp, setShowHelp } = useKeyboardShortcuts(shortcuts);
@@ -110,6 +129,20 @@ export default function DashboardShortcuts({
         onExpenseClick={() => setShowExpenseDialog(true)}
         onAssetClick={() => setShowAssetDialog(true)}
         onAIChatClick={() => onAIChatOpen?.()}
+        onVaultEntryClick={() => setShowVaultEntryDialog(true)}
+        onWorkspaceClick={() => setShowWorkspaceDialog(true)}
+      />
+
+      <CreateVaultEntryDialog
+        open={showVaultEntryDialog}
+        onOpenChange={setShowVaultEntryDialog}
+        trigger={null}
+      />
+
+      <CreateWorkspaceDialog
+        open={showWorkspaceDialog}
+        onOpenChange={setShowWorkspaceDialog}
+        trigger={null}
       />
 
       <KeyboardShortcutsHelp

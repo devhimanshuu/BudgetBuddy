@@ -64,12 +64,14 @@ export function SmartNudge() {
 
                 <div className="space-y-1">
                     <p className="text-sm font-medium leading-none flex items-center gap-2">
-                        AI Financial Analyst
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
-                            Beta
-                        </span>
+                        {data.label || "AI Assistant"}
+                        {data.label === "AI Financial Analyst" && (
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+                                Beta
+                            </span>
+                        )}
                     </p>
-                    <p className="text-sm text-foreground/80">
+                    <p className="text-sm text-foreground/80 leading-snug">
                         {data.message}
                     </p>
                 </div>

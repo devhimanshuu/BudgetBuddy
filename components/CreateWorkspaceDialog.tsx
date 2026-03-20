@@ -20,10 +20,14 @@ import { useRouter } from "next/navigation";
 
 interface Props {
     trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export default function CreateWorkspaceDialog({ trigger }: Props) {
-    const [open, setOpen] = useState(false);
+export default function CreateWorkspaceDialog({ trigger, open: propsOpen, onOpenChange: propsOnOpenChange }: Props) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const open = propsOpen !== undefined ? propsOpen : internalOpen;
+    const setOpen = propsOnOpenChange || setInternalOpen;
     const [name, setName] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -47,14 +51,16 @@ export default function CreateWorkspaceDialog({ trigger }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {trigger || (
-                    <Button variant="outline" size="sm">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        New Workspace
-                    </Button>
-                )}
-            </DialogTrigger>
+            {trigger !== null && (
+                <DialogTrigger asChild>
+                    {trigger || (
+                        <Button variant="outline" size="sm">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            New Workspace
+                        </Button>
+                    )}
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Create Workspace</DialogTitle>

@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
-  const workspace = await getActiveWorkspace();
+  const workspace = await getActiveWorkspace(user.id);
   const workspaceId = workspace?.id;
 
   const { searchParams } = new URL(request.url);

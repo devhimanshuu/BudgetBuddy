@@ -8,12 +8,46 @@ import OpenAI from "openai";
 export interface AiNudgeResult {
     message: string;
     type: "warning" | "info" | "success" | "neutral";
+    label?: string;
 }
 
 export async function GetAiNudge(): Promise<AiNudgeResult | null> {
     const user = await currentUser();
     if (!user) {
         return null;
+    }
+
+    // 0. Occasional Static Tips ("Did you know?")
+    // 20% chance to show a static tip instead of AI logic
+    if (Math.random() < 0.2) {
+        const tips: AiNudgeResult[] = [
+            { 
+                message: "Press Ctrl + K anywhere to search all features and actions instantly.", 
+                type: "neutral",
+                label: "Knowledge Base"
+            },
+            { 
+                message: "Use Privacy Mode (the eye icon) to blur sensitive totals when in public.", 
+                type: "info",
+                label: "Knowledge Base"
+            },
+            { 
+                message: "Master your workflow! Press Ctrl + ? to see all keyboard shortcuts.", 
+                type: "neutral",
+                label: "Knowledge Base"
+            },
+            { 
+                message: "Use the Legacy Vault (Ctrl+V) to store sensitive emergency documents securely.", 
+                type: "success",
+                label: "Knowledge Base"
+            },
+            { 
+                message: "Pro tip: You can invite family members to your Workspace from the Manage settings.", 
+                type: "info",
+                label: "Knowledge Base"
+            }
+        ];
+        return tips[Math.floor(Math.random() * tips.length)];
     }
 
     // 1. Fetch relevant context data
@@ -161,6 +195,7 @@ export async function GetAiNudge(): Promise<AiNudgeResult | null> {
 
     return {
         message,
-        type
+        type,
+        label: "AI Financial Analyst"
     };
 }

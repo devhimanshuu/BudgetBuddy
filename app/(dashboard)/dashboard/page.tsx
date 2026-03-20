@@ -35,7 +35,7 @@ async function page() {
                 userId: user.id,
             },
         }),
-        getActiveWorkspace()
+        getActiveWorkspace(user.id)
     ]);
 
     const personaData = await getPersona(user.id, workspace?.id);

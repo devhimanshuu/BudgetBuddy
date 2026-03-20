@@ -37,6 +37,8 @@ import {
 
 interface CreateVaultEntryDialogProps {
 	trigger: ReactNode;
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }
 
 const VAULT_ICONS = ["🔒", "🏛️", "📋", "💳", "🏠", "⚕️", "₿", "📂", "🔑", "💼"];
@@ -124,8 +126,12 @@ const CONTENT_TEMPLATES: Record<string, string> = {
 
 export default function CreateVaultEntryDialog({
 	trigger,
+	open: propsOpen,
+	onOpenChange: propsOnOpenChange,
 }: CreateVaultEntryDialogProps) {
-	const [open, setOpen] = useState(false);
+	const [internalOpen, setInternalOpen] = useState(false);
+	const open = propsOpen !== undefined ? propsOpen : internalOpen;
+	const setOpen = propsOnOpenChange || setInternalOpen;
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState("");
 	const [category, setCategory] = useState("other");
@@ -197,7 +203,7 @@ export default function CreateVaultEntryDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>{trigger}</DialogTrigger>
+			{trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 			<DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
 				<DialogHeader>
 					<div className="flex items-center gap-3">

@@ -3,9 +3,8 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
-export async function getActiveWorkspace() {
-	const user = await currentUser();
-	if (!user) return null;
+export async function getActiveWorkspace(userId: string) {
+	if (!userId) return null;
 
 	// Try to get workspaceId from cookies
 	const cookieStore = await cookies(); // Note: cookies() is now async in some Next versions, or returns a promise
@@ -17,7 +16,7 @@ export async function getActiveWorkspace() {
 			where: {
 				workspaceId_userId: {
 					workspaceId: workspaceCookie,
-					userId: user.id,
+				userId: userId,
 				},
 			},
 			include: {
@@ -47,7 +46,7 @@ export async function getActiveWorkspace() {
 
 	// Default to the first workspace where the user is a member
 	const firstMembership = await prisma.workspaceMember.findFirst({
-		where: { userId: user.id },
+		where: { userId: userId },
 		include: {
 			workspace: true,
 		},
@@ -59,16 +58,16 @@ export async function getActiveWorkspace() {
 	if (!firstMembership) {
 		// This shouldn't happen after migration, but if it does, create a default one
 		const settings = await prisma.userSettings.findUnique({
-			where: { userId: user.id },
+			where: { userId: userId },
 		});
 		const workspace = await prisma.workspace.create({
 			data: {
 				name: "Personal Workspace",
-				ownerId: user.id,
+				ownerId: userId,
 				currency: settings?.currency || "USD",
 				members: {
 					create: {
-						userId: user.id,
+					userId: userId,
 						role: "ADMIN",
 					},
 				},
@@ -98,16 +97,16 @@ export async function getActiveWorkspace() {
 
 export async function checkPermissions(
 	workspaceId: string,
+	userId: string,
 	requiredRoles: string[] = ["ADMIN", "EDITOR"],
 ) {
-	const user = await currentUser();
-	if (!user) return false;
+	if (!userId) return false;
 
 	const membership = await prisma.workspaceMember.findUnique({
 		where: {
 			workspaceId_userId: {
 				workspaceId,
-				userId: user.id,
+				userId: userId,
 			},
 		},
 	});

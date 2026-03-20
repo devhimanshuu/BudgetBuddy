@@ -16,7 +16,7 @@ export default async function AnalyticsPage() {
         userId: user.id,
       },
     }),
-    getActiveWorkspace()
+    getActiveWorkspace(user.id)
   ]);
 
   if (!userSettings) {

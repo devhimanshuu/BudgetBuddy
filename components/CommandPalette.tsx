@@ -12,6 +12,9 @@ import {
   Calendar,
   Coins,
   Bot,
+  ShieldCheck,
+  Lock,
+  Users,
 } from "lucide-react"
 
 import {
@@ -33,9 +36,11 @@ interface CommandPaletteProps {
   onExpenseClick: () => void
   onAssetClick: () => void
   onAIChatClick: () => void
+  onVaultEntryClick: () => void
+  onWorkspaceClick: () => void
 }
 
-export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onAssetClick, onAIChatClick }: CommandPaletteProps) {
+export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onAssetClick, onAIChatClick, onVaultEntryClick, onWorkspaceClick }: CommandPaletteProps) {
   const router = useRouter()
 
   const runCommand = React.useCallback((command: () => unknown) => {
@@ -68,6 +73,16 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, o
             <Coins className="mr-2 h-4 w-4 text-blue-500" />
             <span>New Asset</span>
             <CommandShortcut>⌘N</CommandShortcut>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(onVaultEntryClick)}>
+            <Lock className="mr-2 h-4 w-4 text-violet-500" />
+            <span>New Vault Entry</span>
+            <CommandShortcut>⌘L</CommandShortcut>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(onWorkspaceClick)}>
+            <Users className="mr-2 h-4 w-4 text-amber-500" />
+            <span>New Workspace</span>
+            <CommandShortcut>⌘W</CommandShortcut>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
@@ -102,6 +117,11 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, o
             <span>Calendar</span>
             <CommandShortcut>⌘C</CommandShortcut>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/vault"))}>
+            <ShieldCheck className="mr-2 h-4 w-4 " />
+            <span>Legacy Vault</span>
+            <CommandShortcut>⌘V</CommandShortcut>
+          </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push("/manage"))}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Manage</span>
@@ -109,6 +129,13 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, o
           </CommandItem>
         </CommandGroup>
       </CommandList>
+      <div className="p-4 border-t bg-muted/20 text-[10px] sm:text-xs text-muted-foreground transition-all">
+        <p className="flex items-center gap-2">
+          <Bot className="h-3 w-3 text-purple-500" />
+          <span className="font-semibold text-primary">Pro Tip:</span> 
+          Start typing to search across all features or use <kbd className="rounded bg-background px-1.5 py-0.5 border shadow-sm">⌘ + K</kbd> to toggle this menu.
+        </p>
+      </div>
     </CommandDialog>
   )
 }
