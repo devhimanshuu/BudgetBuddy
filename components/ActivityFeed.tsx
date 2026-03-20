@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,9 +96,11 @@ export default function ActivityFeed() {
                                 >
                                     <div className="relative shrink-0">
                                         {activity.user?.imageUrl ? (
-                                            <img
+                                            <Image
                                                 src={activity.user.imageUrl}
                                                 alt={activity.user.name}
+                                                width={36}
+                                                height={36}
                                                 className="h-9 w-9 rounded-full border border-border/50 shadow-sm"
                                             />
                                         ) : (

@@ -119,7 +119,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         toast.success("History cleared");
     };
 
-    const speakText = (text: string, personaName?: string) => {
+    const speakText = useCallback((text: string, personaName?: string) => {
         if (typeof window !== "undefined" && window.speechSynthesis) {
             window.speechSynthesis.cancel();
 
@@ -153,7 +153,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         } else {
             toast.error("Text-to-speech is not supported in your browser.");
         }
-    };
+    }, [userPersona, userLevel]);
 
     const typeMessage = useCallback((fullText: string, personaName?: string) => {
         setMessages((prev) => [...prev, { role: "model", parts: [{ text: "" }], persona: personaName }]);
@@ -183,7 +183,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             }
         };
         typeChar();
-    }, [isAutoSpeak]);
+    }, [isAutoSpeak, speakText]);
 
     const handleSend = useCallback(async (overrideInput?: string) => {
         const messageText = overrideInput || input;

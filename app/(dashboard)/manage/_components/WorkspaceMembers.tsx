@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     GetWorkspaces,
@@ -419,9 +420,11 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                                         >
                                             <div className="flex items-center gap-3">
                                                 {member.imageUrl ? (
-                                                    <img
+                                                    <Image
                                                         src={member.imageUrl}
                                                         alt={member.name}
+                                                        width={32}
+                                                        height={32}
                                                         className="h-8 w-8 rounded-full border border-border"
                                                     />
                                                 ) : (

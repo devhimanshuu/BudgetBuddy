@@ -161,7 +161,7 @@ export const CustomCursor = () => {
                 {/* The Main "Golden Coin" Blob */}
                 <motion.div
                     className={cn(
-                        "relative flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                        "relative flex items-center justify-center transition-all duration-500 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]",
                         isHovering
                             ? "w-[65px] h-[65px] bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-transparent backdrop-blur-xl border border-amber-500/40 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.2),inset_0_0_15px_rgba(245,158,11,0.1)]"
                             : "w-[12px] h-[12px] bg-primary rounded-full shadow-[0_0_10px_rgb(var(--primary)/0.3)]",
