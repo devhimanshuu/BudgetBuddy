@@ -33,6 +33,7 @@ export default function DayTransactionsSheet({
 
     const incomeTransactions = dayData?.transactions.filter((t) => t.type === "income") || [];
     const expenseTransactions = dayData?.transactions.filter((t) => t.type === "expense") || [];
+    const investmentTransactions = dayData?.transactions.filter((t) => t.type === "investment") || [];
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -47,17 +48,23 @@ export default function DayTransactionsSheet({
                 {dayData && (
                     <div className="mt-6 space-y-6">
                         {/* Daily Totals */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="rounded-lg border bg-emerald-500/10 p-4">
-                                <div className="text-sm text-muted-foreground">Income</div>
-                                <div className="text-2xl font-bold text-emerald-500">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                            <div className="rounded-lg border bg-emerald-500/10 p-2 sm:p-4">
+                                <div className="text-[10px] sm:text-sm text-muted-foreground">Income</div>
+                                <div className="text-sm sm:text-2xl font-bold text-emerald-500 truncate">
                                     {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(dayData.income)}
                                 </div>
                             </div>
-                            <div className="rounded-lg border bg-red-500/10 p-4">
-                                <div className="text-sm text-muted-foreground">Expenses</div>
-                                <div className="text-2xl font-bold text-red-500">
+                            <div className="rounded-lg border bg-red-500/10 p-2 sm:p-4">
+                                <div className="text-[10px] sm:text-sm text-muted-foreground">Expenses</div>
+                                <div className="text-sm sm:text-2xl font-bold text-red-500 truncate">
                                     {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(dayData.expense)}
+                                </div>
+                            </div>
+                            <div className="rounded-lg border bg-indigo-500/10 p-2 sm:p-4">
+                                <div className="text-[10px] sm:text-sm text-muted-foreground">Investments</div>
+                                <div className="text-sm sm:text-2xl font-bold text-indigo-500 truncate">
+                                    {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(dayData.investment || 0)}
                                 </div>
                             </div>
                         </div>
@@ -139,6 +146,46 @@ export default function DayTransactionsSheet({
                                                     </div>
                                                 </div>
                                                 <div className="text-lg font-bold text-red-500">
+                                                    -{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(transaction.amount)}
+                                                </div>
+                                            </div>
+                                            {transaction.notes && (
+                                                <div className="mt-2 text-sm text-muted-foreground">
+                                                    {transaction.notes}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Investment Transactions */}
+                        {investmentTransactions.length > 0 && (
+                            <div>
+                                <h3 className="mb-3 text-sm font-semibold text-indigo-500">
+                                    Investments ({investmentTransactions.length})
+                                </h3>
+                                <div className="space-y-2">
+                                    {investmentTransactions.map((transaction) => (
+                                        <div
+                                            key={transaction.id}
+                                            className="rounded-lg border bg-card p-3 hover:bg-accent/50 transition-colors"
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-start gap-3">
+                                                    <span className="text-2xl">{transaction.categoryIcon}</span>
+                                                    <div>
+                                                        <div className="font-medium">{transaction.description}</div>
+                                                        <div className="text-sm text-muted-foreground">
+                                                            {transaction.category}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {format(new Date(transaction.date), "h:mm a")}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-lg font-bold text-indigo-500">
                                                     -{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(transaction.amount)}
                                                 </div>
                                             </div>

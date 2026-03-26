@@ -86,7 +86,7 @@ export default function ActivityFeed() {
 
 function ActivityItem({ activity, isLast, currency }: { activity: Activity; isLast: boolean; currency: string }) {
     const Icon = getActivityIcon(activity.type);
-    const color = getActivityColor(activity.type);
+    const color = getActivityColor(activity.type, activity.metadata?.type);
     const formatter = GetFormatterForCurrency(currency);
     
     return (
@@ -123,9 +123,11 @@ function ActivityItem({ activity, isLast, currency }: { activity: Activity; isLa
                                 variant="outline" 
                                 className={cn(
                                     "font-mono text-xs font-bold",
-                                    activity.metadata.type === "income" 
-                                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5" 
-                                        : "border-red-500/30 text-red-500 bg-red-500/5"
+                                    activity.metadata.type === "income"
+                                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5"
+                                        : activity.metadata.type === "investment"
+                                            ? "border-indigo-500/30 text-indigo-500 bg-indigo-500/5"
+                                            : "border-red-500/30 text-red-500 bg-red-500/5"
                                 )}
                             >
                                 {activity.metadata.type === "income" ? "+" : "-"}{formatter.format(activity.metadata.amount)}
@@ -157,10 +159,12 @@ function getActivityIcon(type: string) {
     }
 }
 
-function getActivityColor(type: string) {
+function getActivityColor(type: string, metadataType?: string) {
     switch (type) {
         case "TRANSACTION_CREATED":
-            return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+            if (metadataType === "income") return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+            if (metadataType === "investment") return "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
+            return "bg-red-500/10 text-red-500 border-red-500/20";
         case "MEMBER_INVITED":
             return "bg-blue-500/10 text-blue-500 border-blue-500/20";
         case "WORKSPACE_CREATED":

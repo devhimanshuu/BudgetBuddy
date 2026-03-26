@@ -60,6 +60,7 @@ export async function GET(request: Request) {
 	const monthStats = {
 		totalIncome: 0,
 		totalExpense: 0,
+		totalInvestment: 0,
 		avgDailyExpense: 0,
 		highSpendingThreshold: 0,
 	};
@@ -67,8 +68,10 @@ export async function GET(request: Request) {
 	transactions.forEach((transaction) => {
 		if (transaction.type === "income") {
 			monthStats.totalIncome += transaction.amount;
-		} else {
+		} else if (transaction.type === "expense") {
 			monthStats.totalExpense += transaction.amount;
+		} else if (transaction.type === "investment") {
+			monthStats.totalInvestment += transaction.amount;
 		}
 	});
 
@@ -90,6 +93,7 @@ export async function GET(request: Request) {
 			dayMap[dateKey] = {
 				income: 0,
 				expense: 0,
+				investment: 0,
 				count: 0,
 				isHighSpending: false,
 				transactions: [],
@@ -103,15 +107,17 @@ export async function GET(request: Request) {
 			description: transaction.description,
 			notes: transaction.notes,
 			date: transaction.date,
-			type: transaction.type as "income" | "expense",
+			type: transaction.type as any,
 			category: transaction.category,
 			categoryIcon: transaction.categoryIcon,
 		});
 
 		if (transaction.type === "income") {
 			dayMap[dateKey].income += transaction.amount;
-		} else {
+		} else if (transaction.type === "expense") {
 			dayMap[dateKey].expense += transaction.amount;
+		} else if (transaction.type === "investment") {
+			dayMap[dateKey].investment += transaction.amount;
 		}
 	});
 
@@ -128,6 +134,7 @@ export async function GET(request: Request) {
 			...monthStats,
 			totalIncome: Math.round(monthStats.totalIncome * 100) / 100,
 			totalExpense: Math.round(monthStats.totalExpense * 100) / 100,
+			totalInvestment: Math.round(monthStats.totalInvestment * 100) / 100,
 			avgDailyExpense: Math.round(monthStats.avgDailyExpense * 100) / 100,
 			highSpendingThreshold:
 				Math.round(monthStats.highSpendingThreshold * 100) / 100,

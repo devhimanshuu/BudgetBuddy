@@ -73,12 +73,12 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
   const trendsDataQuery = { data: summaryQuery.data?.trends, isFetching: summaryQuery.isFetching };
 
   const handleExportPDF = () => {
-    if (!categoryDataQuery.data || !trendsDataQuery.data) {
+    if (!summaryQuery.data?.categoryBreakdown || !trendsDataQuery.data) {
       toast.error("Please wait for data to load before exporting");
       return;
     }
 
-    exportAnalyticsToPDF(categoryDataQuery.data, trendsDataQuery.data, {
+    exportAnalyticsToPDF(summaryQuery.data.categoryBreakdown, trendsDataQuery.data, {
       title: "Analytics Report",
       dateRange: dataRange,
       currency: userSettings.currency,

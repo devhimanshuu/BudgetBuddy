@@ -206,6 +206,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                                     DayButton: (props) => {
                                         const dayData = getDayData(props.day.date);
                                         const hasIncome = dayData && dayData.income > 0;
+                                        const hasInvestment = dayData && dayData.investment > 0;
                                         const hasHighSpending = dayData && dayData.isHighSpending;
                                         const hasNormalSpending = dayData && dayData.expense > 0 && !dayData.isHighSpending;
 
@@ -223,10 +224,13 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                                                     {hasIncome && (
                                                         <div className="h-1 w-1 rounded-full bg-emerald-500" />
                                                     )}
+                                                    {hasInvestment && (
+                                                        <div className="h-1 w-1 rounded-full bg-indigo-500" />
+                                                    )}
                                                     {hasHighSpending && (
                                                         <div className="h-1 w-1 rounded-full bg-red-500" />
                                                     )}
-                                                    {hasNormalSpending && !hasIncome && !hasHighSpending && (
+                                                    {hasNormalSpending && !hasIncome && !hasHighSpending && !hasInvestment && (
                                                         <div className="h-1 w-1 rounded-full bg-gray-400" />
                                                     )}
                                                 </div>
@@ -245,6 +249,10 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                             <span className="text-muted-foreground">Income</span>
                         </div>
                         <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded-full bg-indigo-500" />
+                            <span className="text-muted-foreground">Investment</span>
+                        </div>
+                        <div className="flex items-center gap-2">
                             <div className="h-3 w-3 rounded-full bg-red-500" />
                             <span className="text-muted-foreground">High Spending</span>
                         </div>
@@ -258,7 +266,7 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
 
             {/* Month Statistics */}
             {calendarQuery.data && (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -288,17 +296,30 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Total Investment
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-indigo-500">
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalInvestment)}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Net Savings
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className={cn(
                                 "text-2xl font-bold",
-                                (calendarQuery.data.monthStats.totalIncome - calendarQuery.data.monthStats.totalExpense) >= 0
+                                (calendarQuery.data.monthStats.totalIncome - calendarQuery.data.monthStats.totalExpense - calendarQuery.data.monthStats.totalInvestment) >= 0
                                     ? "text-emerald-500"
                                     : "text-red-500"
                             )}>
-                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalIncome - calendarQuery.data.monthStats.totalExpense)}
+                                {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalIncome - calendarQuery.data.monthStats.totalExpense - calendarQuery.data.monthStats.totalInvestment)}
                             </div>
                         </CardContent>
                     </Card>

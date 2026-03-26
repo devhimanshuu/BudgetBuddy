@@ -16,6 +16,7 @@ export interface CalendarTransaction {
 export interface CalendarDayData {
 	income: number;
 	expense: number;
+	investment: number;
 	count: number;
 	isHighSpending: boolean;
 	transactions: CalendarTransaction[];
@@ -24,6 +25,7 @@ export interface CalendarDayData {
 export interface CalendarMonthStats {
 	totalIncome: number;
 	totalExpense: number;
+	totalInvestment: number;
 	avgDailyExpense: number;
 	highSpendingThreshold: number;
 }

@@ -69,7 +69,7 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           value={investment}
           title="Investment"
           icon={
-            <TrendingUp className="h-12 w-12 items-center rounded-lg p-2 text-blue-500 bg-blue-400/10 3xl:h-14 3xl:w-14" />
+            <TrendingUp className="h-12 w-12 items-center rounded-lg p-2 text-indigo-500 bg-indigo-400/10 3xl:h-14 3xl:w-14" />
           }
           privacyMode={isPrivacyMode}
         />
