@@ -66,28 +66,31 @@ export async function GET(request: Request) {
 	};
 
 	transactions.forEach((transaction) => {
+		const amount = transaction.amount || 0;
 		if (transaction.type === "income") {
-			monthStats.totalIncome += transaction.amount;
+			monthStats.totalIncome += amount;
 		} else if (transaction.type === "expense") {
-			monthStats.totalExpense += transaction.amount;
+			monthStats.totalExpense += amount;
 		} else if (transaction.type === "investment") {
-			monthStats.totalInvestment += transaction.amount;
+			monthStats.totalInvestment += amount;
 		}
 	});
 
 	// Calculate average daily expense
-	const daysInMonth = eachDayOfInterval({
+	const daysInMonth = Math.max(eachDayOfInterval({
 		start: startDate,
 		end: endDate,
-	}).length;
-	monthStats.avgDailyExpense = monthStats.totalExpense / daysInMonth;
-	monthStats.highSpendingThreshold = monthStats.avgDailyExpense * multiplierNum;
+	}).length, 1);
+	
+	monthStats.avgDailyExpense = (monthStats.totalExpense || 0) / daysInMonth;
+	monthStats.highSpendingThreshold = (monthStats.avgDailyExpense || 0) * multiplierNum;
 
 	// Group transactions by day
 	const dayMap: Record<string, CalendarDayData> = {};
 
 	transactions.forEach((transaction) => {
 		const dateKey = format(transaction.date, "yyyy-MM-dd");
+		const amount = transaction.amount || 0;
 
 		if (!dayMap[dateKey]) {
 			dayMap[dateKey] = {
@@ -103,7 +106,7 @@ export async function GET(request: Request) {
 		dayMap[dateKey].count++;
 		dayMap[dateKey].transactions.push({
 			id: transaction.id,
-			amount: transaction.amount,
+			amount: amount,
 			description: transaction.description,
 			notes: transaction.notes,
 			date: transaction.date,
@@ -113,11 +116,11 @@ export async function GET(request: Request) {
 		});
 
 		if (transaction.type === "income") {
-			dayMap[dateKey].income += transaction.amount;
+			dayMap[dateKey].income += amount;
 		} else if (transaction.type === "expense") {
-			dayMap[dateKey].expense += transaction.amount;
+			dayMap[dateKey].expense += amount;
 		} else if (transaction.type === "investment") {
-			dayMap[dateKey].investment += transaction.amount;
+			dayMap[dateKey].investment += amount;
 		}
 	});
 
@@ -131,13 +134,12 @@ export async function GET(request: Request) {
 	return Response.json({
 		days: dayMap,
 		monthStats: {
-			...monthStats,
-			totalIncome: Math.round(monthStats.totalIncome * 100) / 100,
-			totalExpense: Math.round(monthStats.totalExpense * 100) / 100,
-			totalInvestment: Math.round(monthStats.totalInvestment * 100) / 100,
-			avgDailyExpense: Math.round(monthStats.avgDailyExpense * 100) / 100,
+			totalIncome: Math.round((monthStats.totalIncome || 0) * 100) / 100,
+			totalExpense: Math.round((monthStats.totalExpense || 0) * 100) / 100,
+			totalInvestment: Math.round((monthStats.totalInvestment || 0) * 100) / 100,
+			avgDailyExpense: Math.round((monthStats.avgDailyExpense || 0) * 100) / 100,
 			highSpendingThreshold:
-				Math.round(monthStats.highSpendingThreshold * 100) / 100,
+				Math.round((monthStats.highSpendingThreshold || 0) * 100) / 100,
 		},
 	});
 }
