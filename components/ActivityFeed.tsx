@@ -112,7 +112,9 @@ export default function ActivityFeed() {
                                         )}
                                         <div className={cn(
                                             "absolute -bottom-1 -right-1 p-1 rounded-full bg-background border border-border/50 shadow-sm",
-                                            meta.color
+                                            activity.type === "TRANSACTION_CREATED" 
+                                                ? (activity.metadata?.type === "income" ? "text-emerald-500" : activity.metadata?.type === "investment" ? "text-indigo-500" : "text-red-500")
+                                                : meta.color
                                         )}>
                                             <Icon className="w-2.5 h-2.5" />
                                         </div>
@@ -132,7 +134,17 @@ export default function ActivityFeed() {
                                                 {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                                             </p>
                                             {activity.metadata?.type && (
-                                                <Badge variant="outline" className="text-[9px] h-3.5 px-1 bg-muted/30">
+                                                <Badge 
+                                                    variant="outline" 
+                                                    className={cn(
+                                                        "text-[9px] h-3.5 px-1 bg-muted/30",
+                                                        activity.metadata.type === "income" 
+                                                            ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5" 
+                                                            : activity.metadata.type === "investment"
+                                                                ? "text-indigo-500 border-indigo-500/20 bg-indigo-500/5"
+                                                                : "text-red-500 border-red-500/20 bg-red-500/5"
+                                                    )}
+                                                >
                                                     {activity.metadata.type}
                                                 </Badge>
                                             )}
