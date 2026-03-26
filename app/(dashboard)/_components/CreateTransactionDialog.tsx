@@ -231,7 +231,7 @@ const CreateTransactionDialog = ({
               <span
                 className={cn(
                   "m-1",
-                  type === "income" ? "text-emerald-500" : "text-red-500"
+                  type === "income" ? "text-emerald-500" : type === "expense" ? "text-red-500" : "text-blue-500"
                 )}
               >
                 {type}

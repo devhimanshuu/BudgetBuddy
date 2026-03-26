@@ -40,9 +40,11 @@ export async function GET(request: Request) {
 
   const expense = totals.find((t) => t.type === "expense")?._sum.amount;
   const income = totals.find((t) => t.type === "income")?._sum.amount;
+  const investment = totals.find((t) => t.type === "investment")?._sum.amount;
   const balance = {
     expense: expense != null ? Number(expense) : 0,
     income: income != null ? Number(income) : 0,
+    investment: investment != null ? Number(investment) : 0,
   };
 
   const categories = categoriesStats.map((stat) => ({

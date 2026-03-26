@@ -56,7 +56,7 @@ const createRecurringSchema = z.object({
     category: z.string().min(1, "Category is required"),
     date: z.date(),
     interval: z.enum(["daily", "weekly", "monthly", "yearly"]),
-    type: z.enum(["income", "expense"]),
+    type: z.enum(["income", "expense", "investment"]),
 });
 
 type CreateRecurringSchemaType = z.infer<typeof createRecurringSchema>;
@@ -90,7 +90,7 @@ function CreateRecurringDialog({
     const form = useForm<CreateRecurringSchemaType>({
         resolver: zodResolver(createRecurringSchema),
         defaultValues: {
-            type: "expense",
+            type: "investment",
             interval: "monthly",
             date: new Date(),
             description: "",
@@ -108,7 +108,7 @@ function CreateRecurringDialog({
                 id: "create-recurring",
             });
             form.reset({
-                type: "expense",
+                type: "investment",
                 interval: "monthly",
                 date: new Date(),
                 description: "",
@@ -169,6 +169,7 @@ function CreateRecurringDialog({
                                         <SelectContent>
                                             <SelectItem value="income">Income</SelectItem>
                                             <SelectItem value="expense">Expense</SelectItem>
+                                            <SelectItem value="investment">Investment</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -211,7 +212,7 @@ function CreateRecurringDialog({
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Category</FormLabel>
                                     <FormControl>
-                                        <CategoryPicker type={form.watch("type") as "income" | "expense"} onChange={setCategory} />
+                                        <CategoryPicker type={form.watch("type") as "income" | "expense" | "investment"} onChange={setCategory} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -313,7 +314,7 @@ function EditRecurringDialog({
     const form = useForm<CreateRecurringSchemaType>({
         resolver: zodResolver(createRecurringSchema),
         defaultValues: {
-            type: transaction.type as "income" | "expense",
+            type: transaction.type as "income" | "expense" | "investment",
             interval: transaction.interval as any,
             date: new Date(transaction.date),
             description: transaction.description,
@@ -383,6 +384,7 @@ function EditRecurringDialog({
                                         <SelectContent>
                                             <SelectItem value="income">Income</SelectItem>
                                             <SelectItem value="expense">Expense</SelectItem>
+                                            <SelectItem value="investment">Investment</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -425,7 +427,7 @@ function EditRecurringDialog({
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Category</FormLabel>
                                     <FormControl>
-                                        <CategoryPicker type={form.watch("type") as "income" | "expense"} onChange={setCategory} />
+                                        <CategoryPicker type={form.watch("type") as "income" | "expense" | "investment"} onChange={setCategory} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -596,7 +598,7 @@ export function ManageRecurringTransactions() {
                             <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                                 <span className={cn(
                                     "font-bold",
-                                    transaction.type === "income" ? "text-emerald-500" : "text-red-500"
+                                    transaction.type === "income" ? "text-emerald-500" : transaction.type === "expense" ? "text-red-500" : "text-blue-500"
                                 )}>
                                     {transaction.type === "income" ? "+" : "-"}{formatter.format(transaction.amount)}
                                 </span>

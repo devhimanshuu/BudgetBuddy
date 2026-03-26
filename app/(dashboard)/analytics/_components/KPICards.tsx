@@ -35,7 +35,7 @@ export default function KPICards({ userSettings, from, to, isPrivacyMode = false
     const data = statsQuery.data;
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 2xl:gap-6 4xl:gap-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 2xl:gap-6 4xl:gap-8">
             {/* Savings Rate Card */}
             <SkeletonWrapper isLoading={statsQuery.isFetching}>
                 <GlassCard className="h-full overflow-hidden">
@@ -106,6 +106,44 @@ export default function KPICards({ userSettings, from, to, isPrivacyMode = false
                                     {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data?.disposableIncome?.current || 0)}
                                 </h3>
                                 <p className="text-xs text-muted-foreground mt-1">Income after all taxes & expenses</p>
+                            </div>
+                        </CardContent>
+                    </div>
+                </GlassCard>
+            </SkeletonWrapper>
+
+            {/* Investment Card */}
+            <SkeletonWrapper isLoading={statsQuery.isFetching}>
+                <GlassCard className="h-full overflow-hidden">
+                    <div className="flex flex-col h-full relative">
+                        {/* Atmospheric Glow */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-blue-500/5 to-transparent pointer-events-none" />
+
+                        <CardHeader className="relative p-6 shrink-0">
+                            <CardTitle className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 p-2 shadow-lg shadow-indigo-500/20">
+                                        <TrendingUp className="h-5 w-5 text-white" />
+                                    </div>
+                                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Investments</span>
+                                </div>
+                                {data?.investment && (
+                                    <div className={cn(
+                                        "flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full",
+                                        data?.investment?.change >= 0 ? "text-emerald-500 bg-emerald-500/10" : "text-red-500 bg-red-500/10"
+                                    )}>
+                                        {data?.investment?.change >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                                        <span>{isPrivacyMode ? "***" : formatter.format(Math.abs(data?.investment?.change || 0)).replace(/[^\d]/g, '')}</span>
+                                    </div>
+                                )}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative p-6 pt-0">
+                            <div className="flex flex-col">
+                                <h3 className="text-4xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
+                                    {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data?.investment?.current || 0)}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-1">Total capital deployed this period</p>
                             </div>
                         </CardContent>
                     </div>

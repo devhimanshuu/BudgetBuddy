@@ -77,12 +77,14 @@ export async function GET(request: Request) {
       month: monthName,
       currentYearIncome: currentMonth?.income || 0,
       currentYearExpense: currentMonth?.expense || 0,
+      currentYearInvestment: currentMonth?.investment || 0,
       previousYearIncome: previousMonth?.income || 0,
       previousYearExpense: previousMonth?.expense || 0,
+      previousYearInvestment: previousMonth?.investment || 0,
       currentYearBalance:
-        (currentMonth?.income || 0) - (currentMonth?.expense || 0),
+        (currentMonth?.income || 0) - (currentMonth?.expense || 0) - (currentMonth?.investment || 0),
       previousYearBalance:
-        (previousMonth?.income || 0) - (previousMonth?.expense || 0),
+        (previousMonth?.income || 0) - (previousMonth?.expense || 0) - (previousMonth?.investment || 0),
     };
   });
 

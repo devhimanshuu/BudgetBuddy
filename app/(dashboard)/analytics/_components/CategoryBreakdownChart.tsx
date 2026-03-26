@@ -15,7 +15,7 @@ interface CategoryBreakdownProps {
   userSettings: UserSettings;
   from: Date;
   to: Date;
-  type: "income" | "expense";
+  type: "income" | "expense" | "investment";
   tagIds?: string[];
   isPrivacyMode?: boolean;
 }
@@ -72,16 +72,16 @@ export default function CategoryBreakdownChart({
   }, [categoryBreakdownQuery.data]);
 
   return (
-    <GlassCard className="col-span-full md:col-span-6">
+    <GlassCard className="col-span-full lg:col-span-4">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10" />
 
       <CardHeader className="relative">
         <CardTitle className="flex items-center gap-2 3xl:text-2xl">
           <span className="text-2xl">
-            {type === "expense" ? "💸" : "💰"}
+            {type === "expense" ? "💸" : type === "income" ? "💰" : "📈"}
           </span>
-          {type === "expense" ? "Expense" : "Income"} Breakdown by Category
+          {type === "expense" ? "Expense" : type === "income" ? "Income" : "Investment"} Breakdown by Category
         </CardTitle>
       </CardHeader>
       <CardContent className="relative">

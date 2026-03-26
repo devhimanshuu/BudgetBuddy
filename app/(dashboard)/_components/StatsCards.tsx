@@ -35,8 +35,9 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
 
   const income = stateQuery.data?.income || 0;
   const expense = stateQuery.data?.expense || 0;
+  const investment = stateQuery.data?.investment || 0;
 
-  const balance = income - expense;
+  const balance = income - expense - investment;
 
   return (
     <div className="relative flex w-full flex-wrap gap-2 md:flex-nowrap 3xl:gap-4">
@@ -58,6 +59,17 @@ const StatsCards = ({ from, to, userSettings }: Props) => {
           title="Expense"
           icon={
             <TrendingDown className="h-12 w-12 items-center rounded-lg p-2 text-red-500 bg-red-400/10 3xl:h-14 3xl:w-14" />
+          }
+          privacyMode={isPrivacyMode}
+        />
+      </SkeletonWrapper>
+      <SkeletonWrapper isLoading={stateQuery.isFetching}>
+        <StatCard
+          formatter={formatter}
+          value={investment}
+          title="Investment"
+          icon={
+            <TrendingUp className="h-12 w-12 items-center rounded-lg p-2 text-blue-500 bg-blue-400/10 3xl:h-14 3xl:w-14" />
           }
           privacyMode={isPrivacyMode}
         />

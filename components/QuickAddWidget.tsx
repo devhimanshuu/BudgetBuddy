@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 interface QuickAddWidgetProps {
   onIncomeClick: () => void;
   onExpenseClick: () => void;
+  onInvestmentClick: () => void;
   onAssetClick: () => void;
   onOpenChange?: (isOpen: boolean) => void;
 }
@@ -16,6 +17,7 @@ interface QuickAddWidgetProps {
 export default function QuickAddWidget({
   onIncomeClick,
   onExpenseClick,
+  onInvestmentClick,
   onAssetClick,
   onOpenChange,
 }: QuickAddWidgetProps) {
@@ -46,9 +48,9 @@ export default function QuickAddWidget({
                   onAssetClick();
                   setIsOpen(false);
                 }}
-                className="group relative h-14 gap-3 overflow-hidden border-blue-500 bg-blue-600 pr-5 shadow-lg hover:bg-blue-700 hover:shadow-xl rounded-full 2xl:h-16 3xl:h-16 4xl:h-20 2xl:gap-4 3xl:gap-4 4xl:gap-6 2xl:pr-6 3xl:pr-6 4xl:pr-10"
+                className="group relative h-14 gap-3 overflow-hidden border-amber-500 bg-amber-600 pr-5 shadow-lg hover:bg-amber-700 hover:shadow-xl rounded-full 2xl:h-16 3xl:h-16 4xl:h-20 2xl:gap-4 3xl:gap-4 4xl:gap-6 2xl:pr-6 3xl:pr-6 4xl:pr-10"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 <Coins className="h-6 w-6 2xl:h-7 3xl:h-7 4xl:h-9" />
                 <span className="relative z-10 font-semibold 2xl:text-lg 3xl:text-lg 4xl:text-2xl">Add Asset</span>
               </Button>
@@ -89,6 +91,25 @@ export default function QuickAddWidget({
                 <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 <Plus className="h-6 w-6 2xl:h-7 3xl:h-7 4xl:h-9" />
                 <span className="relative z-10 font-semibold 2xl:text-lg 3xl:text-lg 4xl:text-2xl">Add Expense</span>
+              </Button>
+            </motion.div>
+
+            {/* Investment Button */}
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Button
+                onClick={() => {
+                  onInvestmentClick();
+                  setIsOpen(false);
+                }}
+                className="group relative h-14 gap-3 overflow-hidden border-blue-500 bg-blue-600 pr-5 shadow-lg hover:bg-blue-700 hover:shadow-xl rounded-full 2xl:h-16 3xl:h-16 4xl:h-20 2xl:gap-4 3xl:gap-4 4xl:gap-6 2xl:pr-6 3xl:pr-6 4xl:pr-10"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <Plus className="h-6 w-6 2xl:h-7 3xl:h-7 4xl:h-9" />
+                <span className="relative z-10 font-semibold 2xl:text-lg 3xl:text-lg 4xl:text-2xl">Add Investment</span>
               </Button>
             </motion.div>
           </motion.div>

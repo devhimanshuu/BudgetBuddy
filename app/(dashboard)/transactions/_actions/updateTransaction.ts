@@ -125,6 +125,7 @@ export async function UpdateTransaction(
 						year: oldDate.getUTCFullYear(),
 						expense: 0,
 						income: 0,
+						investment: 0,
 					},
 					update: {
 						...(oldType === "expense" && {
@@ -132,6 +133,9 @@ export async function UpdateTransaction(
 						}),
 						...(oldType === "income" && {
 							income: { decrement: oldAmount },
+						}),
+						...(oldType === "investment" && {
+							investment: { decrement: oldAmount },
 						}),
 					},
 				});
@@ -150,6 +154,7 @@ export async function UpdateTransaction(
 						year: oldDate.getUTCFullYear(),
 						expense: 0,
 						income: 0,
+						investment: 0,
 					},
 					update: {
 						...(oldType === "expense" && {
@@ -157,6 +162,9 @@ export async function UpdateTransaction(
 						}),
 						...(oldType === "income" && {
 							income: { decrement: oldAmount },
+						}),
+						...(oldType === "investment" && {
+							investment: { decrement: oldAmount },
 						}),
 					},
 				});
@@ -239,10 +247,12 @@ export async function UpdateTransaction(
 						year: date.getUTCFullYear(),
 						expense: type === "expense" ? amount : 0,
 						income: type === "income" ? amount : 0,
+						investment: type === "investment" ? amount : 0,
 					},
 					update: {
 						expense: { increment: type === "expense" ? amount : 0 },
 						income: { increment: type === "income" ? amount : 0 },
+						investment: { increment: type === "investment" ? amount : 0 },
 					},
 				});
 
@@ -260,10 +270,12 @@ export async function UpdateTransaction(
 						year: date.getUTCFullYear(),
 						expense: type === "expense" ? amount : 0,
 						income: type === "income" ? amount : 0,
+						investment: type === "investment" ? amount : 0,
 					},
 					update: {
 						expense: { increment: type === "expense" ? amount : 0 },
 						income: { increment: type === "income" ? amount : 0 },
+						investment: { increment: type === "investment" ? amount : 0 },
 					},
 				});
 			},

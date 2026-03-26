@@ -79,6 +79,7 @@ async function getHistoryData(
 type HistoryData = {
 	expense: number;
 	income: number;
+	investment: number;
 	year: number;
 	month: number;
 	day?: number;
@@ -98,6 +99,7 @@ async function getYearHistoryData(
 		_sum: {
 			expense: true,
 			income: true,
+			investment: true,
 		},
 		orderBy: [
 			{
@@ -112,12 +114,13 @@ async function getYearHistoryData(
 
 	for (let i = 0; i < 12; i++) {
 		let expense = 0;
-		let income = 0;
+		let investment = 0;
 
 		const month = result.find((row) => row.month === i);
 		if (month) {
 			expense = month._sum.expense != null ? Number(month._sum.expense) : 0;
 			income = month._sum.income != null ? Number(month._sum.income) : 0;
+			investment = month._sum.investment != null ? Number(month._sum.investment) : 0;
 		}
 
 		history.push({
@@ -125,6 +128,7 @@ async function getYearHistoryData(
 			month: i,
 			expense,
 			income,
+			investment,
 		});
 	}
 
@@ -147,6 +151,7 @@ async function getMonthHistoryData(
 		_sum: {
 			expense: true,
 			income: true,
+			investment: true,
 		},
 		orderBy: [
 			{
@@ -161,17 +166,19 @@ async function getMonthHistoryData(
 	const daysInMonth = getDaysInMonth(new Date(year, month));
 	for (let i = 1; i <= daysInMonth; i++) {
 		let expense = 0;
-		let income = 0;
+		let investment = 0;
 
 		const day = result.find((row) => row.day === i);
 		if (day) {
 			expense = day._sum.expense != null ? Number(day._sum.expense) : 0;
 			income = day._sum.income != null ? Number(day._sum.income) : 0;
+			investment = day._sum.investment != null ? Number(day._sum.investment) : 0;
 		}
 
 		history.push({
 			expense,
 			income,
+			investment,
 			year,
 			month,
 			day: i,

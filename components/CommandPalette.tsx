@@ -34,13 +34,14 @@ interface CommandPaletteProps {
   setOpen: (open: boolean) => void
   onIncomeClick: () => void
   onExpenseClick: () => void
+  onInvestmentClick: () => void
   onAssetClick: () => void
   onAIChatClick: () => void
   onVaultEntryClick: () => void
   onWorkspaceClick: () => void
 }
 
-export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onAssetClick, onAIChatClick, onVaultEntryClick, onWorkspaceClick }: CommandPaletteProps) {
+export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, onInvestmentClick, onAssetClick, onAIChatClick, onVaultEntryClick, onWorkspaceClick }: CommandPaletteProps) {
   const router = useRouter()
 
   const runCommand = React.useCallback((command: () => unknown) => {
@@ -69,8 +70,13 @@ export function CommandPalette({ open, setOpen, onIncomeClick, onExpenseClick, o
             <span>New Expense</span>
             <CommandShortcut>⌘E</CommandShortcut>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(onInvestmentClick)}>
+            <TrendingUp className="mr-2 h-4 w-4 text-blue-500" />
+            <span>New Investment</span>
+            <CommandShortcut>⌘I</CommandShortcut>
+          </CommandItem>
           <CommandItem onSelect={() => runCommand(onAssetClick)}>
-            <Coins className="mr-2 h-4 w-4 text-blue-500" />
+            <Coins className="mr-2 h-4 w-4 text-amber-500" />
             <span>New Asset</span>
             <CommandShortcut>⌘N</CommandShortcut>
           </CommandItem>

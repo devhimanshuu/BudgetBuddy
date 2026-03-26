@@ -255,6 +255,89 @@ export default function ComparisonChart({ userSettings, tagIds = [], isPrivacyMo
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+
+              {/* Investment Comparison */}
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">Investment Comparison</h3>
+                <ResponsiveContainer width="100%" height={300} className={cn(isPrivacyMode && "privacy-blur")}>
+                  <BarChart data={comparisonQuery.data}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="month" stroke="#888888" fontSize={12} />
+                    <YAxis
+                      stroke="#888888"
+                      fontSize={12}
+                      tickFormatter={(value) => formatter.format(value)}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload || payload.length === 0)
+                          return null;
+                        const data = payload[0].payload;
+                        return (
+                          <div className="rounded border bg-background p-4 shadow-lg">
+                            <p className="mb-2 font-semibold">{data.month}</p>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full bg-indigo-500" />
+                                <span className="text-sm text-muted-foreground">
+                                  {selectedYear}:
+                                </span>
+                                <span className="font-semibold">
+                                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.currentYearInvestment)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full bg-indigo-300" />
+                                <span className="text-sm text-muted-foreground">
+                                  {selectedYear - 1}:
+                                </span>
+                                <span className="font-semibold">
+                                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.previousYearInvestment)}
+                                </span>
+                              </div>
+                              <div className="border-t pt-1">
+                                <span className="text-sm text-muted-foreground">
+                                  Change:{" "}
+                                </span>
+                                <span
+                                  className={`font-semibold ${data.currentYearInvestment >
+                                    data.previousYearInvestment
+                                    ? "text-indigo-500"
+                                    : "text-red-500"
+                                    }`}
+                                >
+                                  {data.previousYearInvestment > 0
+                                    ? (
+                                      ((data.currentYearInvestment -
+                                        data.previousYearInvestment) /
+                                        data.previousYearInvestment) *
+                                      100
+                                    ).toFixed(1)
+                                    : "N/A"}
+                                  %
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }}
+                    />
+                    <Legend />
+                    <Bar
+                      dataKey="currentYearInvestment"
+                      fill="#6366f1"
+                      radius={[4, 4, 0, 0]}
+                      name={`${selectedYear} Investment`}
+                    />
+                    <Bar
+                      dataKey="previousYearInvestment"
+                      fill="#a5b4fc"
+                      radius={[4, 4, 0, 0]}
+                      name={`${selectedYear - 1} Investment`}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           ) : (
             <div className="flex h-[300px] items-center justify-center">

@@ -56,6 +56,14 @@ function CategoriesStats({ userSettings, from, to }: Props) {
           privacyMode={isPrivacyMode}
         />
       </SkeletonWrapper>
+      <SkeletonWrapper isLoading={statsQuery.isFetching}>
+        <CategoriesCard
+          formatter={formatter}
+          type="investment"
+          data={statsQuery.data || []}
+          privacyMode={isPrivacyMode}
+        />
+      </SkeletonWrapper>
     </div>
   );
 }
@@ -83,7 +91,7 @@ function CategoriesCard({
     <GlassCard className="h-80 w-full col-span-6 3xl:h-96">
       <CardHeader className="3xl:pb-4">
         <CardTitle className="grid grid-flow-row justify-between gap-2 text-muted-foreground md:grid-flow-col 3xl:text-lg">
-          {type === "income" ? "Incomes" : "Expenses"} by category
+          {type === "income" ? "Incomes" : type === "expense" ? "Expenses" : "Investments"} by category
         </CardTitle>
       </CardHeader>
 
@@ -93,7 +101,7 @@ function CategoriesCard({
             No data for the selected period
             <p className="text-sm text-muted-foreground">
               Try selecting a different period or try adding new{" "}
-              {type === "income" ? "incomes" : "expenses"}
+              {type === "income" ? "incomes" : type === "expense" ? "expenses" : "investments"}
             </p>
           </div>
         )}
@@ -123,7 +131,7 @@ function CategoriesCard({
                     <Progress
                       value={percentage}
                       indicator={
-                        type === "income" ? "bg-emerald-500" : "bg-red-500"
+                        type === "income" ? "bg-emerald-500" : type === "expense" ? "bg-red-500" : "bg-blue-500"
                       }
                     />
                   </div>

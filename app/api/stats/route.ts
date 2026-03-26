@@ -40,15 +40,18 @@ export async function GET(request: Request) {
 
 	const currentIncome = currentStats.reduce((sum, s) => sum + s.income, 0);
 	const currentExpense = currentStats.reduce((sum, s) => sum + s.expense, 0);
+	const currentInvestment = currentStats.reduce((sum, s) => sum + (s.investment || 0), 0);
 	const previousIncome = previousStats.reduce((sum, s) => sum + s.income, 0);
 	const previousExpense = previousStats.reduce((sum, s) => sum + s.expense, 0);
+	const previousInvestment = previousStats.reduce((sum, s) => sum + (s.investment || 0), 0);
 
-	const currentBalance = currentIncome - currentExpense;
-	const previousBalance = previousIncome - previousExpense;
+	const currentBalance = currentIncome - currentExpense - currentInvestment;
+	const previousBalance = previousIncome - previousExpense - previousInvestment;
 
 	return Response.json({
 		income: currentIncome,
 		expense: currentExpense,
+		investment: currentInvestment,
 		balance: currentBalance,
 		previousBalance,
 	});

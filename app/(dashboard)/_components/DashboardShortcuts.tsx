@@ -24,6 +24,7 @@ export default function DashboardShortcuts({
 
   const [showIncomeDialog, setShowIncomeDialog] = useState(false);
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
+  const [showInvestmentDialog, setShowInvestmentDialog] = useState(false);
   const [showAssetDialog, setShowAssetDialog] = useState(false);
   const [showVaultEntryDialog, setShowVaultEntryDialog] = useState(false);
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
@@ -49,6 +50,11 @@ export default function DashboardShortcuts({
       key: "Shift+N",
       description: "New Transaction (Expense)",
       action: () => setShowExpenseDialog(true),
+    },
+    {
+      key: "I",
+      description: "New Transaction (Investment)",
+      action: () => setShowInvestmentDialog(true),
     },
     {
       key: "B",
@@ -99,6 +105,7 @@ export default function DashboardShortcuts({
       <QuickAddWidget
         onIncomeClick={() => setShowIncomeDialog(true)}
         onExpenseClick={() => setShowExpenseDialog(true)}
+        onInvestmentClick={() => setShowInvestmentDialog(true)}
         onAssetClick={() => setShowAssetDialog(true)}
         onOpenChange={onQuickAddOpenChange}
       />
@@ -115,6 +122,12 @@ export default function DashboardShortcuts({
         type="expense"
         trigger={null}
       />
+      <CreateTransactionDialog
+        open={showInvestmentDialog}
+        onOpenChange={setShowInvestmentDialog}
+        type="investment"
+        trigger={null}
+      />
 
       <CreateAssetDialog
         open={showAssetDialog}
@@ -127,6 +140,7 @@ export default function DashboardShortcuts({
         setOpen={setShowCommandPalette}
         onIncomeClick={() => setShowIncomeDialog(true)}
         onExpenseClick={() => setShowExpenseDialog(true)}
+        onInvestmentClick={() => setShowInvestmentDialog(true)}
         onAssetClick={() => setShowAssetDialog(true)}
         onAIChatClick={() => onAIChatOpen?.()}
         onVaultEntryClick={() => setShowVaultEntryDialog(true)}

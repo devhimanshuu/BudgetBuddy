@@ -55,7 +55,7 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [], isPri
       <CardHeader className="relative">
         <CardTitle className="flex items-center gap-2 3xl:text-2xl">
           <span className="text-2xl">📈</span>
-          Income vs Expense Trends
+          Income vs Expense vs Investment Trends
         </CardTitle>
       </CardHeader>
       <CardContent className="relative">
@@ -71,6 +71,10 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [], isPri
                   <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
@@ -113,6 +117,15 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [], isPri
                               {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.expense)}
                             </span>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded-full bg-indigo-500" />
+                            <span className="text-sm text-muted-foreground">
+                              Investment:
+                            </span>
+                            <span className="font-semibold text-indigo-500">
+                              {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(data.investment)}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-2 border-t pt-1">
                             <div className="h-3 w-3 rounded-full bg-blue-500" />
                             <span className="text-sm text-muted-foreground">
@@ -148,6 +161,15 @@ export default function TrendsChart({ userSettings, from, to, tagIds = [], isPri
                   dot={{ fill: "#ef4444", r: 4 }}
                   activeDot={{ r: 6 }}
                   name="Expense"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="investment"
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  dot={{ fill: "#6366f1", r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Investment"
                 />
                 <Line
                   type="monotone"

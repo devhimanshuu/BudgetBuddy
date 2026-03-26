@@ -56,16 +56,17 @@ export async function GET(request: Request) {
   const getStatsAgg = (filtered: typeof allHistory) => ({
     income: filtered.reduce((s, x) => s + x.income, 0),
     expense: filtered.reduce((s, x) => s + x.expense, 0),
+    investment: filtered.reduce((s, x) => s + (x.investment || 0), 0),
     count: filtered.length
   });
 
   const currentStats = getStatsAgg(currentHistory);
   const previousStats = getStatsAgg(previousHistory);
 
-  const currentSavings = currentStats.income - currentStats.expense;
-  const previousSavings = previousStats.income - previousStats.expense;
-  const currentSavingsRate = currentStats.income > 0 ? (currentSavings / currentStats.income) * 100 : 0;
-  const previousSavingsRate = previousStats.income > 0 ? (previousSavings / previousStats.income) * 100 : 0;
+  const currentSavings = currentStats.income - currentStats.expense - currentStats.investment;
+  const previousSavings = previousStats.income - previousStats.expense - previousStats.investment;
+  const currentSavingsRate = currentStats.income > 0 ? ((currentStats.income - currentStats.expense) / currentStats.income) * 100 : 0;
+  const previousSavingsRate = previousStats.income > 0 ? ((previousStats.income - previousStats.expense) / previousStats.income) * 100 : 0;
   const currentVelocity = currentStats.expense / daysInPeriod;
   const previousVelocity = previousStats.expense / daysInPeriod;
 
@@ -73,24 +74,31 @@ export async function GET(request: Request) {
     savingsRate: { current: currentSavingsRate, previous: previousSavingsRate, change: currentSavingsRate - previousSavingsRate },
     disposableIncome: { current: currentSavings, previous: previousSavings, change: currentSavings - previousSavings },
     spendVelocity: { current: currentVelocity, previous: previousVelocity, change: previousVelocity > 0 ? ((currentVelocity - previousVelocity) / previousVelocity) * 100 : 0 },
+    investment: { current: currentStats.investment, previous: previousStats.investment, change: currentStats.investment - previousStats.investment },
     raw: { current: currentStats, previous: previousStats }
   };
 
   // --- 2. Category Breakdowns ---
   const incomeBreakdownMap = new Map<string, { amount: number; icon: string }>();
   const expenseBreakdownMap = new Map<string, { amount: number; icon: string }>();
+  const investmentBreakdownMap = new Map<string, { amount: number; icon: string }>();
   let totalIncome = 0;
   let totalExpense = 0;
+  let totalInvestment = 0;
 
   transactions.forEach(t => {
     if (t.type === "income") {
       totalIncome += t.amount;
       const ex = incomeBreakdownMap.get(t.category) || { amount: 0, icon: t.categoryIcon || "" };
       incomeBreakdownMap.set(t.category, { ...ex, amount: ex.amount + t.amount });
-    } else {
+    } else if (t.type === "expense") {
       totalExpense += t.amount;
       const ex = expenseBreakdownMap.get(t.category) || { amount: 0, icon: t.categoryIcon || "" };
       expenseBreakdownMap.set(t.category, { ...ex, amount: ex.amount + t.amount });
+    } else if (t.type === "investment") {
+      totalInvestment += t.amount;
+      const ex = investmentBreakdownMap.get(t.category) || { amount: 0, icon: t.categoryIcon || "" };
+      investmentBreakdownMap.set(t.category, { ...ex, amount: ex.amount + t.amount });
     }
   });
 
@@ -100,6 +108,9 @@ export async function GET(request: Request) {
     })).sort((a,b) => b.amount - a.amount),
     expense: Array.from(expenseBreakdownMap.entries()).map(([cat, data]) => ({
       category: cat, categoryIcon: data.icon, amount: data.amount, percentage: totalExpense > 0 ? (data.amount / totalExpense) * 100 : 0
+    })).sort((a,b) => b.amount - a.amount),
+    investment: Array.from(investmentBreakdownMap.entries()).map(([cat, data]) => ({
+      category: cat, categoryIcon: data.icon, amount: data.amount, percentage: totalInvestment > 0 ? (data.amount / totalInvestment) * 100 : 0
     })).sort((a,b) => b.amount - a.amount)
   };
 
@@ -109,7 +120,8 @@ export async function GET(request: Request) {
     date: new Date(stat.year, stat.month, stat.day).toISOString(),
     income: stat.income,
     expense: stat.expense,
-    balance: stat.income - stat.expense
+    investment: stat.investment || 0,
+    balance: stat.income - stat.expense - (stat.investment || 0)
   }));
 
   // --- 4. Heatmap ---
@@ -135,11 +147,11 @@ export async function GET(request: Request) {
   });
 
   // --- 5. Cashflow Sankey ---
-  const nodes: { name: string; type: "inflow" | "pipeline" | "outflow" }[] = [];
+  const nodes: { name: string; type: "inflow" | "pipeline" | "outflow" | "investment" }[] = [];
   const links: { source: number; target: number; value: number }[] = [];
 
   const ROOT_NODE_NAME = "Total Budget";
-  if (incomeBreakdownMap.size > 0 || expenseBreakdownMap.size > 0) {
+  if (incomeBreakdownMap.size > 0 || expenseBreakdownMap.size > 0 || investmentBreakdownMap.size > 0) {
     nodes.push({ name: ROOT_NODE_NAME, type: "pipeline" });
     const rootIdx = 0;
 
@@ -155,9 +167,15 @@ export async function GET(request: Request) {
       links.push({ source: rootIdx, target: nodeIdx, value: data.amount });
     });
 
-    if (totalIncome > totalExpense) {
+    Array.from(investmentBreakdownMap.entries()).forEach(([cat, data]) => {
+      const nodeIdx = nodes.length;
+      nodes.push({ name: cat, type: "investment" });
+      links.push({ source: rootIdx, target: nodeIdx, value: data.amount });
+    });
+
+    if (totalIncome > (totalExpense + totalInvestment)) {
       nodes.push({ name: "Savings/Surplus", type: "outflow" });
-      links.push({ source: rootIdx, target: nodes.length - 1, value: totalIncome - totalExpense });
+      links.push({ source: rootIdx, target: nodes.length - 1, value: totalIncome - totalExpense - totalInvestment });
     }
   }
 

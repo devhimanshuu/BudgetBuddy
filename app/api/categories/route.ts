@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
 	const paramType = searchParams.get("type");
 
-	const validator = z.enum(["expense", "income"]).nullable();
+	const validator = z.enum(["expense", "income", "investment"]).nullable();
 	const queryParams = validator.safeParse(paramType);
 	if (!queryParams.success) {
 		return Response.json(queryParams.error, {

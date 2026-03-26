@@ -68,7 +68,7 @@ export interface CreateRecurringTransactionSchemaType {
 	category: string;
 	date: Date; // Start date/Next due date
 	interval: RecurringInterval;
-	type: "income" | "expense";
+	type: "income" | "expense" | "investment";
 }
 
 export async function CreateRecurringTransaction(
@@ -221,10 +221,12 @@ export async function ProcessRecurringTransaction(id: string) {
 				year: date.getUTCFullYear(),
 				expense: type === "expense" ? amount : 0,
 				income: type === "income" ? amount : 0,
+				investment: type === "investment" ? amount : 0,
 			},
 			update: {
 				expense: { increment: type === "expense" ? amount : 0 },
 				income: { increment: type === "income" ? amount : 0 },
+				investment: { increment: type === "investment" ? amount : 0 },
 			},
 		});
 
@@ -242,10 +244,12 @@ export async function ProcessRecurringTransaction(id: string) {
 				year: date.getUTCFullYear(),
 				expense: type === "expense" ? amount : 0,
 				income: type === "income" ? amount : 0,
+				investment: type === "investment" ? amount : 0,
 			},
 			update: {
 				expense: { increment: type === "expense" ? amount : 0 },
 				income: { increment: type === "income" ? amount : 0 },
+				investment: { increment: type === "investment" ? amount : 0 },
 			},
 		});
 

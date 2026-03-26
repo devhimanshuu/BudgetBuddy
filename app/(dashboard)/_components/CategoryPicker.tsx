@@ -69,7 +69,9 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
 
   // Get recent category names for filtering
   const recentCategoryNames = new Set(
-    recentCategoriesQuery.data?.map((cat: any) => cat.name) || []
+    Array.isArray(recentCategoriesQuery.data)
+      ? recentCategoriesQuery.data.map((cat: any) => cat.name)
+      : []
   );
 
   // Split categories into recent and other

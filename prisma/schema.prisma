@@ -96,7 +96,7 @@ model Category {
   userId      String
   workspaceId String?
   icon        String
-  type        String   @default("income")
+  type        String   @default("income") // "income", "expense", or "investment"
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -114,7 +114,7 @@ model Transaction {
   notes       String? // Optional notes field
   date        DateTime
   userId      String
-  type        String   @default("income")
+  type        String   @default("income") // "income", "expense", or "investment"
 
   category     String
   categoryIcon String
@@ -178,6 +178,7 @@ model MonthlyHistory {
   year        Int
   income      Float
   expense     Float
+  investment  Float @default(0)
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -192,6 +193,7 @@ model YearHistory {
   year        Int
   income      Float
   expense     Float
+  investment  Float @default(0)
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -313,7 +315,7 @@ model RecurringTransaction {
   workspaceId String?
   amount      Float
   description String
-  type        String   @default("income") // "income" or "expense"
+  type        String   @default("income") // "income", "expense", or "investment"
   
   category     String
   categoryIcon String

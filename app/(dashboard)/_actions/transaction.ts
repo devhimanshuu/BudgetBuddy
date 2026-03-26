@@ -133,6 +133,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				year: date.getUTCFullYear(),
 				expense: type === "expense" ? amount : 0,
 				income: type === "income" ? amount : 0,
+				investment: type === "investment" ? amount : 0,
 			},
 			update: {
 				workspaceId: workspace.id, // Update workspaceId if it was null
@@ -141,6 +142,9 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				},
 				income: {
 					increment: type === "income" ? amount : 0,
+				},
+				investment: {
+					increment: type === "investment" ? amount : 0,
 				},
 			},
 		});
@@ -161,6 +165,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				year: date.getUTCFullYear(),
 				expense: type === "expense" ? amount : 0,
 				income: type === "income" ? amount : 0,
+				investment: type === "investment" ? amount : 0,
 			},
 			update: {
 				workspaceId: workspace.id,
@@ -169,6 +174,9 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				},
 				income: {
 					increment: type === "income" ? amount : 0,
+				},
+				investment: {
+					increment: type === "investment" ? amount : 0,
 				},
 			},
 		});

@@ -35,6 +35,7 @@ const CustomNode = (props: any) => {
     if (payload.type === "inflow") fill = "#10b981"; // Emerald
     else if (payload.type === "pipeline") fill = "#3b82f6"; // Blue
     else if (payload.type === "outflow") fill = "#ef4444"; // Red
+    else if (payload.type === "investment") fill = "#6366f1"; // Indigo
 
     const isLeftEdge = x < 150;
     const textAnchor = isLeftEdge ? "start" : "end";
@@ -181,6 +182,10 @@ export default function CashFlowSankey({ from, to, tagIds = [], isPrivacyMode }:
                         <div className="flex items-center gap-2 text-sm text-muted-foreground border-r pr-4">
                             <div className="w-3 h-3 rounded-full bg-blue-500" />
                             <span>Pipeline</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground border-r pr-4">
+                            <div className="w-3 h-3 rounded-full bg-indigo-500" />
+                            <span>Investment</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <div className="w-3 h-3 rounded-full bg-red-500" />

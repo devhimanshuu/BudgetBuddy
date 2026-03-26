@@ -71,6 +71,13 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                 <div className="h-4 w-4 rounded-full bg-red-500"></div>
                 Expense
               </Badge>
+              <Badge
+                variant={"outline"}
+                className="flex items-center gap-2 text-sm 3xl:text-base"
+              >
+                <div className="h-4 w-4 rounded-full bg-blue-500"></div>
+                Investment
+              </Badge>
             </div>
           </CardTitle>
         </CardHeader>
@@ -105,6 +112,18 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                       <stop
                         offset={"1"}
                         stopColor="#ef4444"
+                        stopOpacity={"0"}
+                      />
+                    </linearGradient>
+                    <linearGradient id="investmentBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset={"0"}
+                        stopColor="#3b82f6"
+                        stopOpacity={"1"}
+                      />
+                      <stop
+                        offset={"1"}
+                        stopColor="#3b82f6"
                         stopOpacity={"0"}
                       />
                     </linearGradient>
@@ -153,6 +172,13 @@ const History = ({ userSettings }: { userSettings: UserSettings }) => {
                     radius={4}
                     className="cursor-pointer"
                   />
+                  <Bar
+                    dataKey={"investment"}
+                    label="investment"
+                    fill="url(#investmentBar)"
+                    radius={4}
+                    className="cursor-pointer"
+                  />
                   <Tooltip
                     cursor={{ opacity: 0.1 }}
                     content={(props) => (
@@ -183,7 +209,7 @@ function CustomTooltip({ active, payload, formatter, isPrivacyMode }: any) {
   if (!active || !payload || payload.length === 0) return null;
 
   const data = payload[0].payload;
-  const { expense, income } = data;
+  const { expense, income, investment } = data;
   return (
     <div className="min-w-[300px] rounded border bg-background p-4">
       <TooltipRow
@@ -202,10 +228,18 @@ function CustomTooltip({ active, payload, formatter, isPrivacyMode }: any) {
         textColor="text-emerald-500"
         isPrivacyMode={isPrivacyMode}
       />
+       <TooltipRow
+        formatter={formatter}
+        label="Investment"
+        value={investment}
+        bgColor="bg-blue-500"
+        textColor="text-blue-500"
+        isPrivacyMode={isPrivacyMode}
+      />
       <TooltipRow
         formatter={formatter}
         label="Balance"
-        value={income - expense}
+        value={income - expense - investment}
         bgColor="bg-gray-100"
         textColor="text-foreground"
         isPrivacyMode={isPrivacyMode}

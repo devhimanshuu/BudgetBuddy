@@ -9,9 +9,9 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") as "income" | "expense" | null;
+  const type = searchParams.get("type") as "income" | "expense" | "investment" | null;
 
-  if (!type || (type !== "income" && type !== "expense")) {
+  if (!type || (type !== "income" && type !== "expense" && type !== "investment")) {
     return Response.json({ error: "Invalid type" }, { status: 400 });
   }
 

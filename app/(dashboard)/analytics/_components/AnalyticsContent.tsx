@@ -180,6 +180,14 @@ export default function AnalyticsContent({ userSettings }: AnalyticsContentProps
             tagIds={tagIds}
             isPrivacyMode={isPrivacyMode}
           />
+          <CategoryBreakdownChart
+            userSettings={userSettings}
+            from={dataRange.from}
+            to={dataRange.to}
+            type="investment"
+            tagIds={tagIds}
+            isPrivacyMode={isPrivacyMode}
+          />
 
           {/* Line Chart - Trends */}
           <TrendsChart

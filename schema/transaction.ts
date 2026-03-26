@@ -6,7 +6,7 @@ export const CreateTransactionSchema = z.object({
   notes: z.string().optional(),
   date: z.coerce.date(),
   category: z.string(),
-  type: z.union([z.literal("income"), z.literal("expense")]),
+  type: z.union([z.literal("income"), z.literal("expense"), z.literal("investment")]),
   tags: z.array(z.string()).optional(),
   attachments: z
     .array(
