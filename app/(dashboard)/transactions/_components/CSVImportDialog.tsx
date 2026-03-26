@@ -145,6 +145,8 @@ export default function CSVImportDialog() {
                     const typeValue = row[mapping.type].toLowerCase();
                     if (typeValue.includes("income") || typeValue.includes("credit") || typeValue.includes("deposit")) {
                         type = "income";
+                    } else if (typeValue.includes("investment") || typeValue.includes("buy") || typeValue.includes("sell") || typeValue.includes("stock") || typeValue.includes("crypto") || typeValue.includes("asset") || typeValue.includes("portfolio")) {
+                        type = "investment";
                     }
                 }
                 // Auto-detect from amount (negative = expense, positive = income)

@@ -89,6 +89,7 @@ const page = () => {
 
         <CategoryList type="income" />
         <CategoryList type="expense" />
+        <CategoryList type="investment" />
         <TagList />
       </div>
     </>
@@ -234,11 +235,13 @@ function CategoryList({ type }: { type: TransactionType }) {
             <div className="flex min-w-0 flex-shrink-0 items-center gap-2">
               {type === "expense" ? (
                 <TrendingDown className="h-10 w-10 shrink-0 rounded-lg bg-red-400/10 p-2 text-red-500 sm:h-12 sm:w-12" />
-              ) : (
+              ) : type === "income" ? (
                 <TrendingUp className="h-10 w-10 shrink-0 rounded-lg bg-emerald-400/10 p-2 text-emerald-500 sm:h-12 sm:w-12" />
+              ) : (
+                <Zap className="h-10 w-10 shrink-0 rounded-lg bg-indigo-400/10 p-2 text-indigo-500 sm:h-12 sm:w-12" />
               )}
               <div className="min-w-0">
-                <span className="block">{type === "income" ? "Incomes" : "Expenses"} categories</span>
+                <span className="block capitalize">{type} categories</span>
                 <div className="text-sm text-muted-foreground">
                   {totalCategories} {totalCategories === 1 ? "category" : "categories"} • {totalUsage} {totalUsage === 1 ? "transaction" : "transactions"}
                 </div>
@@ -362,7 +365,7 @@ function CategoryList({ type }: { type: TransactionType }) {
               <span
                 className={cn(
                   "m-1",
-                  type === "income" ? "text-emerald-500" : "text-red-500"
+                  type === "income" ? "text-emerald-500" : type === "expense" ? "text-red-500" : "text-indigo-500"
                 )}
               >
                 {type}
@@ -424,7 +427,7 @@ function CategoryCard({ category }: { category: any }) {
           ) : (
             <LucideIcon className={cn(
               compactMode ? "w-5 h-5" : "w-8 h-8",
-              category.type === "income" ? "text-emerald-500" : "text-red-500"
+              category.type === "income" ? "text-emerald-500" : category.type === "expense" ? "text-red-500" : "text-indigo-500"
             )} />
           )}
         </span>

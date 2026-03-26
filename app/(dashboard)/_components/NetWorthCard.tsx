@@ -28,7 +28,8 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
 
   const income = summaryQuery.data?.stats?.income || 0;
   const expense = summaryQuery.data?.stats?.expense || 0;
-  const balance = income - expense;
+  const investment = summaryQuery.data?.stats?.investment || 0;
+  const balance = summaryQuery.data?.stats?.balance || 0;
   const previousBalance = summaryQuery.data?.stats?.previousBalance || 0;
   const balanceChange = balance - previousBalance;
   const balanceChangePercent =
@@ -88,18 +89,24 @@ export default function NetWorthCard({ userSettings }: NetWorthCardProps) {
               )}
             </div>
 
-            {/* Income & Expense Breakdown */}
-            <div className="grid grid-cols-2 gap-4 3xl:gap-6 mt-auto">
+            {/* Income, Expense & Investment Breakdown */}
+            <div className="grid grid-cols-3 gap-2 3xl:gap-4 mt-auto">
               <div className="space-y-1 3xl:space-y-2">
                 <p className="text-xs text-muted-foreground 3xl:text-sm">Income</p>
-                <p className="text-lg font-semibold text-emerald-600 3xl:text-xl">
+                <p className="text-sm font-semibold text-emerald-600 3xl:text-base">
                   {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(income)}
                 </p>
               </div>
-              <div className="space-y-1 3xl:space-y-2">
+              <div className="space-y-1 3xl:space-y-2 text-center">
                 <p className="text-xs text-muted-foreground 3xl:text-sm">Expenses</p>
-                <p className="text-lg font-semibold text-red-600 3xl:text-xl">
+                <p className="text-sm font-semibold text-red-600 3xl:text-base">
                   {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(expense)}
+                </p>
+              </div>
+              <div className="space-y-1 3xl:space-y-2 text-right">
+                <p className="text-xs text-muted-foreground 3xl:text-sm">Investments</p>
+                <p className="text-sm font-semibold text-indigo-600 3xl:text-base">
+                  {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(investment)}
                 </p>
               </div>
             </div>

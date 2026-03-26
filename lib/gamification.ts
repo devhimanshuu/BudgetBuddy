@@ -293,6 +293,38 @@ export const ACHIEVEMENTS = {
 		requirement: 5,
 	},
 
+	// Investment achievements
+	FIRST_INVESTMENT: {
+		key: "first_investment",
+		name: "Wealth Builder",
+		description: "Create your first investment transaction",
+		icon: "🔋",
+		category: "investment",
+		tier: "bronze",
+		points: 15,
+		requirement: 1,
+	},
+	INVESTMENT_MILESTONE_1000: {
+		key: "investment_1000",
+		name: "Active Investor",
+		description: "Reach $1,000 in total investments",
+		icon: "📈",
+		category: "investment",
+		tier: "silver",
+		points: 50,
+		requirement: 1000,
+	},
+	INVESTMENT_MILESTONE_10000: {
+		key: "investment_10000",
+		name: "Portfolio Powerhouse",
+		description: "Reach $10,000 in total investments",
+		icon: "💎",
+		category: "investment",
+		tier: "gold",
+		points: 200,
+		requirement: 10000,
+	},
+
 	// Special achievements
 	EARLY_BIRD: {
 		key: "early_bird",
@@ -404,7 +436,7 @@ export async function checkAchievements(
 			existingAchievements.map((ua) => ua.achievement.key),
 		);
 
-		// Check transaction-based achievements
+		// Check investment-based achievements
 		if (context.type === "transaction") {
 			const transactionCount = await prisma.transaction.count({
 				where: { userId },
@@ -423,6 +455,31 @@ export async function checkAchievements(
 					await unlockAchievement(userId, achievement);
 					unlockedAchievements.push(achievement);
 				}
+			}
+
+			// Specific investment checks
+			const investmentCount = await prisma.transaction.count({
+				where: { userId, type: "investment" },
+			});
+
+			if (investmentCount >= 1 && !existingKeys.has(ACHIEVEMENTS.FIRST_INVESTMENT.key)) {
+				await unlockAchievement(userId, ACHIEVEMENTS.FIRST_INVESTMENT);
+				unlockedAchievements.push(ACHIEVEMENTS.FIRST_INVESTMENT);
+			}
+
+			const totalInvested = await prisma.transaction.aggregate({
+				where: { userId, type: "investment" },
+				_sum: { amount: true },
+			});
+
+			const investedAmount = totalInvested._sum.amount || 0;
+			if (investedAmount >= 1000 && !existingKeys.has(ACHIEVEMENTS.INVESTMENT_MILESTONE_1000.key)) {
+				await unlockAchievement(userId, ACHIEVEMENTS.INVESTMENT_MILESTONE_1000);
+				unlockedAchievements.push(ACHIEVEMENTS.INVESTMENT_MILESTONE_1000);
+			}
+			if (investedAmount >= 10000 && !existingKeys.has(ACHIEVEMENTS.INVESTMENT_MILESTONE_10000.key)) {
+				await unlockAchievement(userId, ACHIEVEMENTS.INVESTMENT_MILESTONE_10000);
+				unlockedAchievements.push(ACHIEVEMENTS.INVESTMENT_MILESTONE_10000);
 			}
 
 			// Check time-based achievements
@@ -499,11 +556,11 @@ export async function checkAchievements(
 					(m.year === currentYear && m.month < currentMonth),
 			);
 
-			// Count consecutive months where Income >= Expense
+			// Count consecutive months where Income >= Expense + Investment
 			let consecutive = 0;
 			// Iterate from most recent backwards
 			for (const m of completedMonths) {
-				if (m.income >= m.expense) {
+				if (m.income >= (m.expense + (m.investment || 0))) {
 					consecutive++;
 				} else {
 					break;

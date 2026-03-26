@@ -5,7 +5,7 @@
 
 export interface OfflineTransaction {
 	id: string; // Temporary local ID
-	type: "income" | "expense";
+	type: "income" | "expense" | "investment";
 	amount: number;
 	description: string;
 	category: string;

@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 	const transactions = await prisma.transaction.findMany({
 		where: {
 			workspaceId: workspace.id,
-			type: "expense",
+			type: { in: ["expense", "investment"] },
 			date: {
 				gte: startDate,
 				lte: endDate,
