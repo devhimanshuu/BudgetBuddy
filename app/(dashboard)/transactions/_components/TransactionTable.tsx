@@ -235,7 +235,8 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
           "capitalize rounded-lg text-center p-2",
           row.original.type === "income" &&
           "bg-emerald-400/10 text-emerald-500",
-          row.original.type === "expense" && "bg-red-400/10 text-red-500"
+          row.original.type === "expense" && "bg-red-400/10 text-red-500",
+          row.original.type === "investment" && "bg-indigo-400/10 text-indigo-500"
         )}
       >
         {row.original.type}
@@ -265,7 +266,8 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         <p className={cn(
           "text-md rounded-lg p-2 text-center font-medium",
           row.original.type === "income" && "bg-emerald-400/10 text-emerald-500",
-          row.original.type === "expense" && "bg-red-400/10 text-red-500"
+          row.original.type === "expense" && "bg-red-400/10 text-red-500",
+          row.original.type === "investment" && "bg-indigo-400/10 text-indigo-500"
         )}>
           {isPrivacyMode ? GetPrivacyMask(formatter) : row.original.formattedAmount}
         </p>
@@ -453,6 +455,7 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
               options={[
                 { label: "Income", value: "income" },
                 { label: "Expense", value: "expense" },
+                { label: "Investment", value: "investment" },
               ]}
             />
           )}
@@ -506,9 +509,11 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
                 const selectedRows = table.getFilteredSelectedRowModel().rows;
                 let income = 0;
                 let expense = 0;
+                let investment = 0;
                 selectedRows.forEach(row => {
                   if (row.original.type === 'income') income += row.original.amount;
                   if (row.original.type === 'expense') expense += row.original.amount;
+                  if (row.original.type === 'investment') investment += row.original.amount;
                 });
                 const formatter = GetFormatterForCurrency(userSettings.data?.currency || 'USD');
 
@@ -520,8 +525,11 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
                     {expense > 0 && (
                       <span className="text-red-500">Expense: {formatter.format(expense)}</span>
                     )}
-                    {(income > 0 || expense > 0) && (
-                      <span className="font-bold border-l pl-3">Net: {formatter.format(income - expense)}</span>
+                    {investment > 0 && (
+                      <span className="text-indigo-500">Investment: {formatter.format(investment)}</span>
+                    )}
+                    {(income > 0 || expense > 0 || investment > 0) && (
+                      <span className="font-bold border-l pl-3">Net: {formatter.format(income - expense - investment)}</span>
                     )}
                   </>
                 )

@@ -53,7 +53,7 @@ export async function GET(request: Request) {
 	}
 
 	// Filter by type
-	if (type && (type === "income" || type === "expense")) {
+	if (type && (type === "income" || type === "expense" || type === "investment")) {
 		where.type = type;
 	}
 

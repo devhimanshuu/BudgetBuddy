@@ -157,6 +157,7 @@ export default function AdvancedSearch({
                 <SelectItem value="all_types">All types</SelectItem>
                 <SelectItem value="income">Income</SelectItem>
                 <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="investment">Investment</SelectItem>
               </SelectContent>
             </Select>
           </div>

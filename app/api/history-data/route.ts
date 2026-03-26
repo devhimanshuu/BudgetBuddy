@@ -114,6 +114,7 @@ async function getYearHistoryData(
 
 	for (let i = 0; i < 12; i++) {
 		let expense = 0;
+		let income = 0;
 		let investment = 0;
 
 		const month = result.find((row) => row.month === i);
@@ -166,6 +167,7 @@ async function getMonthHistoryData(
 	const daysInMonth = getDaysInMonth(new Date(year, month));
 	for (let i = 1; i <= daysInMonth; i++) {
 		let expense = 0;
+		let income = 0;
 		let investment = 0;
 
 		const day = result.find((row) => row.day === i);
