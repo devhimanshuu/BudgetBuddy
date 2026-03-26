@@ -47,12 +47,12 @@ export async function GET(request: Request) {
     
     // 2. Spending Trends & Top Categories & Budget Overview (Current)
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, type: "expense", date: { gte: currentMonthStart, lte: currentMonthEnd } },
+      where: { ...whereUserIdOrWorkspaceId, type: { in: ["expense", "investment"] }, date: { gte: currentMonthStart, lte: currentMonthEnd } },
       include: { splits: true },
     }),
     // 3. Spending Trends (Previous)
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, type: "expense", date: { gte: previousMonthStart, lte: previousMonthEnd } },
+      where: { ...whereUserIdOrWorkspaceId, type: { in: ["expense", "investment"] }, date: { gte: previousMonthStart, lte: previousMonthEnd } },
       include: { splits: true },
     }),
 
@@ -90,11 +90,13 @@ export async function GET(request: Request) {
   // --- Compute Stats & Savings ---
   const currentIncome = currentMonthHistory.reduce((sum, s) => sum + s.income, 0);
   const currentExpense = currentMonthHistory.reduce((sum, s) => sum + s.expense, 0);
+  const currentInvestment = currentMonthHistory.reduce((sum, s) => sum + s.investment, 0);
   const previousIncome = previousMonthHistory.reduce((sum, s) => sum + s.income, 0);
   const previousExpense = previousMonthHistory.reduce((sum, s) => sum + s.expense, 0);
+  const previousInvestment = previousMonthHistory.reduce((sum, s) => sum + s.investment, 0);
 
-  const currentBalance = currentIncome - currentExpense;
-  const previousBalance = previousIncome - previousExpense;
+  const currentBalance = currentIncome - currentExpense - currentInvestment;
+  const previousBalance = previousIncome - previousExpense - previousInvestment;
 
   const currentSavingsRate = currentIncome > 0 ? (currentBalance / currentIncome) * 100 : 0;
   const previousSavingsRate = previousIncome > 0 ? (previousBalance / previousIncome) * 100 : 0;
@@ -102,6 +104,7 @@ export async function GET(request: Request) {
   const stats = {
     income: currentIncome,
     expense: currentExpense,
+    investment: currentInvestment,
     balance: currentBalance,
     previousBalance,
     savings: currentBalance, // Added for SavingsRate

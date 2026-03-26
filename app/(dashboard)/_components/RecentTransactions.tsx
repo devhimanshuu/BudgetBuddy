@@ -52,7 +52,12 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
                            <p className="text-sm font-medium leading-none">{t.description || t.category}</p>
                            <div className="flex items-center gap-2">
                               <p className="text-xs text-muted-foreground">{new Date(t.date).toLocaleDateString()}</p>
-                              <div className={`text-[10px] px-1.5 py-0.5 rounded-full ${t.type === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                              <div className={cn(
+                                "text-[10px] px-1.5 py-0.5 rounded-full capitalize",
+                                t.type === 'income' && "bg-emerald-100 text-emerald-700",
+                                t.type === 'expense' && "bg-red-100 text-red-700",
+                                t.type === 'investment' && "bg-indigo-100 text-indigo-700"
+                              )}>
                                  {t.type}
                               </div>
                            </div>
@@ -60,7 +65,7 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
                      </div>
                      <div className={cn(
                         "font-bold",
-                        t.type === 'income' ? 'text-emerald-600' : 'text-red-600'
+                        t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-red-600' : 'text-indigo-600'
                      )}>
                         {t.type === 'income' ? '+' : '-'}{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(t.amount)}
                      </div>
