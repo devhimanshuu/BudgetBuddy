@@ -570,7 +570,7 @@ export default function LandingPageContent() {
                                     transition={{ duration: 0.5, delay: 0.2 }}
                                     className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl 3xl:max-w-[1000px] 4xl:max-w-[1300px] leading-relaxed"
                                 >
-                                    BudgetBuddy isn't just a tracker — it's an <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Enterprise-Grade Financial Command Center</span>. From Vision AI scanning to shared workspaces and offline sync, it's everything you need to build a legacy.
+                                    BudgetBuddy isn&apos;t just a tracker — it&apos;s an <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Enterprise-Grade Financial Command Center</span>. From Vision AI scanning to shared workspaces and offline sync, it&apos;s everything you need to build a legacy.
                                 </motion.p>
                             </div>
                             <motion.div
