@@ -11,8 +11,6 @@ import {
     Settings,
     Trash2,
     LogIn,
-    ArrowUpRight,
-    ArrowDownLeft,
     Calendar,
     Clock
 } from "lucide-react";
@@ -78,7 +76,7 @@ export default function ActivityFeed() {
                 {!activities || activities.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground/60 italic px-6">
                         <div className="h-16 w-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
-                             <Calendar className="w-8 h-8 opacity-20" />
+                            <Calendar className="w-8 h-8 opacity-20" />
                         </div>
                         <p className="text-sm font-medium">No activity yet</p>
                         <p className="text-xs">New events will appear here</p>
@@ -112,7 +110,7 @@ export default function ActivityFeed() {
                                         )}
                                         <div className={cn(
                                             "absolute -bottom-1 -right-1 p-1 rounded-full bg-background border border-border/50 shadow-sm",
-                                            activity.type === "TRANSACTION_CREATED" 
+                                            activity.type === "TRANSACTION_CREATED"
                                                 ? (activity.metadata?.type === "income" ? "text-emerald-500" : activity.metadata?.type === "investment" ? "text-indigo-500" : "text-red-500")
                                                 : meta.color
                                         )}>
@@ -134,12 +132,12 @@ export default function ActivityFeed() {
                                                 {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                                             </p>
                                             {activity.metadata?.type && (
-                                                <Badge 
-                                                    variant="outline" 
+                                                <Badge
+                                                    variant="outline"
                                                     className={cn(
                                                         "text-[9px] h-3.5 px-1 bg-muted/30",
-                                                        activity.metadata.type === "income" 
-                                                            ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5" 
+                                                        activity.metadata.type === "income"
+                                                            ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5"
                                                             : activity.metadata.type === "investment"
                                                                 ? "text-indigo-500 border-indigo-500/20 bg-indigo-500/5"
                                                                 : "text-red-500 border-red-500/20 bg-red-500/5"

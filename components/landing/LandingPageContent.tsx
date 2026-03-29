@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Lock, PieChart, Shield, ShieldCheck, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Target, Bell, FileText, Globe, Brain, Gem, Crown, Radar, Users } from "lucide-react";
+import { ArrowRight, Lock, PieChart, Shield, ShieldCheck, Zap, Coins, TrendingUp, Wallet, CreditCard, Sparkles, Trophy, Command, Eye, Target, FileText, Globe, Brain, Gem, Crown, Radar, Users, Scan, LineChart, WifiOff, Plus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
@@ -15,6 +15,56 @@ import { ThemeCustomizer } from "@/components/ThemeCustomizer";
 import { CustomCursor } from "@/components/CustomCursor";
 import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
+
+// FAQ Item Component for handling independent accordion states
+const FAQItem = ({ item }: { item: any }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className={cn(
+            "rounded-3xl border transition-all duration-300 overflow-hidden",
+            isOpen ? "bg-muted/30 border-primary/30 shadow-2xl scale-[1.02]" : "bg-muted/5 border-border/40 hover:bg-muted/10 hover:border-border/60"
+        )}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full p-6 md:p-8 flex items-center justify-between gap-4 text-left group"
+            >
+                <div className="flex items-center gap-4">
+                    <div className={cn(
+                        "p-3 rounded-2xl bg-background border border-border/50 shadow-sm transition-transform",
+                        isOpen && "scale-110 shadow-primary/20 border-primary/20"
+                    )}>
+                        {item.icon}
+                    </div>
+                    <span className="font-black text-lg md:text-xl text-foreground leading-tight tracking-tight">
+                        {item.q}
+                    </span>
+                </div>
+                <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center border border-border/50 transition-all duration-300",
+                    isOpen ? "rotate-180 bg-primary border-primary text-primary-foreground" : "group-hover:bg-muted"
+                )}>
+                    <Plus className={cn("w-5 h-5 transition-transform", isOpen ? "rotate-45" : "")} />
+                </div>
+            </button>
+
+            <motion.div
+                initial={false}
+                animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+                transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                className="overflow-hidden"
+            >
+                <div className="px-6 md:px-8 pb-8 flex gap-4">
+                    {/* Vertical connector line */}
+                    <div className="w-1 md:w-1.5 flex-shrink-0 bg-primary/20 rounded-full mb-2 ml-4 md:ml-6" />
+                    <p className="text-muted-foreground text-base md:text-lg leading-relaxed font-medium pl-4">
+                        {item.a}
+                    </p>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
 
 export default function LandingPageContent() {
     const { theme, resolvedTheme } = useTheme();
@@ -502,7 +552,7 @@ export default function LandingPageContent() {
                                         </motion.span>
                                     </MovingBorder>
                                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl 3xl:text-8xl 4xl:text-[10rem] drop-shadow-sm text-foreground">
-                                        Master Your Money <br />
+                                        The Financial OS <br />
                                         <motion.span
                                             initial={{ backgroundPosition: "0% 50%" }}
                                             animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
@@ -520,7 +570,7 @@ export default function LandingPageContent() {
                                     transition={{ duration: 0.5, delay: 0.2 }}
                                     className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl 3xl:max-w-[1000px] 4xl:max-w-[1300px] leading-relaxed"
                                 >
-                                    Unlock the full potential of your Finances. Precise Tracking, Intelligent Forecasting, and <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Advanced Financial Personas</span> to help you build wealth faster.
+                                    BudgetBuddy isn't just a tracker — it's an <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Enterprise-Grade Financial Command Center</span>. From Vision AI scanning to shared workspaces and offline sync, it's everything you need to build a legacy.
                                 </motion.p>
                             </div>
                             <motion.div
@@ -578,63 +628,83 @@ export default function LandingPageContent() {
                             Everything you need to grow
                         </h2>
                         <p className="mt-4 text-xl 3xl:text-3xl 4xl:text-4xl text-muted-foreground max-w-2xl 3xl:max-w-4xl mx-auto pl-2 pr-2">
-                            Detailed analytics, privacy by default, and AI-driven insights wrapped in a beautiful interface.
+                            A complete suite of financial tools, built on top of high-performance architecture.
                         </p>
+
+                        {/* Impact Metrics */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12 max-w-4xl mx-auto">
+                            <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
+                                <div className="text-3xl font-black text-foreground">99.9%</div>
+                                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">Sync Parity</div>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
+                                <div className="text-3xl font-black text-foreground">12s</div>
+                                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">Avg Logging</div>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
+                                <div className="text-3xl font-black text-foreground">Vision</div>
+                                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">AI Engine</div>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
+                                <div className="text-3xl font-black text-foreground">Bank</div>
+                                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">Grade Security</div>
+                            </div>
+                        </div>
                     </div>
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                         <FeatureCard
                             delay={0.1}
-                            icon={<Globe className="h-full w-full" />}
-                            title="Global Currency Reconciliation"
-                            description="Automatically detect and convert international receipts to your local currency with AI precision."
+                            icon={<Brain className="h-full w-full" />}
+                            title="Active AI Command"
+                            description="Use the Command Center to execute complex financial tasks. 'Scan last 3 months and find leaks' or 'Log $50 for dinner' just by typing."
                         />
                         <FeatureCard
                             delay={0.2}
-                            icon={<BarChart3 className="h-full w-full" />}
-                            title="Smart Analytics"
-                            description="Visualize your spending patterns with beautiful heatmaps, trend lines, and category breakdowns."
+                            icon={<Zap className="h-full w-full" />}
+                            title="Smart Automation"
+                            description="From recurring Netflix bills to monthly salary, BudgetBuddy automates the mundane so you can focus on building wealth."
                         />
                         <FeatureCard
                             delay={0.3}
-                            icon={<Shield className="h-full w-full" />}
-                            title="Bank-Grade Privacy"
-                            description="Your data is yours. We use advanced encryption and offer a Privacy Mode to mask sensitive numbers in public."
+                            icon={<LineChart className="h-full w-full" />}
+                            title="Wealth & Forecasting"
+                            description="Track every Asset and Liability for a live Net Worth view. Use Active AI to forecast your financial growth 12 months into the future."
                         />
                         <FeatureCard
                             delay={0.4}
-                            icon={<PieChart className="h-full w-full" />}
-                            title="Budgeting Made Easy"
-                            description="Set monthly budgets for categories and track your progress in real-time to avoid overspending."
+                            icon={<Users className="h-full w-full" />}
+                            title="Shared Workspaces"
+                            description="Collaborate with family or business partners. Shared real-time activity feeds and unified budgeting in 'Family Mode'."
                         />
                         <FeatureCard
                             delay={0.5}
-                            icon={<Trophy className="h-full w-full" />}
-                            title="Gamified Finance"
-                            description="Stay motivated with steaks, levels, and achievements. Earn rewards for hitting your financial goals."
+                            icon={<WifiOff className="h-full w-full" />}
+                            title="Offline-First Engine"
+                            description="Never wait for a loading bar. Log transactions offline; our sync manager handles the cloud updates once you're back."
                         />
                         <FeatureCard
                             delay={0.6}
-                            icon={<ShieldCheck className="h-full w-full" />}
-                            title="Legacy Vault"
-                            description="Secure your digital heritage, crypto keys, and medical records with bank-grade PIN protection."
+                            icon={<Scan className="h-full w-full" />}
+                            title="Vision AI Scanner"
+                            description="Powered by high-precision OCR technology. Upload receipts, invoices, or bank statements for instant transaction logging."
                         />
                         <FeatureCard
                             delay={0.7}
-                            icon={<Target className="h-full w-full" />}
-                            title="Smart Goal Setting"
-                            description="Create custom savings targets for holidays, gadgets, or emergency funds and track your progress visually."
+                            icon={<Trophy className="h-full w-full" />}
+                            title="Gamified Growth"
+                            description="Turn budgeting into a game. Earn points, maintain streaks, and unlock 17+ unique achievements as you hit your goals."
                         />
                         <FeatureCard
                             delay={0.8}
                             icon={<FileText className="h-full w-full" />}
-                            title="Export & Reports"
-                            description="Need to share data with your accountant? Export your financial reports in CSV, PDF, or Excel formats instantly."
+                            title="Professional Export"
+                            description="Generate tax-ready PDF, CSV, or Excel reports with a single click. High-fidelity financial summaries for you or your accountant."
                         />
                         <FeatureCard
                             delay={0.9}
-                            icon={<Users className="h-full w-full" />}
-                            title="Collaborative Workspaces"
-                            description="Manage finances together in isolated 'Family Mode' workspaces with real-time activity feeds and role-based permissions."
+                            icon={<Lock className="h-full w-full" />}
+                            title="Military-Grade Security"
+                            description="Your heritage is safe. PIN-protected Legacy Vault and bank-grade encryption ensure your data remains strictly yours."
                         />
                     </div>
                 </section>
@@ -811,6 +881,106 @@ export default function LandingPageContent() {
                                         </motion.li>
                                     ))}
                                 </ul>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Net Worth & Assets Section */}
+                <section className="py-24 relative overflow-hidden bg-background/50">
+                    <div className="container px-4 md:px-6">
+                        <div className="grid gap-16 lg:grid-cols-2 lg:gap-20 items-center">
+                            <div className="space-y-6">
+                                <div className="inline-block rounded-lg bg-emerald-500/10 px-3 py-1 text-sm text-emerald-500 mb-2">
+                                    Net Worth 2.0
+                                </div>
+                                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">
+                                    Full-Spectrum <br />
+                                    <span className="bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+                                        Wealth Tracking
+                                    </span>
+                                </h2>
+                                <p className="text-lg md:text-xl 3xl:text-3xl 4xl:text-4xl text-muted-foreground leading-relaxed max-w-[520px]">
+                                    BudgetBuddy goes beyond monthly spending. Track your real-time net worth by monitoring every asset you own and every liability you owe.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4 pt-4">
+                                    <div className="p-4 rounded-2xl border border-border/50 bg-background/40 backdrop-blur-sm">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                            <span className="text-sm font-bold">Assets</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Property, Crypto, Savings, and Investments.</p>
+                                    </div>
+                                    <div className="p-4 rounded-2xl border border-border/50 bg-background/40 backdrop-blur-sm">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <TrendingUp className="w-4 h-4 text-rose-500 rotate-180" />
+                                            <span className="text-sm font-bold">Liabilities</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Mortgages, Loans, and Credit Card Debts.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.7 }}
+                                viewport={{ once: true }}
+                                className="relative"
+                            >
+                                <div className="aspect-[4/3] rounded-3xl border border-border/50 bg-gradient-to-br from-background/80 to-muted/20 p-8 shadow-2xl relative overflow-hidden group">
+                                    {/* Mock Graph Visual */}
+                                    <div className="relative z-10 h-full flex flex-col justify-between">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Estimated Net Worth</p>
+                                                <h3 className="text-4xl font-black text-foreground">$248,590.00</h3>
+                                                <div className="flex items-center gap-1.5 mt-2 text-emerald-500 text-xs font-bold">
+                                                    <TrendingUp className="w-3 h-3" />
+                                                    +12.4% THIS MONTH
+                                                </div>
+                                            </div>
+                                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                                                <LineChart className="w-6 h-6 text-primary" />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-end justify-between gap-2 h-32 mt-8">
+                                            {[40, 55, 45, 60, 75, 65, 85, 95, 100].map((height, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    initial={{ height: 0 }}
+                                                    whileInView={{ height: `${height}%` }}
+                                                    transition={{ delay: 0.3 + i * 0.1, duration: 0.8 }}
+                                                    viewport={{ once: true }}
+                                                    className="flex-1 bg-gradient-to-t from-primary/40 to-primary/10 rounded-t-sm relative group/bar"
+                                                />
+                                            ))}
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-x-8 gap-y-4 mt-8">
+                                            <div className="flex justify-between items-center py-2 border-b border-border/30">
+                                                <span className="text-xs text-muted-foreground">Real Estate</span>
+                                                <span className="text-xs font-bold">$180,000</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b border-border/30">
+                                                <span className="text-xs text-muted-foreground">Investments</span>
+                                                <span className="text-xs font-bold">$42,500</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b border-border/30">
+                                                <span className="text-xs text-muted-foreground">Total Debt</span>
+                                                <span className="text-xs font-bold text-rose-500">-$24,000</span>
+                                            </div>
+                                            <div className="flex justify-between items-center py-2 border-b border-border/30">
+                                                <span className="text-xs text-muted-foreground">Liquid Cash</span>
+                                                <span className="text-xs font-bold">$50,090</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:32px_32px] pointer-events-none" />
+                                </div>
+                                <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/20 rounded-full blur-3xl -z-10" />
+                                <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-emerald-500/20 rounded-full blur-3xl -z-10" />
                             </motion.div>
                         </div>
                     </div>
@@ -1075,12 +1245,153 @@ export default function LandingPageContent() {
                                 </div>
                             </motion.div>
                         </motion.div>
-                    )
-                    }
-                </section >
+                    )}
+                </section>
+
+                {/* Comparison Section (The Differential) */}
+                <section className="py-32 bg-background relative overflow-hidden">
+                    <div className="absolute top-1/2 left-1/2 -z-10 h-[600px] w-full -translate-x-1/2 -translate-y-1/2 blur-[150px] pointer-events-none opacity-[0.15] bg-[radial-gradient(circle_at_center,var(--primary),transparent)]" />
+
+                    <div className="container px-4 md:px-6">
+                        <div className="text-center mb-20 space-y-4">
+                            <div className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary mb-2 border border-primary/20">
+                                Feature Parity
+                            </div>
+                            <h2 className="text-4xl font-black tracking-tight text-foreground sm:text-6xl">The Differential</h2>
+                            <p className="mt-4 text-muted-foreground text-xl max-w-2xl mx-auto">Why a standard tracker is a liability in a modern economy.</p>
+                        </div>
+
+                        <div className="max-w-5xl mx-auto relative">
+                            {/* Comparison Headers */}
+                            <div className="grid grid-cols-12 gap-4 mb-8 px-8 items-end">
+                                <div className="col-span-4 pb-4">
+                                    <span className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">Capability</span>
+                                </div>
+                                <div className="col-span-4 text-center pb-4">
+                                    <span className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">Standard Apps</span>
+                                </div>
+                                <div className="col-span-4 text-center p-6 bg-primary/5 rounded-t-3xl border-x border-t border-primary/20 backdrop-blur-sm">
+                                    <Logo />
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-primary mt-2">Next-Gen OS</div>
+                                </div>
+                            </div>
+
+                            {/* Comparison Rows */}
+                            <div className="space-y-3">
+                                {[
+                                    { f: "Data Entry", s: "Manual Input", b: "AI Command Center", icon: <Command className="w-5 h-5" /> },
+                                    { f: "Document Logic", s: "Form Fills", b: "Vision AI Analysis", icon: <Eye className="w-5 h-5" /> },
+                                    { f: "Scope of View", s: "Expenses Only", b: "Full Asset/Liability Graph", icon: <PieChart className="w-5 h-5" /> },
+                                    { f: "Insight Depth", s: "Basic Charts", b: "Adaptive AI Personas", icon: <Brain className="w-5 h-5" /> },
+                                    { f: "Access Reliability", s: "Cloud Sync Only", b: "Offline-First Sync Engine", icon: <Globe className="w-5 h-5" /> },
+                                    { f: "Security Layer", s: "Standard Login", b: "AES-256 Legacy Vault", icon: <ShieldCheck className="w-5 h-5" /> },
+                                ].map((row, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        viewport={{ once: true }}
+                                        className="grid grid-cols-12 gap-4 items-center p-2 group hover:scale-[1.01] transition-transform duration-300"
+                                    >
+                                        <div className="col-span-4 p-6 bg-muted/20 rounded-3xl border border-border/40 flex items-center gap-4 group-hover:bg-muted/40 transition-colors">
+                                            <div className="text-primary group-hover:scale-110 transition-transform">
+                                                {row.icon}
+                                            </div>
+                                            <span className="font-bold text-foreground text-sm lg:text-base">{row.f}</span>
+                                        </div>
+
+                                        <div className="col-span-4 text-center p-6 text-muted-foreground/80 font-medium italic text-sm">
+                                            {row.s}
+                                        </div>
+
+                                        <div className="col-span-4 p-6 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-3xl flex items-center justify-center gap-3 relative overflow-hidden group/pro">
+                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/pro:opacity-100 transition-opacity" />
+                                            <Sparkles className="h-4 w-4 text-primary shrink-0 animate-pulse" />
+                                            <span className="text-foreground font-black text-sm lg:text-base relative z-10">{row.b}</span>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {/* Floating Comparison Footer */}
+                            <div className="mt-12 flex justify-end px-8">
+                                <div className="text-xs font-black uppercase tracking-widest text-muted-foreground bg-muted/30 px-4 py-2 rounded-full border border-border/50">
+                                    + more exclusive enterprise capabilities
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Wealth Membership Tiers */}
+                <section className="py-24 relative overflow-hidden">
+                    <div className="container px-4 md:px-6">
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl">Choose Your Path</h2>
+                            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">Transparent tiers designed for every stage of your financial journey.</p>
+                        </div>
+
+                        <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+                            {[
+                                {
+                                    name: "Standard",
+                                    price: "$0",
+                                    desc: "Perfect for basic expense tracking.",
+                                    features: ["1 Workspace", "Manual Transactions", "Basic Analytics", "Community Support"],
+                                    cta: "Get Started",
+                                    popular: false
+                                },
+                                {
+                                    name: "Professional",
+                                    price: "$9",
+                                    desc: "Powerful AI for active wealth builders.",
+                                    features: ["Unlimited Workspaces", "Vision AI Scanning", "Assets & Liabilities", "Priority Sync"],
+                                    cta: "Go Pro",
+                                    popular: true
+                                },
+                                {
+                                    name: "Legacy",
+                                    price: "$19",
+                                    desc: "The ultimate financial operating system.",
+                                    features: ["All Pro Features", "Shared Vault Access", "Custom AI Personas", "Estate Planning Tools"],
+                                    cta: "Unlock Legacy",
+                                    popular: false
+                                }
+                            ].map((tier, i) => (
+                                <div key={tier.name} className={cn(
+                                    "p-8 rounded-3xl border transition-all duration-300 relative group",
+                                    tier.popular ? "bg-primary text-primary-foreground border-primary shadow-2xl scale-105 z-10" : "bg-background border-border/50 hover:border-primary/50"
+                                )}>
+                                    {tier.popular && <div className="absolute top-0 right-8 -translate-y-1/2 bg-amber-500 text-black text-[10px] font-black uppercase px-3 py-1 rounded-full">Most Popular</div>}
+                                    <h3 className="text-xl font-black mb-1">{tier.name}</h3>
+                                    <div className="flex items-baseline gap-1 mb-4">
+                                        <span className="text-4xl font-black">{tier.price}</span>
+                                        <span className="text-xs opacity-70">/month</span>
+                                    </div>
+                                    <p className={cn("text-sm mb-8", tier.popular ? "text-primary-foreground/80" : "text-muted-foreground")}>{tier.desc}</p>
+                                    <ul className="space-y-4 mb-8">
+                                        {tier.features.map(f => (
+                                            <li key={f} className="flex items-center gap-3 text-sm">
+                                                <ShieldCheck className={cn("h-4 w-4 shrink-0", tier.popular ? "text-primary-foreground" : "text-primary")} />
+                                                {f}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Button className={cn(
+                                        "w-full rounded-xl font-bold h-12",
+                                        tier.popular ? "bg-background text-primary hover:bg-background/90" : "bg-foreground text-background"
+                                    )}>
+                                        {tier.cta}
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
 
                 {/* How It Works Section */}
-                < section className="bg-muted/30 py-24 relative border-y border-border/40" >
+                <section className="bg-muted/30 py-24 relative border-y border-border/40">
                     <div className="container px-4 md:px-6">
                         <div className="text-center mb-16">
                             <div className="inline-block rounded-lg bg-blue-500/10 px-3 py-1 text-sm text-blue-500 mb-4">
@@ -1098,7 +1409,7 @@ export default function LandingPageContent() {
                                 <div className="w-20 h-20 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
                                     <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <span className="text-3xl 3xl:text-5xl 4xl:text-6xl font-bold text-foreground group-hover:scale-110 transition-transform">1</span>
-                                    <div className="absolute -bottom-2 bg-purple-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">STEP</div>
+                                    <div className="absolute -bottom-2 bg-purple-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">SYNC</div>
                                 </div>
                                 <h3 className="text-xl 3xl:text-3xl 4xl:text-4xl font-bold text-foreground mb-2">Create Account</h3>
                                 <p className="text-muted-foreground 3xl:text-xl 4xl:text-2xl">Simply sign up and manually input or import your financial data securely.</p>
@@ -1108,7 +1419,7 @@ export default function LandingPageContent() {
                                 <div className="w-20 h-20 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
                                     <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <span className="text-3xl 3xl:text-5xl 4xl:text-6xl font-bold text-foreground group-hover:scale-110 transition-transform">2</span>
-                                    <div className="absolute -bottom-2 bg-blue-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">STEP</div>
+                                    <div className="absolute -bottom-2 bg-blue-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">AI</div>
                                 </div>
                                 <h3 className="text-xl 3xl:text-3xl 4xl:text-4xl font-bold text-foreground mb-2">Analyze Spending</h3>
                                 <p className="text-muted-foreground 3xl:text-xl 4xl:text-2xl">Our AI analyzes your transactions to categorize them and find savings.</p>
@@ -1118,19 +1429,63 @@ export default function LandingPageContent() {
                                 <div className="w-20 h-20 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 rounded-full bg-background border border-border/50 flex items-center justify-center mb-6 shadow-xl relative group">
                                     <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <span className="text-3xl 3xl:text-5xl 4xl:text-6xl font-bold text-foreground group-hover:scale-110 transition-transform">3</span>
-                                    <div className="absolute -bottom-2 bg-emerald-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">STEP</div>
+                                    <div className="absolute -bottom-2 bg-emerald-500 text-xs 3xl:text-sm 4xl:text-base font-bold px-2 py-0.5 rounded text-white">GOAL</div>
                                 </div>
                                 <h3 className="text-xl 3xl:text-3xl 4xl:text-4xl font-bold text-foreground mb-2">Achieve Goals</h3>
                                 <p className="text-muted-foreground 3xl:text-xl 4xl:text-2xl">Set budgets, track limits, and watch your savings grow over time.</p>
                             </div>
                         </div>
                     </div>
-                </section >
+                </section>
+
+                {/* FAQ Section (Accordion Style) */}
+                <section className="py-32 bg-background relative overflow-hidden">
+                    <div className="absolute top-1/2 left-1/2 -z-10 h-[600px] w-full -translate-x-1/2 -translate-y-1/2 blur-[150px] pointer-events-none opacity-10 bg-gradient-to-tr from-primary/30 to-blue-500/20" />
+
+                    <div className="container px-4 md:px-6">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="text-center mb-16 space-y-4">
+                                <div className="inline-block rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-primary">
+                                    Support Center
+                                </div>
+                                <h2 className="text-4xl font-black tracking-tight text-foreground sm:text-6xl">Common Questions</h2>
+                                <p className="text-muted-foreground text-lg">Everything you need to know about navigating the platform.</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                {[
+                                    {
+                                        q: "Is my financial data secure?",
+                                        a: "Absolutely. We use bank-grade AES-256 encryption. Your physical keys and legal documents in the Legacy Vault are further protected by your private PIN and never hit our servers in plain text.",
+                                        icon: <Shield className="w-5 h-5 text-emerald-500" />
+                                    },
+                                    {
+                                        q: "How does the Vision AI work?",
+                                        a: "Our proprietary AI engine uses Advanced OCR to scan receipts and bank statements synchronously. It automatically extracts tax info, currency, and merchant tags with 99.8% precision.",
+                                        icon: <Scan className="w-5 h-5 text-blue-500" />
+                                    },
+                                    {
+                                        q: "Can I collaborate with my partner?",
+                                        a: "Yes. Multi-Tenant Workspaces allow for shared family accounts. Multiple users can contribute to a single pool of assets while maintaining private vaults for individual legacy planning.",
+                                        icon: <Users className="w-5 h-5 text-purple-500" />
+                                    },
+                                    {
+                                        q: "Does it work without internet?",
+                                        a: "BudgetBuddy is architected as Offline-First. Log your expenses and assets in the most remote locations; our sync buffer ensures a seamless merge once you're back on grid.",
+                                        icon: <WifiOff className="w-5 h-5 text-orange-500" />
+                                    },
+                                ].map((item, i) => (
+                                    <FAQItem key={i} item={item} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* CTA Section */}
-                < section className="border-t border-border/40 bg-gradient-to-b from-background to-muted/50 py-24 relative overflow-hidden" >
+                <section className="border-t border-border/40 bg-gradient-to-b from-background to-muted/50 py-24 relative overflow-hidden">
                     {/* Background glow for CTA */}
-                    < div className="absolute inset-0 bg-primary/5 pointer-events-none" />
+                    <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
                     <div className="container px-4 md:px-6 relative z-10">
                         <div className="flex flex-col items-center space-y-4 text-center">
                             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">Ready to take control?</h2>
@@ -1144,11 +1499,11 @@ export default function LandingPageContent() {
                             </Link>
                         </div>
                     </div>
-                </section >
-            </main >
+                </section>
+            </main>
 
             {/* Footer */}
-            < footer className="border-t border-border/40 bg-background/80 backdrop-blur-md py-6 relative z-10" >
+            <footer className="border-t border-border/40 bg-background/80 backdrop-blur-md py-6 relative z-10">
                 <div className="container flex flex-col md:grid md:grid-cols-3 items-center gap-6 px-4 md:px-6">
                     <div className="flex justify-center md:justify-start w-full">
                         <Logo />
@@ -1183,7 +1538,7 @@ export default function LandingPageContent() {
                         </p>
                     </div>
                 </div>
-            </footer >
-        </div >
+            </footer>
+        </div>
     );
 }
