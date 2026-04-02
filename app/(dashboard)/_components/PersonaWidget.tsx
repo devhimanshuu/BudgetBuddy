@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { PersonaData, PERSONA_THEME } from "@/lib/persona";
+import { type PersonaData, PERSONA_THEME } from "@/lib/persona-client";
 import GlassCard from "@/components/GlassCard";
 import { cn } from "@/lib/utils";
 import {

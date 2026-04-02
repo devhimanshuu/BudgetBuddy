@@ -1,6 +1,6 @@
 "use client";
 
-import { PERSONA_THEME, PersonaType } from "@/lib/persona";
+import { PERSONA_THEME, type PersonaType } from "@/lib/persona-client";
 import { Bot, User, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";

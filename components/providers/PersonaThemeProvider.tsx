@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PersonaData } from "@/lib/persona";
+import { type PersonaData } from "@/lib/persona-client";
 import { useAuth } from "@clerk/nextjs";
 
 interface PersonaThemeContextType {

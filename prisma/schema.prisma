@@ -48,6 +48,7 @@ model Workspace {
   currency  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   members               WorkspaceMember[]
   invites               Invite[]
@@ -63,6 +64,8 @@ model Workspace {
   activities            Activity[]
   vaultEntries          VaultEntry[]
   beneficiaries         Beneficiary[]
+
+  @@index([ownerId, deletedAt])
 }
 
 model WorkspaceMember {
@@ -72,10 +75,13 @@ model WorkspaceMember {
   role        String   @default("VIEWER") // VIEWER, EDITOR, ADMIN
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
+  @@index([workspaceId, deletedAt])
+  @@index([userId, deletedAt])
 }
 
 model Invite {
@@ -86,8 +92,11 @@ model Invite {
   token       String   @unique
   expiresAt   DateTime
   createdAt   DateTime @default(now())
+  deletedAt   DateTime?
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, deletedAt])
 }
 
 model Category {
@@ -97,10 +106,12 @@ model Category {
   workspaceId String?
   icon        String
   type        String   @default("income") // "income", "expense", or "investment"
+  deletedAt   DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@id([name, userId, type])
+  @@index([workspaceId, deletedAt])
 }
 
 model Transaction {
@@ -123,12 +134,13 @@ model Transaction {
   attachments  Attachment[]
   splits       TransactionSplit[]
   history      TransactionHistory[]
+  deletedAt    DateTime?
   workspace    Workspace?           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId, date])
-  @@index([workspaceId, category])
-  @@index([userId, type, date]) // Optimize "Get all expenses for month"
-  @@index([userId, date, type]) // Optimize date range + type filtering
+  @@index([workspaceId, date, deletedAt])
+  @@index([workspaceId, category, deletedAt])
+  @@index([userId, type, date, deletedAt]) // Optimize "Get all expenses for month"
+  @@index([userId, date, type, deletedAt]) // Optimize date range + type filtering
 }
 
 model Tag {
@@ -138,12 +150,13 @@ model Tag {
   userId      String
   workspaceId String?
   createdAt   DateTime @default(now())
+  deletedAt   DateTime?
 
   transactions TransactionTag[]
   workspace    Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([name, userId])
-  @@index([workspaceId])
+  @@index([workspaceId, deletedAt])
 }
 
 model TransactionTag {
@@ -164,10 +177,11 @@ model Attachment {
   fileSize      Int
   fileType      String
   uploadedAt    DateTime @default(now())
+  deletedAt     DateTime?
 
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
-  @@index([transactionId])
+  @@index([transactionId, deletedAt])
 }
 
 model MonthlyHistory {
@@ -210,11 +224,12 @@ model Budget {
   year         Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@id([userId, category, month, year])
-  @@index([workspaceId, month, year])
+  @@index([workspaceId, month, year, deletedAt])
 }
 
 model SavingsGoal {
@@ -232,11 +247,12 @@ model SavingsGoal {
   isCompleted   Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
-  @@index([workspaceId, isCompleted])
+  @@index([workspaceId, deletedAt])
+  @@index([workspaceId, isCompleted, deletedAt])
 }
 
 model TransactionSplit {
@@ -286,13 +302,14 @@ model Asset {
   notes        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
   
   history   AssetHistory[]
   workspace Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
-  @@index([workspaceId, type])
-  @@index([workspaceId, category])
+  @@index([workspaceId, deletedAt])
+  @@index([workspaceId, type, deletedAt])
+  @@index([workspaceId, category, deletedAt])
 }
 
 model AssetHistory {
@@ -327,10 +344,11 @@ model RecurringTransaction {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
+  @@index([workspaceId, deletedAt])
 }
 
 model Achievement {
@@ -389,11 +407,12 @@ model VaultEntry {
   lastVerified  DateTime? // When user last confirmed info is still valid
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
-  @@index([userId])
+  @@index([workspaceId, deletedAt])
+  @@index([userId, deletedAt])
 }
 
 model Beneficiary {
@@ -409,9 +428,10 @@ model Beneficiary {
   isVerified    Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([workspaceId])
-  @@index([userId])
+  @@index([workspaceId, deletedAt])
+  @@index([userId, deletedAt])
 }

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import { PERSONA_THEME, PersonaType } from "@/lib/persona";
+import { PERSONA_THEME, type PersonaType } from "@/lib/persona-client";
 
 interface ChatHeaderProps {
     isMinimized: boolean;

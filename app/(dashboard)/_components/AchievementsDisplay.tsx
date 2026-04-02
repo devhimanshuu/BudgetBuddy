@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { ACHIEVEMENTS } from "@/lib/gamification";
+import { ACHIEVEMENTS } from "@/lib/gamification-client";
 import GlassCard from "@/components/GlassCard";
 import { cn } from "@/lib/utils";
 

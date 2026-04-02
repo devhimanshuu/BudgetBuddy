@@ -21,7 +21,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
-import { PersonaType, PERSONA_THEME } from "@/lib/persona";
+import { type PersonaType, PERSONA_THEME } from "@/lib/persona-client";
 
 // Refactored Components
 import { ChatHeader } from "./chat/ChatHeader";
@@ -68,7 +68,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                 setCurrency(settings.currency === "INR" ? "₹" : "$");
 
                 // Fetch level info
-                const { calculateLevel } = await import("@/lib/gamification");
+                const { calculateLevel } = await import("@/lib/gamification-client");
                 const levelInfo = calculateLevel(settings.totalPoints || 0);
                 setUserLevel(levelInfo.currentLevel.level);
             } catch (e) {
