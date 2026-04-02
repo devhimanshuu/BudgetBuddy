@@ -1,52 +1,55 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 const softDeleteLogic = {
-  async delete({ model, operation, args, query }: any) {
-    return (model as any).update({
+  async delete(this: any, { args }: any) {
+    return this.update({
       ...args,
       data: { deletedAt: new Date() },
     });
   },
-  async deleteMany({ model, operation, args, query }: any) {
-    return (model as any).updateMany({
+  async deleteMany(this: any, { args }: any) {
+    return this.updateMany({
       ...args,
       data: { deletedAt: new Date() },
     });
   },
-  async findMany({ model, operation, args, query }: any) {
+  async findMany({ args, query }: any) {
     if (args.where?.deletedAt === undefined) {
       args.where = { ...args.where, deletedAt: null };
     }
     return query(args);
   },
-  async findFirst({ model, operation, args, query }: any) {
+  async findFirst({ args, query }: any) {
     if (args.where?.deletedAt === undefined) {
       args.where = { ...args.where, deletedAt: null };
     }
     return query(args);
   },
-  async findUnique({ model, operation, args, query }: any) {
-    if (args.where?.deletedAt === undefined) {
-      return (model as any).findFirst({
-        ...args,
-        where: { ...args.where, deletedAt: null },
-      });
+  async findUnique(this: any, { args }: any) {
+    // findUnique only allows unique fields. Adding deletedAt: null filter
+    // requires switching to findFirst.
+    const where = { ...args.where };
+    if (where.deletedAt === undefined) {
+      where.deletedAt = null;
     }
-    return (model as any).findFirst(args);
+    return this.findFirst({
+      ...args,
+      where,
+    });
   },
-  async count({ model, operation, args, query }: any) {
-    if (args.where?.deletedAt === undefined) {
-      args.where = { ...args.where, deletedAt: null };
-    }
-    return query(args);
-  },
-  async groupBy({ model, operation, args, query }: any) {
+  async count({ args, query }: any) {
     if (args.where?.deletedAt === undefined) {
       args.where = { ...args.where, deletedAt: null };
     }
     return query(args);
   },
-  async aggregate({ model, operation, args, query }: any) {
+  async groupBy({ args, query }: any) {
+    if (args.where?.deletedAt === undefined) {
+      args.where = { ...args.where, deletedAt: null };
+    }
+    return query(args);
+  },
+  async aggregate({ args, query }: any) {
     if (args.where?.deletedAt === undefined) {
       args.where = { ...args.where, deletedAt: null };
     }
