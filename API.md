@@ -112,8 +112,4 @@ The API uses standard HTTP status codes:
 - `400 Bad Request`: Invalid parameters
 - `401 Unauthorized`: Authentication required
 - `404 Not Found`: Resource does not exist
-- `429 Too Many Requests`: Rate limit exceeded
 - `500 Internal Server Error`: Server-side failure
-
-## Rate Limiting
-API requests are limited to preserve system stability. If you exceed the limit, you will receive a `429 Too Many Requests` response. For high-volume access, please contact the administrator.

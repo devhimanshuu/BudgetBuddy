@@ -14,7 +14,7 @@ import SavingsRate from "../_components/SavingsRate";
 import SavingsGoals from "../_components/SavingsGoals";
 import RecentTransactions from "../_components/RecentTransactions";
 import ActivityFeed from "@/components/ActivityFeed";
-import { DueTransactionsPopup } from "../_components/DueTransactionsPopup";
+import { DueTransactionsWrapper } from "../_components/DueTransactionsWrapper";
 import { SubscriptionAlerts } from "../_components/SubscriptionAlerts";
 import StreakDisplay from "../_components/StreakDisplay";
 import { SmartNudge } from "../_components/SmartNudge";
@@ -50,7 +50,7 @@ async function page() {
     }
     return (
         <div className="h-full bg-background ">
-            <DueTransactionsPopup userSettings={userSettings} />
+            <DueTransactionsWrapper userSettings={userSettings} />
             <div className="border-b bg-card shadow-sm">
                 <div className="container flex flex-wrap items-center justify-between gap-6 py-4 3xl:gap-8 4xl:py-8">
                     <div className="flex flex-col gap-1">

@@ -24,10 +24,26 @@ export async function GET(request: Request) {
 	const from = searchParams.get("from");
 	const to = searchParams.get("to");
 
+	const page = parseInt(searchParams.get("page") || "1");
+	const pageSize = parseInt(searchParams.get("pageSize") || "100");
+	const skip = (page - 1) * pageSize;
+	const take = pageSize;
+
 	// Build where clause
 	const where: any = {
 		...(workspaceId ? { workspaceId } : { userId: user.id }),
+		deletedAt: null,
 	};
+
+	// Filter by tags if specified
+	if (tags) {
+		const tagIds = tags.split(",");
+		where.tags = {
+			every: {
+				tagId: { in: tagIds },
+			},
+		};
+	}
 
 	// Full-text search across description and notes
 	if (query) {
@@ -79,38 +95,32 @@ export async function GET(request: Request) {
 		}
 	}
 
-	// Get transactions
-	let transactions = await prisma.transaction.findMany({
-		where,
-		include: {
-			tags: {
-				include: {
-					tag: true,
+	// Get transactions and total count
+	const [transactions, totalCount] = await Promise.all([
+		prisma.transaction.findMany({
+			where,
+			include: {
+				tags: {
+					include: {
+						tag: true,
+					},
+				},
+				attachments: true,
+				splits: true,
+				_count: {
+					select: {
+						history: true,
+					},
 				},
 			},
-			attachments: true,
-			splits: true,
-			_count: {
-				select: {
-					history: true,
-				},
+			orderBy: {
+				date: "desc",
 			},
-		},
-		orderBy: {
-			date: "desc",
-		},
-		take: 100, // Limit results
-	});
-
-	// Filter by tags if specified
-	if (tags) {
-		const tagIds = tags.split(",");
-		transactions = transactions.filter((transaction) =>
-			tagIds.every((tagId) =>
-				transaction.tags.some((tt) => tt.tagId === tagId),
-			),
-		);
-	}
+			skip,
+			take,
+		}),
+		prisma.transaction.count({ where }),
+	]);
 
 	// Get user settings for currency formatting
 	const userSettings = await prisma.userSettings.findUnique({
@@ -163,7 +173,12 @@ export async function GET(request: Request) {
 
 	return Response.json({
 		transactions: formattedTransactions,
-		count: formattedTransactions.length,
+		pagination: {
+			page,
+			pageSize,
+			totalCount,
+			totalPages: Math.ceil(totalCount / pageSize),
+		},
 	});
 }
 

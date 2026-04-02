@@ -210,7 +210,7 @@ export async function checkAchievements(
 		if (context.type === "budget" || context.type === "transaction") {
 			const monthlyHistory = await prisma.monthlyHistory.findMany({
 				where: { userId },
-				orderBy: { year: "desc", month: "desc" },
+				orderBy: [{ year: "desc" }, { month: "desc" }],
 			});
 
 			const currentMonth = new Date().getUTCMonth();
