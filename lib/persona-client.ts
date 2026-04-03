@@ -20,6 +20,8 @@ export interface PersonaData {
 		budgetAdherence: number;
 	};
 	insights: string[];
+	unlockedList: string;
+	aiPrompt: string;
 	quote: {
 		text: string;
 		author: string;

@@ -10,6 +10,9 @@ interface PersonaThemeContextType {
     setIsMorphingEnabled: (enabled: boolean) => void;
     personaData: PersonaData | null;
     isLoading: boolean;
+    healthScore: number | null;
+    userLevel: number;
+    refreshPersona: () => Promise<void>;
 }
 
 const PersonaThemeContext = createContext<PersonaThemeContextType | undefined>(undefined);
@@ -31,7 +34,7 @@ export const PersonaThemeProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("enablePersonaMorphing", isMorphingEnabled.toString());
     }, [isMorphingEnabled]);
 
-    const { data: personaData, isLoading } = useQuery<PersonaData>({
+    const { data: personaData, isLoading, refetch } = useQuery<PersonaData>({
         queryKey: ["persona"],
         queryFn: async () => {
             const res = await fetch("/api/persona");
@@ -40,6 +43,10 @@ export const PersonaThemeProvider = ({ children }: { children: ReactNode }) => {
         },
         enabled: !!userId, // Only fetch if user is logged in
     });
+
+    const refreshPersona = async () => {
+        await refetch();
+    };
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -53,8 +60,21 @@ export const PersonaThemeProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [isMorphingEnabled, personaData]);
 
+    const healthScore = personaData?.healthScore ?? null;
+    const userLevel = personaData?.level ?? 1;
+
     return (
-        <PersonaThemeContext.Provider value={{ isMorphingEnabled, setIsMorphingEnabled, personaData: personaData || null, isLoading }}>
+        <PersonaThemeContext.Provider
+            value={{
+                isMorphingEnabled,
+                setIsMorphingEnabled,
+                personaData: personaData || null,
+                isLoading,
+                healthScore,
+                userLevel,
+                refreshPersona
+            }}
+        >
             {children}
         </PersonaThemeContext.Provider>
     );

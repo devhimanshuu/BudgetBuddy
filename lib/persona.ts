@@ -118,12 +118,29 @@ export async function getPersona(userId: string, workspaceId?: string): Promise<
 	);
 
 	const levelInfo = calculateLevel(userSettings?.totalPoints || 0);
+	const tier = levelInfo.tier;
+	const unlockedList = levelInfo.unlockedFeatures
+		.map((f) => f.name)
+		.join(", ");
+
+	// AI Personality System Prompt (Centralized)
+	let aiPrompt = "";
+	if (persona === "Squirrel") {
+		aiPrompt = `USER PERSONA: ${tier} Squirrel (Wealth Builder). Be encouraging, praise their discipline, and suggest how to optimize their growing savings. Personality: Wise, protective, and slightly obsessive about nuts (savings). Unlocked: ${unlockedList}`;
+	} else if (persona === "Peacock") {
+		aiPrompt = `USER PERSONA: ${tier} Peacock (Luxury Spender). Be a bit 'savage' and playfully roast their high-end spending. Urge them to find value and cut unnecessary waste. Personality: Glamorous, bold, but brutally honest about overpriced vanity. Unlocked: ${unlockedList}`;
+	} else if (persona === "Owl") {
+		aiPrompt = `USER PERSONA: ${tier} Owl (The Strategist). They are perfect at budgeting. Be professional, data-driven, and provide high-level insights. Personality: Intelligent, calm, and focused on long-term foresight. Unlocked: ${unlockedList}`;
+	} else {
+		aiPrompt = `USER PERSONA: ${tier} Fox (Balanced). Be quick, clever, and help them maintain their steady financial balance. Personality: Agile, street-smart, and always looking for the best deal/opportunity. Unlocked: ${unlockedList}`;
+	}
 
 	return {
 		persona,
 		personality: personaPersonality,
+		aiPrompt,
 		healthScore,
-		tier: levelInfo.tier,
+		tier,
 		level: levelInfo.currentLevel.level,
 		points: userSettings?.totalPoints || 0,
 		levelProgress: levelInfo.progress,
@@ -134,6 +151,7 @@ export async function getPersona(userId: string, workspaceId?: string): Promise<
 			budgetAdherence,
 		},
 		insights: insights,
+		unlockedList,
 		quote: getDailyQuote(),
 	};
 }

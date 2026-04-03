@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Loader2 } from "lucide-react";
-import { ChatWithAI } from "@/app/(dashboard)/_actions/ai";
+import { ChatWithAI, type ChatAIResponse } from "@/app/(dashboard)/_actions/ai";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,8 @@ import { MessageItem } from "./chat/MessageItem";
 import { HealthScoreBar } from "./chat/HealthScoreBar";
 import { detectVoiceCommand } from "./chat/utils";
 
+import { usePersonaTheme } from "./providers/PersonaThemeProvider";
+
 export interface Message {
     role: "user" | "model";
     parts: { text: string }[];
@@ -53,12 +55,12 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [pendingReceipt, setPendingReceipt] = useState<any>(null);
-    const [userPersona, setUserPersona] = useState<string | null>(null);
-    const [healthScore, setHealthScore] = useState<number | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [currency, setCurrency] = useState("$");
     const [isAutoSpeak, setIsAutoSpeak] = useState(false);
-    const [userLevel, setUserLevel] = useState(1);
+
+    const { personaData, healthScore, userLevel, refreshPersona } = usePersonaTheme();
+    const userPersona = personaData?.persona || null;
 
     // Load history on mount
     useEffect(() => {
@@ -66,18 +68,11 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             try {
                 const settings = await GetUserSettings();
                 setCurrency(settings.currency === "INR" ? "₹" : "$");
-
-                // Fetch level info
-                const { calculateLevel } = await import("@/lib/gamification-client");
-                const levelInfo = calculateLevel(settings.totalPoints || 0);
-                setUserLevel(levelInfo.currentLevel.level);
             } catch (e) {
                 console.error("Failed to fetch settings", e);
             }
         };
         fetchSettings();
-        const savedPersona = localStorage.getItem("budget-buddy-user-persona");
-        if (savedPersona) setUserPersona(savedPersona);
 
         const autoSpeak = localStorage.getItem("budget-buddy-auto-speak");
         if (autoSpeak === "true") setIsAutoSpeak(true);
@@ -112,10 +107,10 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
 
     const clearHistory = () => {
         setMessages([]);
-        setUserPersona(null);
         localStorage.removeItem("budget-buddy-chat-history");
         localStorage.removeItem("budget-buddy-user-persona");
         setShowClearConfirm(false);
+        refreshPersona();
         toast.success("History cleared");
     };
 
@@ -195,14 +190,14 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         setIsLoading(true);
 
         try {
-            const result = (await ChatWithAI(messageText, messages)) as any;
+            const result: ChatAIResponse = await ChatWithAI(messageText, messages);
             if (result.error) {
                 typeMessage(result.error as string, result.persona);
             } else if (result.text) {
                 typeMessage(result.text as string, result.persona);
-                if (result.persona) setUserPersona(result.persona);
-                if (result.healthScore !== undefined) setHealthScore(result.healthScore);
-                if (result.level !== undefined) setUserLevel(result.level);
+                if (result.persona || result.healthScore !== undefined || result.level !== undefined) {
+                    refreshPersona();
+                }
 
                 if (result.filter) {
                     const params = new URLSearchParams();
@@ -353,12 +348,13 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         setIsLoading(true);
 
         try {
-            const result = await ChatWithAI(transactionRequest, messages);
+            const result: ChatAIResponse = await ChatWithAI(transactionRequest, messages);
             if (result.error) {
                 typeMessage(result.error as string);
             } else if (result.text) {
-                if (result.persona) setUserPersona(result.persona);
-                if (result.healthScore !== undefined) setHealthScore(result.healthScore);
+                if (result.persona || result.healthScore !== undefined) {
+                    refreshPersona();
+                }
                 typeMessage(result.text as string);
             }
         } catch (error) {

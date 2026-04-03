@@ -9,11 +9,23 @@ import { CreateTransaction } from "./transaction";
 import { UpdateTransaction } from "../transactions/_actions/updateTransaction";
 import { DeleteTransaction } from "../transactions/_actions/deleteTransaction";
 import { calculateLevel } from "@/lib/gamification";
+import { getPersona } from "@/lib/persona";
+import { getActiveWorkspace } from "@/lib/workspaces";
+
+export type ChatAIResponse = {
+	text?: string;
+	error?: string;
+	persona?: any;
+	healthScore?: number | null;
+	level?: number;
+	filter?: any;
+	component?: string;
+};
 
 export async function ChatWithAI(
 	message: string,
 	history: { role: "user" | "model"; parts: { text: string }[] }[],
-) {
+): Promise<ChatAIResponse> {
 	const groqApiKey = process.env.GROQ_API_KEY;
 	const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
@@ -35,129 +47,54 @@ export async function ChatWithAI(
 	let availableCategories: string[] = [];
 
 	try {
-		let persona = "Fox";
-		let personaPersonality = "";
+		const workspace = await getActiveWorkspace(user.id);
+		const [personaData, savingsGoals, userSettings, categories, achievements] =
+			await Promise.all([
+				getPersona(user.id, workspace?.id),
+				prisma.savingsGoal.findMany({
+					where: { userId: user.id },
+					select: { name: true, targetAmount: true, currentAmount: true },
+				}),
+				prisma.userSettings.findFirst({ where: { userId: user.id } }),
+				prisma.category.findMany({
+					where: { userId: user.id },
+					select: { name: true, type: true },
+				}),
+				prisma.userAchievement.findMany({
+					where: { userId: user.id },
+					include: { achievement: true },
+				}),
+			]);
 
+		const levelInfo = calculateLevel(userSettings?.totalPoints || 0);
+
+		const {
+			persona,
+			aiPrompt: personaPersonality,
+			healthScore,
+			level,
+			unlockedList,
+		} = personaData;
+
+		// Fetch all transactions for insights (the AI still needs recent transactions for context)
 		const twoMonthsAgo = new Date();
 		twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+		const transactions = await prisma.transaction.findMany({
+			where: {
+				userId: user.id,
+				date: { gte: twoMonthsAgo },
+			},
+			orderBy: { date: "desc" },
+			take: 1000,
+		});
 
-		const [
-			transactions,
-			budgets,
-			savingsGoals,
-			userSettings,
-			categories,
-			achievements,
-		] = await Promise.all([
-			prisma.transaction.findMany({
-				where: {
-					userId: user.id,
-					date: {
-						gte: twoMonthsAgo,
-					},
-				},
-				orderBy: { date: "desc" },
-				take: 1000,
-				select: {
-					id: true,
-					amount: true,
-					description: true,
-					category: true,
-					categoryIcon: true,
-					date: true,
-					type: true,
-				},
-			}),
-			prisma.budget.findMany({
-				where: { userId: user.id },
-				select: { category: true, amount: true },
-			}),
-			prisma.savingsGoal.findMany({
-				where: { userId: user.id },
-				select: { name: true, targetAmount: true, currentAmount: true },
-			}),
-			prisma.userSettings.findFirst({ where: { userId: user.id } }),
-			prisma.category.findMany({
-				where: { userId: user.id },
-				select: { name: true, type: true },
-			}),
-			prisma.userAchievement.findMany({
-				where: { userId: user.id },
-				include: { achievement: true },
-			}),
-		]);
+		const budgets = await prisma.budget.findMany({
+			where: { userId: user.id },
+			select: { category: true, amount: true },
+		});
 
 		currency = userSettings?.currency || "USD";
 		availableCategories = categories.map((c) => c.name);
-
-		// --- PERSONA LOGIC ---
-		const last30Days = new Date();
-		last30Days.setDate(last30Days.getDate() - 30);
-
-		const recentTx = transactions.filter((t) => t.date >= last30Days);
-		const totalIncome = recentTx
-			.filter((t) => t.type === "income")
-			.reduce((acc, t) => acc + t.amount, 0);
-		const totalExpense = recentTx
-			.filter((t) => t.type === "expense")
-			.reduce((acc, t) => acc + t.amount, 0);
-
-		const luxuryCategories = [
-			"Shopping",
-			"Entertainment",
-			"Travel",
-			"Dining",
-			"Luxury",
-			"Misc",
-		];
-		const luxurySpending = recentTx
-			.filter(
-				(t) => t.type === "expense" && luxuryCategories.includes(t.category),
-			)
-			.reduce((acc, t) => acc + t.amount, 0);
-
-		const savingsRate =
-			totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
-		const luxuryRate = totalExpense > 0 ? luxurySpending / totalExpense : 0;
-
-		// Check Budget Adherence
-		let overBudgetCount = 0;
-		budgets.forEach((b) => {
-			const spentInCategory = recentTx
-				.filter((t) => t.type === "expense" && t.category === b.category)
-				.reduce((acc, t) => acc + t.amount, 0);
-			if (spentInCategory > b.amount) overBudgetCount++;
-		});
-		const budgetAdherence =
-			budgets.length > 0 ? 1 - overBudgetCount / budgets.length : 1;
-
-		const levelInfo = calculateLevel(userSettings?.totalPoints || 0);
-		const tier = levelInfo.tier;
-		const unlockedList = levelInfo.unlockedFeatures
-			.map((f) => f.name)
-			.join(", ");
-
-		const healthScore = Math.min(
-			Math.max(
-				Math.floor(savingsRate * 150 + budgetAdherence * 50 - luxuryRate * 100),
-				0,
-			),
-			100,
-		);
-
-		if (savingsRate > 0.3) {
-			persona = "Squirrel";
-			personaPersonality = `USER PERSONA: ${tier} Squirrel (Wealth Builder). Be encouraging, praise their discipline, and suggest how to optimize their growing savings. Personality: Wise, protective, and slightly obsessive about nuts (savings). Unlocked: ${unlockedList}`;
-		} else if (luxuryRate > 0.4) {
-			persona = "Peacock";
-			personaPersonality = `USER PERSONA: ${tier} Peacock (Luxury Spender). Be a bit 'savage' and playfully roast their high-end spending. Urge them to find value and cut unnecessary waste. Personality: Glamorous, bold, but brutally honest about overpriced vanity. Unlocked: ${unlockedList}`;
-		} else if (budgetAdherence > 0.9 && budgets.length > 0) {
-			persona = "Owl";
-			personaPersonality = `USER PERSONA: ${tier} Owl (The Strategist). They are perfect at budgeting. Be professional, data-driven, and provide high-level insights. Personality: Intelligent, calm, and focused on long-term foresight. Unlocked: ${unlockedList}`;
-		} else {
-			persona = "Fox";
-			personaPersonality = `USER PERSONA: ${tier} Fox (Balanced). Be quick, clever, and help them maintain their steady financial balance. Personality: Agile, street-smart, and always looking for the best deal/opportunity. Unlocked: ${unlockedList}`;
-		}
 
 		// --- INTELLIGENCE LOGIC (Anomalies & Forecasts) ---
 		const dayOfMonth = new Date().getDate();
