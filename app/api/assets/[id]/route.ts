@@ -101,8 +101,9 @@ export async function DELETE(
 			return NextResponse.json({ error: "Asset not found" }, { status: 404 });
 		}
 
-		await prisma.asset.delete({
+		await prisma.asset.update({
 			where: { id: id },
+			data: { deletedAt: new Date() },
 		});
 
 		return NextResponse.json({ success: true });

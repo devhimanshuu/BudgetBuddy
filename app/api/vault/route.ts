@@ -258,8 +258,9 @@ export async function DELETE(request: Request) {
 		);
 	}
 
-	await prisma.vaultEntry.delete({
+	await prisma.vaultEntry.update({
 		where: { id },
+		data: { deletedAt: new Date() },
 	});
 
 	return Response.json({ success: true });

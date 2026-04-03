@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { getPersona } from "@/lib/persona";
+import { getActiveWorkspace } from "@/lib/workspaces";
 
 export async function GET() {
     const user = await currentUser();
@@ -9,7 +10,8 @@ export async function GET() {
     }
 
     try {
-        const personaData = await getPersona(user.id);
+        const workspace = await getActiveWorkspace(user.id);
+        const personaData = await getPersona(user.id, workspace?.id);
         return NextResponse.json(personaData);
     } catch (error) {
         console.error("Error fetching persona:", error);

@@ -310,7 +310,7 @@ export async function AcceptInvite(token: string) {
 
 	if (existingMember) {
 		// Already a member, delete the invite and return
-		await prisma.invite.delete({ where: { id: invite.id } });
+		await prisma.invite.update({ where: { id: invite.id }, data: { deletedAt: new Date() } });
 		return {
 			success: true,
 			workspaceId: invite.workspaceId,
@@ -319,16 +319,16 @@ export async function AcceptInvite(token: string) {
 	}
 
 	// Create membership and delete invite in a transaction
-	await prisma.$transaction([
-		prisma.workspaceMember.create({
+	await prisma.$transaction(async (tx) => {
+		await tx.workspaceMember.create({
 			data: {
 				workspaceId: invite.workspaceId,
 				userId: user.id,
 				role: invite.role,
 			},
-		}),
-		prisma.invite.delete({ where: { id: invite.id } }),
-	]);
+		});
+		await tx.invite.update({ where: { id: invite.id }, data: { deletedAt: new Date() } });
+	});
 
 	const userName = user.firstName
 		? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
@@ -371,13 +371,14 @@ export async function RemoveMember(workspaceId: string, memberUserId: string) {
 		throw new Error("Cannot remove the workspace owner");
 	}
 
-	await prisma.workspaceMember.delete({
+	await prisma.workspaceMember.update({
 		where: {
 			workspaceId_userId: {
 				workspaceId,
 				userId: memberUserId,
 			},
 		},
+		data: { deletedAt: new Date() },
 	});
 
 	revalidatePath("/manage");
@@ -447,7 +448,7 @@ export async function RevokeInvite(inviteId: string) {
 	const canManage = await checkPermissions(invite.workspaceId, user.id, ["ADMIN"]);
 	if (!canManage) throw new Error("Only admins can revoke invites");
 
-	await prisma.invite.delete({ where: { id: inviteId } });
+	await prisma.invite.update({ where: { id: inviteId }, data: { deletedAt: new Date() } });
 
 	revalidatePath("/manage");
 

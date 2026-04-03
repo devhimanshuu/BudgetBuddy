@@ -40,14 +40,20 @@ export async function DeleteTransaction(id: string) {
 		throw new Error("Transaction does not belong to this workspace");
 	}
 
-	await prisma.$transaction([
-		prisma.transaction.delete({
+	await prisma.$transaction(async (tx) => {
+		// 1. Soft-delete: set deletedAt timestamp instead of hard delete
+		await tx.transaction.update({
 			where: {
 				id,
 				userId: user.id,
 			},
-		}),
-		prisma.monthlyHistory.update({
+			data: {
+				deletedAt: new Date(),
+			},
+		});
+
+		// 2. Decrement monthly history
+		await tx.monthlyHistory.update({
 			where: {
 				day_month_year_userId: {
 					userId: user.id,
@@ -73,9 +79,10 @@ export async function DeleteTransaction(id: string) {
 					},
 				}),
 			},
-		}),
+		});
 
-		prisma.yearHistory.update({
+		// 3. Decrement year history
+		await tx.yearHistory.update({
 			where: {
 				month_year_userId: {
 					userId: user.id,
@@ -100,8 +107,8 @@ export async function DeleteTransaction(id: string) {
 					},
 				}),
 			},
-		}),
-	]);
+		});
+	});
 
 	const formatter = GetFormatterForCurrency(workspace.currency);
 	const formattedAmount = formatter.format(transaction.amount);

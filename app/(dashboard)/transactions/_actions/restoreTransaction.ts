@@ -42,8 +42,9 @@ export async function RestoreTransaction(id: string) {
 		throw new Error("Transaction does not belong to this workspace");
 	}
 
-	await prisma.$transaction([
-		prisma.transaction.update({
+	await prisma.$transaction(async (tx) => {
+		// 1. Restore the transaction (by setting deletedAt to null)
+		await tx.transaction.update({
 			where: {
 				id,
 				userId: user.id,
@@ -51,8 +52,10 @@ export async function RestoreTransaction(id: string) {
 			data: {
 				deletedAt: null,
 			},
-		}),
-		prisma.monthlyHistory.update({
+		});
+
+		// 2. Increment monthly history
+		await tx.monthlyHistory.update({
 			where: {
 				day_month_year_userId: {
 					userId: user.id,
@@ -78,9 +81,10 @@ export async function RestoreTransaction(id: string) {
 					},
 				}),
 			},
-		}),
+		});
 
-		prisma.yearHistory.update({
+		// 3. Increment year history
+		await tx.yearHistory.update({
 			where: {
 				month_year_userId: {
 					userId: user.id,
@@ -105,8 +109,8 @@ export async function RestoreTransaction(id: string) {
 					},
 				}),
 			},
-		}),
-	]);
+		});
+	});
 
 	const formatter = GetFormatterForCurrency(workspace.currency);
 	const formattedAmount = formatter.format(transaction.amount);

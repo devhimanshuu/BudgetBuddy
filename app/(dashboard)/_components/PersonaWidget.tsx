@@ -7,7 +7,6 @@ import GlassCard from "@/components/GlassCard";
 import { cn } from "@/lib/utils";
 import {
     Zap,
-    AlertTriangle,
     Wallet,
     TrendingDown,
     Target,
@@ -17,12 +16,17 @@ import { Progress } from "@/components/ui/progress";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { usePersonaTheme } from "@/components/providers/PersonaThemeProvider";
 
 interface PersonaWidgetProps {
     data: PersonaData;
 }
 
-export default function PersonaWidget({ data }: PersonaWidgetProps) {
+export default function PersonaWidget({ data: serverData }: PersonaWidgetProps) {
+    // Use context data (same source as chatbot) when available, fall back to server-rendered data
+    const { personaData: contextData } = usePersonaTheme();
+    const data = contextData || serverData;
+
     const config = PERSONA_THEME[data.persona];
     const { setTheme } = useTheme();
     const scoreColor =

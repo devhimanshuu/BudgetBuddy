@@ -7,76 +7,69 @@ function injectSoftDeleteFilter(args: any) {
   }
 }
 
-function buildSoftDeleteLogic() {
-  return {
-    async delete({ model, args, query }: any) {
-      // Instead of deleting, set deletedAt timestamp
-      return (model as any).update({
-        where: args.where,
-        data: { deletedAt: new Date() },
-      });
-    },
-    async deleteMany({ model, args, query }: any) {
-      return (model as any).updateMany({
-        where: args.where,
-        data: { deletedAt: new Date() },
-      });
-    },
-    async findMany({ model, args, query }: any) {
-      injectSoftDeleteFilter(args);
-      return query(args);
-    },
-    async findFirst({ args, query }: any) {
-      injectSoftDeleteFilter(args);
-      return query(args);
-    },
-    async findUnique({ args, query }: any) {
-      // Prisma 6.x allows additional non-unique filters in findUnique where.
-      // We simply add deletedAt: null and call the original query.
-      injectSoftDeleteFilter(args);
-      return query(args);
-    },
-    async count({ args, query }: any) {
-      injectSoftDeleteFilter(args);
-      return query(args);
-    },
-    async groupBy({ args, query }: any) {
-      injectSoftDeleteFilter(args);
-      return query(args);
-    },
-    async aggregate({ args, query }: any) {
-      injectSoftDeleteFilter(args);
-      return query(args);
-    },
-  };
-}
-
+// Models that support soft-delete (PascalCase as Prisma reports them)
 const SOFT_DELETE_MODELS = [
-  "transaction",
-  "workspace",
-  "workspaceMember",
-  "invite",
-  "category",
-  "tag",
-  "attachment",
-  "budget",
-  "savingsGoal",
-  "asset",
-  "recurringTransaction",
-  "vaultEntry",
-  "beneficiary",
-] as const;
+  "Transaction",
+  "Workspace",
+  "WorkspaceMember",
+  "Invite",
+  "Category",
+  "Tag",
+  "Attachment",
+  "Budget",
+  "SavingsGoal",
+  "Asset",
+  "RecurringTransaction",
+  "VaultEntry",
+  "Beneficiary",
+];
 
 const prismaClientSingleton = () => {
   const client = new PrismaClient();
 
-  const queryExtensions: Record<string, any> = {};
-  for (const model of SOFT_DELETE_MODELS) {
-    queryExtensions[model] = buildSoftDeleteLogic();
-  }
-
+  // Only intercept READ operations to auto-filter soft-deleted records.
+  // For DELETE operations, call softDelete() explicitly in application code.
   return client.$extends({
-    query: queryExtensions as any,
+    query: {
+      $allModels: {
+        async findMany({ model, args, query }: any) {
+          if (SOFT_DELETE_MODELS.includes(model)) {
+            injectSoftDeleteFilter(args);
+          }
+          return query(args);
+        },
+        async findFirst({ model, args, query }: any) {
+          if (SOFT_DELETE_MODELS.includes(model)) {
+            injectSoftDeleteFilter(args);
+          }
+          return query(args);
+        },
+        async findUnique({ model, args, query }: any) {
+          if (SOFT_DELETE_MODELS.includes(model)) {
+            injectSoftDeleteFilter(args);
+          }
+          return query(args);
+        },
+        async count({ model, args, query }: any) {
+          if (SOFT_DELETE_MODELS.includes(model)) {
+            injectSoftDeleteFilter(args);
+          }
+          return query(args);
+        },
+        async groupBy({ model, args, query }: any) {
+          if (SOFT_DELETE_MODELS.includes(model)) {
+            injectSoftDeleteFilter(args);
+          }
+          return query(args);
+        },
+        async aggregate({ model, args, query }: any) {
+          if (SOFT_DELETE_MODELS.includes(model)) {
+            injectSoftDeleteFilter(args);
+          }
+          return query(args);
+        },
+      },
+    },
   });
 };
 

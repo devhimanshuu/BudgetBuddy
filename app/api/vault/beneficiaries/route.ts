@@ -122,8 +122,9 @@ export async function DELETE(request: Request) {
 		);
 	}
 
-	await prisma.beneficiary.delete({
+	await prisma.beneficiary.update({
 		where: { id },
+		data: { deletedAt: new Date() },
 	});
 
 	return Response.json({ success: true });

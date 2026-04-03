@@ -79,8 +79,9 @@ export async function DELETE(request: Request) {
     return Response.json({ error: "Attachment not found" }, { status: 404 });
   }
 
-  await prisma.attachment.delete({
+  await prisma.attachment.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 
   return Response.json({ success: true });

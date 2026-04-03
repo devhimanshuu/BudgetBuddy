@@ -102,7 +102,7 @@ export async function POST(request: Request) {
 			});
 
 			// 5. Delete the source category
-			await tx.category.delete({
+			await tx.category.update({
 				where: {
 					name_userId_type: {
 						name: sourceCategoryName,
@@ -110,6 +110,7 @@ export async function POST(request: Request) {
 						type,
 					},
 				},
+				data: { deletedAt: new Date() },
 			});
 
 			return {

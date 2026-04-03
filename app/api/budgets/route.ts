@@ -220,7 +220,7 @@ export async function DELETE(request: Request) {
 		return Response.json({ error: "Budget not found" }, { status: 404 });
 	}
 
-	await prisma.budget.delete({
+	await prisma.budget.update({
 		where: {
 			userId_category_month_year: {
 				userId: user.id,
@@ -229,6 +229,7 @@ export async function DELETE(request: Request) {
 				year: parseInt(year),
 			},
 		},
+		data: { deletedAt: new Date() },
 	});
 
 	return Response.json({ success: true });

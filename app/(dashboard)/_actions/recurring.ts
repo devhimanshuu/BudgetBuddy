@@ -139,10 +139,13 @@ export async function DeleteRecurringTransaction(id: string) {
 		redirect("/sign-in");
 	}
 
-	await prisma.recurringTransaction.delete({
+	await prisma.recurringTransaction.update({
 		where: {
 			id,
 			userId: user.id,
+		},
+		data: {
+			deletedAt: new Date(),
 		},
 	});
 

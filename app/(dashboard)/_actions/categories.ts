@@ -72,13 +72,16 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot delete categories");
 
-	return await prisma.category.delete({
+	return await prisma.category.update({
 		where: {
 			name_userId_type: {
 				userId: user.id,
 				name: parsedBody.data.name,
 				type: parsedBody.data.type,
 			},
+		},
+		data: {
+			deletedAt: new Date(),
 		},
 	});
 }
@@ -150,14 +153,17 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 				});
 			}
 
-			// Delete the old category
-			await tx.category.delete({
+			// Soft-delete the old category
+			await tx.category.update({
 				where: {
 					name_userId_type: {
 						name: oldName,
 						userId: user.id,
 						type,
 					},
+				},
+				data: {
+					deletedAt: new Date(),
 				},
 			});
 
