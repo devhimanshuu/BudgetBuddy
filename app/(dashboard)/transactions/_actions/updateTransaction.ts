@@ -52,7 +52,6 @@ export async function UpdateTransaction(
 
 	const transaction = await prisma.transaction.findUnique({
 		where: {
-			userId: user.id,
 			id,
 		},
 		include: {
@@ -70,7 +69,8 @@ export async function UpdateTransaction(
 		throw new Error("Transaction not found");
 	}
 
-	if (transaction.workspaceId && transaction.workspaceId !== workspaceId) {
+	// Ensure the transaction belongs to the active workspace
+	if (!transaction.workspaceId || transaction.workspaceId !== workspaceId) {
 		throw new Error("Transaction does not belong to this workspace");
 	}
 
@@ -112,14 +112,14 @@ export async function UpdateTransaction(
 				await tx.monthlyHistory.upsert({
 					where: {
 						day_month_year_userId: {
-							userId: user.id,
+							userId: transaction.userId,
 							day: oldDate.getUTCDate(),
 							month: oldDate.getUTCMonth(),
 							year: oldDate.getUTCFullYear(),
 						},
 					},
 					create: {
-						userId: user.id,
+						userId: transaction.userId,
 						day: oldDate.getUTCDate(),
 						month: oldDate.getUTCMonth(),
 						year: oldDate.getUTCFullYear(),
@@ -143,13 +143,13 @@ export async function UpdateTransaction(
 				await tx.yearHistory.upsert({
 					where: {
 						month_year_userId: {
-							userId: user.id,
+							userId: transaction.userId,
 							month: oldDate.getUTCMonth(),
 							year: oldDate.getUTCFullYear(),
 						},
 					},
 					create: {
-						userId: user.id,
+						userId: transaction.userId,
 						month: oldDate.getUTCMonth(),
 						year: oldDate.getUTCFullYear(),
 						expense: 0,
@@ -184,7 +184,7 @@ export async function UpdateTransaction(
 
 				// 3. Update Transaction
 				await tx.transaction.update({
-					where: { id, userId: user.id },
+					where: { id },
 					data: {
 						amount,
 						date,
@@ -234,14 +234,14 @@ export async function UpdateTransaction(
 				await tx.monthlyHistory.upsert({
 					where: {
 						day_month_year_userId: {
-							userId: user.id,
+							userId: transaction.userId,
 							day: date.getUTCDate(),
 							month: date.getUTCMonth(),
 							year: date.getUTCFullYear(),
 						},
 					},
 					create: {
-						userId: user.id,
+						userId: transaction.userId,
 						day: date.getUTCDate(),
 						month: date.getUTCMonth(),
 						year: date.getUTCFullYear(),
@@ -259,13 +259,13 @@ export async function UpdateTransaction(
 				await tx.yearHistory.upsert({
 					where: {
 						month_year_userId: {
-							userId: user.id,
+							userId: transaction.userId,
 							month: date.getUTCMonth(),
 							year: date.getUTCFullYear(),
 						},
 					},
 					create: {
-						userId: user.id,
+						userId: transaction.userId,
 						month: date.getUTCMonth(),
 						year: date.getUTCFullYear(),
 						expense: type === "expense" ? amount : 0,

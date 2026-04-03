@@ -27,7 +27,6 @@ export async function DeleteTransaction(id: string) {
 
 	const transaction = await prisma.transaction.findUnique({
 		where: {
-			userId: user.id,
 			id,
 		},
 	});
@@ -36,7 +35,8 @@ export async function DeleteTransaction(id: string) {
 		throw new Error("bad request");
 	}
 
-	if (transaction.workspaceId && transaction.workspaceId !== workspaceId) {
+	// Ensure the transaction belongs to the active workspace
+	if (!transaction.workspaceId || transaction.workspaceId !== workspaceId) {
 		throw new Error("Transaction does not belong to this workspace");
 	}
 
@@ -45,7 +45,6 @@ export async function DeleteTransaction(id: string) {
 		await tx.transaction.update({
 			where: {
 				id,
-				userId: user.id,
 			},
 			data: {
 				deletedAt: new Date(),
@@ -56,7 +55,7 @@ export async function DeleteTransaction(id: string) {
 		await tx.monthlyHistory.update({
 			where: {
 				day_month_year_userId: {
-					userId: user.id,
+					userId: transaction.userId,
 					day: transaction.date.getUTCDate(),
 					month: transaction.date.getUTCMonth(),
 					year: transaction.date.getUTCFullYear(),
@@ -85,7 +84,7 @@ export async function DeleteTransaction(id: string) {
 		await tx.yearHistory.update({
 			where: {
 				month_year_userId: {
-					userId: user.id,
+					userId: transaction.userId,
 					month: transaction.date.getUTCMonth(),
 					year: transaction.date.getUTCFullYear(),
 				},
