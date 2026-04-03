@@ -3,8 +3,11 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Repeat } from "lucide-react";
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Repeat, Zap, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
     DialogContent,
@@ -57,6 +60,7 @@ const createRecurringSchema = z.object({
     date: z.date(),
     interval: z.enum(["daily", "weekly", "monthly", "yearly"]),
     type: z.enum(["income", "expense", "investment"]),
+    isAuto: z.boolean().default(true),
 });
 
 type CreateRecurringSchemaType = z.infer<typeof createRecurringSchema>;
@@ -72,6 +76,7 @@ interface RecurringTransaction {
     categoryIcon: string
     date: Date
     interval: string
+    isAuto: boolean
     lastProcessed: Date | null
     createdAt: Date
     updatedAt: Date
@@ -96,6 +101,7 @@ function CreateRecurringDialog({
             description: "",
             amount: 0,
             category: "",
+            isAuto: true,
         },
     });
 
@@ -114,6 +120,7 @@ function CreateRecurringDialog({
                 description: "",
                 amount: 0,
                 category: "",
+                isAuto: true,
             });
             queryClient.invalidateQueries({ queryKey: ["recurring-transactions"] });
             setOpen(false);
@@ -289,6 +296,29 @@ function CreateRecurringDialog({
                                 )}
                             />
                         </div>
+                        <FormField
+                            control={form.control}
+                            name="isAuto"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base flex items-center gap-2">
+                                            <Zap className="h-4 w-4 text-emerald-500" />
+                                            Automatic Processing
+                                        </FormLabel>
+                                        <p className="text-[12px] text-muted-foreground">
+                                            If enabled, the transaction is added automatically by the system.
+                                        </p>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
 
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -320,6 +350,7 @@ function EditRecurringDialog({
             description: transaction.description,
             amount: transaction.amount,
             category: transaction.category,
+            isAuto: transaction.isAuto,
         },
     });
 
@@ -504,6 +535,29 @@ function EditRecurringDialog({
                                 )}
                             />
                         </div>
+                        <FormField
+                            control={form.control}
+                            name="isAuto"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base flex items-center gap-2">
+                                            <Zap className="h-4 w-4 text-emerald-500" />
+                                            Automatic Processing
+                                        </FormLabel>
+                                        <p className="text-[12px] text-muted-foreground">
+                                            If enabled, the transaction is added automatically by the system.
+                                        </p>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
 
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -590,9 +644,22 @@ export function ManageRecurringTransactions() {
                                 </span>
                                 <div>
                                     <p className="font-semibold">{transaction.description}</p>
-                                    <p className="text-xs text-muted-foreground capitalize">
-                                        {transaction.interval} • Next: {format(new Date(transaction.date), "MMM d, yyyy")}
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-xs text-muted-foreground capitalize">
+                                            {transaction.interval} • Next: {format(new Date(transaction.date), "MMM d, yyyy")}
+                                        </p>
+                                        {transaction.isAuto ? (
+                                            <Badge variant="outline" className="h-4 text-[10px] px-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-1 font-normal">
+                                                <Zap className="h-2 w-2" />
+                                                Auto
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="h-4 text-[10px] px-1 bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1 font-normal">
+                                                <Hand className="h-2 w-2" />
+                                                Manual
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">

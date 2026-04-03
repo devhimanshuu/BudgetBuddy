@@ -52,6 +52,7 @@ export async function EditRecurringTransaction(
 			description: description || "",
 			interval,
 			type,
+			isAuto: form.isAuto !== undefined ? form.isAuto : true,
 			category: categoryRow.name,
 			categoryIcon: categoryRow.icon,
 		},
@@ -69,6 +70,7 @@ export interface CreateRecurringTransactionSchemaType {
 	date: Date; // Start date/Next due date
 	interval: RecurringInterval;
 	type: "income" | "expense" | "investment";
+	isAuto?: boolean;
 }
 
 export async function CreateRecurringTransaction(
@@ -106,6 +108,7 @@ export async function CreateRecurringTransaction(
 			description: description || "",
 			interval,
 			type,
+			isAuto: form.isAuto !== undefined ? form.isAuto : true,
 			category: categoryRow.name,
 			categoryIcon: categoryRow.icon,
 		},
@@ -183,90 +186,7 @@ export async function ProcessRecurringTransaction(id: string) {
 		throw new Error("Recurring transaction not found");
 	}
 
-	// Logic similar to CreateTransaction but simplified
-	await prisma.$transaction(async (tx) => {
-		// 1. Create real transaction
-		await tx.transaction.create({
-			data: {
-				userId: user.id,
-				workspaceId: recurring.workspaceId,
-				amount: recurring.amount,
-				date: recurring.date,
-				description: recurring.description,
-				notes: `Recurring transaction: ${recurring.interval}`,
-				type: recurring.type,
-				category: recurring.category,
-				categoryIcon: recurring.categoryIcon,
-			},
-		});
-
-		// 2. Aggregate updates (Monthly/Yearly) - COPIED logic from transaction.ts to ensure consistency
-		const date = recurring.date;
-		const type = recurring.type;
-		const amount = recurring.amount;
-
-		await tx.monthlyHistory.upsert({
-			where: {
-				day_month_year_userId: {
-					userId: user.id,
-					day: date.getUTCDate(),
-					month: date.getUTCMonth(),
-					year: date.getUTCFullYear(),
-				},
-			},
-			create: {
-				userId: user.id,
-				day: date.getUTCDate(),
-				month: date.getUTCMonth(),
-				year: date.getUTCFullYear(),
-				expense: type === "expense" ? amount : 0,
-				income: type === "income" ? amount : 0,
-				investment: type === "investment" ? amount : 0,
-			},
-			update: {
-				expense: { increment: type === "expense" ? amount : 0 },
-				income: { increment: type === "income" ? amount : 0 },
-				investment: { increment: type === "investment" ? amount : 0 },
-			},
-		});
-
-		await tx.yearHistory.upsert({
-			where: {
-				month_year_userId: {
-					userId: user.id,
-					month: date.getUTCMonth(),
-					year: date.getUTCFullYear(),
-				},
-			},
-			create: {
-				userId: user.id,
-				month: date.getUTCMonth(),
-				year: date.getUTCFullYear(),
-				expense: type === "expense" ? amount : 0,
-				income: type === "income" ? amount : 0,
-				investment: type === "investment" ? amount : 0,
-			},
-			update: {
-				expense: { increment: type === "expense" ? amount : 0 },
-				income: { increment: type === "income" ? amount : 0 },
-				investment: { increment: type === "investment" ? amount : 0 },
-			},
-		});
-
-		// 3. Update Recurring Transaction Next Due Date
-		const nextDate = calculateNextDate(
-			recurring.date,
-			recurring.interval as RecurringInterval,
-		);
-
-		await tx.recurringTransaction.update({
-			where: { id },
-			data: {
-				date: nextDate,
-				lastProcessed: new Date(),
-			},
-		});
-	});
+	await processRecurringTransaction(id);
 
 	revalidatePath("/");
 	revalidatePath("/transactions");
@@ -291,7 +211,11 @@ export async function ProcessAllDueRecurringTransactions() {
 	if (due.length === 0) return;
 
 	for (const transaction of due) {
-		await processRecurringTransaction(transaction.id);
+		try {
+			await processRecurringTransaction(transaction.id);
+		} catch (error) {
+			console.error(`Failed to process recurring transaction ${transaction.id}:`, error);
+		}
 	}
 
 	revalidatePath("/");

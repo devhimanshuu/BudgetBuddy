@@ -340,6 +340,7 @@ model RecurringTransaction {
   date     DateTime // Next due date
   interval String // "daily", "weekly", "monthly", "yearly"
   
+  isAuto    Boolean @default(true) // If true, cron job will automatically process it. If false, user must manually approve.
   lastProcessed DateTime? 
   
   createdAt DateTime @default(now())

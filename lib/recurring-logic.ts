@@ -48,11 +48,18 @@ export async function processRecurringTransaction(transactionId: string) {
 	const MAX_LOOPS = 48; // Approx 1.5 months of daily, or 4 years of monthly
 
 	while (currentDueDate <= now && transactionsCreated < MAX_LOOPS) {
+		// Calculate next date (to be saved as the NEW next due date)
+		const nextDueDate = calculateNextDate(
+			currentDueDate,
+			recurring.interval as RecurringInterval,
+		);
+
 		// Create Transaction
 		await prisma.$transaction(async (tx) => {
 			await tx.transaction.create({
 				data: {
 					userId: recurring.userId,
+					workspaceId: recurring.workspaceId,
 					amount: recurring.amount,
 					date: currentDueDate,
 					description: recurring.description,
@@ -79,18 +86,24 @@ export async function processRecurringTransaction(transactionId: string) {
 				},
 				create: {
 					userId: recurring.userId,
+					workspaceId: recurring.workspaceId,
 					day,
 					month,
 					year,
 					expense: recurring.type === "expense" ? recurring.amount : 0,
 					income: recurring.type === "income" ? recurring.amount : 0,
+					investment: recurring.type === "investment" ? recurring.amount : 0,
 				},
 				update: {
+					workspaceId: recurring.workspaceId,
 					expense: {
 						increment: recurring.type === "expense" ? recurring.amount : 0,
 					},
 					income: {
 						increment: recurring.type === "income" ? recurring.amount : 0,
+					},
+					investment: {
+						increment: recurring.type === "investment" ? recurring.amount : 0,
 					},
 				},
 			});
@@ -105,41 +118,43 @@ export async function processRecurringTransaction(transactionId: string) {
 				},
 				create: {
 					userId: recurring.userId,
+					workspaceId: recurring.workspaceId,
 					month,
 					year,
 					expense: recurring.type === "expense" ? recurring.amount : 0,
 					income: recurring.type === "income" ? recurring.amount : 0,
+					investment: recurring.type === "investment" ? recurring.amount : 0,
 				},
 				update: {
+					workspaceId: recurring.workspaceId,
 					expense: {
 						increment: recurring.type === "expense" ? recurring.amount : 0,
 					},
 					income: {
 						increment: recurring.type === "income" ? recurring.amount : 0,
 					},
+					investment: {
+						increment: recurring.type === "investment" ? recurring.amount : 0,
+					},
+				},
+			});
+
+			// Update the recurring transaction record with the new next due date
+			await tx.recurringTransaction.update({
+				where: { id: transactionId },
+				data: {
+					date: nextDueDate,
+					lastProcessed: new Date(),
 				},
 			});
 		});
 
-		// Calculate next date (for next iteration)
-		currentDueDate = calculateNextDate(
-			currentDueDate,
-			recurring.interval as RecurringInterval,
-		);
+		currentDueDate = nextDueDate;
 		transactionsCreated++;
 	}
 
-	// Update the recurring transaction record with the new next due date
-	// Note: We update it to creating date, even if loop broke early due to limit,
-	// so we don't start over from scratch next time.
+	// Trigger Gamification updates (just once per batch)
 	if (transactionsCreated > 0) {
-		await prisma.recurringTransaction.update({
-			where: { id: transactionId },
-			data: {
-				date: currentDueDate,
-				lastProcessed: new Date(),
-			},
-		});
 
 		// Trigger Gamification updates (just once per batch)
 		try {

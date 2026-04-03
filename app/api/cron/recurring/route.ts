@@ -21,6 +21,7 @@ export async function GET(request: Request) {
 				date: {
 					lte: now,
 				},
+				isAuto: true,
 			},
 			select: {
 				id: true,
