@@ -36,10 +36,13 @@ export default function DeleteBudgetDialog({
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/budgets?id=${id}`, {
-        method: "DELETE",
-      });
+    mutationFn: async () => {
+      const response = await fetch(
+        `/api/budgets?category=${encodeURIComponent(budget.category)}&month=${month}&year=${year}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete budget");
@@ -59,7 +62,7 @@ export default function DeleteBudgetDialog({
   });
 
   const handleDelete = () => {
-    mutate(budget.id);
+    mutate();
   };
 
   return (

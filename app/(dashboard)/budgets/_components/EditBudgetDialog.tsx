@@ -41,11 +41,16 @@ export default function EditBudgetDialog({
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: { id: string; amount: number }) => {
-      const response = await fetch(`/api/budgets?id=${data.id}`, {
+    mutationFn: async (data: { amount: number }) => {
+      const response = await fetch(`/api/budgets`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: data.amount }),
+        body: JSON.stringify({
+          amount: data.amount,
+          category: budget.category,
+          month,
+          year,
+        }),
       });
 
       if (!response.ok) {
@@ -80,7 +85,6 @@ export default function EditBudgetDialog({
     }
 
     mutate({
-      id: budget.id,
       amount: amountNum,
     });
   };

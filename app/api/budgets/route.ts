@@ -144,14 +144,12 @@ export async function PATCH(request: Request) {
 	const { category, month, year, amount, categoryIcon } = parsedBody.data;
 
 	// Verify ownership before updating
-	const existingBudget = await prisma.budget.findUnique({
+	const existingBudget = await prisma.budget.findFirst({
 		where: {
-			userId_category_month_year: {
-				userId: user.id,
-				category,
-				month,
-				year,
-			},
+			...(workspace.id ? { workspaceId: workspace.id } : { userId: user.id }),
+			category,
+			month,
+			year,
 		},
 	});
 
@@ -165,7 +163,7 @@ export async function PATCH(request: Request) {
 	const budget = await prisma.budget.update({
 		where: {
 			userId_category_month_year: {
-				userId: user.id,
+				userId: existingBudget.userId,
 				category,
 				month,
 				year,
@@ -205,14 +203,12 @@ export async function DELETE(request: Request) {
 	}
 
 	// Verify ownership before deleting
-	const budget = await prisma.budget.findUnique({
+	const budget = await prisma.budget.findFirst({
 		where: {
-			userId_category_month_year: {
-				userId: user.id,
-				category,
-				month: parseInt(month),
-				year: parseInt(year),
-			},
+			...(workspace.id ? { workspaceId: workspace.id } : { userId: user.id }),
+			category,
+			month: parseInt(month),
+			year: parseInt(year),
 		},
 	});
 
@@ -223,7 +219,7 @@ export async function DELETE(request: Request) {
 	await prisma.budget.update({
 		where: {
 			userId_category_month_year: {
-				userId: user.id,
+				userId: budget.userId,
 				category,
 				month: parseInt(month),
 				year: parseInt(year),
