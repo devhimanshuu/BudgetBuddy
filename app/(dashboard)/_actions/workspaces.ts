@@ -10,7 +10,7 @@ import {
 	checkPermissions,
 	logActivity,
 } from "@/lib/workspaces";
-import { sendInviteEmail } from "@/lib/resend";
+import { sendInviteEmail } from "@/lib/mail";
 
 export async function GetWorkspaces() {
 	const user = await currentUser();
@@ -234,7 +234,7 @@ export async function InviteMember(
 		},
 	});
 
-	// Send email via Resend
+	// Send email via SendGrid
 	const getAppUrl = () => {
 		if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
 		if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
