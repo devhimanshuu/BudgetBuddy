@@ -12,22 +12,42 @@ export async function GET(request: Request) {
 	const workspace = await getActiveWorkspace();
 	const workspaceId = workspace?.id;
 
+	const { searchParams } = new URL(request.url);
+	const page = parseInt(searchParams.get("page") || "1");
+	const pageSize = parseInt(searchParams.get("pageSize") || "30");
+	const skip = (page - 1) * pageSize;
+	const take = pageSize;
+
 	if (!workspaceId) {
-		return Response.json([]);
+		return Response.json({
+			activities: [],
+			pagination: {
+				page,
+				pageSize,
+				totalCount: 0,
+				totalPages: 0,
+			},
+		});
 	}
 
-	const activities = await prisma.activity.findMany({
-		where: {
-			workspaceId,
-			...(workspace.role !== "ADMIN" ? { 
-				userId: { in: [user.id, workspace.ownerId] } 
-			} : {}),
-		},
-		orderBy: {
-			createdAt: "desc",
-		},
-		take: 30,
-	});
+	const where = {
+		workspaceId,
+		...(workspace.role !== "ADMIN" ? { 
+			userId: { in: [user.id, workspace.ownerId] } 
+		} : {}),
+	};
+
+	const [activities, totalCount] = await Promise.all([
+		prisma.activity.findMany({
+			where,
+			orderBy: {
+				createdAt: "desc",
+			},
+			skip,
+			take,
+		}),
+		prisma.activity.count({ where }),
+	]);
 
 	// Enrich with Clerk data
 	const client = await clerkClient();
@@ -55,6 +75,12 @@ export async function GET(request: Request) {
 
 	return Response.json({
 		activities: enrichedActivities,
-		currency: workspace.currency
+		currency: workspace.currency,
+		pagination: {
+			page,
+			pageSize,
+			totalCount,
+			totalPages: Math.ceil(totalCount / pageSize),
+		},
 	});
 }

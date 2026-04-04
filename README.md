@@ -1,20 +1,24 @@
 # BudgetBuddy 💰
 
-BudgetBuddy is a modern personal finance tracker designed to help you master your financial life. Built with **Next.js 15**, it combines powerful analytics with a seamless, stunning user experience to make money management effortless.
+BudgetBuddy is an AI-Powered Advanced Personal finance tracker aka wealth management app that helps users manage expenses and savings effectively. Built with modern web technologies, it offers a seamless experience for tracking financial transactions and generating insightful reports.
 
-[![BudgetBuddy Dashboard Preview](https://res.cloudinary.com/dbonhpuvh/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/v1770181853/dashboard-dark_ocosok.png)](https://budget-buddy-lovat.vercel.app/)
+[![BudgetBuddy Dashboard Preview](https://res.cloudinary.com/djkqo49ip/image/upload/v1775292690/Dark_tkiyfr.png)](https://budget-buddy-lovat.vercel.app/)
 
 ## 🌟 What's New
 
 ### 🏛️ Legacy Vault
+
 Secure your digital heritage and emergency information with bank-grade PIN protection.
+
 - **PIN-Based Access**: Multi-layered security with a dedicated PIN overlay for sensitive data.
 - **Digital Heritage**: Store insurance, legal, crypto, and medical records securely.
 - **Beneficiary Management**: Designate trusted contacts to access your vault in case of emergencies.
 - **Categorized Security**: Organize sensitive information with custom sensitivity levels and categories.
 
 ### 👨‍👩‍👧‍👦 Collaborative Workspaces (Family Mode)
+
 Manage finances together in isolated, shared environments with role-based access control.
+
 - **Multiple Workspaces**: Create separate workspaces for Family, Business, or Personal use.
 - **Role-Based Access Control**: Invite members via email with specific roles (Admin, Editor, Viewer).
 - **Real-Time Activity Feed**: Track exactly who added, edited, or deleted transactions within the workspace.
