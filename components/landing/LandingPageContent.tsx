@@ -1186,12 +1186,12 @@ export default function LandingPageContent() {
 
   // Map themes to their specific image URLs
   const themeImages: Record<string, string> = {
-    dark: "v1770181853/dashboard-dark_ocosok.png",
-    light: "v1770181879/dashboard-light_xvrjns.png",
-    solaris: "v1770577023/solaris_pibuwk.png",
-    cyberpunk: "v1770577013/cyberpunk_h4rvkt.png",
-    midnight: "v1770577001/midnight_gnuolc.png",
-    forest: "v1770576992/forest_kaqil7.png",
+    dark: "v1775292690/Dark_tkiyfr.png",
+    light: "v1775292690/Light_uil8tn.png",
+    solaris: "v1775292690/Solaris_yg2f3x.png",
+    cyberpunk: "v1775292690/CyberPunk_tpnkbe.png",
+    midnight: "v1775292690/Midnight_wyoaez.png",
+    forest: "v1775292690/Forest_i14use.png",
   };
 
   // Use resolvedTheme if theme is 'system' or not set
