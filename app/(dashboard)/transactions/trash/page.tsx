@@ -222,8 +222,8 @@ const TrashPage = () => {
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
                                   This action cannot be undone. This will
-                                  permanently delete the transaction "
-                                  {transaction.description}" and remove it from
+                                  permanently delete the transaction &quot;
+                                  {transaction.description}&quot; and remove it from
                                   our Database.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>

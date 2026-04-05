@@ -218,7 +218,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
         } finally {
             setIsLoading(false);
         }
-    }, [input, isLoading, messages, router, typeMessage]);
+    }, [input, isLoading, messages, router, typeMessage, refreshPersona]);
 
     // Initialize Speech Recognition
     useEffect(() => {
