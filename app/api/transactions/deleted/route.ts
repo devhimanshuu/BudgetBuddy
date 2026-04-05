@@ -13,6 +13,19 @@ export async function GET(request: Request) {
 	const workspace = await getActiveWorkspace();
 	const workspaceId = workspace?.id;
 
+    // 1. Auto-delete items older than 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    await prisma.transaction.deleteMany({
+        where: {
+            ...(workspaceId ? { workspaceId } : { userId: user.id }),
+            deletedAt: {
+                lte: thirtyDaysAgo
+            }
+        }
+    });
+
 	const [userSettings, transactions] = await Promise.all([
 		prisma.userSettings.findUnique({
 			where: {

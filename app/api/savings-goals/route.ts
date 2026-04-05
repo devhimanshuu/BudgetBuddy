@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkAchievements } from "@/lib/gamification";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -77,6 +77,15 @@ export async function POST(request: Request) {
 		},
 	});
 
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    await logActivity({
+        workspaceId: workspace.id,
+        userId: user.id,
+        type: "SAVINGS_GOAL_CREATED",
+        description: `${userName} created savings goal: ${goal.icon} ${goal.name} (Target: ${goal.targetAmount})`,
+        metadata: { userName, name: goal.name, targetAmount: goal.targetAmount }
+    });
+
 	return Response.json(goal, { status: 201 });
 }
 
@@ -117,6 +126,27 @@ export async function PATCH(request: Request) {
 		},
 	});
 
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (goal.workspaceId) {
+        if (parsedBody.data.isCompleted && !goal.isCompleted) {
+            await logActivity({
+                workspaceId: goal.workspaceId,
+                userId: user.id,
+                type: "SAVINGS_GOAL_COMPLETED",
+                description: `${userName} completed savings goal: ${goal.icon} ${goal.name}! 🎉`,
+                metadata: { userName, name: goal.name }
+            });
+        } else if (parsedBody.data.currentAmount !== undefined && parsedBody.data.currentAmount !== goal.currentAmount) {
+            await logActivity({
+                workspaceId: goal.workspaceId,
+                userId: user.id,
+                type: "SAVINGS_GOAL_UPDATED",
+                description: `${userName} updated savings goal: ${goal.name} (New balance: ${parsedBody.data.currentAmount})`,
+                metadata: { userName, name: goal.name, currentAmount: parsedBody.data.currentAmount }
+            });
+        }
+    }
+
 	// Check achievements if the goal is completed
 	let unlockedAchievements: any[] = [];
 	if (parsedBody.data.isCompleted && !goal.isCompleted) {
@@ -150,10 +180,21 @@ export async function DELETE(request: Request) {
 		return Response.json({ error: "Goal not found" }, { status: 404 });
 	}
 
-	await prisma.savingsGoal.update({
+	const deleted = await prisma.savingsGoal.update({
 		where: { id },
 		data: { deletedAt: new Date() },
 	});
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (deleted.workspaceId) {
+        await logActivity({
+            workspaceId: deleted.workspaceId,
+            userId: user.id,
+            type: "SAVINGS_GOAL_DELETED",
+            description: `${userName} deleted savings goal: ${deleted.name}`,
+            metadata: { userName, name: deleted.name }
+        });
+    }
 
 	return Response.json({ success: true });
 }

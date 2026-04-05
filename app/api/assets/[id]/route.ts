@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { logActivity } from "@/lib/workspaces";
 
 const updateAssetSchema = z.object({
 	name: z.string().min(1, "Name is required").optional(),
@@ -46,20 +47,30 @@ export async function PATCH(
 			data: validatedData,
 		});
 
-		// If value changed, create history entry
-		if (
-			validatedData.currentValue &&
-			validatedData.currentValue !== existingAsset.currentValue
-		) {
-			await prisma.assetHistory.create({
-				data: {
-					assetId: asset.id,
-					value: validatedData.currentValue,
-					date: new Date(),
-					notes: "Value updated",
-				},
-			});
-		}
+        if (
+            validatedData.currentValue &&
+            validatedData.currentValue !== existingAsset.currentValue
+        ) {
+            await prisma.assetHistory.create({
+                data: {
+                    assetId: asset.id,
+                    value: validatedData.currentValue,
+                    date: new Date(),
+                    notes: "Value updated",
+                },
+            });
+        }
+
+        const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+        if (existingAsset.workspaceId) {
+            await logActivity({
+                workspaceId: existingAsset.workspaceId,
+                userId: user.id,
+                type: "ASSET_UPDATED",
+                description: `${userName} updated asset: ${existingAsset.name}`,
+                metadata: { userName, name: existingAsset.name, type: existingAsset.type }
+            });
+        }
 
 		return NextResponse.json(asset);
 	} catch (error) {
@@ -105,6 +116,17 @@ export async function DELETE(
 			where: { id: id },
 			data: { deletedAt: new Date() },
 		});
+
+        const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+        if (existingAsset.workspaceId) {
+            await logActivity({
+                workspaceId: existingAsset.workspaceId,
+                userId: user.id,
+                type: "ASSET_DELETED",
+                description: `${userName} deleted asset: ${existingAsset.name}`,
+                metadata: { userName, name: existingAsset.name, type: existingAsset.type }
+            });
+        }
 
 		return NextResponse.json({ success: true });
 	} catch (error) {

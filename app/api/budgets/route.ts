@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkAchievements } from "@/lib/gamification";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -102,6 +102,15 @@ export async function POST(request: Request) {
 		},
 	});
 
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    await logActivity({
+        workspaceId: workspace.id,
+        userId: user.id,
+        type: "BUDGET_UPDATED",
+        description: `${userName} set budget for ${categoryIcon} ${category}: ${amount}`,
+        metadata: { userName, category, amount, month, year }
+    });
+
 	// Check budget achievements
 	const unlockedAchievements = await checkAchievements(user.id, {
 		type: "budget",
@@ -172,6 +181,17 @@ export async function PATCH(request: Request) {
 		data: updateData,
 	});
 
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (workspace.id) {
+        await logActivity({
+            workspaceId: workspace.id,
+            userId: user.id,
+            type: "BUDGET_UPDATED",
+            description: `${userName} updated budget for ${category}: ${amount}`,
+            metadata: { userName, category, amount, month, year }
+        });
+    }
+
 	return Response.json(budget);
 }
 
@@ -227,6 +247,17 @@ export async function DELETE(request: Request) {
 		},
 		data: { deletedAt: new Date() },
 	});
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (workspace.id) {
+        await logActivity({
+            workspaceId: workspace.id,
+            userId: user.id,
+            type: "BUDGET_DELETED",
+            description: `${userName} deleted budget for ${category}`,
+            metadata: { userName, category, month, year }
+        });
+    }
 
 	return Response.json({ success: true });
 }

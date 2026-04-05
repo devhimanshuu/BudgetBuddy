@@ -45,8 +45,8 @@ const DeleteTransactionDialog = ({ setOpen, open, transactionId }: Props) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanentely delete your
-            transaction
+            This action will move your transaction to the trash bin. You can
+            restore it later if needed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

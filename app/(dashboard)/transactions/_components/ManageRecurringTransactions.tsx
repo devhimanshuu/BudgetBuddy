@@ -42,6 +42,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
     CreateRecurringTransaction,
     DeleteRecurringTransaction,
     EditRecurringTransaction,
@@ -570,12 +581,12 @@ function EditRecurringDialog({
     );
 }
 
-function DeleteRecurringButton({ id }: { id: string }) {
+function DeleteRecurringDialog({ id, description }: { id: string, description: string }) {
     const queryClient = useQueryClient();
     const { mutate, isPending } = useMutation({
         mutationFn: DeleteRecurringTransaction,
         onSuccess: () => {
-            toast.success("Deleted", { id: "delete-recurring" });
+            toast.success("Recurring transaction deleted", { id: "delete-recurring" });
             queryClient.invalidateQueries({ queryKey: ["recurring-transactions"] });
         },
         onError: (e) => {
@@ -584,13 +595,35 @@ function DeleteRecurringButton({ id }: { id: string }) {
     });
 
     return (
-        <Button variant="ghost" size="icon" onClick={() => {
-            toast.loading("Deleting...", { id: "delete-recurring" });
-            mutate(id);
-        }} disabled={isPending}>
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
-        </Button>
-    )
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" disabled={isPending}>
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will permanently delete the recurring schedule for <strong>{description}</strong>.
+                        No future transactions will be automatically generated from this schedule.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => {
+                            toast.loading("Deleting...", { id: "delete-recurring" });
+                            mutate(id);
+                        }}
+                    >
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
 }
 
 export function ManageRecurringTransactions() {
@@ -671,7 +704,7 @@ export function ManageRecurringTransactions() {
                                 </span>
                                 <div className="flex items-center gap-2">
                                     <EditRecurringDialog transaction={transaction} />
-                                    <DeleteRecurringButton id={transaction.id} />
+                                    <DeleteRecurringDialog id={transaction.id} description={transaction.description} />
                                 </div>
                             </div>
                         </div>

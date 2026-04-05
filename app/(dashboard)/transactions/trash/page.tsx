@@ -6,6 +6,7 @@ import { Trash2, RotateCcw, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { RestoreTransaction } from "../_actions/restoreTransaction";
+import { PermanentlyDeleteTransaction } from "../_actions/permanentlyDeleteTransaction";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import {
   Table,
@@ -37,6 +38,17 @@ const TrashPage = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to restore transaction");
+    },
+  });
+  
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => PermanentlyDeleteTransaction(id),
+    onSuccess: () => {
+      toast.success("Transaction permanently deleted");
+      queryClient.invalidateQueries({ queryKey: ["transactions", "deleted"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete transaction");
     },
   });
 
@@ -111,16 +123,35 @@ const TrashPage = () => {
                       <TableCell className="text-center font-bold">
                         {transaction.formattedAmount}
                       </TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground">
-                        {format(new Date(transaction.deletedAt), "PPp")}
+                      <TableCell className="text-right text-xs">
+                        <div className="flex flex-col items-end">
+                            <span className="text-muted-foreground">{format(new Date(transaction.deletedAt), "PPp")}</span>
+                            {(() => {
+                                const deletedAt = new Date(transaction.deletedAt);
+                                const expiryDate = new Date(deletedAt);
+                                expiryDate.setDate(expiryDate.getDate() + 30);
+                                const now = new Date();
+                                const diffTime = expiryDate.getTime() - now.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                return (
+                                    <span className={cn(
+                                        "font-bold",
+                                        diffDays <= 7 ? "text-rose-500" : "text-amber-500"
+                                    )}>
+                                        Auto-deletes in {diffDays} {diffDays === 1 ? "day" : "days"}
+                                    </span>
+                                )
+                            })()}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 ml-auto"
+                          className="flex items-center gap-2"
                           onClick={() => restoreMutation.mutate(transaction.id)}
-                          disabled={restoreMutation.isPending}
+                          disabled={restoreMutation.isPending || deleteMutation.isPending}
                         >
                           {restoreMutation.isPending &&
                           restoreMutation.variables === transaction.id ? (
@@ -130,6 +161,26 @@ const TrashPage = () => {
                           )}
                           Restore
                         </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => {
+                            if (confirm("Are you sure you want to permanently delete this transaction? This action cannot be undone.")) {
+                                deleteMutation.mutate(transaction.id);
+                            }
+                          }}
+                          disabled={restoreMutation.isPending || deleteMutation.isPending}
+                        >
+                          {deleteMutation.isPending &&
+                          deleteMutation.variables === transaction.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                          Delete
+                        </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

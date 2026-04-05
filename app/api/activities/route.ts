@@ -33,7 +33,17 @@ export async function GET(request: Request) {
 	const where = {
 		workspaceId,
 		...(workspace.role !== "ADMIN" ? { 
-			userId: { in: [user.id, workspace.ownerId] } 
+			OR: [
+                { userId: user.id },
+                { 
+                    userId: {
+                        in: await prisma.workspaceMember.findMany({
+                            where: { workspaceId, role: "ADMIN" },
+                            select: { userId: true }
+                        }).then(members => members.map(m => m.userId))
+                    }
+                }
+            ]
 		} : {}),
 	};
 

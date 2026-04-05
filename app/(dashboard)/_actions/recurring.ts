@@ -8,7 +8,8 @@ import {
 	processRecurringTransaction,
 	calculateNextDate,
 } from "@/lib/recurring-logic";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function EditRecurringTransaction(
 	id: string,
@@ -57,6 +58,18 @@ export async function EditRecurringTransaction(
 			categoryIcon: categoryRow.icon,
 		},
 	});
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    const workspaceId = existing.workspaceId || "";
+    if (workspaceId) {
+        await logActivity({
+            workspaceId,
+            userId: user.id,
+            type: "RECURRING_TRANSACTION_UPDATED",
+            description: `${userName} updated recurring transaction: ${description || categoryRow.name}`,
+            metadata: { userName, description, amount, interval, type }
+        });
+    }
 
 	revalidatePath("/transactions");
 }
@@ -114,6 +127,15 @@ export async function CreateRecurringTransaction(
 		},
 	});
 
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    await logActivity({
+        workspaceId: workspace.id,
+        userId: user.id,
+        type: "RECURRING_TRANSACTION_CREATED",
+        description: `${userName} created recurring transaction: ${description || categoryRow.name}`,
+        metadata: { userName, description, amount, interval, type }
+    });
+
 	revalidatePath("/transactions");
 }
 
@@ -139,7 +161,7 @@ export async function DeleteRecurringTransaction(id: string) {
 		redirect("/sign-in");
 	}
 
-	await prisma.recurringTransaction.update({
+	const deleted = await prisma.recurringTransaction.update({
 		where: {
 			id,
 			userId: user.id,
@@ -148,6 +170,17 @@ export async function DeleteRecurringTransaction(id: string) {
 			deletedAt: new Date(),
 		},
 	});
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (deleted.workspaceId) {
+        await logActivity({
+            workspaceId: deleted.workspaceId,
+            userId: user.id,
+            type: "RECURRING_TRANSACTION_DELETED",
+            description: `${userName} deleted recurring transaction: ${deleted.description}`,
+            metadata: { userName, description: deleted.description }
+        });
+    }
 
 	revalidatePath("/transactions");
 }
@@ -190,6 +223,17 @@ export async function ProcessRecurringTransaction(id: string) {
 	}
 
 	await processRecurringTransaction(id);
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (recurring.workspaceId) {
+        await logActivity({
+            workspaceId: recurring.workspaceId,
+            userId: user.id,
+            type: "RECURRING_TRANSACTION_PROCESSED",
+            description: `${userName} processed recurring transaction: ${recurring.description}`,
+            metadata: { userName, description: recurring.description, amount: recurring.amount }
+        });
+    }
 
 	revalidatePath("/");
 	revalidatePath("/transactions");
@@ -251,6 +295,17 @@ export async function SkipRecurringTransaction(id: string) {
 			date: nextDate,
 		},
 	});
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    if (recurring.workspaceId) {
+        await logActivity({
+            workspaceId: recurring.workspaceId,
+            userId: user.id,
+            type: "RECURRING_TRANSACTION_SKIPPED",
+            description: `${userName} skipped recurring transaction: ${recurring.description}`,
+            metadata: { userName, description: recurring.description, nextDate }
+        });
+    }
 
 	revalidatePath("/");
 }

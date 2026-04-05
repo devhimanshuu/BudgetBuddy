@@ -12,7 +12,9 @@ import {
     Trash2,
     LogIn,
     Calendar,
-    Clock
+    Clock,
+    RotateCcw,
+    CheckCircle2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -22,12 +24,31 @@ const typeMap: Record<string, { icon: any; color: string }> = {
     TRANSACTION_CREATED: { icon: PlusCircle, color: "text-blue-500" },
     TRANSACTION_UPDATED: { icon: Settings, color: "text-blue-400" },
     TRANSACTION_DELETED: { icon: Trash2, color: "text-red-500" },
+    TRANSACTION_RESTORED: { icon: RotateCcw, color: "text-green-500" },
+    TRANSACTION_PERMANENTLY_DELETED: { icon: Trash2, color: "text-rose-600" },
     MEMBER_INVITED: { icon: UserPlus, color: "text-amber-500" },
     MEMBER_JOINED: { icon: LogIn, color: "text-green-500" },
     MEMBER_REMOVED: { icon: Trash2, color: "text-red-500" },
     ROLE_UPDATED: { icon: Settings, color: "text-purple-500" },
     WORKSPACE_CREATED: { icon: PlusCircle, color: "text-emerald-500" },
+    WORKSPACE_UPDATED: { icon: Settings, color: "text-emerald-400" },
     INVITE_REVOKED: { icon: Trash2, color: "text-red-400" },
+    CATEGORY_CREATED: { icon: PlusCircle, color: "text-pink-500" },
+    CATEGORY_DELETED: { icon: Trash2, color: "text-pink-400" },
+    RECURRING_TRANSACTION_CREATED: { icon: Calendar, color: "text-cyan-500" },
+    RECURRING_TRANSACTION_UPDATED: { icon: Settings, color: "text-cyan-400" },
+    RECURRING_TRANSACTION_DELETED: { icon: Trash2, color: "text-cyan-600" },
+    RECURRING_TRANSACTION_PROCESSED: { icon: Clock, color: "text-emerald-500" },
+    RECURRING_TRANSACTION_SKIPPED: { icon: RotateCcw, color: "text-amber-400" },
+    SAVINGS_GOAL_CREATED: { icon: PlusCircle, color: "text-indigo-500" },
+    SAVINGS_GOAL_UPDATED: { icon: Settings, color: "text-indigo-400" },
+    SAVINGS_GOAL_DELETED: { icon: Trash2, color: "text-indigo-600" },
+    SAVINGS_GOAL_COMPLETED: { icon: CheckCircle2, color: "text-emerald-500" },
+    BUDGET_UPDATED: { icon: Settings, color: "text-lime-500" },
+    BUDGET_DELETED: { icon: Trash2, color: "text-lime-600" },
+    ASSET_CREATED: { icon: PlusCircle, color: "text-violet-500" },
+    ASSET_UPDATED: { icon: Settings, color: "text-violet-400" },
+    ASSET_DELETED: { icon: Trash2, color: "text-violet-600" },
 };
 
 export default function ActivityFeed() {

@@ -11,7 +11,8 @@ import {
 } from "@/schema/categories";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function CreateCategory(form: CreateCategorySchemaType) {
 	const parsedBody = CreateCategorySchema.safeParse(form);
@@ -30,7 +31,7 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 
 	const { name, icon, type } = parsedBody.data;
 	try {
-		return await prisma.category.upsert({
+		const category = await prisma.category.upsert({
 			where: {
 				name_userId_type: {
 					name,
@@ -50,6 +51,17 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 				type,
 			},
 		});
+
+        const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+        await logActivity({
+            workspaceId: workspace.id,
+            userId: user.id,
+            type: "CATEGORY_CREATED",
+            description: `${userName} created category: ${icon} ${name} (${type})`,
+            metadata: { name, icon, type, userName }
+        });
+
+        return category;
 	} catch (error) {
 		console.error("Error creating category:", error);
 		throw error;
@@ -72,7 +84,7 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot delete categories");
 
-	return await prisma.category.update({
+	const category = await prisma.category.update({
 		where: {
 			name_userId_type: {
 				userId: user.id,
@@ -84,6 +96,17 @@ export async function DeleteCategory(form: DeleteCategorySchemaType) {
 			deletedAt: new Date(),
 		},
 	});
+
+    const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+    await logActivity({
+        workspaceId: workspace.id,
+        userId: user.id,
+        type: "CATEGORY_DELETED",
+        description: `${userName} deleted category: ${category.icon} ${category.name}`,
+        metadata: { name: category.name, icon: category.icon, type: category.type, userName }
+    });
+
+    return category;
 }
 
 export async function UpdateCategory(form: UpdateCategorySchemaType) {

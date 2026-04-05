@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -93,6 +93,15 @@ export async function POST(request: Request) {
 				notes: "Initial value",
 			},
 		});
+
+        const userName = user.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}` : user.emailAddresses[0].emailAddress.split("@")[0];
+        await logActivity({
+            workspaceId: workspace.id,
+            userId: user.id,
+            type: "ASSET_CREATED",
+            description: `${userName} added ${validatedData.type}: ${validatedData.icon} ${validatedData.name}`,
+            metadata: { userName, name: validatedData.name, type: validatedData.type, value: validatedData.currentValue }
+        });
 
 		return NextResponse.json(asset, { status: 201 });
 	} catch (error) {
