@@ -17,11 +17,13 @@ export async function getActiveWorkspace(userId?: string) {
 
 	if (workspaceCookie) {
 		// Verify user is a member of this workspace
-		const membership = await prisma.workspaceMember.findUnique({
+		const membership = await prisma.workspaceMember.findFirst({
 			where: {
-				workspaceId_userId: {
-					workspaceId: workspaceCookie,
+				workspaceId: workspaceCookie,
 				userId: finalUserId,
+				deletedAt: null,
+				workspace: {
+					deletedAt: null,
 				},
 			},
 			include: {
@@ -29,7 +31,7 @@ export async function getActiveWorkspace(userId?: string) {
 			},
 		});
 
-		if (membership) {
+		if (membership && membership.workspace) {
 			let name = membership.workspace.name;
 			if (membership.userId !== membership.workspace.ownerId && name === "Personal Workspace") {
 				try {
@@ -51,7 +53,13 @@ export async function getActiveWorkspace(userId?: string) {
 
 	// Default to the first workspace where the user is a member
 	const firstMembership = await prisma.workspaceMember.findFirst({
-		where: { userId: finalUserId },
+		where: { 
+			userId: finalUserId,
+			deletedAt: null,
+			workspace: {
+				deletedAt: null,
+			},
+		},
 		include: {
 			workspace: true,
 		},
@@ -107,12 +115,11 @@ export async function checkPermissions(
 ) {
 	if (!userId) return false;
 
-	const membership = await prisma.workspaceMember.findUnique({
+	const membership = await prisma.workspaceMember.findFirst({
 		where: {
-			workspaceId_userId: {
-				workspaceId,
-				userId: userId,
-			},
+			workspaceId,
+			userId: userId,
+			deletedAt: null,
 		},
 	});
 

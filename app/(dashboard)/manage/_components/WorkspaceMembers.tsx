@@ -489,44 +489,35 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10 transition-all duration-200"
                                                                 >
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </Button>
                                                             </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>
-                                                                        Remove
-                                                                        member?
+                                                            <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-3xl border-destructive/20 bg-gradient-to-b from-background to-destructive/5 backdrop-blur-xl shadow-2xl p-6">
+                                                                <AlertDialogHeader className="space-y-4">
+                                                                    <AlertDialogTitle className="text-destructive flex items-center gap-3 text-xl font-bold uppercase tracking-tight">
+                                                                        <div className="p-2 bg-destructive/10 rounded-xl">
+                                                                            <UserPlus className="h-5 w-5 rotate-45" />
+                                                                        </div>
+                                                                        Remove Member?
                                                                     </AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        This
-                                                                        person
-                                                                        will
-                                                                        lose
-                                                                        access
-                                                                        to this
-                                                                        workspace.
-                                                                        They
-                                                                        can be
-                                                                        re-invited
-                                                                        later.
+                                                                    <AlertDialogDescription className="text-foreground/70 text-sm leading-relaxed bg-destructive/5 p-4 rounded-xl border border-destructive/10">
+                                                                        Are you sure you want to remove <strong className="text-foreground">{member.name}</strong>? They will immediately lose access to all shared transactions and budgets in this workspace.
                                                                     </AlertDialogDescription>
                                                                 </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>
-                                                                        Cancel
-                                                                    </AlertDialogCancel>
+                                                                <AlertDialogFooter className="flex-row gap-3 pt-6">
+                                                                    <AlertDialogCancel className="flex-1 rounded-2xl h-11 border-muted-foreground/20">Cancel</AlertDialogCancel>
                                                                     <AlertDialogAction
-                                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                        className="flex-1 bg-destructive hover:bg-destructive/90 text-white rounded-2xl h-11 font-bold shadow-lg shadow-destructive/20 transition-all duration-200"
                                                                         onClick={() =>
                                                                             removeMutation.mutate(
                                                                                 member.userId
                                                                             )
                                                                         }
+                                                                        disabled={removeMutation.isPending}
                                                                     >
-                                                                        Remove
+                                                                        {removeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove Member"}
                                                                     </AlertDialogAction>
                                                                 </AlertDialogFooter>
                                                             </AlertDialogContent>

@@ -77,9 +77,7 @@ const page = () => {
       </div>
       <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <PermissionGuard allowedRoles={["ADMIN"]}>
-            <WorkspaceSettingsCard />
-          </PermissionGuard>
+          <WorkspaceSettingsCard />
           <AlertSettingsCard />
           <VibeControls />
         </div>

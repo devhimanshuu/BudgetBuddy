@@ -17,7 +17,13 @@ export async function GetWorkspaces() {
 	if (!user) return [];
 
 	const memberships = await prisma.workspaceMember.findMany({
-		where: { userId: user.id },
+		where: { 
+			userId: user.id,
+			deletedAt: null,
+			workspace: {
+				deletedAt: null,
+			},
+		},
 		include: {
 			workspace: true,
 		},
@@ -486,4 +492,82 @@ export async function UpdateWorkspace(workspaceId: string, data: { name?: string
 	revalidatePath("/dashboard");
 
 	return updatedWorkspace;
+}
+
+export async function DeleteWorkspace(workspaceId: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const workspace = await prisma.workspace.findUnique({
+		where: { id: workspaceId },
+	});
+
+	if (!workspace) throw new Error("Workspace not found");
+	if (workspace.ownerId !== user.id) throw new Error("Only the workspace owner can delete it");
+
+	// Soft delete the workspace
+	await prisma.workspace.update({
+		where: { id: workspaceId },
+		data: { deletedAt: new Date() },
+	});
+
+	// Log activity
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "WORKSPACE_DELETED",
+		description: `Deleted workspace: ${workspace.name}`,
+	});
+
+	revalidatePath("/manage");
+	revalidatePath("/");
+
+	return { success: true };
+}
+
+export async function LeaveWorkspace(workspaceId: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const workspace = await prisma.workspace.findUnique({
+		where: { id: workspaceId },
+	});
+
+	if (!workspace) throw new Error("Workspace not found");
+	if (workspace.ownerId === user.id) throw new Error("Owners cannot leave their own workspace. Delete it instead.");
+
+	// Verify membership
+	const membership = await prisma.workspaceMember.findFirst({
+		where: {
+			workspaceId,
+			userId: user.id,
+			deletedAt: null,
+		},
+	});
+
+	if (!membership) throw new Error("You are not a member of this workspace");
+
+	// Soft delete the membership
+	await prisma.workspaceMember.update({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: user.id,
+			},
+		},
+		data: { deletedAt: new Date() },
+	});
+
+	// Log activity
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "MEMBER_LEFT",
+		description: `Left the workspace`,
+	});
+
+	revalidatePath("/manage");
+	revalidatePath("/");
+
+	return { success: true };
 }
