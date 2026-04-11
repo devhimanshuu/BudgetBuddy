@@ -196,6 +196,9 @@ export async function GetPendingInvites(workspaceId: string) {
 		where: {
 			workspaceId,
 			expiresAt: { gt: new Date() },
+			NOT: {
+				email: { startsWith: "qr-invite:" },
+			},
 		},
 		orderBy: { createdAt: "desc" },
 	});
@@ -292,6 +295,72 @@ export async function InviteMember(
 	return { success: true, inviteLink, token };
 }
 
+export async function GetOrCreateQRInvite(workspaceId: string, role: string = "VIEWER") {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const canInvite = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
+	if (!canInvite) throw new Error("Only admins can generate join QR codes");
+
+	const placeholderEmail = `qr-invite:${workspaceId}`;
+
+	// Check if a valid QR invite already exists
+	let invite = await prisma.invite.findFirst({
+		where: {
+			workspaceId,
+			email: placeholderEmail,
+			role,
+			expiresAt: { gt: new Date() },
+			deletedAt: null,
+		},
+	});
+
+	if (!invite) {
+		const token = randomUUID();
+		// QR invites last longer, say 24 hours, or until revoked
+		const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+		invite = await prisma.invite.create({
+			data: {
+				email: placeholderEmail,
+				workspaceId,
+				role,
+				token,
+				expiresAt,
+			},
+		});
+
+		const userName = user.firstName
+			? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+			: user.emailAddresses[0].emailAddress.split("@")[0];
+
+		await logActivity({
+			workspaceId,
+			userId: user.id,
+			type: "QR_CODE_GENERATED",
+			description: `${userName} generated a join QR code for ${role} access`,
+			metadata: { role, userName },
+		});
+	}
+
+	const getAppUrl = () => {
+		if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+		if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
+			return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+		if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+		return "http://localhost:3000";
+	};
+
+	const inviteLink = `${getAppUrl()}/join?token=${invite.token}`;
+
+	return {
+		success: true,
+		inviteLink,
+		token: invite.token,
+		expiresAt: invite.expiresAt,
+	};
+}
+
 export async function AcceptInvite(token: string) {
 	const user = await currentUser();
 	if (!user) throw new Error("You must be signed in to accept an invite");
@@ -333,7 +402,11 @@ export async function AcceptInvite(token: string) {
 				role: invite.role,
 			},
 		});
-		await tx.invite.update({ where: { id: invite.id }, data: { deletedAt: new Date() } });
+		
+		// Only delete if it's NOT a reusable QR invite
+		if (!invite.email.startsWith("qr-invite:")) {
+			await tx.invite.update({ where: { id: invite.id }, data: { deletedAt: new Date() } });
+		}
 	});
 
 	const userName = user.firstName

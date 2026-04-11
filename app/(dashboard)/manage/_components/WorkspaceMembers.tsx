@@ -12,6 +12,7 @@ import {
     UpdateMemberRole,
     RevokeInvite,
 } from "@/app/(dashboard)/_actions/workspaces";
+import { WorkspaceJoinQRCode } from "./WorkspaceJoinQRCode";
 import CreateWorkspaceDialog from "@/components/CreateWorkspaceDialog";
 import {
     Card,
@@ -269,24 +270,25 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                             </CardDescription>
                         </div>
                     </div>
-
                     {isAdmin && (
-                        <Dialog
-                            open={inviteDialogOpen}
-                            onOpenChange={setInviteDialogOpen}
-                        >
-                            <DialogTrigger asChild>
-                                <Button
-                                    size="sm"
-                                    className="gap-2 bg-primary hover:bg-primary/90"
-                                >
-                                    <UserPlus className="h-4 w-4" />
-                                    <span className="hidden sm:inline">
-                                        Invite Member
-                                    </span>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-md">
+                        <div className="flex items-center gap-2">
+                            <WorkspaceJoinQRCode workspaceId={workspace.id} />
+                            <Dialog
+                                open={inviteDialogOpen}
+                                onOpenChange={setInviteDialogOpen}
+                            >
+                                <DialogTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        className="gap-2 bg-primary hover:bg-primary/90"
+                                    >
+                                        <UserPlus className="h-4 w-4" />
+                                        <span className="hidden sm:inline">
+                                            Invite Member
+                                        </span>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
                                 <DialogHeader>
                                     <DialogTitle>Invite a Member</DialogTitle>
                                     <DialogDescription>
@@ -379,6 +381,7 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
+                        </div>
                     )}
                 </div>
             </CardHeader>

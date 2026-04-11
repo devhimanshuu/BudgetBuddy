@@ -55,6 +55,7 @@ import { toast } from "sonner";
 import { DeleteTransaction } from "../_actions/deleteTransaction";
 import TransactionHistoryPopover from "./TransactionHistoryPopover";
 import BulkTagDialog from "./BulkTagDialog";
+import { calculateLevel } from "@/lib/gamification-client";
 
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
@@ -353,7 +354,6 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
       categoryIcon: row.original.categoryIcon,
     }));
 
-    const { calculateLevel } = require("@/lib/gamification");
     const levelInfo = calculateLevel(userSettings.data?.totalPoints || 0);
 
     exportTransactionsToPDF(filteredData, {
