@@ -251,8 +251,40 @@ model SavingsGoal {
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  contributions GoalContribution[]
+  messages      GoalMessage[]
+
   @@index([workspaceId, deletedAt])
   @@index([workspaceId, isCompleted, deletedAt])
+}
+
+model GoalContribution {
+  id            String   @id @default(uuid())
+  goalId        String
+  userId        String
+  userName      String?  // Cache user name for leaderboard
+  userImage     String?  // Cache user image
+  amount        Float
+  createdAt     DateTime @default(now())
+
+  goal          SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@index([userId])
+}
+
+model GoalMessage {
+  id            String   @id @default(uuid())
+  goalId        String
+  userId        String
+  userName      String?
+  userImage     String?
+  content       String
+  createdAt     DateTime @default(now())
+
+  goal          SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
 }
 
 model TransactionSplit {

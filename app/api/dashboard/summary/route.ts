@@ -35,7 +35,8 @@ export async function GET(request: Request) {
     recentTransactions,
     activities,
     budgets,
-    savingsGoals
+    savingsGoals,
+    membersCount
   ] = await Promise.all([
     // 1. Stats and Savings
     prisma.monthlyHistory.findMany({
@@ -84,7 +85,12 @@ export async function GET(request: Request) {
     prisma.savingsGoal.findMany({
       where: { ...whereUserIdOrWorkspaceId },
       orderBy: [{ isCompleted: "asc" }, { targetDate: "asc" }],
-    })
+    }),
+
+    // 8. Workspace Members Count
+    workspaceId ? prisma.workspaceMember.count({
+      where: { workspaceId }
+    }) : Promise.resolve(1)
   ]);
 
   // --- Compute Stats & Savings ---
@@ -203,6 +209,7 @@ export async function GET(request: Request) {
     activities,
     budgetProgress,
     savingsGoals,
-    currency: workspace?.currency || "USD"
+    currency: workspace?.currency || "USD",
+    isCollaborative: (workspaceId && membersCount > 1) || false
   });
 }

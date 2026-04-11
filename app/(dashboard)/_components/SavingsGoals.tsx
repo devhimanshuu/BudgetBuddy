@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,8 @@ import {
   Trash2,
   Edit,
   AlertTriangle,
+  Sparkles,
+  Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
@@ -42,6 +45,7 @@ import { toast } from "sonner";
 import { differenceInDays, format } from "date-fns";
 import CreateGoalDialog from "./CreateGoalDialog";
 import UpdateGoalDialog from "./UpdateGoalDialog";
+import SavingsCircleDialog from "./SavingsCircleDialog";
 
 interface SavingsGoalsProps {
   userSettings: UserSettings;
@@ -77,6 +81,8 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
   });
   
   const goalsData = summaryQuery.data?.savingsGoals as SavingsGoal[];
+  const isCollaborative = summaryQuery.data?.isCollaborative || false;
+  const currency = summaryQuery.data?.currency || userSettings.currency;
 
   const queryClient = useQueryClient();
 
@@ -166,6 +172,8 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                           onUpdate={() => handleUpdateClick(goal)}
                           onDelete={() => handleDeleteClick(goal)}
                           privacyMode={isPrivacyMode}
+                          isCollaborativeContent={isCollaborative}
+                          currency={currency}
                         />
                       ))}
                     </div>
@@ -187,6 +195,8 @@ export default function SavingsGoals({ userSettings }: SavingsGoalsProps) {
                           onUpdate={() => handleUpdateClick(goal)}
                           onDelete={() => handleDeleteClick(goal)}
                           privacyMode={isPrivacyMode}
+                          isCollaborativeContent={isCollaborative}
+                          currency={currency}
                         />
                       ))}
                     </div>
@@ -270,13 +280,18 @@ function GoalCard({
   onUpdate,
   onDelete,
   privacyMode,
+  isCollaborativeContent,
+  currency,
 }: {
   goal: SavingsGoal;
   formatter: Intl.NumberFormat;
   onUpdate: () => void;
   onDelete: () => void;
   privacyMode: boolean;
+  isCollaborativeContent: boolean;
+  currency: string;
 }) {
+  const [showCircleDialog, setShowCircleDialog] = useState(false);
   const progress = (goal.currentAmount / goal.targetAmount) * 100;
   const remaining = goal.targetAmount - goal.currentAmount;
   const targetDate = new Date(goal.targetDate);
@@ -309,10 +324,15 @@ function GoalCard({
               )}
             </div>
           </div>
-          {goal.isCompleted && (
+          {goal.isCompleted ? (
             <div className="rounded-full bg-emerald-500 p-1">
               <Check className="h-4 w-4 text-white" />
             </div>
+          ) : isCollaborativeContent && (
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 animate-pulse">
+               <Users className="w-3 h-3 mr-1" />
+               Circle
+            </Badge>
           )}
         </div>
       </CardHeader>
@@ -396,6 +416,28 @@ function GoalCard({
             </Button>
           </div>
         </PermissionGuard>
+
+        {isCollaborativeContent && (
+          <Button 
+             className="w-full mt-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-md transition-all active:scale-95" 
+             size="sm"
+             onClick={() => setShowCircleDialog(true)}
+          >
+             <Sparkles className="w-3.5 h-3.5 mr-2" />
+             Enter Savings Circle
+          </Button>
+        )}
+
+        {showCircleDialog && (
+          <SavingsCircleDialog 
+             open={showCircleDialog} 
+             onOpenChangeAction={setShowCircleDialog}
+             goal={{
+               ...goal,
+               currency
+             }}
+          />
+        )}
       </CardContent>
     </Card>
   );
