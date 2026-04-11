@@ -64,6 +64,8 @@ model Workspace {
   activities            Activity[]
   vaultEntries          VaultEntry[]
   beneficiaries         Beneficiary[]
+  budgetTemplates       BudgetTemplate[]
+
 
   @@index([ownerId, deletedAt])
 }
@@ -468,3 +470,33 @@ model Beneficiary {
   @@index([workspaceId, deletedAt])
   @@index([userId, deletedAt])
 }
+
+model BudgetTemplate {
+  id          String   @id @default(uuid())
+  userId      String
+  workspaceId String?
+  name        String
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  entries     BudgetTemplateEntry[]
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, workspaceId, deletedAt])
+}
+
+model BudgetTemplateEntry {
+  id           String @id @default(uuid())
+  templateId   String
+  category     String
+  categoryIcon String
+  amount       Float
+
+  template     BudgetTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+}
+

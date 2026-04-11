@@ -7,6 +7,7 @@ import { UserSettings } from "@prisma/client";
 import { Copy, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import CreateBudgetDialog from "./CreateBudgetDialog";
+import BudgetTemplatesDialog from "./BudgetTemplatesDialog";
 import BudgetProgressCards from "./BudgetProgressCards";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -140,6 +141,11 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                     {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy"}
                   </span>
                 </Button>
+
+                <BudgetTemplatesDialog
+                  month={selectedMonth}
+                  year={selectedYear}
+                />
 
                 <CreateBudgetDialog
                   trigger={
