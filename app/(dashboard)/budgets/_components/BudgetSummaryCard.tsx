@@ -7,6 +7,9 @@ import { useMemo } from "react";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
+import { useQuery } from "@tanstack/react-query";
+import { type GetBalanceStatsResponseType } from "@/app/api/stats/balance/route";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface BudgetProgress {
   id: string;
@@ -24,12 +27,16 @@ interface BudgetSummaryCardProps {
   userSettings: UserSettings;
   budgetProgress: BudgetProgress[] | undefined;
   isLoading: boolean;
+  month: number;
+  year: number;
 }
 
 export default function BudgetSummaryCard({
   userSettings,
   budgetProgress,
   isLoading,
+  month,
+  year,
 }: BudgetSummaryCardProps) {
   const { isPrivacyMode } = usePrivacyMode();
   const formatter = useMemo(() => {
@@ -86,6 +93,20 @@ export default function BudgetSummaryCard({
       daysRemaining,
     };
   }, [budgetProgress]);
+
+  const from = new Date(year, month, 1);
+  const to = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
+  const { data: balanceStats, isFetching: isBalanceFetching } = useQuery<GetBalanceStatsResponseType>({
+    queryKey: ["balance", month, year],
+    queryFn: () =>
+      fetch(`/api/stats/balance?from=${from.toISOString()}&to=${to.toISOString()}`).then((res) =>
+        res.json()
+      ),
+  });
+
+  const actualIncome = balanceStats?.income || 0;
+  const availableToBudget = actualIncome - summary.totalBudget;
 
   if (isLoading || !budgetProgress || budgetProgress.length === 0) {
     return null;
@@ -213,6 +234,32 @@ export default function BudgetSummaryCard({
                   )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Available to Budget Section */}
+        <div className={cn(
+          "mt-6 rounded-lg border-2 p-4 flex items-center justify-between",
+          availableToBudget >= 0
+            ? "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/20"
+            : "border-orange-500/50 bg-orange-50 dark:bg-orange-950/20"
+        )}>
+          <div className="space-y-1">
+            <p className={cn(
+              "text-sm font-medium flex items-center gap-2",
+              availableToBudget >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-orange-700 dark:text-orange-400"
+            )}>
+              {availableToBudget >= 0 ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+              {availableToBudget >= 0 ? "Available to Budget" : "Over-budgeted"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {availableToBudget >= 0 
+                ? `You have ${isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(availableToBudget)} left to give a job.`
+                : `⚠️ You've budgeted ${isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(availableToBudget))} more than you earn.`}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Monthly Income: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(actualIncome)} | Total Allocated: {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(summary.totalBudget)}
+            </p>
           </div>
         </div>
 

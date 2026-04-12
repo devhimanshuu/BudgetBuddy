@@ -21,6 +21,7 @@ import BudgetTransactionDialog from "./BudgetTransactionDialog";
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { History as HistoryIcon } from "lucide-react";
 import BudgetChart from "./BudgetChart";
+import CoverOverspendingDialog from "./CoverOverspendingDialog";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -82,6 +83,8 @@ export default function BudgetProgressCards({
         userSettings={userSettings}
         budgetProgress={budgetProgress}
         isLoading={isFetching}
+        month={month}
+        year={year}
       />
 
       {/* Individual Budget Cards */}
@@ -279,6 +282,21 @@ export default function BudgetProgressCards({
                         </div>
                       )}
                     </div>
+                  )}
+
+                  {/* Overspending Reallocation */}
+                  {budget.isOverBudget && !isFrozen && (
+                    <CoverOverspendingDialog
+                      trigger={
+                        <Button variant="outline" className="w-full mt-2 border-red-500 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/50">
+                          Fix It
+                        </Button>
+                      }
+                      targetBudget={budget}
+                      budgets={budgetProgress}
+                      month={month}
+                      year={year}
+                    />
                   )}
 
                   {/* Historical Context */}
