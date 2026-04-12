@@ -73,7 +73,17 @@ export default function BudgetChart({
             }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis 
+              dataKey="name" 
+              stroke="#888888" 
+              fontSize={10} 
+              tickLine={false} 
+              axisLine={false}
+              interval={0}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
             <YAxis
               stroke="#888888"
               fontSize={12}
