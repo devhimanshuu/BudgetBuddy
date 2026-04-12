@@ -179,72 +179,26 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
 
               <div className="flex bg-muted p-1 rounded-md">
                 <Button
-                  variant={viewMode === "card" ? "secondary" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("card")}
-                  className="h-9 px-4"
+                  className={`h-8 px-4 ${viewMode === "card" ? "bg-background text-foreground shadow-sm hover:bg-background" : "text-muted-foreground hover:text-foreground"}`}
                 >
                   <CreditCard className="mr-2 h-4 w-4" /> Card
                 </Button>
                 <Button
-                  variant={viewMode === "grid" ? "secondary" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="h-9 px-4"
+                  className={`h-8 px-4 ${viewMode === "grid" ? "bg-background text-foreground shadow-sm hover:bg-background" : "text-muted-foreground hover:text-foreground"}`}
                 >
                   <LayoutGrid className="mr-2 h-4 w-4" /> Grid
                 </Button>
               </div>
 
               <PermissionGuard>
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <Button
-                    variant="outline"
-                    onClick={() => copyPreviousMonthMutation.mutate()}
-                    disabled={copyPreviousMonthMutation.isPending}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Copy className="mr-2 h-4 w-4" />
-                    <span className="hidden lg:inline">
-                      {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy Previous"}
-                    </span>
-                    <span className="lg:hidden">
-                      {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy"}
-                    </span>
-                  </Button>
-
-                  <AutoSuggestBudgetButton
-                    month={selectedMonth}
-                    year={selectedYear}
-                  />
-
-                  <BudgetTemplatesDialog
-                    month={selectedMonth}
-                    year={selectedYear}
-                  />
-
-                  <CreateBudgetDialog
-                    trigger={
-                      <Button className="flex-1 sm:flex-none">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        <span className="hidden lg:inline">Create Budget</span>
-                        <span className="lg:hidden">Create</span>
-                      </Button>
-                    }
-                    month={selectedMonth}
-                    year={selectedYear}
-                  />
-
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsFrozen(!isFrozen)}
-                    className="flex-1 sm:flex-none"
-                  >
-                    {isFrozen ? <Lock className="mr-2 h-4 w-4 text-emerald-500" /> : <Unlock className="mr-2 h-4 w-4" />}
-                    <span className="hidden lg:inline">{isFrozen ? "Unfreeze" : "Freeze"}</span>
-                    <span className="lg:hidden">{isFrozen ? "Unfreeze" : "Freeze"}</span>
-                  </Button>
-
+                <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
+                  {/* Management & View Actions */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="flex-1 sm:flex-none">
@@ -263,6 +217,57 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsFrozen(!isFrozen)}
+                    className="flex-1 sm:flex-none"
+                  >
+                    {isFrozen ? <Lock className="mr-2 h-4 w-4 text-emerald-500" /> : <Unlock className="mr-2 h-4 w-4" />}
+                    <span className="hidden lg:inline">{isFrozen ? "Unfreeze" : "Freeze"}</span>
+                    <span className="lg:hidden">{isFrozen ? "Unfreeze" : "Freeze"}</span>
+                  </Button>
+
+                  {/* Divider */}
+                  <div className="hidden sm:block w-[1px] h-8 bg-border mx-1" />
+
+                  {/* Creation & Smart Tools */}
+                  <Button
+                    variant="outline"
+                    onClick={() => copyPreviousMonthMutation.mutate()}
+                    disabled={copyPreviousMonthMutation.isPending}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    <span className="hidden lg:inline">
+                      {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy Previous"}
+                    </span>
+                    <span className="lg:hidden">
+                      {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy"}
+                    </span>
+                  </Button>
+
+                  <BudgetTemplatesDialog
+                    month={selectedMonth}
+                    year={selectedYear}
+                  />
+
+                  <AutoSuggestBudgetButton
+                    month={selectedMonth}
+                    year={selectedYear}
+                  />
+
+                  <CreateBudgetDialog
+                    trigger={
+                      <Button className="flex-1 sm:flex-none">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        <span className="hidden lg:inline">Create Budget</span>
+                        <span className="lg:hidden">Create</span>
+                      </Button>
+                    }
+                    month={selectedMonth}
+                    year={selectedYear}
+                  />
                 </div>
               </PermissionGuard>
             </div>

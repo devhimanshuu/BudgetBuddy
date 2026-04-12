@@ -22,8 +22,33 @@ export default function AutoSuggestBudgetButton({
 }: AutoSuggestBudgetButtonProps) {
 	const queryClient = useQueryClient();
 
+	const undoMutation = useMutation({
+		mutationFn: async (previousBudgets: any[]) => {
+			const response = await fetch("/api/budgets/bulk-restore", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ month, year, previousBudgets }),
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || "Failed to restore budgets");
+			}
+
+			return response.json();
+		},
+		onSuccess: () => {
+			toast.success("Previous budgets restored!");
+			queryClient.invalidateQueries({ queryKey: ["budgets"] });
+			queryClient.invalidateQueries({ queryKey: ["budget-progress"] });
+		},
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+	});
+
 	const autoSuggestMutation = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (previousBudgets: any[]) => {
 			const response = await fetch("/api/budgets/auto-suggest", {
 				method: "POST",
 				headers: {
@@ -40,12 +65,18 @@ export default function AutoSuggestBudgetButton({
 				throw new Error(error.message || error.error || "Failed to auto-suggest budget");
 			}
 
-			return response.json();
+			const responseData = await response.json();
+			return { previousBudgets, ...responseData };
 		},
 		onSuccess: (data) => {
 			toast.success("Budget Auto-Suggested ✨", {
 				description: data.message,
+				action: {
+					label: "Undo",
+					onClick: () => undoMutation.mutate(data.previousBudgets),
+				},
 			});
+            queryClient.invalidateQueries({ queryKey: ["budgets"] });
 			queryClient.invalidateQueries({ queryKey: ["budget-progress"] });
 		},
 		onError: (error: Error) => {
@@ -53,22 +84,36 @@ export default function AutoSuggestBudgetButton({
 		},
 	});
 
+	const handleAutoSuggest = async () => {
+		let previousBudgets = [];
+		try {
+			const res = await fetch(`/api/budgets?month=${month}&year=${year}`);
+			if (res.ok) {
+				previousBudgets = await res.json();
+			}
+		} catch (e) {
+			console.error("Failed to fetch previous budgets", e);
+		}
+
+		autoSuggestMutation.mutate(previousBudgets);
+	};
+
 	return (
 		<TooltipProvider>
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<Button
 						variant="secondary"
-						onClick={() => autoSuggestMutation.mutate()}
-						disabled={autoSuggestMutation.isPending}
+						onClick={handleAutoSuggest}
+						disabled={autoSuggestMutation.isPending || undoMutation.isPending}
 						className="flex-1 sm:flex-none bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-600 dark:text-amber-500 border border-amber-200 dark:border-amber-900/50"
 					>
 						<Sparkles className="mr-2 h-4 w-4" />
 						<span className="hidden lg:inline">
-							{autoSuggestMutation.isPending ? "Analyzing..." : "Auto-Suggest"}
+							{autoSuggestMutation.isPending || undoMutation.isPending ? "Analyzing..." : "Auto-Suggest"}
 						</span>
 						<span className="lg:hidden">
-							{autoSuggestMutation.isPending ? "Analyzing..." : "Auto"}
+							{autoSuggestMutation.isPending || undoMutation.isPending ? "Analyzing..." : "Auto"}
 						</span>
 					</Button>
 				</TooltipTrigger>
