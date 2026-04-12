@@ -43,12 +43,13 @@ export async function POST(request: Request) {
     previousYear = targetYear - 1;
   }
 
-  // Check if target month already has budgets
+  // Check if target month already has active budgets
   const existingBudgets = await prisma.budget.findMany({
     where: {
       workspaceId: workspace.id,
       month: targetMonth,
       year: targetYear,
+      deletedAt: null,
     },
   });
 
@@ -62,12 +63,13 @@ export async function POST(request: Request) {
     );
   }
 
-  // Get previous month's budgets
+  // Get previous month's active budgets
   const previousBudgets = await prisma.budget.findMany({
     where: {
       workspaceId: workspace.id,
       month: previousMonth,
       year: previousYear,
+      deletedAt: null,
     },
   });
 
@@ -78,24 +80,42 @@ export async function POST(request: Request) {
     );
   }
 
-  // Copy budgets to target month
-  const newBudgets = await prisma.budget.createMany({
-    data: previousBudgets.map((budget) => ({
-      userId: user.id,
-      workspaceId: workspace.id,
-      category: budget.category,
-      categoryIcon: budget.categoryIcon,
-      amount: budget.amount,
-      month: targetMonth,
-      year: targetYear,
-    })),
-  });
+  // Copy budgets to target month using upsert to bypass soft-delete conflicts
+  const transactions = previousBudgets.map((budget) =>
+    prisma.budget.upsert({
+      where: {
+        userId_category_month_year: {
+          userId: user.id,
+          category: budget.category,
+          month: targetMonth,
+          year: targetYear,
+        },
+      },
+      update: {
+        amount: budget.amount,
+        categoryIcon: budget.categoryIcon,
+        workspaceId: workspace.id,
+        deletedAt: null, // restore if soft-deleted previously
+      },
+      create: {
+        userId: user.id,
+        workspaceId: workspace.id,
+        category: budget.category,
+        categoryIcon: budget.categoryIcon,
+        amount: budget.amount,
+        month: targetMonth,
+        year: targetYear,
+      },
+    })
+  );
+
+  await prisma.$transaction(transactions);
 
   return Response.json(
     {
       success: true,
-      count: newBudgets.count,
-      message: `Successfully copied ${newBudgets.count} budget(s) from previous month.`,
+      count: previousBudgets.length,
+      message: `Successfully copied ${previousBudgets.length} budget(s) from previous month.`,
     },
     { status: 201 },
   );

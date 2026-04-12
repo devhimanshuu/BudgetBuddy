@@ -123,7 +123,7 @@ export default function SavingsCircleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChangeAction}>
-      <DialogContent className="w-[95vw] max-w-4xl h-[90vh] sm:h-[85vh] p-0 overflow-hidden flex flex-col bg-background/80 sm:bg-background/60 backdrop-blur-2xl border-primary/20 rounded-2xl sm:rounded-3xl shadow-2xl">
+      <DialogContent className="w-[95vw] max-w-md sm:max-w-xl h-[85vh] sm:h-[75vh] max-h-[750px] min-h-[500px] p-0 overflow-hidden flex flex-col bg-background/95 sm:bg-background/80 backdrop-blur-2xl border-primary/20 rounded-2xl sm:rounded-3xl shadow-2xl">
         <div 
           className="absolute inset-0 opacity-10 pointer-events-none" 
           style={{ 
@@ -173,25 +173,25 @@ export default function SavingsCircleDialog({
         </DialogHeader>
 
         <Tabs defaultValue="leaderboard" className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="px-2 sm:px-6 border-b bg-muted/30 overflow-x-auto no-scrollbar">
-            <TabsList className="bg-transparent h-12 gap-2 sm:gap-6 w-full justify-start min-w-max">
+          <div className="px-2 sm:px-4 border-b bg-muted/30">
+            <TabsList className="bg-transparent h-12 gap-1 w-full flex justify-between sm:justify-evenly overflow-x-auto no-scrollbar">
               <TabsTrigger 
                 value="leaderboard" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 sm:gap-2 px-2 sm:px-1 text-xs sm:text-sm"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 px-3 text-xs sm:text-sm whitespace-nowrap"
               >
                 <Trophy className="w-3 h-3 sm:w-4 sm:h-4" />
                 Leaderboard
               </TabsTrigger>
               <TabsTrigger 
                 value="chat" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 sm:gap-2 px-2 sm:px-1 text-xs sm:text-sm"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 px-3 text-xs sm:text-sm whitespace-nowrap"
               >
                 <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                 Circle Chat
               </TabsTrigger>
               <TabsTrigger 
                 value="contribute" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 sm:gap-2 px-2 sm:px-1 text-xs sm:text-sm"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 px-3 text-xs sm:text-sm whitespace-nowrap"
               >
                 <PlusCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                 Contribute
@@ -345,7 +345,7 @@ export default function SavingsCircleDialog({
                  <p className="text-xs sm:text-sm text-muted-foreground">Every bit counts towards the {goal.name}!</p>
               </div>
               
-              <div className="space-y-4 sm:space-y-5">
+              <div className="space-y-4 sm:space-y-5 w-full max-w-sm mx-auto">
                 <div className="space-y-2">
                    <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-muted-foreground px-1">Amount</p>
                    <div className="relative group">
