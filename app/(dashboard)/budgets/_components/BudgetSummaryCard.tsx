@@ -130,7 +130,7 @@ export default function BudgetSummaryCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Budget */}
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Total Budget</p>
@@ -239,7 +239,7 @@ export default function BudgetSummaryCard({
 
         {/* Available to Budget Section */}
         <div className={cn(
-          "mt-6 rounded-lg border-2 p-4 flex items-center justify-between",
+          "mt-6 rounded-lg border-2 p-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
           availableToBudget >= 0
             ? "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/20"
             : "border-orange-500/50 bg-orange-50 dark:bg-orange-950/20"

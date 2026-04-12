@@ -92,7 +92,7 @@ export default function BudgetProgressCards({
         {dataAvailable ? (
           <>
             <BudgetChart userSettings={userSettings} budgetProgress={budgetProgress} />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-4">
             {budgetProgress.map((budget) => (
               <Card
                 key={budget.id}
@@ -107,9 +107,9 @@ export default function BudgetProgressCards({
               >
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center justify-between text-base">
-                    <span className="flex items-center gap-2">
-                      <span className="text-2xl">{budget.categoryIcon}</span>
-                      <span>{budget.category}</span>
+                    <span className="flex items-center gap-2 overflow-hidden">
+                      <span className="text-2xl flex-shrink-0">{budget.categoryIcon}</span>
+                      <span className="truncate">{budget.category}</span>
                     </span>
                     <div className="flex items-center gap-1">
                       {budget.isOverBudget && (
