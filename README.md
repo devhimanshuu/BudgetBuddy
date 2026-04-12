@@ -6,6 +6,14 @@ BudgetBuddy is an AI-Powered Advanced Personal finance tracker aka wealth manage
 
 ## 🌟 What's New
 
+### 🎯 Smarter Budgeting
+
+Take control of your monthly spend limits with completely overhauled planning tools.
+
+- **✨ Auto-Suggest Budgets**: Sick of manual entry? Calculate a rolling 3-month average for your typical categories instantly. It even smartly recommends a 5% reduction on discretionary/luxury categories to quietly enforce saving.
+- **📅 Multi-Month Grid View**: Toggle to an Excel-like annual layout to plan ahead for Christmas in July or annual car insurance premiums, side-by-side with your active card view.
+- **🧹 End-of-Month Savings Sweep**: Don't let your unspent budget vanish! A smart banner detects unused funds at the end of the month and helps you "sweep" them directly into your savings goals.
+
 ### 🏛️ Legacy Vault
 
 Secure your digital heritage and emergency information with bank-grade PIN protection.
