@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUser } from "@clerk/nextjs";
 import { Card, CardContent } from "@/components/ui/card";
 import { GetFormatterForCurrency } from "@/lib/helper";
 import {
@@ -61,6 +62,7 @@ export default function SavingsCircleDialog({
   const [message, setMessage] = useState("");
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(goal.currency);
@@ -121,7 +123,7 @@ export default function SavingsCircleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChangeAction}>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 overflow-hidden flex flex-col bg-background/60 backdrop-blur-2xl border-primary/20">
+      <DialogContent className="w-[95vw] max-w-4xl h-[90vh] sm:h-[85vh] p-0 overflow-hidden flex flex-col bg-background/80 sm:bg-background/60 backdrop-blur-2xl border-primary/20 rounded-2xl sm:rounded-3xl shadow-2xl">
         <div 
           className="absolute inset-0 opacity-10 pointer-events-none" 
           style={{ 
@@ -129,77 +131,77 @@ export default function SavingsCircleDialog({
           }} 
         />
         
-        <DialogHeader className="p-6 pb-2 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <DialogHeader className="p-4 sm:p-6 pb-2 border-b bg-card/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <div 
-                className="w-12 h-12 rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-white/20"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-lg border border-white/20 shrink-0"
                 style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
               >
                 {goal.icon}
               </div>
-              <div>
-                <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                  {goal.name}
-                  <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
-                    <Users className="w-3 h-3 mr-1" />
-                    Savings Circle
+              <div className="min-w-0">
+                <DialogTitle className="text-xl sm:text-2xl font-bold flex flex-wrap items-center gap-2">
+                  <span className="truncate">{goal.name}</span>
+                  <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary text-[10px] sm:text-xs">
+                    <Users className="w-3 h-3 mr-1 shrink-0" />
+                    Circle
                   </Badge>
                 </DialogTitle>
-                <p className="text-muted-foreground text-sm flex items-center gap-2">
-                  <Target className="w-3.5 h-3.5" />
+                <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1.5 truncate">
+                  <Target className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                   Target: {formatter.format(goal.targetAmount)}
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-black text-primary">
-                {progress.toFixed(1)}%
-              </p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+            <div className="flex flex-row sm:flex-col items-center justify-between sm:items-end sm:justify-start shrink-0">
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground font-bold order-2 sm:order-1 hidden sm:block">
                 Goal Progress
+              </p>
+              <p className="text-lg sm:text-2xl font-black text-primary order-1 sm:order-2">
+                {progress.toFixed(1)}%
               </p>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-2 sm:mt-4">
              <Progress 
                 value={progress} 
-                className="h-3 bg-muted/50 overflow-hidden" 
+                className="h-2 sm:h-3 bg-muted/50 overflow-hidden" 
                 style={{ "--progress-foreground": goal.color } as any}
              />
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="leaderboard" className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-6 border-b bg-muted/30">
-            <TabsList className="bg-transparent h-12 gap-6">
+        <Tabs defaultValue="leaderboard" className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="px-2 sm:px-6 border-b bg-muted/30 overflow-x-auto no-scrollbar">
+            <TabsList className="bg-transparent h-12 gap-2 sm:gap-6 w-full justify-start min-w-max">
               <TabsTrigger 
                 value="leaderboard" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-2 px-0"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 sm:gap-2 px-2 sm:px-1 text-xs sm:text-sm"
               >
-                <Trophy className="w-4 h-4" />
+                <Trophy className="w-3 h-3 sm:w-4 sm:h-4" />
                 Leaderboard
               </TabsTrigger>
               <TabsTrigger 
                 value="chat" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-2 px-0"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 sm:gap-2 px-2 sm:px-1 text-xs sm:text-sm"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                 Circle Chat
               </TabsTrigger>
               <TabsTrigger 
                 value="contribute" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-2 px-0"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full gap-1.5 sm:gap-2 px-2 sm:px-1 text-xs sm:text-sm"
               >
-                <PlusCircle className="w-4 h-4" />
-                Add Contribution
+                <PlusCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                Contribute
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="leaderboard" className="flex-1 p-0 m-0 overflow-hidden">
-            <ScrollArea className="h-full p-6">
-              <div className="space-y-4">
+          <TabsContent value="leaderboard" className="flex-1 p-0 m-0 overflow-hidden bg-card/30">
+            <ScrollArea className="h-full p-4 sm:p-6">
+              <div className="space-y-3 sm:space-y-4 pb-10">
                 <AnimatePresence mode="popLayout">
                   {socialQuery.data?.leaderboard.map((member, index) => (
                     <motion.div
@@ -209,41 +211,41 @@ export default function SavingsCircleDialog({
                       transition={{ delay: index * 0.1 }}
                     >
                       <Card className={cn(
-                        "overflow-hidden transition-all duration-300 hover:scale-[1.02] border-primary/10",
+                        "overflow-hidden transition-all duration-300 hover:scale-[1.02] border-primary/10 shadow-sm",
                         index === 0 && "bg-gradient-to-r from-amber-500/10 via-background to-transparent border-amber-500/30",
                         index === 1 && "bg-gradient-to-r from-slate-400/10 via-background to-transparent border-slate-400/30",
                         index === 2 && "bg-gradient-to-r from-orange-600/10 via-background to-transparent border-orange-600/30"
                       )}>
-                        <CardContent className="p-4 flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="relative">
-                              <Avatar className="h-12 w-12 border-2 border-primary/20">
+                        <CardContent className="p-3 sm:p-4 flex flex-row items-center justify-between gap-2">
+                          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <div className="relative shrink-0">
+                              <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-primary/20">
                                 <AvatarImage src={member.image} />
                                 <AvatarFallback>{member.name.slice(0, 2)}</AvatarFallback>
                               </Avatar>
                               {index < 3 && (
                                 <div className="absolute -top-2 -right-2 bg-background rounded-full p-1 shadow-lg border">
-                                  {index === 0 && <Trophy className="w-4 h-4 text-amber-500" />}
-                                  {index === 1 && <Trophy className="w-4 h-4 text-slate-400" />}
-                                  {index === 2 && <Trophy className="w-4 h-4 text-orange-600" />}
+                                  {index === 0 && <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />}
+                                  {index === 1 && <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />}
+                                  {index === 2 && <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" />}
                                 </div>
                               )}
                             </div>
-                            <div>
-                              <p className="font-bold">{member.name}</p>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                                Rank #{index + 1} • Contributor
+                            <div className="min-w-0">
+                              <p className="font-bold text-sm sm:text-base truncate">{member.name}</p>
+                              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium truncate">
+                                Rank #{index + 1}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xl font-black text-primary">
+                          <div className="text-right shrink-0">
+                            <p className="text-lg sm:text-xl font-black text-primary">
                               {formatter.format(member.total)}
                             </p>
                             <div className="flex items-center justify-end gap-1">
-                              <TrendingUp className="w-3 h-3 text-emerald-500" />
-                              <p className="text-[10px] text-emerald-500 font-bold">
-                                {((member.total / goal.targetAmount) * 100).toFixed(1)}% OF TOTAL
+                              <TrendingUp className="w-3 h-3 text-emerald-500 hidden sm:block" />
+                              <p className="text-[9px] sm:text-[10px] text-emerald-500 font-bold">
+                                {((member.total / goal.targetAmount) * 100).toFixed(1)}% <span className="hidden sm:inline">OF TOTAL</span>
                               </p>
                             </div>
                           </div>
@@ -263,38 +265,46 @@ export default function SavingsCircleDialog({
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="chat" className="flex-1 p-0 m-0 overflow-hidden flex flex-col">
+          <TabsContent value="chat" className="flex-1 p-0 m-0 overflow-hidden flex flex-col bg-card/30">
             <div className="flex-1 overflow-hidden relative">
-              <ScrollArea className="h-full p-6" ref={scrollRef}>
-                <div className="space-y-6 pb-4">
-                  {socialQuery.data?.messages.map((msg, idx) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className={cn(
-                        "flex gap-3 max-w-[80%]",
-                        msg.userId === "me" ? "ml-auto flex-row-reverse" : "mr-auto"
-                      )}
-                    >
-                      <Avatar className="h-8 w-8 mt-1 border">
-                        <AvatarImage src={msg.userImage || ""} />
-                        <AvatarFallback>{msg.userName?.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 px-1">
-                           <span className="text-[10px] font-bold text-muted-foreground">{msg.userName}</span>
-                           <span className="text-[8px] text-muted-foreground/60">{formatDistanceToNow(new Date(msg.createdAt))} ago</span>
+              <ScrollArea className="h-full p-4 sm:p-6" ref={scrollRef}>
+                <div className="space-y-4 sm:space-y-6 pb-4">
+                  {socialQuery.data?.messages.map((msg, idx) => {
+                    const isMe = msg.userId === user?.id; // Check with current user's clerk ID
+                    return (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={cn(
+                          "flex gap-2 sm:gap-3 max-w-[85%] sm:max-w-[75%]",
+                          isMe ? "ml-auto flex-row-reverse" : "mr-auto"
+                        )}
+                      >
+                        <Avatar className="h-6 w-6 sm:h-8 sm:w-8 mt-1 border border-primary/20 shrink-0">
+                          <AvatarImage src={msg.userImage || ""} />
+                          <AvatarFallback>{msg.userName?.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1 min-w-0">
+                          <div className={cn(
+                            "flex items-center gap-2 px-1",
+                            isMe ? "justify-end" : "justify-start"
+                          )}>
+                             <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground truncate">{isMe ? "You" : msg.userName}</span>
+                             <span className="text-[8px] text-muted-foreground/60 shrink-0">{formatDistanceToNow(new Date(msg.createdAt))} ago</span>
+                          </div>
+                          <div className={cn(
+                            "p-2.5 sm:p-3 rounded-2xl text-[13px] sm:text-sm shadow-sm border break-words",
+                            isMe 
+                              ? "bg-primary text-primary-foreground border-primary rounded-tr-sm" 
+                              : "bg-muted/80 backdrop-blur-md border-border/50 rounded-tl-sm text-foreground"
+                          )}>
+                            {msg.content}
+                          </div>
                         </div>
-                        <div className={cn(
-                          "p-3 rounded-2xl text-sm shadow-sm border",
-                          "bg-muted/50 backdrop-blur-md border-white/10"
-                        )}>
-                          {msg.content}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                   {(!socialQuery.data?.messages || socialQuery.data.messages.length === 0) && (
                     <div className="flex flex-col items-center justify-center py-20 text-muted-foreground opacity-50">
                        <MessageCircle className="w-12 h-12 mb-4" />
@@ -305,72 +315,78 @@ export default function SavingsCircleDialog({
               </ScrollArea>
             </div>
             
-            <form onSubmit={handleSendMessage} className="p-6 border-t bg-muted/20 backdrop-blur-md">
-              <div className="flex gap-2">
+            <form onSubmit={handleSendMessage} className="p-3 sm:p-6 border-t bg-muted/20 backdrop-blur-md">
+              <div className="flex gap-2 relative">
                 <Input 
                    placeholder="Cheer on the team..." 
                    value={message}
                    onChange={(e) => setMessage(e.target.value)}
-                   className="bg-background/80 border-primary/20"
+                   className="bg-background/80 border-primary/20 h-10 sm:h-12 pr-12 rounded-full text-xs sm:text-sm"
                 />
-                <Button type="submit" size="icon" disabled={messageMutation.isPending || !message}>
-                  <Send className="w-4 h-4" />
+                <Button 
+                   type="submit" 
+                   size="icon" 
+                   className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-full"
+                   disabled={messageMutation.isPending || !message}
+                >
+                  <Send className="w-4 h-4 sm:w-4 sm:h-4" />
                 </Button>
               </div>
             </form>
           </TabsContent>
 
-          <TabsContent value="contribute" className="flex-1 p-6 m-0 overflow-hidden">
-            <div className="max-w-md mx-auto space-y-8 pt-10">
+          <TabsContent value="contribute" className="flex-1 p-4 sm:p-6 m-0 overflow-y-auto bg-card/30">
+            <div className="max-w-md mx-auto space-y-6 sm:space-y-8 pt-4 sm:pt-8 pb-10">
               <div className="text-center space-y-2">
-                 <div className="inline-flex p-4 rounded-3xl bg-primary/10 text-primary mb-4">
-                    <Sparkles className="w-8 h-8 animate-pulse" />
+                 <div className="inline-flex p-3 sm:p-4 rounded-3xl bg-primary/10 text-primary mb-2 sm:mb-4 border border-primary/20">
+                    <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 animate-pulse" />
                  </div>
-                 <h2 className="text-2xl font-black">Make a Contribution</h2>
-                 <p className="text-muted-foreground">Every bit counts towards the {goal.name}!</p>
+                 <h2 className="text-xl sm:text-2xl font-black">Make a Contribution</h2>
+                 <p className="text-xs sm:text-sm text-muted-foreground">Every bit counts towards the {goal.name}!</p>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-4 sm:space-y-5">
                 <div className="space-y-2">
-                   <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground px-1">Amount</p>
+                   <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-muted-foreground px-1">Amount</p>
                    <div className="relative group">
-                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-lg">
-                        {goal.currency === "INR" ? "₹" : goal.currency === "USD" ? "$" : ""}
+                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-lg sm:text-xl">
+                        {goal.currency === "INR" ? "₹" : goal.currency === "USD" ? "$" : goal.currency === "EUR" ? "€" : "£"}
                      </div>
                      <Input 
                        type="number" 
                        placeholder="0.00" 
-                       className="pl-10 h-16 text-2xl font-black border-2 border-primary/20 focus-visible:border-primary/50 transition-all"
+                       className="pl-10 h-14 sm:h-16 text-xl sm:text-2xl font-black border-2 border-primary/20 focus-visible:border-primary/50 transition-all rounded-xl"
                        value={contributionAmount}
                        onChange={(e) => setContributionAmount(e.target.value)}
+                       autoComplete="off"
                      />
                    </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                    {[100, 500, 1000].map(amt => (
-                      <Button 
-                        key={amt} 
-                        variant="outline" 
-                        className="py-6 hover:bg-primary/10 hover:border-primary/50"
-                        onClick={() => setContributionAmount(amt.toString())}
-                      >
-                        +{amt}
-                      </Button>
-                   ))}
-                </div>
+                       <Button 
+                         key={amt} 
+                         variant="outline" 
+                         className="py-5 sm:py-6 hover:bg-primary/10 hover:border-primary/50 rounded-xl"
+                         onClick={() => setContributionAmount(amt.toString())}
+                       >
+                         +{amt}
+                       </Button>
+                    ))}
+                 </div>
 
-                <Button 
-                  className="w-full h-16 text-lg font-bold shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-95" 
-                  onClick={handleContribute}
-                  disabled={contributeMutation.isPending || !contributionAmount}
-                >
-                  {contributeMutation.isPending ? "Contributing..." : "Contribute Now"}
-                </Button>
-                
-                <p className="text-center text-xs text-muted-foreground">
-                   Contributions will be added to the {goal.name} and shared with all circle members.
-                </p>
+                 <Button 
+                   className="w-full h-14 sm:h-16 text-base sm:text-lg font-bold shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-95 rounded-xl" 
+                   onClick={handleContribute}
+                   disabled={contributeMutation.isPending || !contributionAmount}
+                 >
+                   {contributeMutation.isPending ? "Contributing..." : "Contribute Now"}
+                 </Button>
+                 
+                 <p className="text-center text-[10px] sm:text-xs text-muted-foreground mt-2">
+                    Contributions will be added to the {goal.name} and shared with all circle members.
+                 </p>
               </div>
             </div>
           </TabsContent>

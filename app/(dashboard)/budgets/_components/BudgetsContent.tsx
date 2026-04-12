@@ -18,6 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Lock, Unlock, DownloadIcon, FileText, ChevronDown } from "lucide-react";
+import { mkConfig, generateCsv, download } from "export-to-csv";
+import { exportBudgetToPDF } from "@/lib/pdf-export";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface BudgetsContentProps {
   userSettings: UserSettings;
@@ -27,8 +36,47 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [isFrozen, setIsFrozen] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const csvConfig = mkConfig({
+    fieldSeparator: ",",
+    decimalSeparator: ".",
+    useKeysAsHeaders: true,
+  });
+
+  const handleExportCSV = () => {
+    const data = queryClient.getQueryData(["budget-progress", selectedMonth, selectedYear]) as any;
+    if (!data || data.length === 0) {
+      toast.error("No budget data available to export");
+      return;
+    }
+    const csvData = data.map((b: any) => ({
+      Category: b.category,
+      "Budget Amount": b.budgetAmount,
+      Spent: b.spent,
+      Remaining: b.remaining,
+      Percentage: `${b.percentage}%`,
+      "Over Budget": b.isOverBudget ? "Yes" : "No",
+    }));
+    const csv = generateCsv(csvConfig)(csvData);
+    download(csvConfig)(csv);
+  };
+
+  const handleExportPDF = () => {
+    const data = queryClient.getQueryData(["budget-progress", selectedMonth, selectedYear]) as any;
+    if (!data || data.length === 0) {
+      toast.error("No budget data available to export");
+      return;
+    }
+    exportBudgetToPDF(data, {
+      title: `Budget_Report_${months[selectedMonth]}_${selectedYear}`,
+      currency: userSettings.currency,
+    });
+  };
+
+
 
   const copyPreviousMonthMutation = useMutation({
     mutationFn: async () => {
@@ -158,6 +206,35 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                   month={selectedMonth}
                   year={selectedYear}
                 />
+
+                <Button
+                  variant="outline"
+                  onClick={() => setIsFrozen(!isFrozen)}
+                  className="flex-1 sm:flex-none"
+                >
+                  {isFrozen ? <Lock className="mr-2 h-4 w-4 text-emerald-500" /> : <Unlock className="mr-2 h-4 w-4" />}
+                  <span className="hidden sm:inline">{isFrozen ? "Unfreeze" : "Freeze"}</span>
+                  <span className="sm:hidden">{isFrozen ? "Unfreeze" : "Freeze"}</span>
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex-1 sm:flex-none">
+                      <DownloadIcon className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Export</span>
+                      <span className="sm:hidden">Export</span>
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer">
+                      <DownloadIcon className="mr-2 h-4 w-4" /> Export CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                      <FileText className="mr-2 h-4 w-4" /> Export PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </PermissionGuard>
           </div>
@@ -169,6 +246,7 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
           userSettings={userSettings}
           month={selectedMonth}
           year={selectedYear}
+          isFrozen={isFrozen}
         />
       </div>
     </>

@@ -468,3 +468,101 @@ function formatCurrency(amount: number, currency: string): string {
 		return `${currency} ${amount.toFixed(2)}`;
 	}
 }
+
+export function exportBudgetToPDF(
+	budgetData: any[],
+	options: ExportOptions,
+) {
+	const doc = new jsPDF();
+	const pageWidth = doc.internal.pageSize.getWidth();
+	const pageHeight = doc.internal.pageSize.getHeight();
+
+	// Add title
+	doc.setFontSize(20);
+	doc.setFont("helvetica", "bold");
+	doc.text(options.title || "Budget Report", pageWidth / 2, 20, { align: "center" });
+
+	// Add date range
+	if (options.dateRange) {
+		doc.setFontSize(10);
+		doc.setFont("helvetica", "normal");
+		const dateText = `Period: ${new Date(
+			options.dateRange.from,
+		).toLocaleDateString()} - ${new Date(
+			options.dateRange.to,
+		).toLocaleDateString()}`;
+		doc.text(dateText, pageWidth / 2, 28, { align: "center" });
+	}
+
+	doc.setFontSize(8);
+	doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, 35, {
+		align: "center",
+	});
+
+	let currentY = 45;
+
+	const totalBudget = budgetData.reduce((sum, b) => sum + b.budgetAmount, 0);
+	const totalSpent = budgetData.reduce((sum, b) => sum + b.spent, 0);
+
+	doc.setFontSize(14);
+	doc.setFont("helvetica", "bold");
+	doc.text("Summary", 14, currentY);
+
+	currentY += 10;
+	doc.setFontSize(11);
+	doc.setFont("helvetica", "normal");
+	doc.text(`Total Budget: ${formatCurrency(totalBudget, options.currency)}`, 14, currentY);
+	currentY += 7;
+	doc.text(`Total Spent: ${formatCurrency(totalSpent, options.currency)}`, 14, currentY);
+	currentY += 7;
+	doc.text(`Remaining: ${formatCurrency(totalBudget - totalSpent, options.currency)}`, 14, currentY);
+
+	currentY += 15;
+
+	// Table Data
+	const tableData = budgetData.map((b) => [
+		getCategoryDisplay(b.categoryIcon, b.category),
+		formatCurrency(b.budgetAmount, options.currency),
+		formatCurrency(b.spent, options.currency),
+		formatCurrency(b.budgetAmount - b.spent, options.currency),
+		`${b.percentage.toFixed(1)}%`
+	]);
+
+	autoTable(doc, {
+		startY: currentY,
+		head: [["Category", "Budget", "Spent", "Remaining", "Used %"]],
+		body: tableData,
+		theme: "striped",
+		headStyles: {
+			fillColor: [59, 130, 246],
+			textColor: [255, 255, 255],
+			fontStyle: "bold",
+			fontSize: 10,
+		},
+		styles: {
+			fontSize: 9,
+			cellPadding: 3,
+		},
+		columnStyles: {
+			0: { cellWidth: 50 },
+			1: { halign: "right", cellWidth: 30 },
+			2: { halign: "right", cellWidth: 30 },
+			3: { halign: "right", cellWidth: 30 },
+			4: { halign: "right", cellWidth: 20 },
+		},
+		didDrawPage: (data) => {
+			doc.setFontSize(8);
+			doc.setTextColor(128, 128, 128);
+			doc.text(`Page ${data.pageNumber}`, pageWidth / 2, pageHeight - 10, {
+				align: "center",
+			});
+			doc.setTextColor(0, 0, 0);
+		},
+	});
+
+	const fileName = `${(options.title || "Budget_Report").replace(/\s+/g, "_")}_${
+		new Date().toISOString().split("T")[0]
+	}.pdf`;
+	doc.save(fileName);
+}
+

@@ -20,11 +20,13 @@ import BudgetHistory from "./BudgetHistory";
 import BudgetTransactionDialog from "./BudgetTransactionDialog";
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { History as HistoryIcon } from "lucide-react";
+import BudgetChart from "./BudgetChart";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
   month: number;
   year: number;
+  isFrozen?: boolean;
 }
 
 interface BudgetProgress {
@@ -48,6 +50,7 @@ export default function BudgetProgressCards({
   userSettings,
   month,
   year,
+  isFrozen = false,
 }: BudgetProgressProps) {
   const { isPrivacyMode } = usePrivacyMode();
   const formatter = useMemo(() => {
@@ -84,7 +87,9 @@ export default function BudgetProgressCards({
       {/* Individual Budget Cards */}
       <SkeletonWrapper isLoading={isFetching}>
         {dataAvailable ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <>
+            <BudgetChart userSettings={userSettings} budgetProgress={budgetProgress} />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
             {budgetProgress.map((budget) => (
               <Card
                 key={budget.id}
@@ -112,22 +117,24 @@ export default function BudgetProgressCards({
                       )}
 
                       {/* Quick-Add Expense Button */}
-                      <PermissionGuard>
-                        <CreateTransactionDialog
-                          trigger={
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          }
-                          type="expense"
-                          initialCategory={budget.category}
-                          initialCategoryIcon={budget.categoryIcon}
-                        />
-                      </PermissionGuard>
+                      {!isFrozen && (
+                        <PermissionGuard>
+                          <CreateTransactionDialog
+                            trigger={
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            }
+                            type="expense"
+                            initialCategory={budget.category}
+                            initialCategoryIcon={budget.categoryIcon}
+                          />
+                        </PermissionGuard>
+                      )}
 
                       <BudgetTransactionDialog
                         category={budget.category}
@@ -145,45 +152,47 @@ export default function BudgetProgressCards({
                         }
                       />
 
-                      <PermissionGuard>
-                        <EditBudgetDialog
-                          trigger={
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          }
-                          budget={{
-                            id: budget.id,
-                            category: budget.category,
-                            categoryIcon: budget.categoryIcon,
-                            budgetAmount: budget.budgetAmount,
-                          }}
-                          month={month}
-                          year={year}
-                        />
-                        <DeleteBudgetDialog
-                          trigger={
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          }
-                          budget={{
-                            id: budget.id,
-                            category: budget.category,
-                            categoryIcon: budget.categoryIcon,
-                          }}
-                          month={month}
-                          year={year}
-                        />
-                      </PermissionGuard>
+                      {!isFrozen && (
+                        <PermissionGuard>
+                          <EditBudgetDialog
+                            trigger={
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            }
+                            budget={{
+                              id: budget.id,
+                              category: budget.category,
+                              categoryIcon: budget.categoryIcon,
+                              budgetAmount: budget.budgetAmount,
+                            }}
+                            month={month}
+                            year={year}
+                          />
+                          <DeleteBudgetDialog
+                            trigger={
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            }
+                            budget={{
+                              id: budget.id,
+                              category: budget.category,
+                              categoryIcon: budget.categoryIcon,
+                            }}
+                            month={month}
+                            year={year}
+                          />
+                        </PermissionGuard>
+                      )}
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -282,6 +291,7 @@ export default function BudgetProgressCards({
               </Card>
             ))}
           </div>
+          </>
         ) : (
           <Card>
             <CardContent className="flex h-40 items-center justify-center">

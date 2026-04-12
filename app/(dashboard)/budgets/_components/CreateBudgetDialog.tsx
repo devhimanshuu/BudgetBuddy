@@ -140,7 +140,7 @@ export default function CreateBudgetDialog({
           <div className="space-y-2">
             <Label>Category</Label>
             <CategoryPicker
-              type="expense"
+              type="all"
               onChange={(value) => {
                 setCategory(value.name);
                 setCategoryIcon(value.icon);

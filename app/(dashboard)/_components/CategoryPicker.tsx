@@ -23,27 +23,30 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
 interface Props {
-  type: TransactionType;
+  type?: TransactionType | "all";
   onChange: (value: Category) => void;
   defaultValue?: string;
   className?: string;
 }
 
-function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
+function CategoryPicker({ type = "expense", onChange, defaultValue, className }: Props) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(defaultValue || "");
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
     queryFn: () =>
-      fetch(`/api/categories?type=${type}`).then((res) => res.json()),
+      fetch(type === "all" ? `/api/categories` : `/api/categories?type=${type}`).then((res) => res.json()),
   });
 
   // Fetch recent categories
   const recentCategoriesQuery = useQuery({
     queryKey: ["categories", "recent", type],
     queryFn: () =>
-      fetch(`/api/categories/recent?type=${type}`).then((res) => res.json()),
+      fetch(type === "all" ? `/api/categories/recent` : `/api/categories/recent?type=${type}`).then(async (res) => {
+        if (!res.ok) return []; // Fallback to empty array on error for recent
+        return res.json();
+      }),
     enabled: !!type,
   });
 
@@ -107,7 +110,7 @@ function CategoryPicker({ type, onChange, defaultValue, className }: Props) {
           }}
         >
           <CommandInput placeholder="Search category..." />
-          <CreateCategoryDialog type={type} successCallback={successCallback} />
+          <CreateCategoryDialog type={type === "all" ? "expense" as TransactionType : type as TransactionType} successCallback={successCallback} />
           <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>
               <p>Category not found</p>
