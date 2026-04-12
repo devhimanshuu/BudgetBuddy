@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 	const year = searchParams.get("year");
 
 	const querySchema = z.object({
-		month: z.string(),
+		month: z.string().optional().nullable(),
 		year: z.string(),
 	});
 
@@ -29,12 +29,16 @@ export async function GET(request: Request) {
 		return Response.json(queryParams.error, { status: 400 });
 	}
 
+	const whereClause: any = {
+		...(workspaceId ? { workspaceId } : { userId: user.id }),
+		year: parseInt(queryParams.data.year),
+	};
+	if (queryParams.data.month) {
+		whereClause.month = parseInt(queryParams.data.month);
+	}
+
 	const budgets = await prisma.budget.findMany({
-		where: {
-			...(workspaceId ? { workspaceId } : { userId: user.id }),
-			month: parseInt(queryParams.data.month),
-			year: parseInt(queryParams.data.year),
-		},
+		where: whereClause,
 		orderBy: {
 			category: "asc",
 		},

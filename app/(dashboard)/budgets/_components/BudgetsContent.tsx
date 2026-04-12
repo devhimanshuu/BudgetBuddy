@@ -10,6 +10,8 @@ import CreateBudgetDialog from "./CreateBudgetDialog";
 import BudgetTemplatesDialog from "./BudgetTemplatesDialog";
 import BudgetProgressCards from "./BudgetProgressCards";
 import SweepBanner from "./SweepBanner";
+import AutoSuggestBudgetButton from "./AutoSuggestBudgetButton";
+import BudgetGridView from "./BudgetGridView";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -19,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Lock, Unlock, DownloadIcon, FileText, ChevronDown } from "lucide-react";
+import { Lock, Unlock, DownloadIcon, FileText, ChevronDown, LayoutGrid, CreditCard } from "lucide-react";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { exportBudgetToPDF } from "@/lib/pdf-export";
 import {
@@ -38,6 +40,7 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [isFrozen, setIsFrozen] = useState(false);
+  const [viewMode, setViewMode] = useState<"card" | "grid">("card");
 
   const queryClient = useQueryClient();
 
@@ -174,6 +177,25 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                 </Select>
               </div>
 
+              <div className="flex bg-muted p-1 rounded-md">
+                <Button
+                  variant={viewMode === "card" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("card")}
+                  className="h-9 px-4"
+                >
+                  <CreditCard className="mr-2 h-4 w-4" /> Card
+                </Button>
+                <Button
+                  variant={viewMode === "grid" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className="h-9 px-4"
+                >
+                  <LayoutGrid className="mr-2 h-4 w-4" /> Grid
+                </Button>
+              </div>
+
               <PermissionGuard>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                   <Button
@@ -190,6 +212,11 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                       {copyPreviousMonthMutation.isPending ? "Copying..." : "Copy"}
                     </span>
                   </Button>
+
+                  <AutoSuggestBudgetButton
+                    month={selectedMonth}
+                    year={selectedYear}
+                  />
 
                   <BudgetTemplatesDialog
                     month={selectedMonth}
@@ -248,12 +275,16 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
           month={selectedMonth}
           year={selectedYear}
         />
-        <BudgetProgressCards
-          userSettings={userSettings}
-          month={selectedMonth}
-          year={selectedYear}
-          isFrozen={isFrozen}
-        />
+        {viewMode === "card" ? (
+          <BudgetProgressCards
+            userSettings={userSettings}
+            month={selectedMonth}
+            year={selectedYear}
+            isFrozen={isFrozen}
+          />
+        ) : (
+          <BudgetGridView userSettings={userSettings} year={selectedYear} />
+        )}
       </div>
     </>
   );
