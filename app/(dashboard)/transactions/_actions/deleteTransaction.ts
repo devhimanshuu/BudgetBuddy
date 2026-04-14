@@ -51,62 +51,64 @@ export async function DeleteTransaction(id: string) {
 			},
 		});
 
-		// 2. Decrement monthly history
-		await tx.monthlyHistory.update({
-			where: {
-				day_month_year_userId: {
-					userId: transaction.userId,
-					day: transaction.date.getUTCDate(),
-					month: transaction.date.getUTCMonth(),
-					year: transaction.date.getUTCFullYear(),
+		// 2. Decrement monthly history ONLY IF it was approved
+		if (transaction.status === "APPROVED") {
+			await tx.monthlyHistory.update({
+				where: {
+					day_month_year_userId: {
+						userId: transaction.userId,
+						day: transaction.date.getUTCDate(),
+						month: transaction.date.getUTCMonth(),
+						year: transaction.date.getUTCFullYear(),
+					},
 				},
-			},
-			data: {
-				...(transaction.type === "expense" && {
-					expense: {
-						decrement: transaction.amount,
-					},
-				}),
-				...(transaction.type === "income" && {
-					income: {
-						decrement: transaction.amount,
-					},
-				}),
-				...(transaction.type === "investment" && {
-					investment: {
-						decrement: transaction.amount,
-					},
-				}),
-			},
-		});
+				data: {
+					...(transaction.type === "expense" && {
+						expense: {
+							decrement: transaction.amount,
+						},
+					}),
+					...(transaction.type === "income" && {
+						income: {
+							decrement: transaction.amount,
+						},
+					}),
+					...(transaction.type === "investment" && {
+						investment: {
+							decrement: transaction.amount,
+						},
+					}),
+				},
+			});
 
-		// 3. Decrement year history
-		await tx.yearHistory.update({
-			where: {
-				month_year_userId: {
-					userId: transaction.userId,
-					month: transaction.date.getUTCMonth(),
-					year: transaction.date.getUTCFullYear(),
+			// 3. Decrement year history
+			await tx.yearHistory.update({
+				where: {
+					month_year_userId: {
+						userId: transaction.userId,
+						month: transaction.date.getUTCMonth(),
+						year: transaction.date.getUTCFullYear(),
+					},
 				},
-			},
-			data: {
-				...(transaction.type === "expense" && {
-					expense: {
-						decrement: transaction.amount,
-					},
-				}),
-				...(transaction.type === "income" && {
-					income: {
-						decrement: transaction.amount,
-					},
-				}),
-				...(transaction.type === "investment" && {
-					investment: {
-						decrement: transaction.amount,
-					},
-				}),
-			},
-		});
+				data: {
+					...(transaction.type === "expense" && {
+						expense: {
+							decrement: transaction.amount,
+						},
+					}),
+					...(transaction.type === "income" && {
+						income: {
+							decrement: transaction.amount,
+						},
+					}),
+					...(transaction.type === "investment" && {
+						investment: {
+							decrement: transaction.amount,
+						},
+					}),
+				},
+			});
+		}
 	});
 
 	const formatter = GetFormatterForCurrency(workspace.currency);

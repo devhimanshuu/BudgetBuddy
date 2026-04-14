@@ -56,6 +56,9 @@ import { DeleteTransaction } from "../_actions/deleteTransaction";
 import TransactionHistoryPopover from "./TransactionHistoryPopover";
 import BulkTagDialog from "./BulkTagDialog";
 import { calculateLevel } from "@/lib/gamification-client";
+import { ApproveTransaction } from "../_actions/approveTransaction";
+import { RejectTransaction } from "../_actions/rejectTransaction";
+import { Check, X as XIcon, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
@@ -276,6 +279,30 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
     },
   },
   {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+    cell: ({ row }) => (
+      <div
+        className={cn(
+          "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase w-fit",
+          row.original.status === "APPROVED" && "bg-emerald-400/10 text-emerald-500",
+          row.original.status === "PENDING" && "bg-amber-400/10 text-amber-500",
+          row.original.status === "REJECTED" && "bg-rose-400/10 text-rose-500"
+        )}
+      >
+        {row.original.status === "APPROVED" && <CheckCircle2 className="h-3 w-3" />}
+        {row.original.status === "PENDING" && <Clock className="h-3 w-3" />}
+        {row.original.status === "REJECTED" && <XCircle className="h-3 w-3" />}
+        {row.original.status}
+      </div>
+    ),
+  },
+  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => <RowActions transaction={row.original} />,
@@ -456,6 +483,17 @@ const TransactionTable = ({ from, to, searchFilters, allCategories }: Props) => 
                 { label: "Income", value: "income" },
                 { label: "Expense", value: "expense" },
                 { label: "Investment", value: "investment" },
+              ]}
+            />
+          )}
+          {table.getColumn("status") && (
+            <DataTableFacetedFilter
+              title="Status"
+              column={table.getColumn("status")}
+              options={[
+                { label: "Approved", value: "APPROVED" },
+                { label: "Pending", value: "PENDING" },
+                { label: "Rejected", value: "REJECTED" },
               ]}
             />
           )}
@@ -644,6 +682,38 @@ export default TransactionTable;
 function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const queryClient = useQueryClient();
+
+  const userSettings = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+
+  const isAdmin = userSettings.data?.workspaceRole === "ADMIN";
+
+  const handleApprove = async () => {
+    toast.loading("Approving transaction...", { id: "approve-transaction" });
+    try {
+      await ApproveTransaction(transaction.id);
+      toast.success("Transaction approved", { id: "approve-transaction" });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    } catch (e) {
+      toast.error("Failed to approve transaction", { id: "approve-transaction" });
+    }
+  };
+
+  const handleReject = async () => {
+    toast.loading("Rejecting transaction...", { id: "reject-transaction" });
+    try {
+      await RejectTransaction(transaction.id);
+      toast.success("Transaction rejected", { id: "reject-transaction" });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    } catch (e) {
+      toast.error("Failed to reject transaction", { id: "reject-transaction" });
+    }
+  };
+
   return (
     <PermissionGuard>
       <EditTransactionDialog
@@ -656,36 +726,60 @@ function RowActions({ transaction }: { transaction: TransactionHistoryRow }) {
         setOpen={setShowDeleteDialog}
         transactionId={transaction.id}
       />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={"ghost"} className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="flex items-center gap-2"
-            onSelect={() => {
-              setShowEditDialog((prev) => !prev);
-            }}
-          >
-            <Pencil className="h-4 w-4 text-muted-foreground" />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="flex items-center gap-2"
-            onSelect={() => {
-              setShowDeleteDialog((prev) => !prev);
-            }}
-          >
-            <TrashIcon className="h-4 w-4 text-muted-foreground" />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-1">
+        {isAdmin && transaction.status === "PENDING" && (
+          <div className="flex items-center gap-1 mr-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10"
+              onClick={handleApprove}
+              title="Approve"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 border-rose-500/50 text-rose-500 hover:bg-rose-500/10"
+              onClick={handleReject}
+              title="Reject"
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={"ghost"} className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onSelect={() => {
+                setShowEditDialog((prev) => !prev);
+              }}
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onSelect={() => {
+                setShowDeleteDialog((prev) => !prev);
+              }}
+            >
+              <TrashIcon className="h-4 w-4 text-muted-foreground" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </PermissionGuard>
   );
 }

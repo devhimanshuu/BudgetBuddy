@@ -541,7 +541,7 @@ export async function RevokeInvite(inviteId: string) {
 
 	return { success: true };
 }
-export async function UpdateWorkspace(workspaceId: string, data: { name?: string; currency?: string }) {
+export async function UpdateWorkspace(workspaceId: string, data: { name?: string; currency?: string; approvalThreshold?: number }) {
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");
 

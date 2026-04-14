@@ -53,16 +53,18 @@ export function WorkspaceSettingsCard() {
     const [confirmName, setConfirmName] = useState("");
     const [openDelete, setOpenDelete] = useState(false);
     const [openLeave, setOpenLeave] = useState(false);
+    const [approvalThreshold, setApprovalThreshold] = useState(0);
 
     useEffect(() => {
         if (workspace) {
             setName(workspace.name);
             setCurrency(workspace.currency);
+            setApprovalThreshold(workspace.approvalThreshold || 0);
         }
     }, [workspace]);
 
     const mutation = useMutation({
-        mutationFn: (data: { name: string; currency: string }) => {
+        mutationFn: (data: { name: string; currency: string; approvalThreshold: number }) => {
             if (!workspace?.id) throw new Error("No workspace selected");
             return UpdateWorkspace(workspace.id, data);
         },
@@ -174,10 +176,24 @@ export function WorkspaceSettingsCard() {
                             </p>
                         </div>
 
+                        <div className="space-y-2">
+                            <Label htmlFor="ws-threshold">Transaction Approval Threshold</Label>
+                            <Input 
+                                id="ws-threshold"
+                                type="number"
+                                value={approvalThreshold}
+                                onChange={(e) => setApprovalThreshold(Number(e.target.value))}
+                                placeholder="500"
+                            />
+                            <p className="text-[10px] text-muted-foreground">
+                                Transactions added by Editors over this amount will require Admin approval. Set to 0 to require approval for all transactions.
+                            </p>
+                        </div>
+
                         <Button 
-                            className="w-full gap-2"
-                            onClick={() => mutation.mutate({ name, currency })}
-                            disabled={mutation.isPending || (name === workspace.name && currency === workspace.currency)}
+                            className="w-full gap-2 transition-all duration-300"
+                            onClick={() => mutation.mutate({ name, currency, approvalThreshold })}
+                            disabled={mutation.isPending || (name === workspace.name && currency === workspace.currency && approvalThreshold === workspace.approvalThreshold)}
                         >
                             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                             Save Workspace Settings

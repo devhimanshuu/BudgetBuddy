@@ -48,18 +48,18 @@ export async function GET(request: Request) {
     
     // 2. Spending Trends & Top Categories & Budget Overview (Current)
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, type: { in: ["expense", "investment"] }, date: { gte: currentMonthStart, lte: currentMonthEnd } },
+      where: { ...whereUserIdOrWorkspaceId, status: "APPROVED", type: { in: ["expense", "investment"] }, date: { lte: currentMonthEnd, gte: currentMonthStart } },
       include: { splits: true },
     }),
     // 3. Spending Trends (Previous)
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, type: { in: ["expense", "investment"] }, date: { gte: previousMonthStart, lte: previousMonthEnd } },
+      where: { ...whereUserIdOrWorkspaceId, status: "APPROVED", type: { in: ["expense", "investment"] }, date: { lte: previousMonthEnd, gte: previousMonthStart } },
       include: { splits: true },
     }),
 
     // 4. Recent Transactions
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId },
+      where: { ...whereUserIdOrWorkspaceId, status: "APPROVED" },
       orderBy: { date: "desc" },
       take: 5,
     }),

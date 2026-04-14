@@ -51,6 +51,15 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		splits,
 	} = parsedBody.data;
 
+	// Determine transaction status
+	// Only Editors are subject to approval workflow
+	let status = "APPROVED";
+	const approvalThreshold = workspace.approvalThreshold || 0;
+	
+	if (workspace.role === "EDITOR" && amount > approvalThreshold) {
+		status = "PENDING";
+	}
+
 	const categoryRow = await prisma.category.findFirst({
 		where: {
 			workspaceId: workspace.id,
@@ -75,6 +84,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				type,
 				category: categoryRow.name,
 				categoryIcon: categoryRow.icon,
+				status,
 			},
 		});
 
@@ -114,72 +124,74 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 			});
 		}
 
-		//Update aggregates table
-		await tx.monthlyHistory.upsert({
-			where: {
-				day_month_year_userId: {
-					// This composite key still has userId, we might need to change it later
+		// Update aggregates ONLY if approved
+		if (status === "APPROVED") {
+			//Update aggregates table
+			await tx.monthlyHistory.upsert({
+				where: {
+					day_month_year_userId: {
+						userId: user.id,
+						day: date.getUTCDate(),
+						month: date.getUTCMonth(),
+						year: date.getUTCFullYear(),
+					},
+				},
+				create: {
 					userId: user.id,
+					workspaceId: workspace.id,
 					day: date.getUTCDate(),
 					month: date.getUTCMonth(),
 					year: date.getUTCFullYear(),
+					expense: type === "expense" ? amount : 0,
+					income: type === "income" ? amount : 0,
+					investment: type === "investment" ? amount : 0,
 				},
-			},
-			create: {
-				userId: user.id,
-				workspaceId: workspace.id,
-				day: date.getUTCDate(),
-				month: date.getUTCMonth(),
-				year: date.getUTCFullYear(),
-				expense: type === "expense" ? amount : 0,
-				income: type === "income" ? amount : 0,
-				investment: type === "investment" ? amount : 0,
-			},
-			update: {
-				workspaceId: workspace.id, // Update workspaceId if it was null
-				expense: {
-					increment: type === "expense" ? amount : 0,
+				update: {
+					workspaceId: workspace.id,
+					expense: {
+						increment: type === "expense" ? amount : 0,
+					},
+					income: {
+						increment: type === "income" ? amount : 0,
+					},
+					investment: {
+						increment: type === "investment" ? amount : 0,
+					},
 				},
-				income: {
-					increment: type === "income" ? amount : 0,
-				},
-				investment: {
-					increment: type === "investment" ? amount : 0,
-				},
-			},
-		});
+			});
 
-		//update year Aggregate
-		await tx.yearHistory.upsert({
-			where: {
-				month_year_userId: {
+			//update year Aggregate
+			await tx.yearHistory.upsert({
+				where: {
+					month_year_userId: {
+						userId: user.id,
+						month: date.getUTCMonth(),
+						year: date.getUTCFullYear(),
+					},
+				},
+				create: {
 					userId: user.id,
+					workspaceId: workspace.id,
 					month: date.getUTCMonth(),
 					year: date.getUTCFullYear(),
+					expense: type === "expense" ? amount : 0,
+					income: type === "income" ? amount : 0,
+					investment: type === "investment" ? amount : 0,
 				},
-			},
-			create: {
-				userId: user.id,
-				workspaceId: workspace.id,
-				month: date.getUTCMonth(),
-				year: date.getUTCFullYear(),
-				expense: type === "expense" ? amount : 0,
-				income: type === "income" ? amount : 0,
-				investment: type === "investment" ? amount : 0,
-			},
-			update: {
-				workspaceId: workspace.id,
-				expense: {
-					increment: type === "expense" ? amount : 0,
+				update: {
+					workspaceId: workspace.id,
+					expense: {
+						increment: type === "expense" ? amount : 0,
+					},
+					income: {
+						increment: type === "income" ? amount : 0,
+					},
+					investment: {
+						increment: type === "investment" ? amount : 0,
+					},
 				},
-				income: {
-					increment: type === "income" ? amount : 0,
-				},
-				investment: {
-					increment: type === "investment" ? amount : 0,
-				},
-			},
-		});
+			});
+		}
 	});
 
 	// Update gamification (streaks and achievements)
@@ -197,27 +209,31 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 			...bAchievements,
 		];
 	} catch (error) {
-		// Don't fail transaction creation if gamification fails
 		console.error("Gamification error:", error);
 	}
 
 	const formatter = GetFormatterForCurrency(workspace.currency);
 	const formattedAmount = formatter.format(amount);
 
+	const activityType = status === "PENDING" ? "TRANSACTION_PENDING" : "TRANSACTION_CREATED";
+	const activityDescription = status === "PENDING"
+		? `${userName} added a ${type} transaction (PENDING APPROVAL): ${description || category} (${formattedAmount})`
+		: `${userName} added a ${type} transaction: ${description || category} (${formattedAmount})`;
+
 	// Log activity
 	await logActivity({
 		workspaceId: workspace.id,
 		userId: user.id,
-		type: "TRANSACTION_CREATED",
-		description: `${userName} added a ${type} transaction: ${description || category} (${formattedAmount})`,
+		type: activityType,
+		description: activityDescription,
 		metadata: {
 			userName,
 			amount,
 			type,
 			category,
-			transactionId: "placeholder", // We could get the ID from the transaction object if needed
+			status,
 		},
 	});
 
-	return { success: true, unlockedAchievements };
+	return { success: true, unlockedAchievements, status };
 }

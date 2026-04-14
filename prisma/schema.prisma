@@ -64,6 +64,7 @@ model Workspace {
   activities            Activity[]
   vaultEntries          VaultEntry[]
   beneficiaries         Beneficiary[]
+  approvalThreshold Float @default(0)
   budgetTemplates       BudgetTemplate[]
 
 
@@ -137,6 +138,7 @@ model Transaction {
   splits       TransactionSplit[]
   history      TransactionHistory[]
   deletedAt    DateTime?
+  status      String   @default("APPROVED") // PENDING, APPROVED, REJECTED
   workspace    Workspace?           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, date, deletedAt])

@@ -85,6 +85,22 @@ export async function UpdateTransaction(
 		throw new Error("Category not found");
 	}
 
+	// Determine new status
+	let newStatus = transaction.status;
+	const approvalThreshold = workspace.approvalThreshold || 0;
+	if (workspace.role === "EDITOR") {
+		if (amount > approvalThreshold) {
+			newStatus = "PENDING";
+		} else {
+			// If it was pending but now it's below threshold, maybe auto-approve?
+			// The prompt says "transactions added by Editors... over a certain threshold" need approval.
+			// So below threshold should be approved.
+			newStatus = "APPROVED";
+		}
+	} else if (workspace.role === "ADMIN") {
+		newStatus = "APPROVED";
+	}
+
 	try {
 		await prisma.$transaction(
 			async (tx) => {
@@ -99,75 +115,76 @@ export async function UpdateTransaction(
 						category: transaction.category,
 						categoryIcon: transaction.categoryIcon,
 						type: transaction.type,
-						tags: transaction.tags.map((t) => t.tag.name), // Store tag names for history readability
+						tags: transaction.tags.map((t) => t.tag.name),
 					},
 				});
 
-				// 1. Revert old stats
-				const oldDate = transaction.date;
-				const oldAmount = transaction.amount;
-				const oldType = transaction.type;
+				// 1. Revert old stats ONLY IF it was approved
+				if (transaction.status === "APPROVED") {
+					const oldDate = transaction.date;
+					const oldAmount = transaction.amount;
+					const oldType = transaction.type;
 
-				// Use upsert to handle cases where the record might not exist
-				await tx.monthlyHistory.upsert({
-					where: {
-						day_month_year_userId: {
+					await tx.monthlyHistory.upsert({
+						where: {
+							day_month_year_userId: {
+								userId: transaction.userId,
+								day: oldDate.getUTCDate(),
+								month: oldDate.getUTCMonth(),
+								year: oldDate.getUTCFullYear(),
+							},
+						},
+						create: {
 							userId: transaction.userId,
 							day: oldDate.getUTCDate(),
 							month: oldDate.getUTCMonth(),
 							year: oldDate.getUTCFullYear(),
+							expense: 0,
+							income: 0,
+							investment: 0,
 						},
-					},
-					create: {
-						userId: transaction.userId,
-						day: oldDate.getUTCDate(),
-						month: oldDate.getUTCMonth(),
-						year: oldDate.getUTCFullYear(),
-						expense: 0,
-						income: 0,
-						investment: 0,
-					},
-					update: {
-						...(oldType === "expense" && {
-							expense: { decrement: oldAmount },
-						}),
-						...(oldType === "income" && {
-							income: { decrement: oldAmount },
-						}),
-						...(oldType === "investment" && {
-							investment: { decrement: oldAmount },
-						}),
-					},
-				});
+						update: {
+							...(oldType === "expense" && {
+								expense: { decrement: oldAmount },
+							}),
+							...(oldType === "income" && {
+								income: { decrement: oldAmount },
+							}),
+							...(oldType === "investment" && {
+								investment: { decrement: oldAmount },
+							}),
+						},
+					});
 
-				await tx.yearHistory.upsert({
-					where: {
-						month_year_userId: {
+					await tx.yearHistory.upsert({
+						where: {
+							month_year_userId: {
+								userId: transaction.userId,
+								month: oldDate.getUTCMonth(),
+								year: oldDate.getUTCFullYear(),
+							},
+						},
+						create: {
 							userId: transaction.userId,
 							month: oldDate.getUTCMonth(),
 							year: oldDate.getUTCFullYear(),
+							expense: 0,
+							income: 0,
+							investment: 0,
 						},
-					},
-					create: {
-						userId: transaction.userId,
-						month: oldDate.getUTCMonth(),
-						year: oldDate.getUTCFullYear(),
-						expense: 0,
-						income: 0,
-						investment: 0,
-					},
-					update: {
-						...(oldType === "expense" && {
-							expense: { decrement: oldAmount },
-						}),
-						...(oldType === "income" && {
-							income: { decrement: oldAmount },
-						}),
-						...(oldType === "investment" && {
-							investment: { decrement: oldAmount },
-						}),
-					},
-				});
+						update: {
+							...(oldType === "expense" && {
+								expense: { decrement: oldAmount },
+							}),
+							...(oldType === "income" && {
+								income: { decrement: oldAmount },
+							}),
+							...(oldType === "investment" && {
+								investment: { decrement: oldAmount },
+							}),
+						},
+					});
+				}
 
 				// 2. Clear existing relations
 				await tx.transactionTag.deleteMany({
@@ -176,8 +193,6 @@ export async function UpdateTransaction(
 				await tx.transactionSplit.deleteMany({
 					where: { transactionId: id },
 				});
-				// For attachments, we might want to keep them or update them more smartly,
-				// but for now, simple replace is safe if the UI sends all current attachments.
 				await tx.attachment.deleteMany({
 					where: { transactionId: id },
 				});
@@ -193,6 +208,7 @@ export async function UpdateTransaction(
 						type,
 						category: categoryRow.name,
 						categoryIcon: categoryRow.icon,
+						status: newStatus,
 					},
 				});
 
@@ -230,58 +246,60 @@ export async function UpdateTransaction(
 					});
 				}
 
-				// 5. Apply new stats
-				await tx.monthlyHistory.upsert({
-					where: {
-						day_month_year_userId: {
+				// 5. Apply new stats ONLY IF approved
+				if (newStatus === "APPROVED") {
+					await tx.monthlyHistory.upsert({
+						where: {
+							day_month_year_userId: {
+								userId: transaction.userId,
+								day: date.getUTCDate(),
+								month: date.getUTCMonth(),
+								year: date.getUTCFullYear(),
+							},
+						},
+						create: {
 							userId: transaction.userId,
 							day: date.getUTCDate(),
 							month: date.getUTCMonth(),
 							year: date.getUTCFullYear(),
+							expense: type === "expense" ? amount : 0,
+							income: type === "income" ? amount : 0,
+							investment: type === "investment" ? amount : 0,
 						},
-					},
-					create: {
-						userId: transaction.userId,
-						day: date.getUTCDate(),
-						month: date.getUTCMonth(),
-						year: date.getUTCFullYear(),
-						expense: type === "expense" ? amount : 0,
-						income: type === "income" ? amount : 0,
-						investment: type === "investment" ? amount : 0,
-					},
-					update: {
-						expense: { increment: type === "expense" ? amount : 0 },
-						income: { increment: type === "income" ? amount : 0 },
-						investment: { increment: type === "investment" ? amount : 0 },
-					},
-				});
+						update: {
+							expense: { increment: type === "expense" ? amount : 0 },
+							income: { increment: type === "income" ? amount : 0 },
+							investment: { increment: type === "investment" ? amount : 0 },
+						},
+					});
 
-				await tx.yearHistory.upsert({
-					where: {
-						month_year_userId: {
+					await tx.yearHistory.upsert({
+						where: {
+							month_year_userId: {
+								userId: transaction.userId,
+								month: date.getUTCMonth(),
+								year: date.getUTCFullYear(),
+							},
+						},
+						create: {
 							userId: transaction.userId,
 							month: date.getUTCMonth(),
 							year: date.getUTCFullYear(),
+							expense: type === "expense" ? amount : 0,
+							income: type === "income" ? amount : 0,
+							investment: type === "investment" ? amount : 0,
 						},
-					},
-					create: {
-						userId: transaction.userId,
-						month: date.getUTCMonth(),
-						year: date.getUTCFullYear(),
-						expense: type === "expense" ? amount : 0,
-						income: type === "income" ? amount : 0,
-						investment: type === "investment" ? amount : 0,
-					},
-					update: {
-						expense: { increment: type === "expense" ? amount : 0 },
-						income: { increment: type === "income" ? amount : 0 },
-						investment: { increment: type === "investment" ? amount : 0 },
-					},
-				});
+						update: {
+							expense: { increment: type === "expense" ? amount : 0 },
+							income: { increment: type === "income" ? amount : 0 },
+							investment: { increment: type === "investment" ? amount : 0 },
+						},
+					});
+				}
 			},
 			{
-				maxWait: 10000, // Maximum time to wait for a transaction slot (10s)
-				timeout: 10000, // Maximum time the transaction can run (10s)
+				maxWait: 10000,
+				timeout: 10000,
 			},
 		);
 	} catch (error) {
