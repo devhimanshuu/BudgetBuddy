@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { GetFormatterForCurrency } from "@/lib/helper";
-import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions, checkPermissions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -11,10 +11,22 @@ export async function GET(request: Request) {
 		redirect("/sign-in");
 	}
 
-	const workspace = await getActiveWorkspace();
-	const workspaceId = workspace?.id;
-
 	const { searchParams } = new URL(request.url);
+    const queryWorkspaceId = searchParams.get("workspaceId");
+
+	const workspace = await getActiveWorkspace();
+	let workspaceId = workspace?.id;
+
+    // If a specific workspaceId is requested, use it (after verifying access)
+    if (queryWorkspaceId && queryWorkspaceId !== workspaceId) {
+        const hasAccess = await checkPermissions(queryWorkspaceId, user.id, ["ADMIN", "EDITOR", "VIEWER"]);
+        if (hasAccess) {
+            workspaceId = queryWorkspaceId;
+        } else {
+            return new Response("Unauthorized access to workspace", { status: 403 });
+        }
+    }
+
 	const query = searchParams.get("query");
 	const tags = searchParams.get("tags");
 	const category = searchParams.get("category");

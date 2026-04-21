@@ -65,6 +65,16 @@ import { AuditLogs } from "./_components/AuditLogs";
 import { WorkspaceExport } from "./_components/WorkspaceExport";
 import { GetActiveWorkspace } from "../_actions/workspaces";
 import { WorkspaceNameplate } from "@/components/WorkspaceBranding";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from "next/link";
+import { Home } from "lucide-react";
 
 const ManagePage = () => {
   const { data: workspace } = useQuery({
@@ -74,13 +84,35 @@ const ManagePage = () => {
 
   return (
     <>
-      <div className="border-b bg-card">
-        <div className="container flex flex-wrap items-center justify-between gap-4 px-4 py-3 sm:gap-6 sm:px-6">
-          <div className="flex flex-col gap-3">
-            <WorkspaceNameplate />
-            <p className="text-3xl font-bold sm:text-4xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Manage</p>
-            <p className="text-sm text-muted-foreground sm:text-base -mt-2">
-              Manage your identity, settings and categories
+      <div className="border-b bg-card/50 backdrop-blur-xl sticky top-0 z-30">
+        <div className="container flex flex-col gap-4 px-4 py-6 sm:px-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/" className="flex items-center gap-2">
+                    <Home className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <WorkspaceNameplate />
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="font-bold text-foreground">Manage</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-black tracking-tighter sm:text-4xl bg-gradient-to-r from-foreground via-foreground/80 to-foreground/50 bg-clip-text text-transparent">
+              Settings & Control
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-2xl">
+              Configure your workspace preferences, manage members, categories, and tags.
             </p>
           </div>
         </div>

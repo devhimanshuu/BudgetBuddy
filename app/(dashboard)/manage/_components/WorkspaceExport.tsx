@@ -37,15 +37,16 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   const fetchExportData = async () => {
-    const res = await fetch(`/api/transactions/search?workspaceId=${workspaceId}`);
+    const res = await fetch(`/api/transactions/search?workspaceId=${workspaceId}&pageSize=5000`);
     if (!res.ok) throw new Error("Failed to fetch data");
-    return res.json();
+    const data = await res.json();
+    return data.transactions || [];
   };
 
   const handleCSVExport = async () => {
     setIsExportingCSV(true);
     try {
-      const data = await fetchExportData();
+      const transactions = await fetchExportData();
       
       const csvConfig = mkConfig({
         fieldSeparator: ",",
@@ -55,7 +56,7 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
       });
 
       // Transform data for CSV
-      const exportData = data.map((t: any) => ({
+      const exportData = transactions.map((t: any) => ({
         Date: format(new Date(t.date), "yyyy-MM-dd"),
         Description: t.description,
         Category: t.category,
@@ -80,7 +81,7 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
   const handlePDFExport = async () => {
     setIsExportingPDF(true);
     try {
-      const data = await fetchExportData();
+      const transactions = await fetchExportData();
       const doc = new jsPDF();
       
       // Header
@@ -92,10 +93,10 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
       doc.setTextColor(100);
       doc.text(`Workspace: ${workspaceName}`, 14, 30);
       doc.text(`Generated on: ${format(new Date(), "PPP HH:mm")}`, 14, 35);
-      doc.text(`Total Records: ${data.length}`, 14, 40);
+      doc.text(`Total Records: ${transactions.length}`, 14, 40);
 
       // Summary Table Logic
-      const totals = data.reduce((acc: any, t: any) => {
+      const totals = transactions.reduce((acc: any, t: any) => {
         if (t.type === "income") acc.income += t.amount;
         if (t.type === "expense") acc.expense += t.amount;
         return acc;
@@ -116,7 +117,7 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
       autoTable(doc, {
         startY: (doc as any).lastAutoTable.finalY + 15,
         head: [["Date", "Description", "Category", "Type", "Amount"]],
-        body: data.map((t: any) => [
+        body: transactions.map((t: any) => [
           format(new Date(t.date), "MMM d, yyyy"),
           t.description,
           t.category,
