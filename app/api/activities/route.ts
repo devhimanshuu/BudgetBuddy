@@ -18,6 +18,9 @@ export async function GET(request: Request) {
 	const skip = (page - 1) * pageSize;
 	const take = pageSize;
 
+	const type = searchParams.get("type");
+	const search = searchParams.get("search");
+
 	if (!workspaceId) {
 		return Response.json({
 			activities: [],
@@ -30,8 +33,15 @@ export async function GET(request: Request) {
 		});
 	}
 
-	const where = {
+	const where: any = {
 		workspaceId,
+		...(type && type !== "ALL" ? { type } : {}),
+		...(search ? {
+			OR: [
+				{ description: { contains: search, mode: "insensitive" } },
+				{ userId: { contains: search, mode: "insensitive" } },
+			]
+		} : {}),
 		...(workspace.role !== "ADMIN" ? { 
 			OR: [
                 { userId: user.id },

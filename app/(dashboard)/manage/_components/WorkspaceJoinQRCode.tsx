@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import {
     Download,
-    Image,
+    Image as ImageIcon,
     QrCode,
     Loader2,
     RefreshCw,
@@ -206,7 +206,7 @@ export default function WorkspaceJoinQRCode({
                                 {sharing ? (
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                 ) : (
-                                    <Image className="h-4 w-4 mr-2" />
+                                    <ImageIcon className="h-4 w-4 mr-2" />
                                 )}
                                 Share Card
                             </Button>

@@ -43,6 +43,8 @@ import { UpdateCategory } from "@/app/(dashboard)/_actions/categories";
 import { Category } from "@prisma/client";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
+import { Switch } from "@/components/ui/switch";
+import { Zap } from "lucide-react";
 
 interface Props {
     category: Category;
@@ -58,6 +60,8 @@ function EditCategoryDialog({ category, trigger }: Props) {
             name: category.name,
             icon: category.icon,
             type: category.type as TransactionType,
+            color: category.color || "#10b981",
+            isShared: category.isShared,
         },
     });
 
@@ -87,7 +91,13 @@ function EditCategoryDialog({ category, trigger }: Props) {
     const onSubmit = useCallback(
         (values: UpdateCategorySchemaType) => {
             // Check if anything changed
-            if (values.name === category.name && values.icon === category.icon) {
+            const hasChanged = 
+                values.name !== category.name || 
+                values.icon !== category.icon || 
+                values.color !== category.color || 
+                values.isShared !== category.isShared;
+
+            if (!hasChanged) {
                 toast.info("No changes made", {
                     id: "edit-category",
                 });
@@ -193,6 +203,58 @@ function EditCategoryDialog({ category, trigger }: Props) {
                                 </FormItem>
                             )}
                         />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="color"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Color</FormLabel>
+                                        <FormControl>
+                                            <div className="flex flex-wrap gap-2 pt-1 border rounded-lg p-2 bg-background/50">
+                                                {["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#64748b"].map(c => (
+                                                    <button 
+                                                        key={c}
+                                                        type="button"
+                                                        onClick={() => field.onChange(c)}
+                                                        className={cn(
+                                                            "w-8 h-8 rounded-full border-2 transition-all",
+                                                            field.value === c ? "border-primary ring-2 ring-primary/20 scale-110" : "border-transparent hover:scale-105"
+                                                        )}
+                                                        style={{ backgroundColor: c }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="isShared"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-primary/5">
+                                        <div className="space-y-0.5">
+                                            <FormLabel className="text-base flex items-center gap-2 font-bold">
+                                                <Zap className="h-4 w-4 text-amber-500" />
+                                                Shared
+                                            </FormLabel>
+                                            <FormDescription className="text-[10px]">
+                                                Across workspace
+                                            </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </form>
                 </Form>
                 <DialogFooter>

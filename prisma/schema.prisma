@@ -66,6 +66,12 @@ model Workspace {
   beneficiaries         Beneficiary[]
   approvalThreshold Float @default(0)
   budgetTemplates       BudgetTemplate[]
+  
+  // Branding fields
+  avatar                String?   @default("🏢")
+  bannerColor           String?   @default("bg-gradient-to-r from-emerald-500 to-emerald-700")
+  description           String?
+  type                  String    @default("PERSONAL") // PERSONAL, HOME, STARTUP, VACATION
 
 
   @@index([ownerId, deletedAt])
@@ -109,7 +115,9 @@ model Category {
   userId      String
   workspaceId String?
   icon        String
+  color       String?  @default("#10b981") // Default emerald color
   type        String   @default("income") // "income", "expense", or "investment"
+  isShared    Boolean  @default(false)
   deletedAt   DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

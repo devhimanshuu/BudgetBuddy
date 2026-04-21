@@ -38,6 +38,14 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export function WorkspaceSettingsCard() {
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -54,17 +62,30 @@ export function WorkspaceSettingsCard() {
     const [openDelete, setOpenDelete] = useState(false);
     const [openLeave, setOpenLeave] = useState(false);
     const [approvalThreshold, setApprovalThreshold] = useState(0);
+    const [avatar, setAvatar] = useState("🏢");
+    const [bannerColor, setBannerColor] = useState("");
+    const [wsType, setWsType] = useState("PERSONAL");
 
     useEffect(() => {
         if (workspace) {
             setName(workspace.name);
             setCurrency(workspace.currency);
             setApprovalThreshold(workspace.approvalThreshold || 0);
+            setAvatar(workspace.avatar || "🏢");
+            setBannerColor(workspace.bannerColor || "bg-gradient-to-r from-emerald-500 to-emerald-700");
+            setWsType(workspace.type || "PERSONAL");
         }
     }, [workspace]);
 
     const mutation = useMutation({
-        mutationFn: (data: { name: string; currency: string; approvalThreshold: number }) => {
+        mutationFn: (data: { 
+            name: string; 
+            currency: string; 
+            approvalThreshold: number;
+            avatar: string;
+            bannerColor: string;
+            type: string;
+        }) => {
             if (!workspace?.id) throw new Error("No workspace selected");
             return UpdateWorkspace(workspace.id, data);
         },
@@ -131,14 +152,77 @@ export function WorkspaceSettingsCard() {
             <CardContent className="space-y-6 flex-grow">
                 {isAdmin ? (
                     <>
-                        <div className="space-y-2">
-                            <Label htmlFor="ws-name">Workspace Name</Label>
-                            <Input 
-                                id="ws-name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Family Budget"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="ws-name">Workspace Name</Label>
+                                <Input 
+                                    id="ws-name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Family Budget"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Workspace Type</Label>
+                                <Select value={wsType} onValueChange={setWsType}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="PERSONAL">Personal</SelectItem>
+                                        <SelectItem value="HOME">Home</SelectItem>
+                                        <SelectItem value="STARTUP">Startup</SelectItem>
+                                        <SelectItem value="VACATION">Vacation</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Workspace Avatar (Emoji)</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        value={avatar}
+                                        onChange={(e) => setAvatar(e.target.value)}
+                                        className="text-2xl text-center w-16 h-12"
+                                        maxLength={2}
+                                    />
+                                    <div className="flex flex-wrap gap-1 items-center bg-background/30 p-1 rounded-lg border">
+                                        {["🏠", "🚀", "🏖️", "📂", "💼", "💎", "🏡"].map(e => (
+                                            <button 
+                                                key={e}
+                                                type="button"
+                                                onClick={() => setAvatar(e)}
+                                                className={`p-1.5 rounded hover:bg-primary/10 transition-colors ${avatar === e ? 'bg-primary/20 scale-110' : ''}`}
+                                            >
+                                                {e}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Theme Color</Label>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                    {[
+                                        "bg-gradient-to-r from-emerald-500 to-emerald-700",
+                                        "bg-gradient-to-r from-blue-500 to-blue-700",
+                                        "bg-gradient-to-r from-purple-500 to-purple-700",
+                                        "bg-gradient-to-r from-amber-500 to-amber-700",
+                                        "bg-gradient-to-r from-rose-500 to-rose-700",
+                                        "bg-gradient-to-r from-slate-700 to-slate-900"
+                                    ].map(c => (
+                                        <button 
+                                            key={c}
+                                            type="button"
+                                            onClick={() => setBannerColor(c)}
+                                            className={`w-8 h-8 rounded-full ${c} border-2 ${bannerColor === c ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-transparent'} hover:scale-105 transition-all`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -191,12 +275,26 @@ export function WorkspaceSettingsCard() {
                         </div>
 
                         <Button 
-                            className="w-full gap-2 transition-all duration-300"
-                            onClick={() => mutation.mutate({ name, currency, approvalThreshold })}
-                            disabled={mutation.isPending || (name === workspace.name && currency === workspace.currency && approvalThreshold === workspace.approvalThreshold)}
+                            className="w-full gap-2 transition-all duration-300 h-11 text-lg font-bold"
+                            onClick={() => mutation.mutate({ 
+                                name, 
+                                currency, 
+                                approvalThreshold,
+                                avatar,
+                                bannerColor,
+                                type: wsType
+                            })}
+                            disabled={mutation.isPending || (
+                                name === workspace.name && 
+                                currency === workspace.currency && 
+                                approvalThreshold === workspace.approvalThreshold &&
+                                avatar === workspace.avatar &&
+                                bannerColor === workspace.bannerColor &&
+                                wsType === workspace.type
+                            )}
                         >
                             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                            Save Workspace Settings
+                            Update Identity & Visuals
                         </Button>
                     </>
                 ) : (

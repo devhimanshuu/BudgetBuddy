@@ -128,6 +128,9 @@ export async function CreateWorkspace(name: string) {
 					role: "ADMIN",
 				},
 			},
+			avatar: "🏢",
+			bannerColor: "bg-gradient-to-r from-emerald-500 to-emerald-700",
+			type: "PERSONAL",
 		},
 	});
 
@@ -541,7 +544,15 @@ export async function RevokeInvite(inviteId: string) {
 
 	return { success: true };
 }
-export async function UpdateWorkspace(workspaceId: string, data: { name?: string; currency?: string; approvalThreshold?: number }) {
+export async function UpdateWorkspace(workspaceId: string, data: { 
+	name?: string; 
+	currency?: string; 
+	approvalThreshold?: number;
+	avatar?: string;
+	bannerColor?: string;
+	type?: string;
+	description?: string;
+}) {
 	const user = await currentUser();
 	if (!user) throw new Error("Unauthorized");
 

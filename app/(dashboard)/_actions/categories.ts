@@ -29,7 +29,7 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot create categories");
 
-	const { name, icon, type } = parsedBody.data;
+	const { name, icon, type, color, isShared } = parsedBody.data;
 	try {
 		const category = await prisma.category.upsert({
 			where: {
@@ -41,6 +41,8 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 			},
 			update: {
 				icon,
+				color,
+				isShared: isShared || false,
 				workspaceId: workspace.id,
 			},
 			create: {
@@ -48,6 +50,8 @@ export async function CreateCategory(form: CreateCategorySchemaType) {
 				workspaceId: workspace.id,
 				name,
 				icon,
+				color: color || "#10b981",
+				isShared: isShared || false,
 				type,
 			},
 		});
@@ -125,7 +129,7 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 	if (workspace.role === "VIEWER")
 		throw new Error("Viewers cannot update categories");
 
-	const { oldName, name, icon, type } = parsedBody.data;
+	const { oldName, name, icon, type, color, isShared } = parsedBody.data;
 
 	try {
 		// Check if the new name already exists (and it's not the same category)
@@ -197,6 +201,8 @@ export async function UpdateCategory(form: UpdateCategorySchemaType) {
 					workspaceId: workspace.id,
 					name,
 					icon,
+					color: color || oldCategory.color,
+					isShared: isShared !== undefined ? isShared : oldCategory.isShared,
 					type,
 				},
 			});

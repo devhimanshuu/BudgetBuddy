@@ -61,16 +61,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AuditLogs } from "./_components/AuditLogs";
+import { WorkspaceExport } from "./_components/WorkspaceExport";
+import { GetActiveWorkspace } from "../_actions/workspaces";
+import { WorkspaceNameplate } from "@/components/WorkspaceBranding";
 
-const page = () => {
+const ManagePage = () => {
+  const { data: workspace } = useQuery({
+    queryKey: ["active-workspace"],
+    queryFn: () => GetActiveWorkspace(),
+  });
+
   return (
     <>
       <div className="border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-4 px-4 py-3 sm:gap-6 sm:px-6">
-          <div className="min-w-0">
-            <p className="text-2xl font-bold sm:text-3xl">Manage</p>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              Manage your account settings and categories
+          <div className="flex flex-col gap-3">
+            <WorkspaceNameplate />
+            <p className="text-3xl font-bold sm:text-4xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Manage</p>
+            <p className="text-sm text-muted-foreground sm:text-base -mt-2">
+              Manage your identity, settings and categories
             </p>
           </div>
         </div>
@@ -80,9 +90,21 @@ const page = () => {
           <WorkspaceSettingsCard />
           <AlertSettingsCard />
           <VibeControls />
+          {workspace && (
+            <WorkspaceExport 
+              workspaceId={workspace.id} 
+              workspaceName={workspace.name} 
+              currency={workspace.currency} 
+            />
+          )}
         </div>
 
         <WorkspaceMembers />
+
+        {workspace && (
+          <AuditLogs workspaceId={workspace.id} />
+        )}
+        
         <ActivityFeed />
 
         <CategoryList type="income" />
@@ -168,7 +190,7 @@ function VibeControls() {
   );
 }
 
-export default page;
+export default ManagePage;
 
 
 function CategoryList({ type }: { type: TransactionType }) {
@@ -417,9 +439,15 @@ function CategoryCard({ category }: { category: any }) {
         compactMode ? "p-1" : "p-4"
       )}>
         <span className={cn(
-          "flex items-center justify-center rounded-lg bg-muted/50 transition-transform group-hover:scale-110",
+          "flex items-center justify-center rounded-lg transition-transform group-hover:scale-110 relative overflow-hidden",
           compactMode ? "text-xl w-10 h-10" : "text-3xl w-16 h-16"
-        )} role="img">
+        )} 
+        style={{ 
+            backgroundColor: `${category.color}20` || "rgba(0,0,0,0.1)",
+            color: category.color || "inherit"
+        }}
+        role="img">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundColor: category.color }} />
           {iconSet === "emoji" ? (
             category.icon
           ) : (

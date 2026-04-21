@@ -44,14 +44,12 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
 
-  // Check if today is near end of month or start of next
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  
   // We only show the banner if we are looking at the current month or previous month
   // and we are within 3 days of the month boundary
   const isRelevantTime = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
     const today = now.getDate();
     const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     
@@ -68,7 +66,7 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
     }
     
     return false;
-  }, [month, year, currentMonth, currentYear]);
+  }, [month, year]);
 
   const { data: budgetProgress, isLoading: isBudgetLoading } = useQuery({
     queryKey: ["budget-progress", month, year],
@@ -222,7 +220,7 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
                   disabled={!selectedGoalId || sweepMutation.isPending}
                   className="bg-emerald-600 hover:bg-emerald-700"
                 >
-                  {sweepMutation.isPending ? "Sweeping..." : "Confim Sweep"}
+                  {sweepMutation.isPending ? "Sweeping..." : "Confirm Sweep"}
                 </Button>
               </DialogFooter>
             </DialogContent>
