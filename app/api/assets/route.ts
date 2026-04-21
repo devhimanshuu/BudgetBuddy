@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
-import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { getActiveWorkspace, logActivity, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -18,10 +18,13 @@ export async function GET(request: Request) {
 	const type = searchParams.get("type");
 
 	try {
+		const restrictions = workspaceId ? await getMemberRestrictions(user.id, workspaceId) : null;
+
 		const assets = await prisma.asset.findMany({
 			where: {
 				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				...(type && { type }),
+				...(restrictions?.allowedAssets ? { id: { in: restrictions.allowedAssets } } : {}),
 			},
 			orderBy: {
 				createdAt: "desc",

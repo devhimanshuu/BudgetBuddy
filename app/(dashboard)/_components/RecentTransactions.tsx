@@ -75,6 +75,7 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
                            entityName={t.description || t.category}
                            transactionId={t.id}
                            workspaceId={userSettings?.workspaceId}
+                           onlyIcon
                         />
                      </div>
                   </div>

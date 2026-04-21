@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { GetFormatterForCurrency } from "@/lib/helper";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -29,10 +29,13 @@ export async function GET(request: Request) {
 	const skip = (page - 1) * pageSize;
 	const take = pageSize;
 
+	const restrictions = workspaceId ? await getMemberRestrictions(user.id, workspaceId) : null;
+
 	// Build where clause
 	const where: any = {
 		...(workspaceId ? { workspaceId } : { userId: user.id }),
 		deletedAt: null,
+		...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
 	};
 
 	// Filter by tags if specified

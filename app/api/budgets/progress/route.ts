@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -33,12 +33,15 @@ export async function GET(request: Request) {
 	const monthNum = parseInt(queryParams.data.month);
 	const yearNum = parseInt(queryParams.data.year);
 
+	const restrictions = await getMemberRestrictions(user.id, workspace.id);
+
 	// Get all budgets for the month
 	const budgets = await prisma.budget.findMany({
 		where: {
 			workspaceId: workspace.id,
 			month: monthNum,
 			year: yearNum,
+			...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
 		},
 	});
 
@@ -50,6 +53,7 @@ export async function GET(request: Request) {
 		where: {
 			workspaceId: workspace.id,
 			type: { in: ["expense", "investment"] },
+			...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
 			date: {
 				gte: startDate,
 				lte: endDate,

@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { OverviewQuerySchema } from "@/schema/overview";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -44,10 +44,13 @@ async function getBalanceStats(
 	from: Date,
 	to: Date,
 ) {
+	const restrictions = workspaceId ? await getMemberRestrictions(userId, workspaceId) : null;
+
 	const totals = await prisma.transaction.groupBy({
 		by: ["type"],
 		where: {
 			...(workspaceId ? { workspaceId } : { userId }),
+			...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
 			date: {
 				gte: from,
 				lte: to,

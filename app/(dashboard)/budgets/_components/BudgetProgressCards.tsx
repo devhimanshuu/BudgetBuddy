@@ -149,6 +149,7 @@ export default function BudgetProgressCards({
                       <DiscussionPanel
                         entityName={budget.category}
                         workspaceId={workspaceId}
+                        onlyIcon
                         budgetData={{
                           userId: userSettings.userId,
                           category: budget.category,

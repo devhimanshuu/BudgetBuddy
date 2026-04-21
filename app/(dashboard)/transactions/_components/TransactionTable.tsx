@@ -313,6 +313,7 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
           entityName={row.original.description}
           transactionId={row.original.id}
           workspaceId={userSettings?.workspaceId}
+          onlyIcon
         />
       );
     },

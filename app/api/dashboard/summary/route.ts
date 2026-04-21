@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
   const user = await currentUser();
@@ -12,6 +12,8 @@ export async function GET(request: Request) {
   const workspace = await getActiveWorkspace();
   const workspaceId = workspace?.id;
   const whereUserIdOrWorkspaceId = workspaceId ? { workspaceId } : { userId: user.id };
+  const restrictions = workspaceId ? await getMemberRestrictions(user.id, workspaceId) : null;
+  const isRestricted = !!restrictions?.allowedCategories;
 
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -48,18 +50,34 @@ export async function GET(request: Request) {
     
     // 2. Spending Trends & Top Categories & Budget Overview (Current)
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, status: "APPROVED", type: { in: ["expense", "investment"] }, date: { lte: currentMonthEnd, gte: currentMonthStart } },
+      where: { 
+        ...whereUserIdOrWorkspaceId, 
+        status: "APPROVED", 
+        type: { in: ["expense", "investment", "income"] }, // Included income for restricted stats
+        date: { lte: currentMonthEnd, gte: currentMonthStart },
+        ...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
+      },
       include: { splits: true },
     }),
     // 3. Spending Trends (Previous)
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, status: "APPROVED", type: { in: ["expense", "investment"] }, date: { lte: previousMonthEnd, gte: previousMonthStart } },
+      where: { 
+        ...whereUserIdOrWorkspaceId, 
+        status: "APPROVED", 
+        type: { in: ["expense", "investment", "income"] }, 
+        date: { lte: previousMonthEnd, gte: previousMonthStart },
+        ...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
+      },
       include: { splits: true },
     }),
 
     // 4. Recent Transactions
     prisma.transaction.findMany({
-      where: { ...whereUserIdOrWorkspaceId, status: "APPROVED" },
+      where: { 
+        ...whereUserIdOrWorkspaceId, 
+        status: "APPROVED",
+        ...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
+      },
       orderBy: { date: "desc" },
       take: 5,
     }),
@@ -78,7 +96,12 @@ export async function GET(request: Request) {
 
     // 6. Budgets
     prisma.budget.findMany({
-      where: { ...whereUserIdOrWorkspaceId, month: currentMonth, year: currentYear },
+      where: { 
+        ...whereUserIdOrWorkspaceId, 
+        month: currentMonth, 
+        year: currentYear,
+        ...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
+      },
     }),
 
     // 7. Savings Goals
@@ -94,12 +117,23 @@ export async function GET(request: Request) {
   ]);
 
   // --- Compute Stats & Savings ---
-  const currentIncome = currentMonthHistory.reduce((sum, s) => sum + s.income, 0);
-  const currentExpense = currentMonthHistory.reduce((sum, s) => sum + s.expense, 0);
-  const currentInvestment = currentMonthHistory.reduce((sum, s) => sum + s.investment, 0);
-  const previousIncome = previousMonthHistory.reduce((sum, s) => sum + s.income, 0);
-  const previousExpense = previousMonthHistory.reduce((sum, s) => sum + s.expense, 0);
-  const previousInvestment = previousMonthHistory.reduce((sum, s) => sum + s.investment, 0);
+  let currentIncome = currentMonthHistory.reduce((sum, s) => sum + s.income, 0);
+  let currentExpense = currentMonthHistory.reduce((sum, s) => sum + s.expense, 0);
+  let currentInvestment = currentMonthHistory.reduce((sum, s) => sum + s.investment, 0);
+  let previousIncome = previousMonthHistory.reduce((sum, s) => sum + s.income, 0);
+  let previousExpense = previousMonthHistory.reduce((sum, s) => sum + s.expense, 0);
+  let previousInvestment = previousMonthHistory.reduce((sum, s) => sum + s.investment, 0);
+
+  // If restricted, recalculate from transactions because monthlyHistory is workspace-wide
+  if (isRestricted) {
+    currentIncome = currentExpenses.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+    currentExpense = currentExpenses.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+    currentInvestment = currentExpenses.filter(t => t.type === "investment").reduce((sum, t) => sum + t.amount, 0);
+    
+    previousIncome = previousExpenses.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+    previousExpense = previousExpenses.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+    previousInvestment = previousExpenses.filter(t => t.type === "investment").reduce((sum, t) => sum + t.amount, 0);
+  }
 
   const currentBalance = currentIncome - currentExpense - currentInvestment;
   const previousBalance = previousIncome - previousExpense - previousInvestment;

@@ -4,7 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { getDaysInMonth } from "date-fns";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 const getHistoryDataSchema = z.object({
 	timeframe: z.enum(["month", "year"]),
@@ -90,6 +90,39 @@ async function getYearHistoryData(
 	year: number,
 	workspaceId?: string,
 ) {
+	const restrictions = workspaceId ? await getMemberRestrictions(userId, workspaceId) : null;
+
+	if (restrictions?.allowedCategories) {
+		const transactions = await prisma.transaction.findMany({
+			where: {
+				workspaceId,
+				date: {
+					gte: new Date(year, 0, 1),
+					lte: new Date(year, 11, 31, 23, 59, 59),
+				},
+				category: { in: restrictions.allowedCategories },
+				status: "APPROVED",
+			},
+		});
+
+		const history: HistoryData[] = Array.from({ length: 12 }, (_, i) => ({
+			year,
+			month: i,
+			expense: 0,
+			income: 0,
+			investment: 0,
+		}));
+
+		transactions.forEach((t) => {
+			const m = t.date.getMonth();
+			if (t.type === "expense") history[m].expense += t.amount;
+			else if (t.type === "income") history[m].income += t.amount;
+			else if (t.type === "investment") history[m].investment += t.amount;
+		});
+
+		return history;
+	}
+
 	const result = await prisma.yearHistory.groupBy({
 		by: ["month"],
 		where: {
@@ -142,6 +175,44 @@ async function getMonthHistoryData(
 	month: number,
 	workspaceId?: string,
 ) {
+	const restrictions = workspaceId ? await getMemberRestrictions(userId, workspaceId) : null;
+
+	if (restrictions?.allowedCategories) {
+		const startDate = new Date(year, month, 1);
+		const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+
+		const transactions = await prisma.transaction.findMany({
+			where: {
+				workspaceId,
+				date: {
+					gte: startDate,
+					lte: endDate,
+				},
+				category: { in: restrictions.allowedCategories },
+				status: "APPROVED",
+			},
+		});
+
+		const daysInMonth = getDaysInMonth(new Date(year, month));
+		const history: HistoryData[] = Array.from({ length: daysInMonth }, (_, i) => ({
+			year,
+			month,
+			day: i + 1,
+			expense: 0,
+			income: 0,
+			investment: 0,
+		}));
+
+		transactions.forEach((t) => {
+			const d = t.date.getDate() - 1;
+			if (t.type === "expense") history[d].expense += t.amount;
+			else if (t.type === "income") history[d].income += t.amount;
+			else if (t.type === "investment") history[d].investment += t.amount;
+		});
+
+		return history;
+	}
+
 	const result = await prisma.monthlyHistory.groupBy({
 		by: ["day"],
 		where: {

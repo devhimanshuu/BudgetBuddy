@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
 	const paramType = searchParams.get("type");
 
-	const validator = z.enum(["expense", "income", "investment"]).nullable();
+	const validator = z.enum(["expense", "income", "investment", "all"]).nullable();
 	const queryParams = validator.safeParse(paramType);
 	if (!queryParams.success) {
 		return Response.json(queryParams.error, {
@@ -25,11 +25,14 @@ export async function GET(request: Request) {
 		});
 	}
 
-	const type = queryParams.data;
+	const type = queryParams.data === "all" ? null : queryParams.data;
+	const restrictions = workspaceId ? await getMemberRestrictions(user.id, workspaceId) : null;
+
 	const categories = await prisma.category.findMany({
 		where: {
 			...(workspaceId ? { workspaceId } : { userId: user.id }),
 			...(type && { type }),
+			...(restrictions?.allowedCategories ? { name: { in: restrictions.allowedCategories } } : {}),
 		},
 		orderBy: {
 			name: "asc",
@@ -42,6 +45,7 @@ export async function GET(request: Request) {
 		where: {
 			...(workspaceId ? { workspaceId } : { userId: user.id }),
 			...(type && { type }),
+			...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
 		},
 		_count: {
 			_all: true,

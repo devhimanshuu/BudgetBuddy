@@ -12,7 +12,8 @@ import {
     UpdateMemberRole,
     RevokeInvite,
 } from "@/app/(dashboard)/_actions/workspaces";
-import { WorkspaceJoinQRCode } from "./WorkspaceJoinQRCode";
+import MemberPermissionsDialog from "./MemberPermissionsDialog";
+import WorkspaceJoinQRCode from "./WorkspaceJoinQRCode";
 import CreateWorkspaceDialog from "@/components/CreateWorkspaceDialog";
 import {
     Card,
@@ -138,7 +139,13 @@ export function WorkspaceMembers() {
     );
 }
 
-function WorkspaceCard({ workspace }: { workspace: any }) {
+interface Workspace {
+    id: string;
+    name: string;
+    role: string;
+}
+
+function WorkspaceCard({ workspace }: { workspace: Workspace }) {
     const queryClient = useQueryClient();
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [inviteEmail, setInviteEmail] = useState("");
@@ -272,7 +279,7 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                     </div>
                     {isAdmin && (
                         <div className="flex items-center gap-2">
-                            <WorkspaceJoinQRCode workspaceId={workspace.id} />
+                            <WorkspaceJoinQRCode workspaceId={workspace.id} workspaceName={workspace.name} />
                             <Dialog
                                 open={inviteDialogOpen}
                                 onOpenChange={setInviteDialogOpen}
@@ -484,6 +491,12 @@ function WorkspaceCard({ workspace }: { workspace: any }) {
                                                                 </SelectItem>
                                                             </SelectContent>
                                                         </Select>
+
+                                                        <MemberPermissionsDialog 
+                                                            workspaceId={workspace.id}
+                                                            memberUserId={member.userId}
+                                                            memberName={member.name}
+                                                        />
 
                                                         <AlertDialog>
                                                             <AlertDialogTrigger

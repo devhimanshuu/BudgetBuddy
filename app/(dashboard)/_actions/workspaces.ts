@@ -642,5 +642,68 @@ export async function LeaveWorkspace(workspaceId: string) {
 	revalidatePath("/manage");
 	revalidatePath("/");
 
+}
+
+export async function UpdateMemberRestrictions(
+	workspaceId: string,
+	memberUserId: string,
+	restrictions: { resourceType: string; resourceId: string }[],
+) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const canManage = await checkPermissions(workspaceId, user.id, ["ADMIN"]);
+	if (!canManage) throw new Error("Only admins can set restrictions");
+
+	const membership = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: memberUserId,
+			},
+		},
+	});
+
+	if (!membership) throw new Error("Member not found");
+
+	// Update restrictions in a transaction
+	await prisma.$transaction([
+		prisma.memberRestriction.deleteMany({
+			where: { memberId: membership.id },
+		}),
+		prisma.memberRestriction.createMany({
+			data: restrictions.map((r) => ({
+				memberId: membership.id,
+				resourceType: r.resourceType,
+				resourceId: r.resourceId,
+			})),
+		}),
+	]);
+
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "PERMISSIONS_UPDATED",
+		description: `Updated granular permissions for a member`,
+		metadata: { memberUserId, restrictionCount: restrictions.length },
+	});
+
+	revalidatePath("/manage");
 	return { success: true };
+}
+
+export async function GetMemberRestrictionsUI(workspaceId: string, memberUserId: string) {
+	const membership = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: memberUserId,
+			},
+		},
+		include: {
+			memberRestrictions: true,
+		},
+	});
+
+	return membership?.memberRestrictions || [];
 }

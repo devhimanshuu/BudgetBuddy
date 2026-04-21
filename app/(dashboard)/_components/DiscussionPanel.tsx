@@ -31,6 +31,7 @@ interface Props {
   workspaceId: string;
   trigger?: React.ReactNode;
   entityName: string;
+  onlyIcon?: boolean;
 }
 
 export default function DiscussionPanel({
@@ -39,6 +40,7 @@ export default function DiscussionPanel({
   workspaceId,
   trigger,
   entityName,
+  onlyIcon,
 }: Props) {
   const { user } = useUser();
   const queryClient = useQueryClient();
@@ -97,11 +99,21 @@ export default function DiscussionPanel({
     }}>
       <SheetTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="sm" className="relative group">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Discuss</span>
+          <Button 
+            variant="ghost" 
+            size={onlyIcon ? "icon" : "sm"} 
+            className={cn(
+                "relative group transition-all hover:bg-primary/10 hover:text-primary",
+                onlyIcon ? "h-8 w-8" : ""
+            )}
+          >
+            <MessageSquare className={cn("h-4 w-4", !onlyIcon && "mr-2")} />
+            {!onlyIcon && <span className="hidden sm:inline">Discuss</span>}
             {totalComments > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white ring-2 ring-background group-hover:scale-110 transition-transform">
+              <span className={cn(
+                  "absolute flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground ring-2 ring-background group-hover:scale-110 transition-transform",
+                  onlyIcon ? "-top-1 -right-1" : "-top-1 -right-1"
+              )}>
                 {totalComments}
               </span>
             )}
@@ -109,22 +121,22 @@ export default function DiscussionPanel({
         )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-slate-50 dark:bg-slate-950 p-0 border-l shadow-2xl">
-        <SheetHeader className="p-6 border-b bg-white dark:bg-slate-900 shadow-sm">
-          <SheetTitle className="flex items-center gap-2 text-xl font-bold">
-            <MessageCircle className="h-6 w-6 text-blue-500" />
-            Discussion: <span className="text-blue-500 font-extrabold truncate max-w-[200px]">{entityName}</span>
+        <SheetHeader className="p-6 border-b bg-gradient-to-r from-white to-primary/5 dark:from-slate-900 dark:to-primary/10 shadow-sm">
+          <SheetTitle className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
+            <MessageCircle className="h-6 w-6 text-primary animate-pulse" />
+            Discussion: <span className="text-primary truncate max-w-[200px]">{entityName}</span>
           </SheetTitle>
         </SheetHeader>
 
         <ScrollArea className="flex-1 p-6 space-y-6">
           {isLoading ? (
             <div className="flex h-full items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : comments?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-              <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <MessageSquare className="h-8 w-8 text-blue-500 opacity-50" />
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <MessageSquare className="h-8 w-8 text-primary opacity-50" />
               </div>
               <div>
                 <p className="font-semibold text-lg">No comments yet</p>
@@ -144,8 +156,8 @@ export default function DiscussionPanel({
                     onDelete={() => deleteCommentMutation.mutate(comment.id)}
                   />
                   {comment.replies && comment.replies.length > 0 && (
-                    <div className="ml-10 border-l-2 border-blue-100 dark:border-blue-900/30 pl-6 space-y-6">
-                      {comment.replies.map((reply) => (
+                    <div className="ml-10 border-l-2 border-primary/20 pl-6 space-y-6">
+                      {comment.replies.map((reply: any) => (
                         <CommentItem
                           key={reply.id}
                           comment={reply}
@@ -163,14 +175,14 @@ export default function DiscussionPanel({
 
         <div className="p-6 border-t bg-white dark:bg-slate-900 shadow-lg">
           {replyTo && (
-            <div className="flex items-center justify-between mb-3 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm border border-blue-100 dark:border-blue-800">
-              <p className="text-blue-600 dark:text-blue-400 font-medium">
+            <div className="flex items-center justify-between mb-3 px-3 py-1.5 bg-primary/10 rounded-md text-sm border border-primary/20">
+              <p className="text-primary font-medium">
                 Replying to <strong>{replyTo.name}</strong>
               </p>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0 hover:bg-blue-200 dark:hover:bg-blue-800"
+                className="h-6 w-6 p-0 hover:bg-primary/20"
                 onClick={() => setReplyTo(null)}
               >
                 <Trash2 className="h-3 w-3" />
@@ -182,14 +194,14 @@ export default function DiscussionPanel({
               placeholder="Write a comment..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="flex-1 bg-slate-50 dark:bg-slate-950 border-blue-100 focus-visible:ring-blue-500"
+              className="flex-1 bg-slate-50 dark:bg-slate-950 border-primary/10 focus-visible:ring-primary"
               disabled={addCommentMutation.isPending}
             />
             <Button 
                 type="submit" 
                 size="icon" 
                 disabled={addCommentMutation.isPending || !content.trim()}
-                className="bg-blue-600 hover:bg-blue-700 shadow-md transition-all active:scale-95"
+                className="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95 text-primary-foreground"
             >
               {addCommentMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -218,9 +230,9 @@ function CommentItem({
   return (
     <div className="group animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="flex gap-3">
-        <Avatar className="h-8 w-8 ring-2 ring-white dark:ring-slate-900 shadow-sm">
+        <Avatar className="h-8 w-8 ring-2 ring-white dark:ring-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
           <AvatarImage src={comment.userImage || ""} />
-          <AvatarFallback className="bg-blue-500 text-white text-[10px]">
+          <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
             {comment.userName?.slice(0, 2).toUpperCase() || "??"}
           </AvatarFallback>
         </Avatar>
@@ -234,35 +246,38 @@ function CommentItem({
                 {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
               </span>
             </div>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              {onReply && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
-                  onClick={onReply}
-                >
-                  <Reply className="h-3.5 w-3.5" />
-                </Button>
-              )}
-              {currentUserId === comment.userId && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
-                  onClick={onDelete}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
+            <div className={cn(
+                "flex items-center gap-1 transition-opacity",
+                "opacity-100 sm:opacity-0 sm:group-hover:opacity-100" // Visible on mobile, hover on desktop
+            )}>
+                {onReply && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 hover:bg-primary/10 hover:text-primary"
+                    onClick={onReply}
+                  >
+                    <Reply className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+                {currentUserId === comment.userId && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
+                    onClick={onDelete}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-800 ring-1 ring-black/5 dark:ring-white/5">
+              <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
+                {comment.content}
+              </p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-800">
-            <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
-              {comment.content}
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );

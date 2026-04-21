@@ -154,3 +154,32 @@ export async function logActivity({
 		console.error("Failed to log activity:", error);
 	}
 }
+
+export async function getMemberRestrictions(userId: string, workspaceId: string) {
+	const membership = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId,
+			},
+		},
+		include: {
+			memberRestrictions: true,
+		},
+	});
+
+	if (!membership || membership.role === "ADMIN") return null; // Admins have no restrictions
+
+	const categoryRestrictions = membership.memberRestrictions
+		.filter((r) => r.resourceType === "CATEGORY")
+		.map((r) => r.resourceId);
+
+	const assetRestrictions = membership.memberRestrictions
+		.filter((r) => r.resourceType === "ASSET")
+		.map((r) => r.resourceId);
+
+	return {
+		allowedCategories: categoryRestrictions.length > 0 ? categoryRestrictions : null,
+		allowedAssets: assetRestrictions.length > 0 ? assetRestrictions : null,
+	};
+}

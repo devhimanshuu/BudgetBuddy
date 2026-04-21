@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { GetFormatterForCurrency } from "@/lib/helper";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 
 export async function GET(request: Request) {
 	const user = await currentUser();
@@ -32,13 +33,22 @@ export async function GET(request: Request) {
 	const startDate = new Date(yearNum, monthNum, 1);
 	const endDate = new Date(yearNum, monthNum + 1, 0, 23, 59, 59);
 
+	const workspace = await getActiveWorkspace();
+	const workspaceId = workspace?.id;
+	const restrictions = workspaceId ? await getMemberRestrictions(user.id, workspaceId) : null;
+
+	// Check if this category is allowed
+	if (restrictions?.allowedCategories && !restrictions.allowedCategories.includes(queryParams.data.category)) {
+		return Response.json([]);
+	}
+
 	const [userSettings, transactions] = await Promise.all([
 		prisma.userSettings.findUnique({
 			where: { userId: user.id },
 		}),
 		prisma.transaction.findMany({
 			where: {
-				userId: user.id,
+				...(workspaceId ? { workspaceId } : { userId: user.id }),
 				type: "expense",
 				date: {
 					gte: startDate,
