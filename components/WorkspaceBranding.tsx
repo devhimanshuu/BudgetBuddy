@@ -25,8 +25,7 @@ export function WorkspaceBranding() {
 
     return (
         <div className={cn(
-            "w-full h-2 sm:h-3 transition-all duration-1000",
-            workspace.bannerColor || "bg-gradient-to-r from-emerald-500 to-emerald-700"
+            "w-full h-2 sm:h-3 transition-all duration-1000 bg-gradient-to-r from-emerald-500 to-emerald-700"
         )} />
     );
 }

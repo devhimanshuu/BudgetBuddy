@@ -63,7 +63,6 @@ export function WorkspaceSettingsCard() {
     const [openLeave, setOpenLeave] = useState(false);
     const [approvalThreshold, setApprovalThreshold] = useState(0);
     const [avatar, setAvatar] = useState("🏢");
-    const [bannerColor, setBannerColor] = useState("");
     const [wsType, setWsType] = useState("PERSONAL");
 
     useEffect(() => {
@@ -72,7 +71,6 @@ export function WorkspaceSettingsCard() {
             setCurrency(workspace.currency);
             setApprovalThreshold(workspace.approvalThreshold || 0);
             setAvatar(workspace.avatar || "🏢");
-            setBannerColor(workspace.bannerColor || "bg-gradient-to-r from-emerald-500 to-emerald-700");
             setWsType(workspace.type || "PERSONAL");
         }
     }, [workspace]);
@@ -83,7 +81,6 @@ export function WorkspaceSettingsCard() {
             currency: string; 
             approvalThreshold: number;
             avatar: string;
-            bannerColor: string;
             type: string;
         }) => {
             if (!workspace?.id) throw new Error("No workspace selected");
@@ -203,26 +200,6 @@ export function WorkspaceSettingsCard() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Theme Color</Label>
-                                <div className="flex flex-wrap gap-2 pt-1">
-                                    {[
-                                        "bg-gradient-to-r from-emerald-500 to-emerald-700",
-                                        "bg-gradient-to-r from-blue-500 to-blue-700",
-                                        "bg-gradient-to-r from-purple-500 to-purple-700",
-                                        "bg-gradient-to-r from-amber-500 to-amber-700",
-                                        "bg-gradient-to-r from-rose-500 to-rose-700",
-                                        "bg-gradient-to-r from-slate-700 to-slate-900"
-                                    ].map(c => (
-                                        <button 
-                                            key={c}
-                                            type="button"
-                                            onClick={() => setBannerColor(c)}
-                                            className={`w-8 h-8 rounded-full ${c} border-2 ${bannerColor === c ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-transparent'} hover:scale-105 transition-all`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -281,7 +258,6 @@ export function WorkspaceSettingsCard() {
                                 currency, 
                                 approvalThreshold,
                                 avatar,
-                                bannerColor,
                                 type: wsType
                             })}
                             disabled={mutation.isPending || (
@@ -289,7 +265,6 @@ export function WorkspaceSettingsCard() {
                                 currency === workspace.currency && 
                                 approvalThreshold === workspace.approvalThreshold &&
                                 avatar === workspace.avatar &&
-                                bannerColor === workspace.bannerColor &&
                                 wsType === workspace.type
                             )}
                         >

@@ -52,11 +52,14 @@ async function page() {
     return (
         <div className="h-full bg-background ">
             <DueTransactionsWrapper userSettings={userSettings} />
+
             <div className="border-b bg-card shadow-sm">
-                <div className="container flex flex-wrap items-center justify-between gap-6 py-4 3xl:gap-8 4xl:py-8">
-                    <div className="flex flex-col gap-3">
-                        <WorkspaceNameplate />
-                        <p className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Hello, {user.firstName}</p>
+                <div className="container flex flex-wrap items-center justify-between gap-6 py-4 sm:py-6 3xl:gap-8 4xl:py-8">
+                    <div className="flex flex-col gap-1">
+                        <p className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent italic">
+                            Hello, {user.firstName}
+                        </p>
+                        <p className="text-sm text-muted-foreground font-medium">Welcome back to your financial control center.</p>
                     </div>
 
                     <div className="flex items-center gap-3 3xl:gap-4 4xl:gap-6">
@@ -64,7 +67,7 @@ async function page() {
                             trigger={
                                 <Button
                                     variant={"outline"}
-                                    className="border-emerald-500 bg-emerald-950 text-white hover:bg-emerald-700 hover:text-white 3xl:text-base 4xl:text-lg 4xl:px-6 4xl:py-6"
+                                    className="border-emerald-500/50 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white 3xl:text-base 4xl:text-lg 4xl:px-6 4xl:py-6 font-bold"
                                 >
                                     New Income
                                 </Button>
@@ -75,7 +78,7 @@ async function page() {
                             trigger={
                                 <Button
                                     variant={"outline"}
-                                    className="border-rose-500 bg-rose-950 text-white hover:bg-rose-700 hover:text-white 3xl:text-base 4xl:text-lg 4xl:px-6 4xl:py-6"
+                                    className="border-rose-500/50 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white 3xl:text-base 4xl:text-lg 4xl:px-6 4xl:py-6 font-bold"
                                 >
                                     New Expense
                                 </Button>
@@ -86,7 +89,7 @@ async function page() {
                             trigger={
                                 <Button
                                     variant={"outline"}
-                                    className="border-blue-500 bg-blue-950 text-white hover:bg-blue-700 hover:text-white 3xl:text-base 4xl:text-lg 4xl:px-6 4xl:py-6"
+                                    className="border-blue-500/50 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white 3xl:text-base 4xl:text-lg 4xl:px-6 4xl:py-6 font-bold"
                                 >
                                     New Investment
                                 </Button>

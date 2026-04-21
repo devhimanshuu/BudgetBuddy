@@ -69,7 +69,6 @@ model Workspace {
   
   // Branding fields
   avatar                String?   @default("🏢")
-  bannerColor           String?   @default("bg-gradient-to-r from-emerald-500 to-emerald-700")
   description           String?
   type                  String    @default("PERSONAL") // PERSONAL, HOME, STARTUP, VACATION
 
