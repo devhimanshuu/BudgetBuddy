@@ -56,7 +56,7 @@ export interface WorkspaceJoinQRCodeProps {
     workspaceName: string;
 }
 
-export default function WorkspaceJoinQRCode({ 
+export default function WorkspaceJoinQRCode({
     workspaceId,
     workspaceName,
 }: WorkspaceJoinQRCodeProps) {
@@ -88,14 +88,14 @@ export default function WorkspaceJoinQRCode({
         try {
             // Wait a bit for the SVG to render if it just appeared
             await new Promise((resolve) => setTimeout(resolve, 500));
-            
-            const dataUrl = await toPng(cardRef.current, { 
+
+            const dataUrl = await toPng(cardRef.current, {
                 cacheBust: true,
                 style: {
                     transform: 'scale(1)',
                 }
             });
-            
+
             const blob = await (await fetch(dataUrl)).blob();
             const file = new File([blob], `join-${workspaceName}.png`, { type: "image/png" });
 
@@ -134,7 +134,7 @@ export default function WorkspaceJoinQRCode({
             </DialogTrigger>
             <DialogContent className="sm:max-w-md lg:max-w-3xl bg-gradient-to-b from-background to-primary/5 border-primary/20 overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
-                
+
                 <DialogHeader className="pt-4">
                     <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
                         <div className="p-2 bg-primary/10 rounded-xl">
@@ -225,23 +225,23 @@ export default function WorkspaceJoinQRCode({
 
                     {/* Hidden Card for Exporting */}
                     <div className="fixed -left-[2000px] top-0 overflow-hidden">
-                        <div 
+                        <div
                             ref={cardRef}
-                            className="bg-gradient-to-br from-primary to-primary/80 p-8 w-[400px] rounded-[32px] flex flex-col items-center gap-6 shadow-2xl text-primary-foreground"
+                            className="bg-slate-950 p-8 w-[400px] rounded-[32px] flex flex-col items-center gap-6 shadow-2xl text-white border border-white/10"
                             style={{ fontFamily: 'Inter, sans-serif' }}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="bg-white p-2 rounded-2xl">
-                                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                                        <Smartphone className="w-5 h-5 text-primary-foreground" />
+                                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <Smartphone className="w-5 h-5 text-white" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-xl font-black tracking-tight leading-none uppercase">BudgetBuddy</span>
-                                    <span className="text-[10px] font-bold opacity-70 tracking-widest text-primary-foreground/70">WORKSPACE COLLAB</span>
+                                    <span className="text-[10px] font-bold opacity-70 tracking-widest text-blue-400">WORKSPACE COLLAB</span>
                                 </div>
                             </div>
-                            
+
                             <div className="flex flex-col items-center gap-2 text-center">
                                 <h3 className="text-2xl font-bold leading-tight">Join {workspaceName}</h3>
                                 <p className="text-sm opacity-80 max-w-[280px]">
@@ -255,8 +255,17 @@ export default function WorkspaceJoinQRCode({
                                         value={data.inviteLink}
                                         size={200}
                                         level="H"
-                                        includeMargin={false}
-                                        fgColor="hsl(var(--primary))"
+                                        includeMargin={true}
+                                        fgColor="#0f172a"
+                                        bgColor="#FFFFFF"
+                                        imageSettings={{
+                                            src: "/icon.png",
+                                            x: undefined,
+                                            y: undefined,
+                                            height: 24,
+                                            width: 24,
+                                            excavate: true,
+                                        }}
                                     />
                                 )}
                             </div>
@@ -276,8 +285,8 @@ export default function WorkspaceJoinQRCode({
                     <div className="w-full lg:w-1/2 flex items-center justify-center">
                         <div className="relative group">
                             <div className="absolute -inset-4 bg-primary/20 rounded-[2rem] blur-2xl group-hover:bg-primary/30 transition-all duration-500 opacity-50" />
-                            
-                            <div className="relative bg-white p-4 rounded-3xl shadow-2xl border border-white/20">
+
+                            <div className="relative bg-white p-2 sm:p-3 rounded-[2.5rem] shadow-2xl border border-white/20 ring-4 ring-black/5">
                                 {isLoading || isRefetching ? (
                                     <div className="h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] lg:h-[260px] lg:w-[260px] flex items-center justify-center">
                                         <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
@@ -287,15 +296,23 @@ export default function WorkspaceJoinQRCode({
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ type: "spring", damping: 15 }}
-                                        className="h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] lg:h-[260px] lg:w-[260px]"
+                                        className="h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] lg:h-[260px] lg:w-[260px] p-2"
                                     >
                                         <QRCodeSVG
                                             value={data.inviteLink}
                                             style={{ width: "100%", height: "100%" }}
                                             level="H"
-                                            includeMargin={false}
-                                            fgColor="hsl(var(--primary))"
+                                            includeMargin={true}
+                                            fgColor="#0f172a"
                                             bgColor="#FFFFFF"
+                                            imageSettings={{
+                                                src: "/icon.png",
+                                                x: undefined,
+                                                y: undefined,
+                                                height: 30,
+                                                width: 30,
+                                                excavate: true,
+                                            }}
                                         />
                                     </motion.div>
                                 ) : (
@@ -305,7 +322,7 @@ export default function WorkspaceJoinQRCode({
                                 )}
 
                                 {/* Floating scan indicator */}
-                                <motion.div 
+                                <motion.div
                                     className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-bold shadow-lg"
                                     animate={{ y: [0, -4, 0] }}
                                     transition={{ repeat: Infinity, duration: 2 }}
