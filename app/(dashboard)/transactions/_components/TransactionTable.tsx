@@ -59,6 +59,7 @@ import { calculateLevel } from "@/lib/gamification-client";
 import { ApproveTransaction } from "../_actions/approveTransaction";
 import { RejectTransaction } from "../_actions/rejectTransaction";
 import { Check, X as XIcon, Clock, CheckCircle2, XCircle } from "lucide-react";
+import DiscussionPanel from "../../_components/DiscussionPanel";
 
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 
@@ -301,6 +302,23 @@ const columns: ColumnDef<TransactionHistoryRow>[] = [
         {row.original.status}
       </div>
     ),
+  },
+  {
+    id: "discussion",
+    header: "Discussion",
+    cell: ({ row, table }) => {
+      const { userSettings } = table.options.meta as any;
+      return (
+        <DiscussionPanel
+          entityName={row.original.description}
+          transactionId={row.original.id}
+          workspaceId={userSettings?.workspaceId}
+        />
+      );
+    },
+    meta: {
+      className: "w-[100px]",
+    },
   },
   {
     id: "actions",

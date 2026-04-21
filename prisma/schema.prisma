@@ -140,6 +140,7 @@ model Transaction {
   deletedAt    DateTime?
   status      String   @default("APPROVED") // PENDING, APPROVED, REJECTED
   workspace    Workspace?           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  comments     Comment[]
 
   @@index([workspaceId, date, deletedAt])
   @@index([workspaceId, category, deletedAt])
@@ -231,6 +232,7 @@ model Budget {
   deletedAt    DateTime?
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  comments  Comment[]
 
   @@id([userId, category, month, year])
   @@index([workspaceId, month, year, deletedAt])
@@ -500,5 +502,34 @@ model BudgetTemplateEntry {
   template     BudgetTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([templateId])
+}
+
+model Comment {
+  id            String   @id @default(uuid())
+  content       String
+  userId        String
+  userName      String?
+  userImage     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  budgetUserId   String?
+  budgetCategory String?
+  budgetMonth    Int?
+  budgetYear     Int?
+  budget         Budget? @relation(fields: [budgetUserId, budgetCategory, budgetMonth, budgetYear], references: [userId, category, month, year], onDelete: Cascade)
+
+  // Threading
+  parentId      String?
+  parent        Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies       Comment[] @relation("CommentReplies")
+
+  @@index([transactionId])
+  @@index([budgetUserId, budgetCategory, budgetMonth, budgetYear])
+  @@index([parentId])
 }
 

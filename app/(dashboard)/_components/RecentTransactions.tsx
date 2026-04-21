@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { cn } from "@/lib/utils";
+import DiscussionPanel from "./DiscussionPanel";
 
 interface Transaction {
    id: string;
@@ -63,11 +64,18 @@ export default function RecentTransactions({ userSettings }: { userSettings: any
                            </div>
                         </div>
                      </div>
-                     <div className={cn(
-                        "font-bold",
-                        t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-red-600' : 'text-indigo-600'
-                     )}>
-                        {t.type === 'income' ? '+' : '-'}{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(t.amount)}
+                     <div className="flex items-center gap-2">
+                        <div className={cn(
+                           "font-bold",
+                           t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-red-600' : 'text-indigo-600'
+                        )}>
+                           {t.type === 'income' ? '+' : '-'}{isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(t.amount)}
+                        </div>
+                        <DiscussionPanel
+                           entityName={t.description || t.category}
+                           transactionId={t.id}
+                           workspaceId={userSettings?.workspaceId}
+                        />
                      </div>
                   </div>
                ))}

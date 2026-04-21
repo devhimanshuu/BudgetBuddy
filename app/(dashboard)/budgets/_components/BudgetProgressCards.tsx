@@ -22,6 +22,7 @@ import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { History as HistoryIcon } from "lucide-react";
 import BudgetChart from "./BudgetChart";
 import CoverOverspendingDialog from "./CoverOverspendingDialog";
+import DiscussionPanel from "../../_components/DiscussionPanel";
 
 interface BudgetProgressProps {
   userSettings: UserSettings;
@@ -57,6 +58,12 @@ export default function BudgetProgressCards({
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
   }, [userSettings.currency]);
+
+  const { data: enrichedSettings } = useQuery({
+    queryKey: ["userSettings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+  const workspaceId = enrichedSettings?.workspaceId;
 
   const { data: budgetProgress, isFetching } = useQuery<BudgetProgress[]>({
     queryKey: ["budget-progress", month, year],
@@ -138,6 +145,17 @@ export default function BudgetProgressCards({
                           />
                         </PermissionGuard>
                       )}
+
+                      <DiscussionPanel
+                        entityName={budget.category}
+                        workspaceId={workspaceId}
+                        budgetData={{
+                          userId: userSettings.userId,
+                          category: budget.category,
+                          month,
+                          year,
+                        }}
+                      />
 
                       <BudgetTransactionDialog
                         category={budget.category}
