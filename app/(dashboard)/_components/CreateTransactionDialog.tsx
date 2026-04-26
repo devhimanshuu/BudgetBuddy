@@ -44,8 +44,9 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateTransaction } from "../_actions/transaction";
+import { GetWorkspaceMembers, GetActiveWorkspace } from "../_actions/workspaces";
 import { toast } from "sonner";
 import { DateToUTCDate } from "@/lib/helper";
 import { Category } from "@prisma/client";
@@ -55,6 +56,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCheckBudgetAlert } from "@/lib/useCheckBudgetAlert";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAchievementToast } from "@/hooks/use-achievement-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@clerk/nextjs";
 
 interface Props {
   trigger?: ReactNode;
@@ -73,6 +76,7 @@ const CreateTransactionDialog = ({
   initialCategory,
   initialCategoryIcon,
 }: Props) => {
+  const { user } = useUser();
   const form = useForm<CreateTransactionSchemaType>({
     resolver: zodResolver(CreateTransactionSchema),
     defaultValues: {
@@ -81,6 +85,7 @@ const CreateTransactionDialog = ({
       description: "",
       amount: 0,
       category: initialCategory || "",
+      billSplits: [],
     },
   });
 
@@ -89,6 +94,7 @@ const CreateTransactionDialog = ({
     name: "splits",
   });
   const [isSplitMode, setIsSplitMode] = useState(false);
+  const [isMemberSplit, setIsMemberSplit] = useState(false);
 
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -105,6 +111,17 @@ const CreateTransactionDialog = ({
       fileType: string;
     }[]
   >([]);
+
+  const { data: activeWorkspace } = useQuery({
+    queryKey: ["active-workspace"],
+    queryFn: () => GetActiveWorkspace(),
+  });
+
+  const { data: members } = useQuery({
+    queryKey: ["workspace-members", activeWorkspace?.id],
+    queryFn: () => GetWorkspaceMembers(activeWorkspace!.id),
+    enabled: !!activeWorkspace?.id && isMemberSplit,
+  });
 
   const handleCategoryChange = useCallback(
     (value: Category) => {
@@ -170,9 +187,12 @@ const CreateTransactionDialog = ({
         amount: 0,
         date: new Date(),
         category: "",
+        billSplits: [],
       });
       setSelectedTags([]);
       setAttachments([]);
+      setIsMemberSplit(false);
+      setIsSplitMode(false);
 
       queryClient.invalidateQueries({
         queryKey: ["overview"],
@@ -208,6 +228,17 @@ const CreateTransactionDialog = ({
         values.splits = undefined;
       }
 
+      if (isMemberSplit) {
+        const total = values.amount;
+        const memberTotal = values.billSplits?.reduce((a, b) => a + b.amount, 0) || 0;
+        if (memberTotal > total) {
+          toast.error(`Member split amounts ($${memberTotal.toFixed(2)}) cannot exceed total amount ($${total.toFixed(2)})`);
+          return;
+        }
+      } else {
+        values.billSplits = undefined;
+      }
+
       toast.loading("Creating transaction...", { id: "create-transaction" });
       mutate({
         ...values,
@@ -215,9 +246,10 @@ const CreateTransactionDialog = ({
         tags: selectedTags.map((tag) => tag.id),
         attachments: attachments,
         splits: isSplitMode ? values.splits : undefined,
+        billSplits: isMemberSplit ? values.billSplits : undefined,
       });
     },
-    [mutate, selectedTags, attachments, isSplitMode]
+    [mutate, selectedTags, attachments, isSplitMode, isMemberSplit]
   );
 
   return (
@@ -437,6 +469,123 @@ const CreateTransactionDialog = ({
                     <div className="text-sm text-muted-foreground mt-2">
                       Total Split: {form.watch("splits")?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0} / {form.watch("amount")}
                     </div>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2 py-4 border-b border-muted/50 my-4">
+                  <Switch
+                    id="member-split"
+                    checked={isMemberSplit}
+                    onCheckedChange={(checked) => {
+                      setIsMemberSplit(checked);
+                      if (!checked) {
+                        form.setValue("billSplits", []);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="member-split" className="font-semibold">Split with Members (Who owes me?)</Label>
+                </div>
+
+                {isMemberSplit && (
+                  <div className="space-y-4 mb-4 p-4 bg-muted/30 rounded-2xl border border-dashed border-primary/20">
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Select members who owe you money for this transaction. 
+                      You can split by amount or divide equally.
+                    </p>
+                    <div className="space-y-3">
+                      {members?.filter(m => m.userId !== user?.id).map((member) => {
+                        const split = form.watch("billSplits")?.find(s => s.debtorId === member.userId);
+                        const isSelected = !!split;
+
+                        return (
+                          <div key={member.userId} className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl hover:bg-background/40 transition-colors">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 border border-background shrink-0">
+                                <AvatarImage src={member.imageUrl || ""} />
+                                <AvatarFallback className="text-[9px] sm:text-[10px] bg-primary/10 text-primary">
+                                  {member.name.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold leading-none truncate">{member.name}</p>
+                                <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-1">Owes you</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 ml-auto">
+                              {isSelected ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="relative">
+                                    <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      className="h-7 w-20 sm:w-24 pl-4 text-xs sm:text-sm"
+                                      value={split.amount || ""}
+                                      onChange={(e) => {
+                                        const val = Number(e.target.value);
+                                        const currentSplits = form.getValues("billSplits") || [];
+                                        form.setValue("billSplits", currentSplits.map(s => 
+                                          s.debtorId === member.userId ? { ...s, amount: val } : s
+                                        ));
+                                      }}
+                                    />
+                                  </div>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-7 w-7 text-destructive"
+                                    onClick={() => {
+                                      const currentSplits = form.getValues("billSplits") || [];
+                                      form.setValue("billSplits", currentSplits.filter(s => s.debtorId !== member.userId));
+                                    }}
+                                  >
+                                    <Trash className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-7 text-xs"
+                                  onClick={() => {
+                                    const currentSplits = form.getValues("billSplits") || [];
+                                    form.setValue("billSplits", [...currentSplits, { 
+                                      debtorId: member.userId, 
+                                      debtorName: member.name,
+                                      amount: 0 
+                                    }]);
+                                  }}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" /> Add
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {form.watch("billSplits") && form.watch("billSplits")!.length > 0 && (
+                      <div className="pt-3 mt-3 border-t border-primary/10 flex justify-between items-center">
+                         <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="h-auto p-0 text-xs text-primary"
+                          onClick={() => {
+                            const count = form.getValues("billSplits")?.length || 0;
+                            if (count > 0) {
+                              const equalAmount = Number((watchedAmount / (count + 1)).toFixed(2));
+                              const currentSplits = form.getValues("billSplits") || [];
+                              form.setValue("billSplits", currentSplits.map(s => ({ ...s, amount: equalAmount })));
+                            }
+                          }}
+                         >
+                          Split Equally
+                         </Button>
+                         <div className="text-xs font-bold">
+                           Total Owed: ${form.watch("billSplits")?.reduce((a, b) => a + b.amount, 0).toFixed(2)}
+                         </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-2">

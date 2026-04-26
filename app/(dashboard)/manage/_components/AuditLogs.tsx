@@ -17,8 +17,8 @@ import {
   User,
   Clock,
   ExternalLink,
-  Loader2,
   CalendarDays,
+  HandCoins,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,6 +42,10 @@ const ACTIVITY_TYPES = [
   { value: "MEMBER_INVITED", label: "Member Invited" },
   { value: "MEMBER_JOINED", label: "Member Joined" },
   { value: "PERMISSIONS_UPDATED", label: "Permissions Changed" },
+  { value: "OWNERSHIP_TRANSFERRED", label: "Ownership Transferred" },
+  { value: "BUDGET_PROPOSED", label: "Budget Proposal" },
+  { value: "BUDGET_FINALIZED", label: "Budget Finalized" },
+  { value: "SETTLEMENT_PAID", label: "Debt Settled" },
 ];
 
 export function AuditLogs({ workspaceId }: { workspaceId: string }) {
@@ -104,7 +108,7 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
               {activities.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground italic">
                   <div className="p-4 bg-muted/20 rounded-full mb-4">
-                     <History className="w-8 h-8 opacity-20" />
+                    <History className="w-8 h-8 opacity-20" />
                   </div>
                   No activities found matching your filters.
                 </div>
@@ -144,9 +148,9 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
                         </div>
                         {log.metadata && (
                           <div className="hidden sm:block">
-                             <Badge variant="secondary" className="text-[10px] bg-primary/5 text-primary">
-                                Details
-                             </Badge>
+                            <Badge variant="secondary" className="text-[10px] bg-primary/5 text-primary">
+                              Details
+                            </Badge>
                           </div>
                         )}
                       </div>
@@ -158,9 +162,9 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
           </SkeletonWrapper>
         </CardContent>
         <div className="p-3 bg-muted/20 border-t flex items-center justify-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                END OF ACTIVITY LOG
-            </p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+            END OF ACTIVITY LOG
+          </p>
         </div>
       </Card>
     </PermissionGuard>
@@ -168,16 +172,18 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
 }
 
 function getTypeColor(type: string) {
-  if (type.includes("CREATED")) return "bg-emerald-500/10 text-emerald-500";
-  if (type.includes("DELETED")) return "bg-red-500/10 text-red-500";
-  if (type.includes("UPDATED")) return "bg-blue-500/10 text-blue-500";
-  if (type.includes("PERMISSIONS")) return "bg-amber-500/10 text-amber-500";
+  if (type.includes("CREATED") || type.includes("FINALIZED") || type.includes("PAID") || type.includes("JOINED")) return "bg-emerald-500/10 text-emerald-500";
+  if (type.includes("DELETED") || type.includes("REJECTED")) return "bg-red-500/10 text-red-500";
+  if (type.includes("UPDATED") || type.includes("TRANSFERRED")) return "bg-blue-500/10 text-blue-500";
+  if (type.includes("PERMISSIONS") || type.includes("PROPOSED")) return "bg-amber-500/10 text-amber-500";
   return "bg-slate-500/10 text-slate-500";
 }
 
 function ActivityIcon({ type }: { type: string }) {
   if (type.includes("TRANSACTION")) return <ExternalLink className="w-4 h-4" />;
-  if (type.includes("MEMBER")) return <User className="w-4 h-4" />;
+  if (type.includes("MEMBER") || type.includes("OWNERSHIP")) return <User className="w-4 h-4" />;
   if (type.includes("PERMISSIONS")) return <Clock className="w-4 h-4" />;
+  if (type.includes("BUDGET")) return <CalendarDays className="w-4 h-4" />;
+  if (type.includes("SETTLEMENT")) return <HandCoins className="w-4 h-4" />;
   return <Filter className="w-4 h-4" />;
 }

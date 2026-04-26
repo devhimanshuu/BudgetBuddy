@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DeleteWorkspace, LeaveWorkspace, UpdateWorkspace, GetActiveWorkspace } from "@/app/(dashboard)/_actions/workspaces";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeleteWorkspace, LeaveWorkspace, UpdateWorkspace, GetActiveWorkspace, TransferOwnership } from "@/app/(dashboard)/_actions/workspaces";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,26 +25,27 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
 } from "@/components/ui/command";
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
+import { WorkspaceMemberSelector } from "./WorkspaceMemberSelector";
 
 export function WorkspaceSettingsCard() {
     const router = useRouter();
@@ -62,8 +63,25 @@ export function WorkspaceSettingsCard() {
     const [openDelete, setOpenDelete] = useState(false);
     const [openLeave, setOpenLeave] = useState(false);
     const [approvalThreshold, setApprovalThreshold] = useState(0);
+    const [targetOwnerId, setTargetOwnerId] = useState<string | undefined>();
     const [avatar, setAvatar] = useState("🏢");
     const [wsType, setWsType] = useState("PERSONAL");
+
+    const transferMutation = useMutation({
+        mutationFn: (newOwnerId: string) => {
+            if (!workspace?.id) throw new Error("No workspace selected");
+            return TransferOwnership(workspace.id, newOwnerId);
+        },
+        onSuccess: () => {
+            toast.success("Ownership transferred successfully!");
+            queryClient.invalidateQueries({ queryKey: ["active-workspace"] });
+            queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+            setTargetOwnerId(undefined);
+        },
+        onError: (e: Error) => {
+            toast.error(e.message || "Failed to transfer ownership");
+        }
+    });
 
     useEffect(() => {
         if (workspace) {
@@ -76,9 +94,9 @@ export function WorkspaceSettingsCard() {
     }, [workspace]);
 
     const mutation = useMutation({
-        mutationFn: (data: { 
-            name: string; 
-            currency: string; 
+        mutationFn: (data: {
+            name: string;
+            currency: string;
             approvalThreshold: number;
             avatar: string;
             type: string;
@@ -152,7 +170,7 @@ export function WorkspaceSettingsCard() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="ws-name">Workspace Name</Label>
-                                <Input 
+                                <Input
                                     id="ws-name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
@@ -179,7 +197,7 @@ export function WorkspaceSettingsCard() {
                             <div className="space-y-2">
                                 <Label>Workspace Avatar (Emoji)</Label>
                                 <div className="flex gap-2">
-                                    <Input 
+                                    <Input
                                         value={avatar}
                                         onChange={(e) => setAvatar(e.target.value)}
                                         className="text-2xl text-center w-16 h-12"
@@ -187,7 +205,7 @@ export function WorkspaceSettingsCard() {
                                     />
                                     <div className="flex flex-wrap gap-1 items-center bg-background/30 p-1 rounded-lg border">
                                         {["🏠", "🚀", "🏖️", "📂", "💼", "💎", "🏡"].map(e => (
-                                            <button 
+                                            <button
                                                 key={e}
                                                 type="button"
                                                 onClick={() => setAvatar(e)}
@@ -239,7 +257,7 @@ export function WorkspaceSettingsCard() {
 
                         <div className="space-y-2">
                             <Label htmlFor="ws-threshold">Transaction Approval Threshold</Label>
-                            <Input 
+                            <Input
                                 id="ws-threshold"
                                 type="number"
                                 value={approvalThreshold}
@@ -251,18 +269,18 @@ export function WorkspaceSettingsCard() {
                             </p>
                         </div>
 
-                        <Button 
+                        <Button
                             className="w-full gap-2 transition-all duration-300 h-11 text-lg font-bold"
-                            onClick={() => mutation.mutate({ 
-                                name, 
-                                currency, 
+                            onClick={() => mutation.mutate({
+                                name,
+                                currency,
                                 approvalThreshold,
                                 avatar,
                                 type: wsType
                             })}
                             disabled={mutation.isPending || (
-                                name === workspace.name && 
-                                currency === workspace.currency && 
+                                name === workspace.name &&
+                                currency === workspace.currency &&
                                 approvalThreshold === workspace.approvalThreshold &&
                                 avatar === workspace.avatar &&
                                 wsType === workspace.type
@@ -290,6 +308,56 @@ export function WorkspaceSettingsCard() {
                     <Separator className="bg-destructive/10" />
 
                     <div className="flex flex-col gap-3">
+                        {isOwner && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="outline" className="w-full gap-2 border-primary/20 hover:bg-primary/5">
+                                        <Globe className="w-4 h-4" />
+                                        Transfer Ownership
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="w-[95vw] max-w-[450px] rounded-3xl border-primary/20 bg-gradient-to-b from-background to-primary/5 backdrop-blur-2xl">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tight">
+                                            Transfer Ownership
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-foreground/70 leading-relaxed">
+                                            Select another <strong>Admin</strong> to take over as the owner of this workspace.
+                                            You will remain an Admin, but you will lose the ability to delete the workspace or transfer ownership again.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+
+                                    <div className="py-4 space-y-4">
+                                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Select New Owner</Label>
+                                        <div className="rounded-xl border bg-background/50 p-2 max-h-[200px] overflow-y-auto">
+                                            <WorkspaceMemberSelector
+                                                workspaceId={workspace.id}
+                                                onSelect={(userId) => setTargetOwnerId(userId)}
+                                                selectedUserId={targetOwnerId}
+                                                currentOwnerId={user?.id}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <AlertDialogFooter className="flex-row gap-3">
+                                        <AlertDialogCancel className="flex-1 rounded-2xl h-12">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={() => {
+                                                if (targetOwnerId) {
+                                                    transferMutation.mutate(targetOwnerId);
+                                                }
+                                            }}
+                                            disabled={!targetOwnerId || transferMutation.isPending}
+                                            className="flex-1 bg-primary hover:bg-primary/90 rounded-2xl h-12 gap-2 shadow-lg"
+                                        >
+                                            {transferMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                                            <span className="font-bold text-primary-foreground">Transfer</span>
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+
                         {isOwner ? (
                             <AlertDialog open={openDelete} onOpenChange={(o) => {
                                 setOpenDelete(o);
@@ -317,7 +385,7 @@ export function WorkspaceSettingsCard() {
                                                 <Label htmlFor="confirm-name" className="text-xs uppercase tracking-widest font-bold text-muted-foreground/80">
                                                     Type the workspace name below to confirm:
                                                 </Label>
-                                                <Input 
+                                                <Input
                                                     id="confirm-name"
                                                     value={confirmName}
                                                     onChange={(e) => setConfirmName(e.target.value)}

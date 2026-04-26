@@ -12,7 +12,10 @@ import BudgetProgressCards from "./BudgetProgressCards";
 import SweepBanner from "./SweepBanner";
 import AutoSuggestBudgetButton from "./AutoSuggestBudgetButton";
 import BudgetGridView from "./BudgetGridView";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import BudgetProposalsDialog from "./BudgetProposalsDialog";
+import ProposeBudgetDialog from "./ProposeBudgetDialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GetActiveWorkspace } from "../../_actions/workspaces";
 import { toast } from "sonner";
 import {
   Select,
@@ -196,8 +199,16 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                 </Button>
               </div>
 
-              <PermissionGuard>
-                <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
+                <ProposeBudgetDialog month={selectedMonth} year={selectedYear} />
+                
+                <PermissionGuard allowedRoles={["ADMIN"]}>
+                  <BudgetProposalsDialog month={selectedMonth} year={selectedYear} />
+                </PermissionGuard>
+
+                <div className="hidden sm:block w-[1px] h-8 bg-border mx-1" />
+                
+                <PermissionGuard allowedRoles={["ADMIN", "EDITOR"]}>
                   {/* Management & View Actions */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -268,11 +279,11 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                     month={selectedMonth}
                     year={selectedYear}
                   />
-                </div>
-              </PermissionGuard>
+                </PermissionGuard>
+              </div>
             </div>
+          </div>
         </div>
-      </div >
 
       <div className="container py-4 md:py-6">
         <SweepBanner

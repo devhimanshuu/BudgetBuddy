@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AuditLogs } from "./_components/AuditLogs";
 import { WorkspaceExport } from "./_components/WorkspaceExport";
+import Settlements from "./_components/Settlements";
 import { GetActiveWorkspace } from "../_actions/workspaces";
 import { WorkspaceNameplate } from "@/components/WorkspaceBranding";
 import {
@@ -132,6 +133,10 @@ const ManagePage = () => {
         </div>
 
         <WorkspaceMembers />
+
+        {workspace && (
+          <Settlements workspaceId={workspace.id} />
+        )}
 
         {workspace && (
           <AuditLogs workspaceId={workspace.id} />

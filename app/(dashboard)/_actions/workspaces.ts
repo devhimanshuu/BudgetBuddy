@@ -716,3 +716,45 @@ export async function GetMemberRestrictionsUI(workspaceId: string, memberUserId:
 
 	return membership?.memberRestrictions || [];
 }
+
+export async function TransferOwnership(workspaceId: string, newOwnerUserId: string) {
+	const user = await currentUser();
+	if (!user) throw new Error("Unauthorized");
+
+	const workspace = await prisma.workspace.findUnique({
+		where: { id: workspaceId },
+	});
+
+	if (!workspace) throw new Error("Workspace not found");
+	if (workspace.ownerId !== user.id) throw new Error("Only the current owner can transfer ownership");
+
+	// Verify new owner is already an ADMIN
+	const membership = await prisma.workspaceMember.findUnique({
+		where: {
+			workspaceId_userId: {
+				workspaceId,
+				userId: newOwnerUserId,
+			},
+		},
+	});
+
+	if (!membership || membership.role !== "ADMIN") {
+		throw new Error("New owner must be an Admin of the workspace");
+	}
+
+	await prisma.workspace.update({
+		where: { id: workspaceId },
+		data: { ownerId: newOwnerUserId },
+	});
+
+	await logActivity({
+		workspaceId,
+		userId: user.id,
+		type: "OWNERSHIP_TRANSFERRED",
+		description: `Transferred workspace ownership to another administrator`,
+		metadata: { from: user.id, to: newOwnerUserId },
+	});
+
+	revalidatePath("/manage");
+	return { success: true };
+}

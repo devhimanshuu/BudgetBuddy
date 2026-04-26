@@ -49,6 +49,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		tags,
 		attachments,
 		splits,
+		billSplits,
 	} = parsedBody.data;
 
 	// Determine transaction status
@@ -120,6 +121,18 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 					categoryIcon: split.categoryIcon,
 					amount: split.amount,
 					percentage: split.percentage,
+				})),
+			});
+		}
+
+		// Create bill splits if provided
+		if (billSplits && billSplits.length > 0) {
+			await tx.billSplit.createMany({
+				data: billSplits.map((bs) => ({
+					transactionId: transaction.id,
+					debtorId: bs.debtorId,
+					debtorName: bs.debtorName,
+					amount: bs.amount,
 				})),
 			});
 		}

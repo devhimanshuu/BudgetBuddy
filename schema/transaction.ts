@@ -28,6 +28,15 @@ export const CreateTransactionSchema = z.object({
       })
     )
     .optional(),
+  billSplits: z
+    .array(
+      z.object({
+        debtorId: z.string(),
+        debtorName: z.string().optional(),
+        amount: z.number().positive(),
+      })
+    )
+    .optional(),
 });
 
 export type CreateTransactionSchemaType = z.infer<

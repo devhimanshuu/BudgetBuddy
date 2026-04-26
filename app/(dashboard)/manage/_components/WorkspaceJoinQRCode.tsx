@@ -28,9 +28,9 @@ import {
     RefreshCw,
     Share2,
     Check,
-    Smartphone,
     Users2,
     ShieldCheck,
+    PiggyBank,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -137,8 +137,8 @@ export default function WorkspaceJoinQRCode({
 
                 <DialogHeader className="pt-4">
                     <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                            <Smartphone className="h-6 w-6 text-primary" />
+                        <div className="p-2 bg-amber-500/10 rounded-xl">
+                            <PiggyBank className="h-6 w-6 text-amber-500" />
                         </div>
                         Quick Join
                     </DialogTitle>
@@ -231,14 +231,14 @@ export default function WorkspaceJoinQRCode({
                             style={{ fontFamily: 'Inter, sans-serif' }}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="bg-white p-2 rounded-2xl">
-                                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                        <Smartphone className="w-5 h-5 text-white" />
+                                <div className="bg-white p-2 rounded-2xl shadow-sm">
+                                    <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+                                        <PiggyBank className="w-5 h-5 text-white" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-xl font-black tracking-tight leading-none uppercase">BudgetBuddy</span>
-                                    <span className="text-[10px] font-bold opacity-70 tracking-widest text-blue-400">WORKSPACE COLLAB</span>
+                                    <span className="text-xl font-black tracking-tight leading-none uppercase bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Budget Buddy</span>
+                                    <span className="text-[10px] font-bold opacity-70 tracking-widest text-amber-500">WORKSPACE COLLAB</span>
                                 </div>
                             </div>
 

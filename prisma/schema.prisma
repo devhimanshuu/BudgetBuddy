@@ -66,6 +66,7 @@ model Workspace {
   beneficiaries         Beneficiary[]
   approvalThreshold Float @default(0)
   budgetTemplates       BudgetTemplate[]
+  budgetProposals       BudgetProposal[]
   
   // Branding fields
   avatar                String?   @default("🏢")
@@ -144,6 +145,7 @@ model Transaction {
   tags         TransactionTag[]
   attachments  Attachment[]
   splits       TransactionSplit[]
+  billSplits   BillSplit[]
   history      TransactionHistory[]
   deletedAt    DateTime?
   status      String   @default("APPROVED") // PENDING, APPROVED, REJECTED
@@ -552,5 +554,43 @@ model MemberRestriction {
   createdAt       DateTime @default(now())
 
   @@index([memberId])
+}
+
+model BudgetProposal {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+  userName    String?
+  category    String
+  categoryIcon String
+  amount      Float
+  month       Int
+  year        Int
+  notes       String?
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, month, year])
+  @@index([userId])
+}
+
+model BillSplit {
+  id            String   @id @default(uuid())
+  transactionId String
+  debtorId      String   // Who owes money
+  debtorName    String?
+  amount        Float    // Amount owed
+  isPaid        Boolean  @default(false)
+  paidAt        DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@index([debtorId])
 }
 
