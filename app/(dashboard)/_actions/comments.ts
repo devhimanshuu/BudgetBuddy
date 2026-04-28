@@ -14,6 +14,7 @@ export async function AddComment(params: {
     month: number;
     year: number;
   };
+  proposalId?: string;
   parentId?: string;
   workspaceId: string;
 }) {
@@ -35,6 +36,7 @@ export async function AddComment(params: {
       budgetCategory: params.budgetData?.category,
       budgetMonth: params.budgetData?.month,
       budgetYear: params.budgetData?.year,
+      proposalId: params.proposalId,
       parentId: params.parentId,
     },
   });
@@ -62,6 +64,7 @@ export async function AddComment(params: {
 
   revalidatePath("/transactions");
   revalidatePath("/budgets");
+  revalidatePath("/manage");
 
   return comment;
 }
@@ -74,6 +77,7 @@ export async function GetComments(params: {
     month: number;
     year: number;
   };
+  proposalId?: string;
 }) {
   const comments = await prisma.comment.findMany({
     where: {
@@ -82,6 +86,7 @@ export async function GetComments(params: {
       budgetCategory: params.budgetData?.category,
       budgetMonth: params.budgetData?.month,
       budgetYear: params.budgetData?.year,
+      proposalId: params.proposalId,
       deletedAt: null,
     },
     orderBy: {
@@ -128,6 +133,7 @@ export async function DeleteComment(commentId: string, workspaceId: string) {
 
   revalidatePath("/transactions");
   revalidatePath("/budgets");
+  revalidatePath("/manage");
 
   return { success: true };
 }

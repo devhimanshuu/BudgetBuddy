@@ -94,8 +94,15 @@ export async function POST(request: Request) {
             return Response.json({ error: "No funds left to sweep" }, { status: 400 });
         }
 
-        // Round total to 2 decimal places
-        const finalSweepAmount = Math.round(totalLeftover * 100) / 100;
+        // Use the requested amount if it's less than total leftover, otherwise use full leftover
+        const finalSweepAmount = Math.min(amount, Math.round(totalLeftover * 100) / 100);
+        
+        // Adjust splits proportionally if amount is restricted
+        const scaleFactor = finalSweepAmount / totalLeftover;
+        const adjustedSplits = splitsData.map(s => ({
+            ...s,
+            amount: Math.round(s.amount * scaleFactor * 100) / 100
+        }));
 
         await prisma.$transaction(async (tx) => {
             // Determine the date for the sweep transaction
@@ -121,11 +128,11 @@ export async function POST(request: Request) {
                     category: goal.category || "Savings",
                     categoryIcon: goal.icon || "🎯",
                     splits: {
-                        create: splitsData.map(s => ({
+                        create: adjustedSplits.map(s => ({
                             category: s.category,
                             categoryIcon: s.categoryIcon,
-                            amount: Math.round(s.amount * 100) / 100,
-                            percentage: (s.amount / totalLeftover) * 100
+                            amount: s.amount,
+                            percentage: (s.amount / finalSweepAmount) * 100
                         }))
                     }
                 }

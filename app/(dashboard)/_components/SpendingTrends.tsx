@@ -55,7 +55,7 @@ export default function SpendingTrends({ userSettings }: SpendingTrendsProps) {
             <div className="space-y-3 3xl:space-y-4">
               {significantTrends.slice(0, 5).map((trend) => (
                 <div
-                  key={trend.category}
+                  key={`${trend.category}-${trend.categoryIcon}`}
                   className="flex items-center justify-between rounded-lg border p-3 3xl:p-4"
                 >
                   <div className="flex items-center gap-3 3xl:gap-4">

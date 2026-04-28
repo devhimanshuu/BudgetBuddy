@@ -11,7 +11,9 @@ import {
     RemoveMember,
     UpdateMemberRole,
     RevokeInvite,
+    TransferOwnership,
 } from "@/app/(dashboard)/_actions/workspaces";
+import { useUser } from "@clerk/nextjs";
 import MemberPermissionsDialog from "./MemberPermissionsDialog";
 import WorkspaceJoinQRCode from "./WorkspaceJoinQRCode";
 import CreateWorkspaceDialog from "@/components/CreateWorkspaceDialog";
@@ -143,6 +145,7 @@ interface Workspace {
     id: string;
     name: string;
     role: string;
+    ownerId: string;
 }
 
 function WorkspaceCard({ workspace }: { workspace: Workspace }) {
@@ -151,6 +154,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState("VIEWER");
     const [copiedLink, setCopiedLink] = useState<string | null>(null);
+    const { user } = useUser();
 
     const { data: members, isLoading: isMembersLoading } = useQuery({
         queryKey: ["workspace-members", workspace.id],
@@ -165,6 +169,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
     });
 
     const isAdmin = workspace.role === "ADMIN";
+    const isOwner = workspace.ownerId === user?.id;
 
     const inviteMutation = useMutation({
         mutationFn: ({
@@ -228,6 +233,23 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
         },
         onError: (e: Error) => {
             toast.error(e.message || "Failed to update role");
+        },
+    });
+
+    const transferMutation = useMutation({
+        mutationFn: (newOwnerId: string) =>
+            TransferOwnership(workspace.id, newOwnerId),
+        onSuccess: () => {
+            toast.success("Ownership transferred successfully");
+            queryClient.invalidateQueries({
+                queryKey: ["workspaces"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["workspace-members"],
+            });
+        },
+        onError: (e: Error) => {
+            toast.error(e.message || "Failed to transfer ownership");
         },
     });
 
@@ -453,44 +475,88 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
                                                     </p>
                                                     <Badge
                                                         variant="outline"
-                                                        className={`text-[10px] h-4 py-0 ${roleConfig.color}`}
+                                                        className={`text-[10px] h-4 py-0 ${member.userId === workspace.ownerId ? "bg-amber-500/15 text-amber-600 border-amber-500/30" : roleConfig.color}`}
                                                     >
-                                                        {roleConfig.icon}
+                                                        {member.userId === workspace.ownerId ? <Crown className="h-3.5 w-3.5" /> : roleConfig.icon}
                                                         <span className="ml-1">
-                                                            {roleConfig.label}
+                                                            {member.userId === workspace.ownerId ? "Owner" : roleConfig.label}
                                                         </span>
                                                     </Badge>
                                                 </div>
                                             </div>
 
-                                            {isAdmin &&
-                                                member.role !== "ADMIN" && (
-                                                    <div className="flex items-center gap-2">
-                                                        <Select
-                                                            value={member.role}
-                                                            onValueChange={(
-                                                                newRole
-                                                            ) =>
-                                                                roleMutation.mutate(
-                                                                    {
-                                                                        userId: member.userId,
-                                                                        role: newRole,
-                                                                    }
-                                                                )
-                                                            }
-                                                        >
-                                                            <SelectTrigger className="h-8 w-[110px]">
-                                                                <SelectValue />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="EDITOR">
-                                                                    Editor
-                                                                </SelectItem>
-                                                                <SelectItem value="VIEWER">
-                                                                    Viewer
-                                                                </SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
+                                            <div className="flex items-center gap-2">
+                                                {isOwner && member.userId !== workspace.ownerId && member.role === "ADMIN" && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all"
+                                                            >
+                                                                <Crown className="h-3.5 w-3.5" />
+                                                                <span className="text-xs">Transfer Ownership</span>
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-3xl border-emerald-200 bg-gradient-to-b from-background to-emerald-50/30 backdrop-blur-xl shadow-2xl p-6">
+                                                            <AlertDialogHeader className="space-y-4">
+                                                                <AlertDialogTitle className="text-emerald-600 flex items-center gap-3 text-xl font-bold uppercase tracking-tight">
+                                                                    <div className="p-2 bg-emerald-100 rounded-xl">
+                                                                        <Crown className="h-5 w-5" />
+                                                                    </div>
+                                                                    Transfer Ownership?
+                                                                </AlertDialogTitle>
+                                                                <AlertDialogDescription className="text-foreground/70 text-sm leading-relaxed bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                                                                    You are about to transfer the ownership of <strong className="text-foreground">{workspace.name}</strong> to <strong className="text-foreground">{member.name}</strong>. 
+                                                                    <br /><br />
+                                                                    <span className="text-destructive font-semibold">Warning:</span> You will lose your owner privileges, although you will remain an Admin.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter className="flex-row gap-3 pt-6">
+                                                                <AlertDialogCancel className="flex-1 rounded-2xl h-11 border-muted-foreground/20">Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-11 font-bold shadow-lg shadow-emerald-200 transition-all duration-200"
+                                                                    onClick={() => transferMutation.mutate(member.userId)}
+                                                                    disabled={transferMutation.isPending}
+                                                                >
+                                                                    {transferMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Transfer Now"}
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+
+                                                {isAdmin &&
+                                                    member.userId !== workspace.ownerId && (
+                                                        <div className="flex items-center gap-2">
+                                                            <Select
+                                                                value={member.role}
+                                                                onValueChange={(
+                                                                    newRole
+                                                                ) =>
+                                                                    roleMutation.mutate(
+                                                                        {
+                                                                            userId: member.userId,
+                                                                            role: newRole,
+                                                                        }
+                                                                    )
+                                                                }
+                                                            >
+                                                                <SelectTrigger className="h-8 w-[110px]">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="ADMIN">
+                                                                        Admin
+                                                                    </SelectItem>
+                                                                    <SelectItem value="EDITOR">
+                                                                        Editor
+                                                                    </SelectItem>
+                                                                    <SelectItem value="VIEWER">
+                                                                        Viewer
+                                                                    </SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
 
                                                         <MemberPermissionsDialog 
                                                             workspaceId={workspace.id}
@@ -540,6 +606,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
                                                         </AlertDialog>
                                                     </div>
                                                 )}
+                                            </div>
                                         </div>
                                     );
                                 }

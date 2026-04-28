@@ -49,7 +49,6 @@ import { useHasHydrated } from "@/hooks/use-has-hydrated";
 import AlertSettingsCard from "./_components/AlertSettingsCard";
 import { WorkspaceMembers } from "./_components/WorkspaceMembers";
 import { WorkspaceSettingsCard } from "./_components/WorkspaceSettingsCard";
-import ActivityFeed from "./_components/ActivityFeed";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import {
   AlertDialog,
@@ -61,7 +60,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AuditLogs } from "./_components/AuditLogs";
+import { WorkspaceActivity } from "./_components/WorkspaceActivity";
 import { WorkspaceExport } from "./_components/WorkspaceExport";
 import Settlements from "./_components/Settlements";
 import { GetActiveWorkspace } from "../_actions/workspaces";
@@ -139,10 +138,8 @@ const ManagePage = () => {
         )}
 
         {workspace && (
-          <AuditLogs workspaceId={workspace.id} />
+          <WorkspaceActivity workspaceId={workspace.id} />
         )}
-        
-        <ActivityFeed />
 
         <CategoryList type="income" />
         <CategoryList type="expense" />

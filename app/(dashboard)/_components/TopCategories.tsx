@@ -54,7 +54,7 @@ export default function TopCategories({ userSettings }: TopCategoriesProps) {
           ) : (
             <div className="space-y-4 3xl:space-y-6">
               {topCategories.map((category, index) => (
-                <div key={category.category} className="space-y-2 3xl:space-y-3">
+                <div key={`${category.category}-${category.categoryIcon}`} className="space-y-2 3xl:space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 3xl:gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted 3xl:h-10 3xl:w-10">

@@ -7,9 +7,11 @@ import { usePrivacyMode } from "@/components/providers/PrivacyProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Coins, PartyPopper, ArrowRight, Wallet } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +41,7 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGoalId, setSelectedGoalId] = useState<string>("");
+  const [sweepAmount, setSweepAmount] = useState<number>(0);
 
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency);
@@ -91,6 +94,12 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
     }, 0);
   }, [budgetProgress]);
 
+  useEffect(() => {
+    if (unspentTotal > 0) {
+      setSweepAmount(unspentTotal);
+    }
+  }, [unspentTotal]);
+
   const sweepMutation = useMutation({
     mutationFn: async (goalId: string) => {
       const response = await fetch("/api/budgets/sweep", {
@@ -100,7 +109,7 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
           month,
           year,
           goalId,
-          amount: unspentTotal,
+          amount: sweepAmount,
         }),
       });
 
@@ -157,7 +166,7 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
               <DialogHeader>
                 <DialogTitle>Sweep Funds to Savings</DialogTitle>
                 <DialogDescription>
-                  Move your unspent budget of {formatter.format(unspentTotal)} into a specific savings goal.
+                  Choose how much of your unspent budget ({formatter.format(unspentTotal)}) you want to move into a savings goal.
                 </DialogDescription>
               </DialogHeader>
               
@@ -195,16 +204,50 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
                   </Select>
                 </div>
                 
-                <div className="rounded-lg bg-muted p-4 space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Amount to sweep:</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                      {formatter.format(unspentTotal)}
+                <div className="space-y-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Amount to Sweep</span>
+                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                      {formatter.format(sweepAmount)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Wallet size={12} />
-                    <span>This will be recorded as a savings contribution.</span>
+                  
+                  <Slider 
+                    value={[sweepAmount]} 
+                    max={unspentTotal} 
+                    step={0.01} 
+                    onValueChange={(vals) => setSweepAmount(vals[0])}
+                    className="py-4"
+                  />
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-1">
+                       <Input 
+                        type="number" 
+                        value={sweepAmount} 
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val)) setSweepAmount(Math.min(val, unspentTotal));
+                        }}
+                        className="pr-10 h-9"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase">
+                        {userSettings.currency}
+                      </span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-9 px-3 text-[10px] font-bold uppercase tracking-tighter"
+                      onClick={() => setSweepAmount(unspentTotal)}
+                    >
+                      Max
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground leading-tight">
+                    <Wallet size={12} className="shrink-0" />
+                    <span>This will be recorded as a savings contribution from your unspent budget.</span>
                   </div>
                 </div>
               </div>

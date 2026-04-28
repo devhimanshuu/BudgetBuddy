@@ -533,6 +533,9 @@ model Comment {
   budgetYear     Int?
   budget         Budget? @relation(fields: [budgetUserId, budgetCategory, budgetMonth, budgetYear], references: [userId, category, month, year], onDelete: Cascade)
 
+  proposalId    String?
+  proposal      BudgetProposal? @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
   // Threading
   parentId      String?
   parent        Comment? @relation("CommentReplies", fields: [parentId], references: [id])
@@ -540,6 +543,7 @@ model Comment {
 
   @@index([transactionId])
   @@index([budgetUserId, budgetCategory, budgetMonth, budgetYear])
+  @@index([proposalId])
   @@index([parentId])
 }
 
@@ -572,6 +576,7 @@ model BudgetProposal {
   updatedAt   DateTime @updatedAt
 
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  comments    Comment[]
 
   @@index([workspaceId, month, year])
   @@index([userId])

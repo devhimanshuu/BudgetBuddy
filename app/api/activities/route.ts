@@ -24,6 +24,8 @@ export async function GET(request: Request) {
 
 	const type = searchParams.get("type");
 	const search = searchParams.get("search");
+	const month = searchParams.get("month");
+	const year = searchParams.get("year");
 
 	if (!workspaceId) {
 		return Response.json({
@@ -60,6 +62,15 @@ export async function GET(request: Request) {
             ]
 		} : {}),
 	};
+
+	if (month && year && month !== "ALL" && year !== "ALL") {
+		const m = parseInt(month);
+		const y = parseInt(year);
+		where.createdAt = {
+			gte: new Date(y, m, 1),
+			lte: new Date(y, m + 1, 0, 23, 59, 59, 999),
+		};
+	}
 
 	const [activities, totalCount] = await Promise.all([
 		prisma.activity.findMany({

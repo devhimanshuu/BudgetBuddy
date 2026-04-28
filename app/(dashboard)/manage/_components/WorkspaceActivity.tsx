@@ -49,14 +49,41 @@ const ACTIVITY_TYPES = [
   { value: "SETTLEMENT_PAID", label: "Debt Settled" },
 ];
 
-export function AuditLogs({ workspaceId }: { workspaceId: string }) {
+const MONTHS = [
+  { value: "ALL", label: "All Months" },
+  { value: "0", label: "January" },
+  { value: "1", label: "February" },
+  { value: "2", label: "March" },
+  { value: "3", label: "April" },
+  { value: "4", label: "May" },
+  { value: "5", label: "June" },
+  { value: "6", label: "July" },
+  { value: "7", label: "August" },
+  { value: "8", label: "September" },
+  { value: "9", label: "October" },
+  { value: "10", label: "November" },
+  { value: "11", label: "December" },
+];
+
+const currentYear = new Date().getFullYear();
+const YEARS = [
+  { value: "ALL", label: "All Years" },
+  ...Array.from({ length: 5 }, (_, i) => ({
+    value: (currentYear - i).toString(),
+    label: (currentYear - i).toString(),
+  })),
+];
+
+export function WorkspaceActivity({ workspaceId }: { workspaceId: string }) {
   const [type, setType] = useState("ALL");
   const [search, setSearch] = useState("");
+  const [month, setMonth] = useState("ALL");
+  const [year, setYear] = useState("ALL");
 
   const logsQuery = useQuery({
-    queryKey: ["audit-logs", workspaceId, type, search],
+    queryKey: ["audit-logs", workspaceId, type, search, month, year],
     queryFn: () =>
-      fetch(`/api/activities?workspaceId=${workspaceId}&type=${type}&search=${search}`).then((res) =>
+      fetch(`/api/activities?workspaceId=${workspaceId}&type=${type}&search=${search}&month=${month}&year=${year}`).then((res) =>
         res.json()
       ),
     enabled: !!workspaceId,
@@ -70,31 +97,69 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
   }, [currency]);
 
   return (
-    <PermissionGuard allowedRoles={["ADMIN"]}>
-      <Card className="border-primary/20 shadow-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-card to-primary/5 pb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-primary">
+    <Card className="border-primary/20 shadow-xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-card to-primary/5 pb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-primary">
                 <History className="w-5 h-5" />
-                Audit Logs
-              </CardTitle>
-              <CardDescription>
-                Track every change made in this workspace for full transparency.
-              </CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
+                Workspace Activity
+              </div>
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] h-5">
+                Live Feed
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              Track and filter every change made in this workspace.
+            </CardDescription>
+          </div>
+          <PermissionGuard allowedRoles={["ADMIN"]}>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search actions or users..."
-                  className="pl-8 w-full sm:w-[250px] bg-background/50 h-9"
+                  className="pl-8 w-full sm:w-[200px] bg-background/50 h-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
+              <Select value={month} onValueChange={setMonth}>
+                <SelectTrigger className="w-[120px] bg-background/50 h-9">
+                  <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((m) => {
+                    const now = new Date();
+                    const curYear = now.getFullYear();
+                    const curMonth = now.getMonth();
+                    const selectedYear = year === "ALL" ? curYear : parseInt(year);
+                    
+                    const isDisabled = selectedYear > curYear || (selectedYear === curYear && m.value !== "ALL" && parseInt(m.value) > curMonth);
+
+                    return (
+                      <SelectItem key={m.value} value={m.value} disabled={isDisabled}>
+                        {m.label}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <Select value={year} onValueChange={setYear}>
+                <SelectTrigger className="w-[100px] bg-background/50 h-9">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {YEARS.map((y) => (
+                    <SelectItem key={y.value} value={y.value}>
+                      {y.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={type} onValueChange={setType}>
-                <SelectTrigger className="w-full sm:w-[180px] bg-background/50 h-9">
+                <SelectTrigger className="w-[150px] bg-background/50 h-9">
                   <SelectValue placeholder="All Activities" />
                 </SelectTrigger>
                 <SelectContent>
@@ -106,8 +171,9 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardHeader>
+          </PermissionGuard>
+        </div>
+      </CardHeader>
         <CardContent className="p-0">
           <SkeletonWrapper isLoading={logsQuery.isLoading}>
             <ScrollArea className="h-[400px] w-full">
@@ -189,8 +255,7 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
             END OF ACTIVITY LOG
           </p>
         </div>
-      </Card>
-    </PermissionGuard>
+    </Card>
   );
 }
 

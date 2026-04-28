@@ -2,7 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GetBudgetProposals, FinalizeBudgetProposal, RejectBudgetProposal } from "../../_actions/budgets";
+import { GetActiveWorkspace } from "../../_actions/workspaces";
 import { GetFormatterForCurrency } from "@/lib/helper";
+import DiscussionPanel from "../../_components/DiscussionPanel";
 import { useMemo } from "react";
 import {
   Dialog,
@@ -30,6 +32,11 @@ export default function BudgetProposalsDialog({ month, year }: Props) {
   const { data: proposals, isLoading } = useQuery({
     queryKey: ["budget-proposals", month, year],
     queryFn: () => GetBudgetProposals(month, year),
+  });
+
+  const { data: workspace } = useQuery({
+    queryKey: ["active-workspace"],
+    queryFn: () => GetActiveWorkspace(),
   });
 
   const { data: userSettings } = useQuery({
@@ -112,13 +119,23 @@ export default function BudgetProposalsDialog({ month, year }: Props) {
                         </p>
                       </div>
                     </div>
-                    <Badge variant={
-                      proposal.status === "APPROVED" ? "default" : 
-                      proposal.status === "REJECTED" ? "destructive" : 
-                      "secondary"
-                    } className="sm:mt-0">
-                      {proposal.status}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge variant={
+                        proposal.status === "APPROVED" ? "default" : 
+                        proposal.status === "REJECTED" ? "destructive" : 
+                        "secondary"
+                      } className="sm:mt-0">
+                        {proposal.status}
+                      </Badge>
+                      {workspace && (
+                        <DiscussionPanel 
+                          proposalId={proposal.id}
+                          workspaceId={workspace.id}
+                          entityName={`${proposal.category} Proposal`}
+                          onlyIcon
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">

@@ -28,6 +28,7 @@ interface Props {
     month: number;
     year: number;
   };
+  proposalId?: string;
   workspaceId: string;
   trigger?: React.ReactNode;
   entityName: string;
@@ -37,6 +38,7 @@ interface Props {
 export default function DiscussionPanel({
   transactionId,
   budgetData,
+  proposalId,
   workspaceId,
   trigger,
   entityName,
@@ -47,11 +49,11 @@ export default function DiscussionPanel({
   const [content, setContent] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
 
-  const queryKey = ["comments", transactionId || JSON.stringify(budgetData)];
+  const queryKey = ["comments", transactionId || proposalId || JSON.stringify(budgetData)];
 
   const { data: comments, isLoading } = useQuery({
     queryKey,
-    queryFn: () => GetComments({ transactionId, budgetData }),
+    queryFn: () => GetComments({ transactionId, budgetData, proposalId }),
   });
 
   const addCommentMutation = useMutation({
@@ -61,6 +63,7 @@ export default function DiscussionPanel({
         parentId: data.parentId,
         transactionId,
         budgetData,
+        proposalId,
         workspaceId,
       }),
     onSuccess: () => {
