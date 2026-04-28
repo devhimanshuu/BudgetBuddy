@@ -2,7 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GetSettlements, MarkAsPaid } from "../../_actions/settlements";
-import { GetWorkspaceMembers } from "../../_actions/workspaces";
+import { GetWorkspaceMembers, GetActiveWorkspace } from "../../_actions/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
+import { useMemo } from "react";
 import { 
   Card, 
   CardContent, 
@@ -43,6 +45,15 @@ export default function Settlements({ workspaceId }: Props) {
     queryKey: ["workspace-members", workspaceId],
     queryFn: () => GetWorkspaceMembers(workspaceId),
   });
+
+  const { data: activeWorkspace } = useQuery({
+    queryKey: ["active-workspace"],
+    queryFn: () => GetActiveWorkspace(),
+  });
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(activeWorkspace?.currency || "USD");
+  }, [activeWorkspace?.currency]);
 
   const markPaidMutation = useMutation({
     mutationFn: MarkAsPaid,
@@ -95,7 +106,7 @@ export default function Settlements({ workspaceId }: Props) {
                 <h3 className="font-bold text-emerald-600 dark:text-emerald-400">Owed to You</h3>
               </div>
               <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
-                ${totalOwedToMe.toLocaleString()}
+                {formatter.format(totalOwedToMe)}
               </span>
             </div>
             
@@ -124,7 +135,7 @@ export default function Settlements({ workspaceId }: Props) {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-black text-primary">${s.amount.toLocaleString()}</p>
+                          <p className="text-sm font-black text-primary">{formatter.format(s.amount)}</p>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -151,7 +162,7 @@ export default function Settlements({ workspaceId }: Props) {
                 <h3 className="font-bold text-red-600 dark:text-red-400">You Owe</h3>
               </div>
               <span className="text-lg font-black text-red-600 dark:text-red-400">
-                ${totalIOwe.toLocaleString()}
+                {formatter.format(totalIOwe)}
               </span>
             </div>
 
@@ -180,7 +191,7 @@ export default function Settlements({ workspaceId }: Props) {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-black text-red-500">${s.amount.toLocaleString()}</p>
+                          <p className="text-sm font-black text-red-500">{formatter.format(s.amount)}</p>
                           <div className="flex items-center gap-1 justify-end text-[10px] text-muted-foreground">
                             <Clock className="w-2 h-2" />
                             Pending

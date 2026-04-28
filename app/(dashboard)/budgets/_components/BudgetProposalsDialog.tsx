@@ -2,6 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GetBudgetProposals, FinalizeBudgetProposal, RejectBudgetProposal } from "../../_actions/budgets";
+import { GetFormatterForCurrency } from "@/lib/helper";
+import { useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +31,15 @@ export default function BudgetProposalsDialog({ month, year }: Props) {
     queryKey: ["budget-proposals", month, year],
     queryFn: () => GetBudgetProposals(month, year),
   });
+
+  const { data: userSettings } = useQuery({
+    queryKey: ["user-settings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(userSettings?.currency || "USD");
+  }, [userSettings?.currency]);
 
   const finalizeMutation = useMutation({
     mutationFn: FinalizeBudgetProposal,
@@ -97,7 +108,7 @@ export default function BudgetProposalsDialog({ month, year }: Props) {
                       <div>
                         <h3 className="font-bold text-base sm:text-lg leading-none">{proposal.category}</h3>
                         <p className="text-xl sm:text-2xl font-black text-primary mt-1">
-                          ${proposal.amount.toLocaleString()}
+                          {formatter.format(proposal.amount)}
                         </p>
                       </div>
                     </div>

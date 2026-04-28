@@ -68,6 +68,11 @@ export default function SavingsCircleDialog({
     return GetFormatterForCurrency(goal.currency);
   }, [goal.currency]);
 
+  const currencySymbol = useMemo(() => {
+    const parts = formatter.formatToParts(0);
+    return parts.find((p) => p.type === "currency")?.value || "$";
+  }, [formatter]);
+
   const socialQuery = useQuery({
     queryKey: ["goal-social", goal.id],
     queryFn: () => GetGoalSocialData(goal.id),
@@ -350,7 +355,7 @@ export default function SavingsCircleDialog({
                    <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-muted-foreground px-1">Amount</p>
                    <div className="relative group">
                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold text-lg sm:text-xl">
-                        {goal.currency === "INR" ? "₹" : goal.currency === "USD" ? "$" : goal.currency === "EUR" ? "€" : "£"}
+                        {currencySymbol}
                      </div>
                      <Input 
                        type="number" 

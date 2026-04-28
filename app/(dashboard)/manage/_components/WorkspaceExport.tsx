@@ -27,6 +27,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { PermissionGuard } from "@/components/PermissionGuard";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export function WorkspaceExport({ workspaceId, workspaceName, currency }: { 
     workspaceId: string, 
@@ -102,13 +103,15 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
         return acc;
       }, { income: 0, expense: 0 });
 
+      const formatter = GetFormatterForCurrency(currency);
+
       autoTable(doc, {
         startY: 50,
         head: [["Summary", "Amount"]],
         body: [
-          ["Total Income", `${currency} ${totals.income.toLocaleString()}`],
-          ["Total Expenses", `${currency} ${totals.expense.toLocaleString()}`],
-          ["Net Flow", `${currency} ${(totals.income - totals.expense).toLocaleString()}`],
+          ["Total Income", formatter.format(totals.income)],
+          ["Total Expenses", formatter.format(totals.expense)],
+          ["Net Flow", formatter.format(totals.income - totals.expense)],
         ],
         theme: "striped",
         headStyles: { fillColor: [16, 185, 129] },
@@ -122,7 +125,7 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
           t.description,
           t.category,
           t.type.toUpperCase(),
-          `${currency} ${t.amount.toLocaleString()}`
+          formatter.format(t.amount)
         ]),
         columnStyles: {
             4: { halign: 'right' }

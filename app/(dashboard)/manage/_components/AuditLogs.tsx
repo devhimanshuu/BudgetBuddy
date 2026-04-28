@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { GetFormatterForCurrency } from "@/lib/helper";
 import {
   Card,
   CardContent,
@@ -62,6 +63,11 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
   });
 
   const activities = logsQuery.data?.activities || [];
+  const currency = logsQuery.data?.currency || "USD";
+
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(currency);
+  }, [currency]);
 
   return (
     <PermissionGuard allowedRoles={["ADMIN"]}>
@@ -146,7 +152,24 @@ export function AuditLogs({ workspaceId }: { workspaceId: string }) {
                             </div>
                           </div>
                         </div>
-                        {log.metadata && (
+                        {log.metadata?.amount && (
+                          <div className="text-right shrink-0">
+                            <Badge 
+                                variant="outline" 
+                                className={cn(
+                                    "font-mono text-[10px] font-bold",
+                                    log.metadata.type === "income"
+                                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5"
+                                        : log.metadata.type === "investment"
+                                            ? "border-indigo-500/30 text-indigo-500 bg-indigo-500/5"
+                                            : "border-red-500/30 text-red-500 bg-red-500/5"
+                                )}
+                            >
+                                {log.metadata.type === "income" ? "+" : "-"}{formatter.format(log.metadata.amount)}
+                            </Badge>
+                          </div>
+                        )}
+                        {!log.metadata?.amount && log.metadata && (
                           <div className="hidden sm:block">
                             <Badge variant="secondary" className="text-[10px] bg-primary/5 text-primary">
                               Details

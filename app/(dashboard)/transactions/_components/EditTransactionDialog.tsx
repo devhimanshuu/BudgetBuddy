@@ -44,8 +44,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UpdateTransaction } from "../_actions/updateTransaction";
 import { toast } from "sonner";
-import { DateToUTCDate } from "@/lib/helper";
+import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
 import { Category } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { GetActiveWorkspace } from "../../_actions/workspaces";
+import { useMemo } from "react";
 import TagSelector from "../../_components/TagSelector";
 import FileUpload from "../../_components/FileUpload";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,6 +60,20 @@ interface Props {
 }
 
 const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
+    const { data: activeWorkspace } = useQuery({
+        queryKey: ["active-workspace"],
+        queryFn: () => GetActiveWorkspace(),
+    });
+
+    const formatter = useMemo(() => {
+        return GetFormatterForCurrency(activeWorkspace?.currency || "USD");
+    }, [activeWorkspace?.currency]);
+
+    const currencySymbol = useMemo(() => {
+        const parts = formatter.formatToParts(0);
+        return parts.find((p) => p.type === "currency")?.value || "$";
+    }, [formatter]);
+
     const form = useForm<CreateTransactionSchemaType>({
         resolver: zodResolver(CreateTransactionSchema),
         defaultValues: {
@@ -158,7 +175,7 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
                 const splitTotal = values.splits?.reduce((a, b) => a + b.amount, 0) || 0;
                 if (Math.abs(total - splitTotal) > 0.01) {
                     toast.error(
-                        `Split amounts ($${splitTotal.toFixed(2)}) must equal total amount ($${total.toFixed(2)})`
+                        `Split amounts (${formatter.format(splitTotal)}) must equal total amount (${formatter.format(total)})`
                     );
                     return;
                 }

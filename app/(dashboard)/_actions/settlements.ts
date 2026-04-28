@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function GetSettlements() {
   const user = await currentUser();
@@ -88,12 +89,13 @@ export async function MarkAsPaid(splitId: string) {
 
   const workspace = await getActiveWorkspace(user.id);
   if (workspace) {
+    const formatter = GetFormatterForCurrency(workspace.currency);
     const userName = user.firstName || user.emailAddresses[0].emailAddress.split("@")[0];
     await logActivity({
       workspaceId: workspace.id,
       userId: user.id,
       type: "SETTLEMENT_PAID",
-      description: `${userName} marked a debt of $${split.amount.toFixed(2)} from ${split.debtorName} as settled`,
+      description: `${userName} marked a debt of ${formatter.format(split.amount)} from ${split.debtorName} as settled`,
       metadata: { splitId, amount: split.amount, debtorName: split.debtorName },
     });
   }

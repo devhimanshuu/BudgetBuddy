@@ -105,7 +105,8 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
       });
 
       if (!response.ok) {
-        throw new Error("Failed to sweep funds");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to sweep funds");
       }
 
       return response.json();
@@ -117,8 +118,8 @@ export default function SweepBanner({ userSettings, month, year }: SweepBannerPr
       queryClient.invalidateQueries({ queryKey: ["savings-goals"] });
       queryClient.invalidateQueries({ queryKey: ["balance"] });
     },
-    onError: () => {
-      toast.error("Something went wrong");
+    onError: (error: any) => {
+      toast.error(error.message || "Something went wrong");
     },
   });
 

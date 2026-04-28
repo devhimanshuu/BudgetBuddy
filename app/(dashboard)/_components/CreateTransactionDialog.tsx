@@ -34,7 +34,14 @@ import {
 import { Input } from "@/components/ui/input";
 import CategoryPicker from "./CategoryPicker";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Loader2, Plus, Trash, AlertTriangle, TrendingDown } from "lucide-react";
+import {
+  CalendarIcon,
+  Loader2,
+  Plus,
+  Trash,
+  AlertTriangle,
+  TrendingDown,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -46,10 +53,14 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateTransaction } from "../_actions/transaction";
-import { GetWorkspaceMembers, GetActiveWorkspace } from "../_actions/workspaces";
+import {
+  GetWorkspaceMembers,
+  GetActiveWorkspace,
+} from "../_actions/workspaces";
 import { toast } from "sonner";
-import { DateToUTCDate } from "@/lib/helper";
+import { DateToUTCDate, GetFormatterForCurrency } from "@/lib/helper";
 import { Category } from "@prisma/client";
+import { useMemo } from "react";
 import TagSelector from "./TagSelector";
 import FileUpload from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,6 +128,15 @@ const CreateTransactionDialog = ({
     queryFn: () => GetActiveWorkspace(),
   });
 
+  const formatter = useMemo(() => {
+    return GetFormatterForCurrency(activeWorkspace?.currency || "USD");
+  }, [activeWorkspace?.currency]);
+
+  const currencySymbol = useMemo(() => {
+    const parts = formatter.formatToParts(0);
+    return parts.find((p) => p.type === "currency")?.value || "$";
+  }, [formatter]);
+
   const { data: members } = useQuery({
     queryKey: ["workspace-members", activeWorkspace?.id],
     queryFn: () => GetWorkspaceMembers(activeWorkspace!.id),
@@ -127,7 +147,7 @@ const CreateTransactionDialog = ({
     (value: Category) => {
       form.setValue("category", value.name);
     },
-    [form]
+    [form],
   );
 
   // Set initial category when dialog opens
@@ -145,7 +165,7 @@ const CreateTransactionDialog = ({
   const { data: budgetAlertData } = useCheckBudgetAlert(
     watchedCategory,
     watchedAmount,
-    type === "expense" && !!watchedCategory && watchedAmount > 0
+    type === "expense" && !!watchedCategory && watchedAmount > 0,
   );
 
   const queryClient = useQueryClient();
@@ -169,7 +189,7 @@ const CreateTransactionDialog = ({
           toast.error(alert.message, {
             id: "budget-alert",
             duration: 5000,
-            description: `You've spent $${alert.spent.toFixed(2)} of your $${alert.budgetAmount.toFixed(2)} budget`,
+            description: `You've spent ${formatter.format(alert.spent)} of your ${formatter.format(alert.budgetAmount)} budget`,
           });
         } else if (alert.level === "warning") {
           toast.warning(alert.message, {
@@ -211,17 +231,20 @@ const CreateTransactionDialog = ({
     (values: CreateTransactionSchemaType) => {
       if (isSplitMode) {
         const total = values.amount;
-        const splitTotal = values.splits?.reduce((a, b) => a + b.amount, 0) || 0;
+        const splitTotal =
+          values.splits?.reduce((a, b) => a + b.amount, 0) || 0;
         if (Math.abs(total - splitTotal) > 0.01) {
-          toast.error(`Split amounts ($${splitTotal.toFixed(2)}) must equal total amount ($${total.toFixed(2)})`);
+          toast.error(
+            `Split amounts (${formatter.format(splitTotal)}) must equal total amount (${formatter.format(total)})`,
+          );
           return;
         }
 
         // Calculate percentages
         if (values.splits) {
-          values.splits = values.splits.map(split => ({
+          values.splits = values.splits.map((split) => ({
             ...split,
-            percentage: total > 0 ? (split.amount / total) * 100 : 0
+            percentage: total > 0 ? (split.amount / total) * 100 : 0,
           }));
         }
       } else {
@@ -230,9 +253,12 @@ const CreateTransactionDialog = ({
 
       if (isMemberSplit) {
         const total = values.amount;
-        const memberTotal = values.billSplits?.reduce((a, b) => a + b.amount, 0) || 0;
+        const memberTotal =
+          values.billSplits?.reduce((a, b) => a + b.amount, 0) || 0;
         if (memberTotal > total) {
-          toast.error(`Member split amounts ($${memberTotal.toFixed(2)}) cannot exceed total amount ($${total.toFixed(2)})`);
+          toast.error(
+            `Member split amounts (${formatter.format(memberTotal)}) cannot exceed total amount (${formatter.format(total)})`,
+          );
           return;
         }
       } else {
@@ -249,7 +275,7 @@ const CreateTransactionDialog = ({
         billSplits: isMemberSplit ? values.billSplits : undefined,
       });
     },
-    [mutate, selectedTags, attachments, isSplitMode, isMemberSplit]
+    [mutate, selectedTags, attachments, isSplitMode, isMemberSplit],
   );
 
   return (
@@ -263,7 +289,11 @@ const CreateTransactionDialog = ({
               <span
                 className={cn(
                   "m-1",
-                  type === "income" ? "text-emerald-500" : type === "expense" ? "text-red-500" : "text-blue-500"
+                  type === "income"
+                    ? "text-emerald-500"
+                    : type === "expense"
+                      ? "text-red-500"
+                      : "text-blue-500",
                 )}
               >
                 {type}
@@ -276,7 +306,10 @@ const CreateTransactionDialog = ({
           </DialogHeader>
           <div className="flex-1 overflow-y-auto px-6 py-2">
             <Form {...form}>
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
                 <FormField
                   name="description"
                   control={form.control}
@@ -345,7 +378,9 @@ const CreateTransactionDialog = ({
                           value={field.value || ""}
                           onChange={(e) => {
                             const value =
-                              e.target.value === "" ? 0 : Number(e.target.value);
+                              e.target.value === ""
+                                ? 0
+                                : Number(e.target.value);
                             field.onChange(value);
                           }}
                         />
@@ -369,7 +404,7 @@ const CreateTransactionDialog = ({
                       "border-2",
                       budgetAlertData.alert.level === "danger"
                         ? "border-red-500 bg-red-50 dark:bg-red-950/20"
-                        : "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
+                        : "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20",
                     )}
                   >
                     <div className="flex items-start gap-2">
@@ -388,15 +423,16 @@ const CreateTransactionDialog = ({
                           {budgetAlertData.alert.message}
                         </AlertDescription>
                         <div className="mt-2 text-xs opacity-80">
-                          Budget: ${budgetAlertData.alert.budgetAmount.toFixed(2)} |
-                          Will spend: ${budgetAlertData.alert.spent.toFixed(2)} (
+                          Budget:{" "}
+                          {formatter.format(budgetAlertData.alert.budgetAmount)}{" "}
+                          | Will spend:{" "}
+                          {formatter.format(budgetAlertData.alert.spent)} (
                           {budgetAlertData.alert.percentage.toFixed(0)}%)
                         </div>
                       </div>
                     </div>
                   </Alert>
                 )}
-
 
                 <div className="flex items-center space-x-2 py-4 border-t border-b border-muted/50 my-4">
                   <Switch
@@ -405,15 +441,27 @@ const CreateTransactionDialog = ({
                     onCheckedChange={(checked) => {
                       setIsSplitMode(checked);
                       if (checked && fields.length === 0) {
-                        append({ category: "", categoryIcon: "", amount: 0, percentage: 0 });
-                        append({ category: "", categoryIcon: "", amount: 0, percentage: 0 });
+                        append({
+                          category: "",
+                          categoryIcon: "",
+                          amount: 0,
+                          percentage: 0,
+                        });
+                        append({
+                          category: "",
+                          categoryIcon: "",
+                          amount: 0,
+                          percentage: 0,
+                        });
                       }
                       if (!checked) {
                         form.setValue("splits", []);
                       }
                     }}
                   />
-                  <Label htmlFor="split-mode" className="font-semibold">Split Transaction</Label>
+                  <Label htmlFor="split-mode" className="font-semibold">
+                    Split Transaction
+                  </Label>
                 </div>
 
                 {isSplitMode && (
@@ -432,9 +480,16 @@ const CreateTransactionDialog = ({
                               type={type}
                               className="w-full"
                               onChange={(cat) => {
-                                form.setValue(`splits.${index}.category`, cat.name);
-                                form.setValue(`splits.${index}.categoryIcon`, cat.icon);
-                              }} />
+                                form.setValue(
+                                  `splits.${index}.category`,
+                                  cat.name,
+                                );
+                                form.setValue(
+                                  `splits.${index}.categoryIcon`,
+                                  cat.icon,
+                                );
+                              }}
+                            />
                           </FormControl>
                         </FormItem>
                         <FormItem className="w-32 space-y-0">
@@ -444,30 +499,61 @@ const CreateTransactionDialog = ({
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              {...form.register(`splits.${index}.amount`, { valueAsNumber: true })}
+                              {...form.register(`splits.${index}.amount`, {
+                                valueAsNumber: true,
+                              })}
                             />
                           </FormControl>
                           <div className="text-[10px] text-muted-foreground mt-0.5 px-1">
-                            {((form.watch(`splits.${index}.amount`) || 0) / (form.watch("amount") || 1) * 100).toFixed(1)}%
+                            {(
+                              ((form.watch(`splits.${index}.amount`) || 0) /
+                                (form.watch("amount") || 1)) *
+                              100
+                            ).toFixed(1)}
+                            %
                           </div>
                         </FormItem>
 
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          remove(index);
-                          if (fields.length === 1) {
-                            setIsSplitMode(false);
-                          }
-                        }}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            remove(index);
+                            if (fields.length === 1) {
+                              setIsSplitMode(false);
+                            }
+                          }}
+                        >
                           <Trash className="h-4 w-4 text-destructive" />
                         </Button>
-
                       </div>
                     ))}
-                    <Button variant="outline" size="sm" type="button" onClick={() => append({ category: "", categoryIcon: "", amount: 0, percentage: 0 })}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                      onClick={() =>
+                        append({
+                          category: "",
+                          categoryIcon: "",
+                          amount: 0,
+                          percentage: 0,
+                        })
+                      }
+                    >
                       <Plus className="h-4 w-4 mr-2" /> Add Split
                     </Button>
                     <div className="text-sm text-muted-foreground mt-2">
-                      Total Split: {form.watch("splits")?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0} / {form.watch("amount")}
+                      Total Split:{" "}
+                      {formatter.format(
+                        form
+                          .watch("splits")
+                          ?.reduce(
+                            (acc, curr) => acc + (curr.amount || 0),
+                            0,
+                          ) || 0,
+                      )}{" "}
+                      / {formatter.format(form.watch("amount"))}
                     </div>
                   </div>
                 )}
@@ -483,109 +569,156 @@ const CreateTransactionDialog = ({
                       }
                     }}
                   />
-                  <Label htmlFor="member-split" className="font-semibold">Split with Members (Who owes me?)</Label>
+                  <Label htmlFor="member-split" className="font-semibold">
+                    Split with Members (Who owes me?)
+                  </Label>
                 </div>
 
                 {isMemberSplit && (
                   <div className="space-y-4 mb-4 p-4 bg-muted/30 rounded-2xl border border-dashed border-primary/20">
                     <p className="text-xs text-muted-foreground mb-4">
-                      Select members who owe you money for this transaction. 
-                      You can split by amount or divide equally.
+                      Select members who owe you money for this transaction. You
+                      can split by amount or divide equally.
                     </p>
                     <div className="space-y-3">
-                      {members?.filter(m => m.userId !== user?.id).map((member) => {
-                        const split = form.watch("billSplits")?.find(s => s.debtorId === member.userId);
-                        const isSelected = !!split;
+                      {members
+                        ?.filter((m) => m.userId !== user?.id)
+                        .map((member) => {
+                          const split = form
+                            .watch("billSplits")
+                            ?.find((s) => s.debtorId === member.userId);
+                          const isSelected = !!split;
 
-                        return (
-                          <div key={member.userId} className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl hover:bg-background/40 transition-colors">
-                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 border border-background shrink-0">
-                                <AvatarImage src={member.imageUrl || ""} />
-                                <AvatarFallback className="text-[9px] sm:text-[10px] bg-primary/10 text-primary">
-                                  {member.name.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0">
-                                <p className="text-sm font-bold leading-none truncate">{member.name}</p>
-                                <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-1">Owes you</p>
+                          return (
+                            <div
+                              key={member.userId}
+                              className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl hover:bg-background/40 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <Avatar className="h-7 w-7 sm:h-8 sm:w-8 border border-background shrink-0">
+                                  <AvatarImage src={member.imageUrl || ""} />
+                                  <AvatarFallback className="text-[9px] sm:text-[10px] bg-primary/10 text-primary">
+                                    {member.name.slice(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-bold leading-none truncate">
+                                    {member.name}
+                                  </p>
+                                  <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-1">
+                                    Owes you
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2 ml-auto">
-                              {isSelected ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="relative">
-                                    <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">$</span>
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      className="h-7 w-20 sm:w-24 pl-4 text-xs sm:text-sm"
-                                      value={split.amount || ""}
-                                      onChange={(e) => {
-                                        const val = Number(e.target.value);
-                                        const currentSplits = form.getValues("billSplits") || [];
-                                        form.setValue("billSplits", currentSplits.map(s => 
-                                          s.debtorId === member.userId ? { ...s, amount: val } : s
-                                        ));
+                              <div className="flex items-center gap-2 ml-auto">
+                                {isSelected ? (
+                                  <div className="flex items-center gap-2">
+                                    <div className="relative">
+                                      <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                                        {currencySymbol}
+                                      </span>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        className="h-7 w-20 sm:w-24 pl-4 text-xs sm:text-sm"
+                                        value={split.amount || ""}
+                                        onChange={(e) => {
+                                          const val = Number(e.target.value);
+                                          const currentSplits =
+                                            form.getValues("billSplits") || [];
+                                          form.setValue(
+                                            "billSplits",
+                                            currentSplits.map((s) =>
+                                              s.debtorId === member.userId
+                                                ? { ...s, amount: val }
+                                                : s,
+                                            ),
+                                          );
+                                        }}
+                                      />
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-destructive"
+                                      onClick={() => {
+                                        const currentSplits =
+                                          form.getValues("billSplits") || [];
+                                        form.setValue(
+                                          "billSplits",
+                                          currentSplits.filter(
+                                            (s) => s.debtorId !== member.userId,
+                                          ),
+                                        );
                                       }}
-                                    />
+                                    >
+                                      <Trash className="h-3 w-3" />
+                                    </Button>
                                   </div>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-7 w-7 text-destructive"
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs"
                                     onClick={() => {
-                                      const currentSplits = form.getValues("billSplits") || [];
-                                      form.setValue("billSplits", currentSplits.filter(s => s.debtorId !== member.userId));
+                                      const currentSplits =
+                                        form.getValues("billSplits") || [];
+                                      form.setValue("billSplits", [
+                                        ...currentSplits,
+                                        {
+                                          debtorId: member.userId,
+                                          debtorName: member.name,
+                                          amount: 0,
+                                        },
+                                      ]);
                                     }}
                                   >
-                                    <Trash className="h-3 w-3" />
+                                    <Plus className="h-3 w-3 mr-1" /> Add
                                   </Button>
-                                </div>
-                              ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-7 text-xs"
-                                  onClick={() => {
-                                    const currentSplits = form.getValues("billSplits") || [];
-                                    form.setValue("billSplits", [...currentSplits, { 
-                                      debtorId: member.userId, 
-                                      debtorName: member.name,
-                                      amount: 0 
-                                    }]);
-                                  }}
-                                >
-                                  <Plus className="h-3 w-3 mr-1" /> Add
-                                </Button>
-                              )}
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
                     </div>
-                    {form.watch("billSplits") && form.watch("billSplits")!.length > 0 && (
-                      <div className="pt-3 mt-3 border-t border-primary/10 flex justify-between items-center">
-                         <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="h-auto p-0 text-xs text-primary"
-                          onClick={() => {
-                            const count = form.getValues("billSplits")?.length || 0;
-                            if (count > 0) {
-                              const equalAmount = Number((watchedAmount / (count + 1)).toFixed(2));
-                              const currentSplits = form.getValues("billSplits") || [];
-                              form.setValue("billSplits", currentSplits.map(s => ({ ...s, amount: equalAmount })));
-                            }
-                          }}
-                         >
-                          Split Equally
-                         </Button>
-                         <div className="text-xs font-bold">
-                           Total Owed: ${form.watch("billSplits")?.reduce((a, b) => a + b.amount, 0).toFixed(2)}
-                         </div>
-                      </div>
-                    )}
+                    {form.watch("billSplits") &&
+                      form.watch("billSplits")!.length > 0 && (
+                        <div className="pt-3 mt-3 border-t border-primary/10 flex justify-between items-center">
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs text-primary"
+                            onClick={() => {
+                              const count =
+                                form.getValues("billSplits")?.length || 0;
+                              if (count > 0) {
+                                const equalAmount = Number(
+                                  (watchedAmount / (count + 1)).toFixed(2),
+                                );
+                                const currentSplits =
+                                  form.getValues("billSplits") || [];
+                                form.setValue(
+                                  "billSplits",
+                                  currentSplits.map((s) => ({
+                                    ...s,
+                                    amount: equalAmount,
+                                  })),
+                                );
+                              }
+                            }}
+                          >
+                            Split Equally
+                          </Button>
+                          <div className="text-xs font-bold">
+                            Total Owed:{" "}
+                            {formatter.format(
+                              form
+                                .watch("billSplits")
+                                ?.reduce((a, b) => a + b.amount, 0) || 0,
+                            )}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-2">
@@ -622,7 +755,7 @@ const CreateTransactionDialog = ({
                                 variant={"outline"}
                                 className={cn(
                                   "w-[200px] pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
+                                  !field.value && "text-muted-foreground",
                                 )}
                               >
                                 {field.value ? (

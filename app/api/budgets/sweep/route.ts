@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-import { getActiveWorkspace } from "@/lib/workspaces";
+import { getActiveWorkspace, getMemberRestrictions } from "@/lib/workspaces";
 import { z } from "zod";
 
 export async function POST(request: Request) {
@@ -29,10 +29,76 @@ export async function POST(request: Request) {
     }
 
     try {
+        const restrictions = await getMemberRestrictions(user.id, workspaceId || "");
+
+        // 1. Get all budgets for the month
+        const budgets = await prisma.budget.findMany({
+            where: {
+                workspaceId: workspaceId || null,
+                month: month,
+                year: year,
+                ...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
+            },
+        });
+
+        // 2. Get actual spending for each category in the month to calculate true leftovers
+        const startDate = new Date(year, month, 1);
+        const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+
+        const transactions = await prisma.transaction.findMany({
+            where: {
+                workspaceId: workspaceId || null,
+                type: { in: ["expense", "investment"] },
+                ...(restrictions?.allowedCategories ? { category: { in: restrictions.allowedCategories } } : {}),
+                date: {
+                    gte: startDate,
+                    lte: endDate,
+                },
+            },
+            include: {
+                splits: true,
+            },
+        });
+
+        // 3. Calculate spending per category (including previous sweeps via splits)
+        const spendingByCategory: { [key: string]: number } = {};
+        transactions.forEach((transaction) => {
+            if (transaction.splits && transaction.splits.length > 0) {
+                transaction.splits.forEach((split) => {
+                    spendingByCategory[split.category] = (spendingByCategory[split.category] || 0) + split.amount;
+                });
+            } else {
+                spendingByCategory[transaction.category] = (spendingByCategory[transaction.category] || 0) + transaction.amount;
+            }
+        });
+
+        // 4. Calculate splits for the sweep
+        const splitsData: { category: string, categoryIcon: string, amount: number }[] = [];
+        let totalLeftover = 0;
+
+        for (const budget of budgets) {
+            const spent = spendingByCategory[budget.category] || 0;
+            const remaining = Math.max(0, budget.amount - spent);
+            
+            if (remaining > 0.01) { // Ignore dust
+                totalLeftover += remaining;
+                splitsData.push({
+                    category: budget.category,
+                    categoryIcon: budget.categoryIcon,
+                    amount: remaining,
+                });
+            }
+        }
+
+        if (totalLeftover <= 0) {
+            return Response.json({ error: "No funds left to sweep" }, { status: 400 });
+        }
+
+        // Round total to 2 decimal places
+        const finalSweepAmount = Math.round(totalLeftover * 100) / 100;
+
         await prisma.$transaction(async (tx) => {
             // Determine the date for the sweep transaction
-            // If we are sweeping a past month, use the last day of that month.
-            // If the current date is still in the same month being viewed, use today.
             const now = new Date();
             let sweepDate = now;
             if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth())) {
@@ -43,17 +109,25 @@ export async function POST(request: Request) {
             const sweepMonth = sweepDate.getMonth();
             const sweepYear = sweepDate.getFullYear();
 
-            // 1. Create a transaction of type "expense" to represent the sweep out of general funds
+            // 1. Create a transaction with splits representing the sweep out of categories
             await tx.transaction.create({
                 data: {
                     userId: user.id,
                     workspaceId: workspaceId,
-                    amount: amount,
+                    amount: finalSweepAmount,
                     date: sweepDate,
                     description: `End of Month Sweep (${month + 1}/${year}) -> ${goal.name}`,
                     type: "expense",
-                    category: goal.category || "Savings", // Or specifically point to savings
+                    category: goal.category || "Savings",
                     categoryIcon: goal.icon || "🎯",
+                    splits: {
+                        create: splitsData.map(s => ({
+                            category: s.category,
+                            categoryIcon: s.categoryIcon,
+                            amount: Math.round(s.amount * 100) / 100,
+                            percentage: (s.amount / totalLeftover) * 100
+                        }))
+                    }
                 }
             });
 
@@ -66,13 +140,13 @@ export async function POST(request: Request) {
                     userId: user.id,
                     userName,
                     userImage: user.imageUrl,
-                    amount,
+                    amount: finalSweepAmount,
                     createdAt: sweepDate,
                 }
             });
 
             // 3. Update goal balance
-            const newAmount = goal.currentAmount + amount;
+            const newAmount = goal.currentAmount + finalSweepAmount;
             await tx.savingsGoal.update({
                 where: { id: goalId },
                 data: {
@@ -97,12 +171,12 @@ export async function POST(request: Request) {
                     day: sweepDay,
                     month: sweepMonth,
                     year: sweepYear,
-                    expense: amount,
+                    expense: finalSweepAmount,
                     income: 0,
                 },
                 update: {
                     expense: {
-                        increment: amount,
+                        increment: finalSweepAmount,
                     },
                 },
             });
@@ -121,12 +195,12 @@ export async function POST(request: Request) {
                     workspaceId,
                     month: sweepMonth,
                     year: sweepYear,
-                    expense: amount,
+                    expense: finalSweepAmount,
                     income: 0,
                 },
                 update: {
                     expense: {
-                        increment: amount,
+                        increment: finalSweepAmount,
                     },
                 },
             });

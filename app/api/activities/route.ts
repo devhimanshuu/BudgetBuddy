@@ -12,6 +12,10 @@ export async function GET(request: Request) {
 	const workspace = await getActiveWorkspace();
 	const workspaceId = workspace?.id;
 
+	const userSettings = await prisma.userSettings.findUnique({
+		where: { userId: user.id },
+	});
+
 	const { searchParams } = new URL(request.url);
 	const page = parseInt(searchParams.get("page") || "1");
 	const pageSize = parseInt(searchParams.get("pageSize") || "30");
@@ -95,7 +99,7 @@ export async function GET(request: Request) {
 
 	return Response.json({
 		activities: enrichedActivities,
-		currency: workspace.currency,
+		currency: userSettings?.currency || workspace.currency,
 		pagination: {
 			page,
 			pageSize,

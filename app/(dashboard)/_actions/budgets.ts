@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
+import { GetFormatterForCurrency } from "@/lib/helper";
 
 export async function ProposeBudget({
   category,
@@ -44,11 +45,13 @@ export async function ProposeBudget({
     },
   });
 
+  const formatter = GetFormatterForCurrency(workspace.currency);
+
   await logActivity({
     workspaceId: workspace.id,
     userId: user.id,
     type: "BUDGET_PROPOSED",
-    description: `${userName} proposed a budget of $${amount.toFixed(2)} for ${category}`,
+    description: `${userName} proposed a budget of ${formatter.format(amount)} for ${category}`,
     metadata: { category, amount, month, year },
   });
 
@@ -123,11 +126,13 @@ export async function FinalizeBudgetProposal(proposalId: string) {
     }),
   ]);
 
+  const formatter = GetFormatterForCurrency(workspace.currency);
+
   await logActivity({
     workspaceId: workspace.id,
     userId: user.id,
     type: "BUDGET_FINALIZED",
-    description: `Finalized budget proposal for ${proposal.category} ($${proposal.amount.toFixed(2)})`,
+    description: `Finalized budget proposal for ${proposal.category} (${formatter.format(proposal.amount)})`,
     metadata: { proposalId, amount: proposal.amount },
   });
 
