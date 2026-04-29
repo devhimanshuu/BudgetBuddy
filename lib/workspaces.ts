@@ -141,7 +141,7 @@ export async function logActivity({
 	metadata?: any;
 }) {
 	try {
-		await prisma.activity.create({
+		const activity = await prisma.activity.create({
 			data: {
 				workspaceId,
 				userId,
@@ -150,10 +150,31 @@ export async function logActivity({
 				metadata,
 			},
 		});
+
+		// Create notifications for all other members of the workspace
+		const members = await prisma.workspaceMember.findMany({
+			where: {
+				workspaceId,
+				userId: { not: userId }, // Don't notify the person who did the action
+				deletedAt: null,
+			},
+		});
+
+		if (members.length > 0) {
+			await prisma.notification.createMany({
+				data: members.map((member) => ({
+					userId: member.userId,
+					workspaceId,
+					activityId: activity.id,
+					isRead: false,
+				})),
+			});
+		}
 	} catch (error) {
 		console.error("Failed to log activity:", error);
 	}
 }
+
 
 export async function getMemberRestrictions(userId: string, workspaceId: string) {
 	const membership = await prisma.workspaceMember.findUnique({
