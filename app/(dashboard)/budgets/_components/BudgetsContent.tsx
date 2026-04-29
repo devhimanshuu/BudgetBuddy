@@ -136,8 +136,8 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
       <div className="border-b bg-card">
         <div className="container flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Budget Goals</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-heading-xl">Budget Goals</h1>
+            <p className="text-body-premium">
               Set spending limits and track your progress
             </p>
           </div>

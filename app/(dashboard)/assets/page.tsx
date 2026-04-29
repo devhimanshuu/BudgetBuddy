@@ -27,13 +27,14 @@ export default async function AssetsPage() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl">
+					<h1 className="text-heading-xl">
 						Assets & Liabilities
 					</h1>
-					<p className="text-muted-foreground 4xl:text-lg">
+					<p className="text-body-premium">
 						Track your net worth by managing your assets and liabilities
 					</p>
 				</div>
+
 				<CreateAssetDialog />
 			</div>
 

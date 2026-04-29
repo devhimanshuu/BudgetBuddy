@@ -124,27 +124,29 @@ export default function BudgetSummaryCard({
       )}
     >
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
+        <CardTitle className="text-heading-lg flex items-center gap-2">
           <Wallet className="h-6 w-6" />
           Budget Overview
         </CardTitle>
+
       </CardHeader>
       <CardContent>
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Budget */}
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Total Budget</p>
-            <p className="text-2xl font-bold">
+            <p className="text-heading-sm text-muted-foreground">Total Budget</p>
+            <p className="text-heading-lg">
               {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(summary.totalBudget)}
             </p>
           </div>
 
+
           {/* Total Spent */}
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Total Spent</p>
+            <p className="text-heading-sm text-muted-foreground">Total Spent</p>
             <p
               className={cn(
-                "text-2xl font-bold",
+                "text-heading-lg",
                 isOverBudget && "text-red-600 dark:text-red-400"
               )}
             >
@@ -152,14 +154,15 @@ export default function BudgetSummaryCard({
             </p>
           </div>
 
+
           {/* Total Remaining */}
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-heading-sm text-muted-foreground">
               {isOverBudget ? "Over Budget" : "Remaining"}
             </p>
             <p
               className={cn(
-                "text-2xl font-bold",
+                "text-heading-lg",
                 isOverBudget
                   ? "text-red-600 dark:text-red-400"
                   : isNearLimit
@@ -170,6 +173,7 @@ export default function BudgetSummaryCard({
               {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(summary.totalRemaining))}
             </p>
           </div>
+
 
           {/* Overall Progress */}
           <div className="space-y-2">
@@ -276,11 +280,12 @@ export default function BudgetSummaryCard({
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="text-heading-xl text-emerald-600 dark:text-emerald-400">
                   {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(summary.dailySafeToSpend)}
                 </p>
-                <p className="text-xs text-muted-foreground">per day</p>
+                <p className="text-heading-sm text-muted-foreground">per day</p>
               </div>
+
             </div>
           </div>
         )}

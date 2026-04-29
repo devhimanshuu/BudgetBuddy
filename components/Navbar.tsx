@@ -18,6 +18,7 @@ import {
 	Eye,
 	EyeOff,
 	ShieldCheck,
+	HandCoins
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeCustomizer } from "./ThemeCustomizer";
@@ -66,6 +67,11 @@ const items = [
 		label: "Analytics",
 		link: "/analytics",
 		icon: <LineChart className="h-4 w-4" />,
+	},
+	{
+		label: "Settlements",
+		link: "/settlements",
+		icon: <HandCoins className="h-4 w-4" />,
 	},
 	{
 		label: "Vault",
