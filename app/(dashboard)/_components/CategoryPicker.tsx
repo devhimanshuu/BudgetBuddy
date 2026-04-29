@@ -1,6 +1,7 @@
 "use client";
 
 import CreateCategoryDialog from "@/app/(dashboard)/_components/CreateCategoryDialog";
+import { PermissionGuard } from "@/components/PermissionGuard";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -110,7 +111,9 @@ function CategoryPicker({ type = "expense", onChange, defaultValue, className }:
           }}
         >
           <CommandInput placeholder="Search category..." />
-          <CreateCategoryDialog type={type === "all" ? "expense" as TransactionType : type as TransactionType} successCallback={successCallback} />
+          <PermissionGuard allowedRoles={["ADMIN"]}>
+            <CreateCategoryDialog type={type === "all" ? "expense" as TransactionType : type as TransactionType} successCallback={successCallback} />
+          </PermissionGuard>
           <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>
               <p>Category not found</p>

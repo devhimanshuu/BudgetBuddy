@@ -20,6 +20,7 @@ import {
   ExternalLink,
   CalendarDays,
   HandCoins,
+  Lock
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -97,24 +98,45 @@ export function WorkspaceActivity({ workspaceId }: { workspaceId: string }) {
   }, [currency]);
 
   return (
-    <Card className="border-primary/20 shadow-xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-card to-primary/5 pb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-primary">
-                <History className="w-5 h-5" />
-                Workspace Activity
-              </div>
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] h-5">
-                Live Feed
-              </Badge>
+    <PermissionGuard
+      allowedRoles={["ADMIN"]}
+      fallback={
+        <Card className="border-primary/20 shadow-xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-card to-primary/5 pb-8">
+            <CardTitle className="flex items-center gap-2 text-primary">
+              <History className="w-5 h-5" />
+              Workspace Activity
             </CardTitle>
             <CardDescription>
-              Track and filter every change made in this workspace.
+              Activity logs are restricted to workspace administrators.
             </CardDescription>
-          </div>
-          <PermissionGuard allowedRoles={["ADMIN"]}>
+          </CardHeader>
+          <CardContent className="flex h-60 items-center justify-center text-muted-foreground italic">
+            <div className="flex flex-col items-center gap-2">
+              <Lock className="w-8 h-8 opacity-20" />
+              <p>You do not have permission to view the audit logs.</p>
+            </div>
+          </CardContent>
+        </Card>
+      }
+    >
+      <Card className="border-primary/20 shadow-xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-card to-primary/5 pb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-primary">
+                  <History className="w-5 h-5" />
+                  Workspace Activity
+                </div>
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] h-5">
+                  Live Feed
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Track and filter every change made in this workspace.
+              </CardDescription>
+            </div>
             <div className="flex flex-col sm:flex-row flex-wrap gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -135,7 +157,7 @@ export function WorkspaceActivity({ workspaceId }: { workspaceId: string }) {
                     const curYear = now.getFullYear();
                     const curMonth = now.getMonth();
                     const selectedYear = year === "ALL" ? curYear : parseInt(year);
-                    
+
                     const isDisabled = selectedYear > curYear || (selectedYear === curYear && m.value !== "ALL" && parseInt(m.value) > curMonth);
 
                     return (
@@ -171,9 +193,9 @@ export function WorkspaceActivity({ workspaceId }: { workspaceId: string }) {
                 </SelectContent>
               </Select>
             </div>
-          </PermissionGuard>
-        </div>
-      </CardHeader>
+          </div>
+        </CardHeader>
+
         <CardContent className="p-0">
           <SkeletonWrapper isLoading={logsQuery.isLoading}>
             <ScrollArea className="h-[400px] w-full">
@@ -220,18 +242,18 @@ export function WorkspaceActivity({ workspaceId }: { workspaceId: string }) {
                         </div>
                         {log.metadata?.amount && (
                           <div className="text-right shrink-0">
-                            <Badge 
-                                variant="outline" 
-                                className={cn(
-                                    "font-mono text-[10px] font-bold",
-                                    log.metadata.type === "income"
-                                        ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5"
-                                        : log.metadata.type === "investment"
-                                            ? "border-indigo-500/30 text-indigo-500 bg-indigo-500/5"
-                                            : "border-red-500/30 text-red-500 bg-red-500/5"
-                                )}
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "font-mono text-[10px] font-bold",
+                                log.metadata.type === "income"
+                                  ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/5"
+                                  : log.metadata.type === "investment"
+                                    ? "border-indigo-500/30 text-indigo-500 bg-indigo-500/5"
+                                    : "border-red-500/30 text-red-500 bg-red-500/5"
+                              )}
                             >
-                                {log.metadata.type === "income" ? "+" : "-"}{formatter.format(log.metadata.amount)}
+                              {log.metadata.type === "income" ? "+" : "-"}{formatter.format(log.metadata.amount)}
                             </Badge>
                           </div>
                         )}
@@ -255,7 +277,8 @@ export function WorkspaceActivity({ workspaceId }: { workspaceId: string }) {
             END OF ACTIVITY LOG
           </p>
         </div>
-    </Card>
+      </Card>
+    </PermissionGuard>
   );
 }
 

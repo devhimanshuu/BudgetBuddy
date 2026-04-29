@@ -175,7 +175,7 @@ export default function BudgetProgressCards({
                       />
 
                       {!isFrozen && (
-                        <PermissionGuard>
+                        <PermissionGuard allowedRoles={["ADMIN"]}>
                           <EditBudgetDialog
                             trigger={
                               <Button
@@ -215,6 +215,7 @@ export default function BudgetProgressCards({
                           />
                         </PermissionGuard>
                       )}
+
                     </div>
                   </CardTitle>
                 </CardHeader>

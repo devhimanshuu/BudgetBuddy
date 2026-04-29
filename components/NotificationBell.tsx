@@ -20,6 +20,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    CheckCheck, 
+    ArrowRight, 
+    TrendingUp, 
+    TrendingDown, 
+    UserPlus, 
+    LayoutDashboard, 
+    Settings,
+    FileText
+} from "lucide-react";
 
 export function NotificationBell() {
     const queryClient = useQueryClient();
@@ -87,38 +98,51 @@ export function NotificationBell() {
                     size="icon"
                     className="relative rounded-full hover:bg-accent/50 transition-all duration-300 h-9 w-9 3xl:h-11 3xl:w-11 4xl:h-12 4xl:w-12"
                 >
-                    <Bell className="h-4 w-4 3xl:h-5 3xl:w-5 4xl:h-6 4xl:w-6 text-muted-foreground hover:text-foreground transition-colors" />
-                    {unreadCount > 0 && (
-                        <span className="absolute top-2 right-2 flex h-2 w-2 items-center justify-center">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                        </span>
-                    )}
+                    <Bell className="h-4 w-4 3xl:h-5 3xl:w-5 4xl:h-6 4xl:w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    <AnimatePresence>
+                        {unreadCount > 0 && (
+                            <motion.span 
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0 }}
+                                className="absolute -top-0.5 -right-0.5 flex h-4 w-4 3xl:h-5 3xl:w-5 items-center justify-center rounded-full bg-rose-500 text-[9px] 3xl:text-[11px] font-black text-white shadow-lg ring-2 ring-background"
+                            >
+                                {unreadCount > 9 ? "9+" : unreadCount}
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
                 </Button>
+
             </PopoverTrigger>
             <PopoverContent 
                 className="w-[350px] sm:w-[380px] p-0 border-border bg-background/95 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden" 
                 align="end" 
                 sideOffset={8}
             >
-                <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/30">
+                <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-muted/50 to-background">
                     <div className="flex flex-col gap-0.5">
-                        <h3 className="text-sm font-bold tracking-tight">Notifications</h3>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                            {unreadCount} UNREAD
+                        <h3 className="text-sm font-black tracking-tight uppercase italic">Notifications</h3>
+                        <p className={cn(
+                            "text-[10px] font-bold uppercase tracking-widest",
+                            unreadCount > 0 ? "text-rose-500" : "text-muted-foreground"
+                        )}>
+                            {unreadCount} {unreadCount === 1 ? "Update" : "Updates"} pending
                         </p>
                     </div>
                     {unreadCount > 0 && (
                         <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-8 text-[11px] font-bold text-primary hover:text-primary hover:bg-primary/10 transition-all rounded-full px-3"
+                            className="h-8 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 transition-all rounded-xl px-3 gap-2 border border-primary/10"
                             onClick={() => markAllReadMutation.mutate()}
+                            disabled={markAllReadMutation.isPending}
                         >
-                            Mark all as read
+                            <CheckCheck className="h-3 w-3" />
+                            Clear All
                         </Button>
                     )}
                 </div>
+
 
                 <ScrollArea className="h-[400px]">
                     <div className="flex flex-col divide-y divide-border/30">
@@ -144,33 +168,43 @@ export function NotificationBell() {
                                 <div 
                                     key={notification.id}
                                     className={cn(
-                                        "group relative flex items-start gap-3 p-4 transition-all duration-300 hover:bg-accent/40 cursor-pointer",
-                                        !notification.isRead && "bg-primary/5"
+                                        "group relative flex items-start gap-3 p-4 transition-all duration-300 hover:bg-muted/50 cursor-pointer overflow-hidden",
+                                        !notification.isRead && "bg-primary/[0.03]"
                                     )}
                                     onClick={() => !notification.isRead && markReadMutation.mutate(notification.id)}
                                 >
+                                    {/* Unread Indicator Bar */}
+                                    {!notification.isRead && (
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                                    )}
+
                                     <div className={cn(
-                                        "h-9 w-9 rounded-full flex items-center justify-center shrink-0 border border-border/50 shadow-sm transition-transform group-hover:scale-105",
+                                        "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border border-border/50 shadow-sm transition-all duration-500 group-hover:rotate-6 group-hover:scale-110",
                                         !notification.isRead ? "bg-primary/10 text-primary border-primary/20" : "bg-muted/50 text-muted-foreground"
                                     )}>
                                         <ActivityIcon type={notification.activity.type} />
                                     </div>
                                     <div className="flex flex-col gap-1 min-w-0 pr-4">
-                                        <p className="text-[13px] font-medium leading-snug">
+                                        <p className={cn(
+                                            "text-[13px] leading-snug transition-colors",
+                                            !notification.isRead ? "font-bold text-foreground" : "font-medium text-muted-foreground"
+                                        )}>
                                             {notification.activity.description}
                                         </p>
-                                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
-                                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                                        </span>
-                                    </div>
-                                    {!notification.isRead && (
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                            <div className="h-2 w-2 rounded-full bg-primary" />
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
+                                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                                            </span>
+                                            {!notification.isRead && (
+                                                <span className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
+                                    <ArrowRight className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
                                 </div>
                             ))
                         )}
+
                     </div>
                 </ScrollArea>
                 
@@ -191,16 +225,24 @@ export function NotificationBell() {
 function ActivityIcon({ type }: { type: string }) {
     switch (type) {
         case "TRANSACTION_CREATED":
-            return <Circle className="h-2.5 w-2.5 fill-emerald-500 text-emerald-500" />;
+            return <TrendingUp className="h-4 w-4" />;
         case "TRANSACTION_UPDATED":
-            return <Circle className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />;
+            return <FileText className="h-4 w-4" />;
+        case "TRANSACTION_DELETED":
+            return <TrendingDown className="h-4 w-4" />;
+        case "BUDGET_PROPOSED":
         case "BUDGET_CREATED":
-        case "BUDGET_UPDATED":
-            return <Circle className="h-2.5 w-2.5 fill-blue-500 text-blue-500" />;
+            return <LayoutDashboard className="h-4 w-4" />;
+        case "BUDGET_FINALIZED":
+            return <CheckCheck className="h-4 w-4" />;
         case "MEMBER_JOINED":
         case "MEMBER_INVITED":
-            return <Circle className="h-2.5 w-2.5 fill-purple-500 text-purple-500" />;
+            return <UserPlus className="h-4 w-4" />;
+        case "PERMISSIONS_UPDATED":
+        case "OWNERSHIP_TRANSFERRED":
+            return <Settings className="h-4 w-4" />;
         default:
-            return <Circle className="h-2.5 w-2.5 fill-muted-foreground text-muted-foreground" />;
+            return <Bell className="h-4 w-4" />;
     }
 }
+

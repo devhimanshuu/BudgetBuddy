@@ -200,7 +200,10 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
               </div>
 
               <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
-                <ProposeBudgetDialog month={selectedMonth} year={selectedYear} />
+                <PermissionGuard allowedRoles={["EDITOR"]}>
+                  <ProposeBudgetDialog month={selectedMonth} year={selectedYear} />
+                </PermissionGuard>
+
                 
                 <PermissionGuard allowedRoles={["ADMIN"]}>
                   <BudgetProposalsDialog month={selectedMonth} year={selectedYear} />
@@ -228,7 +231,10 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                </PermissionGuard>
 
+
+                <PermissionGuard allowedRoles={["ADMIN"]}>
                   <Button
                     variant="outline"
                     onClick={() => setIsFrozen(!isFrozen)}
@@ -280,6 +286,7 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                     year={selectedYear}
                   />
                 </PermissionGuard>
+
               </div>
             </div>
           </div>
