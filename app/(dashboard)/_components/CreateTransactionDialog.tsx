@@ -275,7 +275,7 @@ const CreateTransactionDialog = ({
         billSplits: isMemberSplit ? values.billSplits : undefined,
       });
     },
-    [mutate, selectedTags, attachments, isSplitMode, isMemberSplit],
+    [mutate, selectedTags, attachments, isSplitMode, isMemberSplit, formatter],
   );
 
   return (

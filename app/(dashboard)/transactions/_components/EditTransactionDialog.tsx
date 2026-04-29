@@ -200,7 +200,7 @@ const EditTransactionDialog = ({ open, setOpen, transaction }: Props) => {
                 splits: isSplitMode ? values.splits : undefined,
             });
         },
-        [mutate, selectedTags, attachments, isSplitMode]
+        [mutate, selectedTags, attachments, isSplitMode, formatter]
     );
 
     const type = transaction.type as TransactionType;

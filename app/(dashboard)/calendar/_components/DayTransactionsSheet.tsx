@@ -90,7 +90,7 @@ export default function DayTransactionsSheet({
                                 <div className="w-full rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4">
                                     <div className="flex items-center gap-3">
                                         <div className="text-2xl">✨</div>
-                                        <div className="text-heading-sm text-amber-600">Perfect "No Spend" Day!</div>
+                                        <div className="text-heading-sm text-amber-600">Perfect &quot;No Spend&quot; Day!</div>
                                     </div>
                                 </div>
                             )}
