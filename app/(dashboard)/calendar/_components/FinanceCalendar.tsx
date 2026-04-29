@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { useQuery } from "@tanstack/react-query";
-import { format, addMonths, subMonths } from "date-fns";
+import { format, addMonths, subMonths, isSameDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -159,9 +159,10 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <span className="text-2xl font-bold">
+                        <span className="text-heading-xl">
                             {format(currentMonth, "MMMM yyyy")}
                         </span>
+
                         <Button
                             variant="outline"
                             size="icon"
@@ -200,98 +201,121 @@ export default function FinanceCalendar({ userSettings }: FinanceCalendarProps) 
                                 onSelect={handleDayClick}
                                 month={currentMonth}
                                 onMonthChange={setCurrentMonth}
-                                disabled={(date) => date > new Date()}
-                                className="rounded-md border"
+                                className="rounded-md border p-4 glass shadow-2xl"
                                 components={{
                                     DayButton: (props) => {
+                                        const dateKey = format(props.day.date, "yyyy-MM-dd");
                                         const dayData = getDayData(props.day.date);
-                                        const hasIncome = dayData && dayData.income > 0;
-                                        const hasInvestment = dayData && dayData.investment > 0;
-                                        const hasHighSpending = dayData && dayData.isHighSpending;
-                                        const hasNormalSpending = dayData && dayData.expense > 0 && !dayData.isHighSpending;
+                                        const isToday = isSameDay(props.day.date, new Date());
+                                        const isFuture = props.day.date > new Date();
+                                        
+                                        // Heatmap logic
+                                        const isPayday = dayData && dayData.income > 500; // Significant income
+                                        const isHeavyBillDay = dayData && (dayData.isRecurringDue || dayData.isHighSpending);
+                                        
+                                        // No Spend Streak
+                                        const isNoSpendDay = dayData && dayData.expense === 0 && dayData.investment === 0 && !isFuture;
 
                                         return (
                                             <button
                                                 {...props}
                                                 className={cn(
-                                                    "relative flex h-9 w-9 items-center justify-center p-0 font-normal",
-                                                    props.className
+                                                    "relative flex h-12 w-12 3xl:h-14 3xl:w-14 items-center justify-center p-0 font-bold transition-all duration-300 hover:scale-110",
+                                                    props.className,
+                                                    isToday && "ring-2 ring-primary ring-offset-2",
+                                                    isPayday && "bg-emerald-500/20 text-emerald-600 rounded-xl",
+                                                    isHeavyBillDay && "bg-rose-500/20 text-rose-600 rounded-xl",
+                                                    isNoSpendDay && "ring-2 ring-amber-400/50 rounded-full"
                                                 )}
                                             >
-                                                <span>{format(props.day.date, "d")}</span>
-                                                {/* Indicator dots */}
-                                                <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-0.5 pb-0.5">
-                                                    {hasIncome && (
-                                                        <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                                                <span className={cn(
+                                                    "z-10",
+                                                    isNoSpendDay && "text-amber-600"
+                                                )}>{format(props.day.date, "d")}</span>
+
+                                                {/* Indicators */}
+                                                <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-0.5">
+                                                    {(dayData?.income ?? 0) > 0 && (
+                                                        <div className="h-1 w-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                                     )}
-                                                    {hasInvestment && (
-                                                        <div className="h-1 w-1 rounded-full bg-indigo-500" />
+                                                    {dayData?.isRecurringDue && (
+                                                        <div className="h-1 w-1 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
                                                     )}
-                                                    {hasHighSpending && (
-                                                        <div className="h-1 w-1 rounded-full bg-red-500" />
-                                                    )}
-                                                    {hasNormalSpending && !hasIncome && !hasHighSpending && !hasInvestment && (
-                                                        <div className="h-1 w-1 rounded-full bg-gray-400" />
+                                                    {dayData?.isGoalMilestone && (
+                                                        <div className="h-1 w-1 rounded-full bg-amber-400 animate-bounce" />
                                                     )}
                                                 </div>
+
+                                                {/* Background Glow for High Spenders */}
+                                                {dayData?.isHighSpending && (
+                                                    <div className="absolute inset-0 bg-rose-500/10 blur-sm rounded-xl" />
+                                                )}
                                             </button>
                                         );
                                     },
                                 }}
+
                             />
                         </div>
                     </SkeletonWrapper>
 
                     {/* Legend */}
-                    <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
+                    <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4 glass p-4 rounded-2xl">
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                            <span className="text-muted-foreground">Income</span>
+                            <div className="h-4 w-4 rounded bg-emerald-500/20 border border-emerald-500/50" />
+                            <span className="text-xs font-black uppercase tracking-tighter text-emerald-600">Payday High</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-indigo-500" />
-                            <span className="text-muted-foreground">Investment</span>
+                            <div className="h-4 w-4 rounded bg-rose-500/20 border border-rose-500/50" />
+                            <span className="text-xs font-black uppercase tracking-tighter text-rose-600">Bill Heavy</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-red-500" />
-                            <span className="text-muted-foreground">High Spending</span>
+                            <div className="h-4 w-4 rounded-full border-2 border-amber-400/50" />
+                            <span className="text-xs font-black uppercase tracking-tighter text-amber-600">No Spend Streak</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-gray-400" />
-                            <span className="text-muted-foreground">Normal Spending</span>
+                            <div className="h-2 w-2 rounded-full bg-amber-400" />
+                            <span className="text-xs font-black uppercase tracking-tighter text-muted-foreground">Goal Target</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                            <span className="text-xs font-black uppercase tracking-tighter text-muted-foreground">Predictive Bill</span>
                         </div>
                     </div>
+
                 </CardContent>
             </Card>
 
             {/* Month Statistics */}
             {calendarQuery.data && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                    <Card>
+                    <Card className="glass border-emerald-500/20">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                            <CardTitle className="text-heading-md text-emerald-600">
                                 Total Income
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-emerald-500">
+                            <div className="text-heading-lg text-emerald-600">
                                 {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalIncome)}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
+
+                    <Card className="glass border-rose-500/20">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                            <CardTitle className="text-heading-md text-rose-600">
                                 Total Expenses
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-red-500">
+                            <div className="text-heading-lg text-rose-600">
                                 {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(calendarQuery.data.monthStats.totalExpense)}
                             </div>
                         </CardContent>
                     </Card>
+
 
                     <Card>
                         <CardHeader className="pb-2">
