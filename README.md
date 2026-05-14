@@ -106,7 +106,7 @@ The AI embeds functional, reactive components directly in your chat:
 
 BudgetBuddy utilizes a robust relational schema designed for workspace isolation and detailed financial tracking.
 
-![BudgetBuddy Database Schema](BudgetBuddy_Schema_Design.svg)
+![BudgetBuddy Database Schema](BudgetBuddy_Schema.svg)
 
 ---
 

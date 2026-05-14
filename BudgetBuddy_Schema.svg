@@ -1,0 +1,1157 @@
+<svg viewBox="0 0 2200 2800" xmlns="http://www.w3.org/2000/svg" font-family="'Courier New', monospace">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#060b14"/>
+      <stop offset="100%" style="stop-color:#0a1020"/>
+    </linearGradient>
+    <linearGradient id="cG" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#101623"/>
+      <stop offset="100%" style="stop-color:#0b1020"/>
+    </linearGradient>
+    <linearGradient id="hBl" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#1e3a8a"/><stop offset="100%" style="stop-color:#2563eb"/></linearGradient>
+    <linearGradient id="hGr" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#064e3b"/><stop offset="100%" style="stop-color:#059669"/></linearGradient>
+    <linearGradient id="hPu" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#4c1d95"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient>
+    <linearGradient id="hOr" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#78350f"/><stop offset="100%" style="stop-color:#d97706"/></linearGradient>
+    <linearGradient id="hRe" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#7f1d1d"/><stop offset="100%" style="stop-color:#dc2626"/></linearGradient>
+    <linearGradient id="hTe" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#134e4a"/><stop offset="100%" style="stop-color:#0d9488"/></linearGradient>
+    <linearGradient id="hPi" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#831843"/><stop offset="100%" style="stop-color:#db2777"/></linearGradient>
+    <linearGradient id="hIn" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#312e81"/><stop offset="100%" style="stop-color:#4f46e5"/></linearGradient>
+    <linearGradient id="hSl" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#1e293b"/><stop offset="100%" style="stop-color:#475569"/></linearGradient>
+    <linearGradient id="hCy" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#155e75"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient>
+    <linearGradient id="hLi" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#3b0764"/><stop offset="100%" style="stop-color:#a855f7"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0e1a2e" stroke-width="0.6"/>
+    </pattern>
+    <filter id="cs"><feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000" flood-opacity="0.7"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <marker id="a0" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563eb" opacity="0.8"/></marker>
+    <marker id="a1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#059669" opacity="0.8"/></marker>
+    <marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c3aed" opacity="0.8"/></marker>
+    <marker id="a3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc2626" opacity="0.8"/></marker>
+    <marker id="a4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#0d9488" opacity="0.8"/></marker>
+    <marker id="a5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#db2777" opacity="0.8"/></marker>
+    <marker id="a6" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#06b6d4" opacity="0.8"/></marker>
+    <marker id="a7" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a855f7" opacity="0.8"/></marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="2200" height="2800" fill="url(#bg)"/>
+  <rect width="2200" height="2800" fill="url(#grid)"/>
+  <rect x="0" y="0" width="2200" height="2800" fill="none" stroke="#1a2540" stroke-width="2"/>
+  <line x1="0" y1="96" x2="2200" y2="96" stroke="#1a2540" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="1100" y="48" text-anchor="middle" font-size="28" font-weight="bold" fill="#e2e8f0" letter-spacing="8" filter="url(#glow)">DATABASE SCHEMA</text>
+  <text x="1100" y="74" text-anchor="middle" font-size="10" fill="#374151" letter-spacing="4">ENTITY RELATIONSHIP DIAGRAM  ·  POSTGRESQL + PRISMA ORM  ·  v3 — COLLABORATION UPDATE</text>
+
+  <!-- Version badge -->
+  <rect x="1820" y="12" width="358" height="64" rx="6" fill="#0d1321" stroke="#059669" stroke-width="1.2"/>
+  <text x="1999" y="30" text-anchor="middle" font-size="8" fill="#059669" letter-spacing="2">NEW IN THIS VERSION</text>
+  <text x="1999" y="44" text-anchor="middle" font-size="7.5" fill="#6b7280">BudgetTemplate · BudgetTemplateEntry</text>
+  <text x="1999" y="58" text-anchor="middle" font-size="7.5" fill="#6b7280">Comment · MemberRestriction · BudgetProposal · BillSplit</text>
+  <text x="1999" y="70" text-anchor="middle" font-size="7.5" fill="#6b7280">GoalContribution · GoalMessage · +fields on 6 models</text>
+
+  <!-- ================================================================
+       SECTION LABEL BARS
+  ================================================================ -->
+  <rect x="12" y="102" width="180" height="18" rx="3" fill="#1e3a8a" opacity="0.6"/>
+  <text x="102" y="115" text-anchor="middle" font-size="8" fill="#93c5fd" letter-spacing="2">CORE / WORKSPACE</text>
+
+  <rect x="12" y="780" width="180" height="18" rx="3" fill="#059669" opacity="0.5"/>
+  <text x="102" y="793" text-anchor="middle" font-size="8" fill="#6ee7b7" letter-spacing="2">TRANSACTIONS</text>
+
+  <rect x="12" y="1390" width="180" height="18" rx="3" fill="#d97706" opacity="0.5"/>
+  <text x="102" y="1403" text-anchor="middle" font-size="8" fill="#fcd34d" letter-spacing="2">FINANCIAL PLANNING</text>
+
+  <rect x="12" y="1900" width="180" height="18" rx="3" fill="#7c3aed" opacity="0.5"/>
+  <text x="102" y="1913" text-anchor="middle" font-size="8" fill="#c4b5fd" letter-spacing="2">VAULT / SECURITY</text>
+
+  <rect x="12" y="2280" width="180" height="18" rx="3" fill="#06b6d4" opacity="0.5"/>
+  <text x="102" y="2293" text-anchor="middle" font-size="8" fill="#67e8f9" letter-spacing="2">COLLABORATION</text>
+
+  <!-- ================================================================
+       ROW 1 — CORE: UserSettings | Workspace | WorkspaceMember | Invite | Category | Activity
+  ================================================================ -->
+
+  <!-- UserSettings x=20 y=126 w=238 -->
+  <g filter="url(#cs)">
+    <rect x="20" y="126" width="238" height="300" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="20" y="126" width="238" height="28" rx="5" fill="url(#hSl)"/>
+    <rect x="20" y="142" width="238" height="12" fill="url(#hSl)"/>
+    <text x="139" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">UserSettings</text>
+    <text x="34" y="168" font-size="8" fill="#fbbf24">⬡ userId</text><text x="214" y="168" font-size="7.5" fill="#374151" text-anchor="end">String @id</text>
+    <line x1="34" y1="171" x2="254" y2="171" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="183" font-size="8" fill="#94a3b8">currency</text><text x="214" y="183" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="186" x2="254" y2="186" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="198" font-size="8" fill="#94a3b8">currentStreak</text><text x="214" y="198" font-size="7.5" fill="#374151" text-anchor="end">Int=0</text>
+    <line x1="34" y1="201" x2="254" y2="201" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="213" font-size="8" fill="#94a3b8">longestStreak</text><text x="214" y="213" font-size="7.5" fill="#374151" text-anchor="end">Int=0</text>
+    <line x1="34" y1="216" x2="254" y2="216" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="228" font-size="8" fill="#94a3b8">lastActivityDate</text><text x="214" y="228" font-size="7.5" fill="#374151" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="231" x2="254" y2="231" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="243" font-size="8" fill="#94a3b8">totalPoints</text><text x="214" y="243" font-size="7.5" fill="#374151" text-anchor="end">Int=0</text>
+    <line x1="34" y1="246" x2="254" y2="246" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="258" font-size="8" fill="#94a3b8">spendingLimitThreshold</text><text x="222" y="258" font-size="7.5" fill="#374151" text-anchor="end">Int=80</text>
+    <line x1="34" y1="261" x2="254" y2="261" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="273" font-size="8" fill="#94a3b8">enableAnomalyDetection</text><text x="222" y="273" font-size="7.5" fill="#374151" text-anchor="end">Bool</text>
+    <line x1="34" y1="276" x2="254" y2="276" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="288" font-size="8" fill="#94a3b8">anomalyThreshold</text><text x="222" y="288" font-size="7.5" fill="#374151" text-anchor="end">Float=2.0</text>
+    <line x1="34" y1="291" x2="254" y2="291" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="303" font-size="8" fill="#94a3b8">activeTheme</text><text x="222" y="303" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="306" x2="254" y2="306" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="318" font-size="8" fill="#94a3b8">vaultPin / vaultPinEnabled</text><text x="222" y="318" font-size="7.5" fill="#374151" text-anchor="end">String?/Bool</text>
+    <line x1="34" y1="321" x2="254" y2="321" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="333" font-size="8" fill="#94a3b8">lastVaultActivity</text><text x="222" y="333" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="34" y1="336" x2="254" y2="336" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="348" font-size="8" fill="#94a3b8">dmsEnabled</text><text x="222" y="348" font-size="7.5" fill="#374151" text-anchor="end">Boolean</text>
+    <line x1="34" y1="351" x2="254" y2="351" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="363" font-size="8" fill="#94a3b8">dmsThresholdDays</text><text x="222" y="363" font-size="7.5" fill="#374151" text-anchor="end">Int=30</text>
+    <line x1="34" y1="366" x2="254" y2="366" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="34" y="378" font-size="7" fill="#4b5d7a">No soft delete · No workspace link</text>
+    <text x="34" y="390" font-size="7" fill="#4b5d7a">Vault + DMS + Gamification settings</text>
+    <text x="34" y="402" font-size="7" fill="#4b5d7a">Unchanged in this version</text>
+    <rect x="20" y="126" width="238" height="300" rx="5" fill="none" stroke="#475569" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- Workspace x=282 y=126 w=286 -->
+  <g filter="url(#cs)">
+    <rect x="282" y="126" width="286" height="490" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="282" y="126" width="286" height="28" rx="5" fill="url(#hBl)"/>
+    <rect x="282" y="142" width="286" height="12" fill="url(#hBl)"/>
+    <text x="425" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Workspace</text>
+    <text x="296" y="168" font-size="8" fill="#fbbf24">⬡ id</text><text x="524" y="168" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="296" y1="171" x2="564" y2="171" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="296" y="183" font-size="8" fill="#94a3b8">name / ownerId / currency</text><text x="524" y="183" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="296" y1="186" x2="564" y2="186" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="296" y="198" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="524" y="198" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="296" y1="201" x2="564" y2="201" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="296" y="206" width="260" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="296" y="215" font-size="8" fill="#f87171">deletedAt</text><text x="524" y="215" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="296" y1="218" x2="564" y2="218" stroke="#0e1a2e" stroke-width="0.5"/>
+    <!-- NEW fields highlighted -->
+    <rect x="296" y="223" width="260" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="296" y="232" font-size="8" fill="#6ee7b7">approvalThreshold ★</text><text x="524" y="232" font-size="7.5" fill="#6ee7b7" text-anchor="end">Float=0</text>
+    <line x1="296" y1="235" x2="564" y2="235" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="296" y="240" width="260" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="296" y="249" font-size="8" fill="#6ee7b7">avatar ★</text><text x="524" y="249" font-size="7.5" fill="#6ee7b7" text-anchor="end">String?=🏢</text>
+    <line x1="296" y1="252" x2="564" y2="252" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="296" y="257" width="260" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="296" y="266" font-size="8" fill="#6ee7b7">description ★</text><text x="524" y="266" font-size="7.5" fill="#6ee7b7" text-anchor="end">String?</text>
+    <line x1="296" y1="269" x2="564" y2="269" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="296" y="274" width="260" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="296" y="283" font-size="8" fill="#6ee7b7">type ★</text><text x="524" y="283" font-size="7.5" fill="#6ee7b7" text-anchor="end">PERSONAL|HOME|STARTUP|VACATION</text>
+    <line x1="296" y1="286" x2="564" y2="286" stroke="#0e1a2e" stroke-width="0.5"/>
+    <line x1="296" y1="297" x2="564" y2="297" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="425" y="309" text-anchor="middle" font-size="7.5" fill="#374151" letter-spacing="1">RELATIONS</text>
+    <text x="296" y="321" font-size="7.5" fill="#2563eb">⟶ members, invites, categories, transactions</text>
+    <text x="296" y="333" font-size="7.5" fill="#2563eb">⟶ tags, budgets, savingsGoals, assets</text>
+    <text x="296" y="345" font-size="7.5" fill="#2563eb">⟶ recurringTransactions, activities</text>
+    <text x="296" y="357" font-size="7.5" fill="#2563eb">⟶ vaultEntries, beneficiaries</text>
+    <text x="296" y="369" font-size="7.5" fill="#6ee7b7">⟶ budgetTemplates ★ (new)</text>
+    <text x="296" y="381" font-size="7.5" fill="#6ee7b7">⟶ budgetProposals ★ (new)</text>
+    <line x1="296" y1="391" x2="564" y2="391" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="296" y="403" font-size="7" fill="#374151">@@index [ownerId, deletedAt]</text>
+    <text x="296" y="415" font-size="7" fill="#374151">onDelete: Cascade on all children</text>
+    <text x="296" y="427" font-size="7" fill="#374151">approvalThreshold: tx approval limit</text>
+    <text x="296" y="439" font-size="7" fill="#374151">type: workspace branding classification</text>
+    <text x="296" y="451" font-size="7" fill="#374151">avatar/description: workspace branding</text>
+    <text x="296" y="463" font-size="7" fill="#374151">6 new fields added in this version</text>
+    <text x="296" y="475" font-size="7" fill="#374151">2 new relation arrays added</text>
+    <text x="296" y="487" font-size="7" fill="#374151">budgetTemplates + budgetProposals</text>
+    <text x="296" y="499" font-size="7" fill="#374151">Central workspace entity — root of all</text>
+    <text x="296" y="511" font-size="7" fill="#374151">workspace-scoped data in the system</text>
+    <text x="296" y="523" font-size="7" fill="#374151">Cascade delete propagates to all</text>
+    <text x="296" y="535" font-size="7" fill="#374151">related models on hard workspace delete</text>
+    <text x="296" y="547" font-size="7" fill="#374151">Soft-delete via deletedAt for safety</text>
+    <text x="296" y="559" font-size="7" fill="#374151">and recovery before final purge</text>
+    <text x="296" y="571" font-size="7" fill="#374151">Soft-delete via deletedAt for safety</text>
+    <text x="296" y="583" font-size="7" fill="#374151">and recovery before final purge</text>
+    <text x="296" y="595" font-size="7" fill="#374151">recovery before final purge</text>
+    <text x="296" y="607" font-size="7" fill="#374151">recovery before final purge</text>
+    <rect x="282" y="126" width="286" height="490" rx="5" fill="none" stroke="#2563eb" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- WorkspaceMember x=592 y=126 w=238 -->
+  <g filter="url(#cs)">
+    <rect x="592" y="126" width="238" height="264" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="592" y="126" width="238" height="28" rx="5" fill="url(#hGr)"/>
+    <rect x="592" y="142" width="238" height="12" fill="url(#hGr)"/>
+    <text x="711" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">WorkspaceMember</text>
+    <text x="606" y="168" font-size="8" fill="#fbbf24">⬡ id</text><text x="782" y="168" font-size="7.5" fill="#374151" text-anchor="end">String @id</text>
+    <line x1="606" y1="171" x2="826" y2="171" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="606" y="183" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="782" y="183" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="606" y1="186" x2="826" y2="186" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="606" y="198" font-size="8" fill="#94a3b8">userId</text><text x="782" y="198" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="606" y1="201" x2="826" y2="201" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="606" y="213" font-size="8" fill="#94a3b8">role</text><text x="782" y="213" font-size="7.5" fill="#374151" text-anchor="end">VIEWER|EDITOR|ADMIN</text>
+    <line x1="606" y1="216" x2="826" y2="216" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="606" y="228" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="782" y="228" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="606" y1="231" x2="826" y2="231" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="606" y="236" width="212" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="606" y="245" font-size="8" fill="#f87171">deletedAt</text><text x="782" y="245" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="606" y1="248" x2="826" y2="248" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="606" y="253" width="212" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="606" y="262" font-size="8" fill="#6ee7b7">memberRestrictions ★</text><text x="782" y="262" font-size="7.5" fill="#6ee7b7" text-anchor="end">MemberRestriction[]</text>
+    <line x1="606" y1="265" x2="826" y2="265" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="606" y="277" font-size="7" fill="#374151">@@unique [workspaceId, userId]</text>
+    <text x="606" y="289" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="606" y="301" font-size="7" fill="#374151">@@index [userId, deletedAt]</text>
+    <text x="606" y="313" font-size="7" fill="#374151">workspace: Workspace (cascade)</text>
+    <text x="606" y="325" font-size="7.5" fill="#6ee7b7">⟶ MemberRestriction[] ★ (new)</text>
+    <text x="606" y="337" font-size="7" fill="#374151">Restrictions per-member per-resource</text>
+    <text x="606" y="349" font-size="7" fill="#374151">Can restrict CATEGORY or ASSET access</text>
+    <text x="606" y="361" font-size="7" fill="#374151">Granular RBAC within workspace</text>
+    <text x="606" y="373" font-size="7" fill="#374151">roles for fine-grained permission</text>
+    <text x="606" y="385" font-size="7" fill="#374151">restriction at resource level</text>
+    <rect x="592" y="126" width="238" height="264" rx="5" fill="none" stroke="#059669" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- Invite x=852 y=126 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="852" y="126" width="228" height="222" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="852" y="126" width="228" height="28" rx="5" fill="url(#hOr)"/>
+    <rect x="852" y="142" width="228" height="12" fill="url(#hOr)"/>
+    <text x="966" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Invite</text>
+    <text x="866" y="168" font-size="8" fill="#fbbf24">⬡ id</text><text x="1036" y="168" font-size="7.5" fill="#374151" text-anchor="end">String @id</text>
+    <line x1="866" y1="171" x2="1076" y2="171" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="866" y="183" font-size="8" fill="#94a3b8">email</text><text x="1036" y="183" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="866" y1="186" x2="1076" y2="186" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="866" y="198" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="1036" y="198" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="866" y1="201" x2="1076" y2="201" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="866" y="213" font-size="8" fill="#94a3b8">role / token</text><text x="1036" y="213" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="866" y1="216" x2="1076" y2="216" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="866" y="228" font-size="8" fill="#94a3b8">expiresAt / createdAt</text><text x="1036" y="228" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="866" y1="231" x2="1076" y2="231" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="866" y="236" width="202" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="866" y="245" font-size="8" fill="#f87171">deletedAt</text><text x="1036" y="245" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="866" y1="248" x2="1076" y2="248" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="866" y="260" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="866" y="272" font-size="7" fill="#374151">token: @unique · workspace: cascade</text>
+    <text x="866" y="284" font-size="7" fill="#374151">Unchanged in this version</text>
+    <rect x="852" y="126" width="228" height="222" rx="5" fill="none" stroke="#d97706" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- Category x=1102 y=126 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="1102" y="126" width="228" height="246" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="1102" y="126" width="228" height="28" rx="5" fill="url(#hPu)"/>
+    <rect x="1102" y="142" width="228" height="12" fill="url(#hPu)"/>
+    <text x="1216" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Category</text>
+    <text x="1116" y="168" font-size="8" fill="#fbbf24">⬡ name + userId + type</text>
+    <line x1="1116" y1="171" x2="1326" y2="171" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1116" y="183" font-size="8" fill="#94a3b8">createdAt / userId</text><text x="1286" y="183" font-size="7.5" fill="#374151" text-anchor="end">DateTime/String</text>
+    <line x1="1116" y1="186" x2="1326" y2="186" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1116" y="198" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="1286" y="198" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="1116" y1="201" x2="1326" y2="201" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1116" y="213" font-size="8" fill="#94a3b8">icon / type</text><text x="1286" y="213" font-size="7.5" fill="#374151" text-anchor="end">income|expense|invest</text>
+    <line x1="1116" y1="216" x2="1326" y2="216" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="1116" y="221" width="202" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="1116" y="230" font-size="8" fill="#6ee7b7">color ★</text><text x="1286" y="230" font-size="7.5" fill="#6ee7b7" text-anchor="end">String?=#10b981</text>
+    <line x1="1116" y1="233" x2="1326" y2="233" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="1116" y="238" width="202" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="1116" y="247" font-size="8" fill="#6ee7b7">isShared ★</text><text x="1286" y="247" font-size="7.5" fill="#6ee7b7" text-anchor="end">Boolean=false</text>
+    <line x1="1116" y1="250" x2="1326" y2="250" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="1116" y="255" width="202" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="1116" y="264" font-size="8" fill="#f87171">deletedAt</text><text x="1286" y="264" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="1116" y1="267" x2="1326" y2="267" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1116" y="279" font-size="7" fill="#374151">@@id [name, userId, type]</text>
+    <text x="1116" y="291" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="1116" y="303" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="1116" y="315" font-size="7.5" fill="#6ee7b7">color + isShared added this version</text>
+    <text x="1116" y="327" font-size="7" fill="#374151">color: visual category differentiation</text>
+    <text x="1116" y="339" font-size="7" fill="#374151">isShared: visible to workspace members</text>
+    <text x="1116" y="351" font-size="7" fill="#374151">vs private to creating user only</text>
+    <text x="1116" y="363" font-size="7" fill="#374151">vs private to creating user only</text>
+    <rect x="1102" y="126" width="228" height="246" rx="5" fill="none" stroke="#7c3aed" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- Activity x=1360 y=126 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="1360" y="126" width="228" height="192" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="1360" y="126" width="228" height="28" rx="5" fill="url(#hTe)"/>
+    <rect x="1360" y="142" width="228" height="12" fill="url(#hTe)"/>
+    <text x="1474" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Activity</text>
+    <text x="1374" y="168" font-size="8" fill="#fbbf24">⬡ id</text><text x="1540" y="168" font-size="7.5" fill="#374151" text-anchor="end">String @id cuid</text>
+    <line x1="1374" y1="171" x2="1584" y2="171" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1374" y="183" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="1540" y="183" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1374" y1="186" x2="1584" y2="186" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1374" y="198" font-size="8" fill="#94a3b8">userId / type / description</text><text x="1540" y="198" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1374" y1="201" x2="1584" y2="201" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1374" y="213" font-size="8" fill="#94a3b8">metadata</text><text x="1540" y="213" font-size="7.5" fill="#374151" text-anchor="end">Json?</text>
+    <line x1="1374" y1="216" x2="1584" y2="216" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1374" y="228" font-size="8" fill="#94a3b8">createdAt</text><text x="1540" y="228" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1374" y1="231" x2="1584" y2="231" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1374" y="243" font-size="7" fill="#374151">@@index [workspaceId] [userId]</text>
+    <text x="1374" y="255" font-size="7" fill="#374151">workspace: Workspace (cascade)</text>
+    <text x="1374" y="267" font-size="7.5" fill="#4b5d7a">No soft delete — audit log</text>
+    <text x="1374" y="279" font-size="7" fill="#374151">Unchanged in this version</text>
+    <text x="1374" y="291" font-size="7" fill="#374151">Immutable activity ledger</text>
+    <text x="1374" y="303" font-size="7" fill="#374151">Hard delete only via cascade</text>
+    <rect x="1360" y="126" width="228" height="192" rx="5" fill="none" stroke="#0d9488" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- ================================================================
+       ROW 2 — TRANSACTIONS
+  ================================================================ -->
+
+  <!-- Transaction x=20 y=796 w=270 -->
+  <g filter="url(#cs)">
+    <rect x="20" y="796" width="270" height="420" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="20" y="796" width="270" height="28" rx="5" fill="url(#hBl)"/>
+    <rect x="20" y="812" width="270" height="12" fill="url(#hBl)"/>
+    <text x="155" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Transaction</text>
+    <text x="34" y="838" font-size="8" fill="#fbbf24">⬡ id</text><text x="246" y="838" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="34" y1="841" x2="286" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="853" font-size="8" fill="#94a3b8">createdAt / updateAt</text><text x="246" y="853" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="34" y1="856" x2="286" y2="856" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="868" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="246" y="868" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="871" x2="286" y2="871" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="883" font-size="8" fill="#94a3b8">amount / description / notes</text><text x="246" y="883" font-size="7.5" fill="#374151" text-anchor="end">Float/String</text>
+    <line x1="34" y1="886" x2="286" y2="886" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="898" font-size="8" fill="#94a3b8">date / userId</text><text x="246" y="898" font-size="7.5" fill="#374151" text-anchor="end">DateTime/String</text>
+    <line x1="34" y1="901" x2="286" y2="901" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="913" font-size="8" fill="#94a3b8">type</text><text x="246" y="913" font-size="7.5" fill="#374151" text-anchor="end">income|expense|invest</text>
+    <line x1="34" y1="916" x2="286" y2="916" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="928" font-size="8" fill="#94a3b8">category / categoryIcon</text><text x="246" y="928" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="931" x2="286" y2="931" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="936" width="244" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="34" y="945" font-size="8" fill="#f87171">deletedAt</text><text x="246" y="945" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="948" x2="286" y2="948" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="953" width="244" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="34" y="962" font-size="8" fill="#6ee7b7">status ★</text><text x="246" y="962" font-size="7.5" fill="#6ee7b7" text-anchor="end">PENDING|APPROVED|REJECTED</text>
+    <line x1="34" y1="965" x2="286" y2="965" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="34" y="977" font-size="7.5" fill="#2563eb">⟶ tags, attachments, splits, history</text>
+    <text x="34" y="989" font-size="7.5" fill="#6ee7b7">⟶ billSplits ★ (new)</text>
+    <text x="34" y="1001" font-size="7.5" fill="#6ee7b7">⟶ comments ★ (new)</text>
+    <text x="34" y="1013" font-size="7" fill="#374151">@@index [workspaceId, date, deletedAt]</text>
+    <text x="34" y="1025" font-size="7" fill="#374151">@@index [workspaceId, category, deletedAt]</text>
+    <text x="34" y="1037" font-size="7" fill="#374151">@@index [userId, type, date, deletedAt]</text>
+    <text x="34" y="1049" font-size="7" fill="#374151">@@index [userId, date, type, deletedAt]</text>
+    <text x="34" y="1061" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="34" y="1073" font-size="7.5" fill="#6ee7b7">status: approval workflow for workspace</text>
+    <text x="34" y="1085" font-size="7" fill="#374151">PENDING: awaiting approval (threshold)</text>
+    <text x="34" y="1097" font-size="7" fill="#374151">APPROVED: processed · REJECTED: denied</text>
+    <text x="34" y="1109" font-size="7" fill="#374151">billSplits: shared expense splitting</text>
+    <text x="34" y="1121" font-size="7" fill="#374151">comments: threaded discussion on tx</text>
+    <text x="34" y="1133" font-size="7" fill="#374151">3 new fields/relations in this version</text>
+    <text x="34" y="1145" font-size="7" fill="#374151">4 indexes cover all filter patterns</text>
+    <text x="34" y="1157" font-size="7" fill="#374151">all include deletedAt for soft delete</text>
+    <text x="34" y="1169" font-size="7" fill="#374151">query performance optimization</text>
+    <text x="34" y="1181" font-size="7" fill="#374151">across workspace and user dims</text>
+    <text x="34" y="1193" font-size="7" fill="#374151">across workspace and user dims</text>
+    <text x="34" y="1205" font-size="7" fill="#374151">dims</text>
+    <rect x="20" y="796" width="270" height="420" rx="5" fill="none" stroke="#2563eb" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- Tag x=310 y=796 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="310" y="796" width="228" height="216" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="310" y="796" width="228" height="28" rx="5" fill="url(#hPi)"/>
+    <rect x="310" y="812" width="228" height="12" fill="url(#hPi)"/>
+    <text x="424" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Tag</text>
+    <text x="324" y="838" font-size="8" fill="#fbbf24">⬡ id</text><text x="494" y="838" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="324" y1="841" x2="534" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="324" y="853" font-size="8" fill="#94a3b8">name / color</text><text x="494" y="853" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="324" y1="856" x2="534" y2="856" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="324" y="868" font-size="8" fill="#94a3b8">userId</text><text x="494" y="868" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="324" y1="871" x2="534" y2="871" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="324" y="883" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="494" y="883" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="324" y1="886" x2="534" y2="886" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="324" y="898" font-size="8" fill="#94a3b8">createdAt</text><text x="494" y="898" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="324" y1="901" x2="534" y2="901" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="324" y="906" width="202" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="324" y="915" font-size="8" fill="#f87171">deletedAt</text><text x="494" y="915" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="324" y1="918" x2="534" y2="918" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="324" y="930" font-size="7.5" fill="#db2777">⟶ transactions (TransactionTag)</text>
+    <text x="324" y="942" font-size="7" fill="#374151">@@unique [name, userId]</text>
+    <text x="324" y="954" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="324" y="966" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="324" y="978" font-size="7" fill="#374151">Unchanged in this version</text>
+    <text x="324" y="990" font-size="7" fill="#374151">Tags cascade delete on parent</text>
+    <text x="324" y="1002" font-size="7" fill="#374151">workspace and via TransactionTag</text>
+    <rect x="310" y="796" width="228" height="216" rx="5" fill="none" stroke="#db2777" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- TransactionTag x=558 y=796 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="558" y="796" width="218" height="138" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="558" y="796" width="218" height="28" rx="5" fill="url(#hIn)"/>
+    <rect x="558" y="812" width="218" height="12" fill="url(#hIn)"/>
+    <text x="667" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">TransactionTag</text>
+    <text x="572" y="838" font-size="8" fill="#fbbf24">⬡ </text><text x="582" y="838" font-size="8" fill="#60a5fa">transactionId</text><text x="732" y="838" font-size="7.5" fill="#374151" text-anchor="end">String (PK+FK)</text>
+    <line x1="572" y1="841" x2="772" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="572" y="853" font-size="8" fill="#fbbf24">⬡ </text><text x="582" y="853" font-size="8" fill="#60a5fa">tagId</text><text x="732" y="853" font-size="7.5" fill="#374151" text-anchor="end">String (PK+FK)</text>
+    <line x1="572" y1="856" x2="772" y2="856" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="572" y="868" font-size="7" fill="#374151">@@id [transactionId, tagId]</text>
+    <text x="572" y="880" font-size="7" fill="#374151">Junction: Transaction ↔ Tag</text>
+    <text x="572" y="892" font-size="7" fill="#4b5d7a">Both FKs cascade · No soft delete</text>
+    <text x="572" y="904" font-size="7" fill="#4b5d7a">Unchanged in this version</text>
+    <text x="572" y="916" font-size="7" fill="#4b5d7a">Hard-delete only via parent cascade</text>
+    <rect x="558" y="796" width="218" height="138" rx="5" fill="none" stroke="#4f46e5" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- Attachment x=796 y=796 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="796" y="796" width="218" height="204" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="796" y="796" width="218" height="28" rx="5" fill="url(#hSl)"/>
+    <rect x="796" y="812" width="218" height="12" fill="url(#hSl)"/>
+    <text x="905" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Attachment</text>
+    <text x="810" y="838" font-size="8" fill="#fbbf24">⬡ id</text><text x="970" y="838" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="810" y1="841" x2="1010" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="810" y="853" font-size="8" fill="#60a5fa">⤷ transactionId</text><text x="970" y="853" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="810" y1="856" x2="1010" y2="856" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="810" y="868" font-size="8" fill="#94a3b8">fileName / fileUrl</text><text x="970" y="868" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="810" y1="871" x2="1010" y2="871" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="810" y="883" font-size="8" fill="#94a3b8">fileSize / fileType</text><text x="970" y="883" font-size="7.5" fill="#374151" text-anchor="end">Int/String</text>
+    <line x1="810" y1="886" x2="1010" y2="886" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="810" y="898" font-size="8" fill="#94a3b8">uploadedAt</text><text x="970" y="898" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="810" y1="901" x2="1010" y2="901" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="810" y="906" width="192" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="810" y="915" font-size="8" fill="#f87171">deletedAt</text><text x="970" y="915" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="810" y1="918" x2="1010" y2="918" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="810" y="930" font-size="7" fill="#374151">@@index [transactionId, deletedAt]</text>
+    <text x="810" y="942" font-size="7" fill="#374151">transaction: Transaction (cascade)</text>
+    <text x="810" y="954" font-size="7" fill="#4b5d7a">Unchanged in this version</text>
+    <rect x="796" y="796" width="218" height="204" rx="5" fill="none" stroke="#475569" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- TransactionSplit x=1034 y=796 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="1034" y="796" width="218" height="168" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="1034" y="796" width="218" height="28" rx="5" fill="url(#hTe)"/>
+    <rect x="1034" y="812" width="218" height="12" fill="url(#hTe)"/>
+    <text x="1143" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">TransactionSplit</text>
+    <text x="1048" y="838" font-size="8" fill="#fbbf24">⬡ id</text><text x="1204" y="838" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1048" y1="841" x2="1248" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1048" y="853" font-size="8" fill="#60a5fa">⤷ transactionId</text><text x="1204" y="853" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1048" y1="856" x2="1248" y2="856" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1048" y="868" font-size="8" fill="#94a3b8">category / categoryIcon</text><text x="1204" y="868" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1048" y1="871" x2="1248" y2="871" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1048" y="883" font-size="8" fill="#94a3b8">amount / percentage</text><text x="1204" y="883" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="1048" y1="886" x2="1248" y2="886" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1048" y="898" font-size="7" fill="#374151">@@index [transactionId]</text>
+    <text x="1048" y="910" font-size="7" fill="#374151">transaction: Transaction (cascade)</text>
+    <text x="1048" y="922" font-size="7" fill="#4b5d7a">No soft delete · Category splits</text>
+    <text x="1048" y="934" font-size="7" fill="#4b5d7a">Unchanged in this version</text>
+    <text x="1048" y="946" font-size="7" fill="#4b5d7a">Category-level cost allocation</text>
+    <text x="1048" y="958" font-size="7" fill="#4b5d7a">within single transactions</text>
+    <rect x="1034" y="796" width="218" height="168" rx="5" fill="none" stroke="#0d9488" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- TransactionHistory x=1272 y=796 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="1272" y="796" width="218" height="216" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="1272" y="796" width="218" height="28" rx="5" fill="url(#hRe)"/>
+    <rect x="1272" y="812" width="218" height="12" fill="url(#hRe)"/>
+    <text x="1381" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">TransactionHistory</text>
+    <text x="1286" y="838" font-size="8" fill="#fbbf24">⬡ id</text><text x="1442" y="838" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1286" y1="841" x2="1486" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1286" y="853" font-size="8" fill="#60a5fa">⤷ transactionId</text><text x="1442" y="853" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1286" y1="856" x2="1486" y2="856" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1286" y="868" font-size="8" fill="#94a3b8">amount / description / notes</text><text x="1442" y="868" font-size="7.5" fill="#374151" text-anchor="end">Float/String</text>
+    <line x1="1286" y1="871" x2="1486" y2="871" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1286" y="883" font-size="8" fill="#94a3b8">date / category / type</text><text x="1442" y="883" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1286" y1="886" x2="1486" y2="886" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1286" y="898" font-size="8" fill="#94a3b8">tags</text><text x="1442" y="898" font-size="7.5" fill="#374151" text-anchor="end">String[]</text>
+    <line x1="1286" y1="901" x2="1486" y2="901" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1286" y="913" font-size="8" fill="#94a3b8">changedAt</text><text x="1442" y="913" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1286" y1="916" x2="1486" y2="916" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1286" y="928" font-size="7" fill="#374151">@@index [transactionId]</text>
+    <text x="1286" y="940" font-size="7" fill="#374151">transaction: Transaction (cascade)</text>
+    <text x="1286" y="952" font-size="7.5" fill="#4b5d7a">No soft delete — audit log</text>
+    <text x="1286" y="964" font-size="7" fill="#374151">Immutable state snapshot on edit</text>
+    <text x="1286" y="976" font-size="7" fill="#374151">Unchanged in this version</text>
+    <text x="1286" y="988" font-size="7" fill="#374151">Full previous state captured</text>
+    <text x="1286" y="1000" font-size="7" fill="#374151">for complete audit trail</text>
+    <rect x="1272" y="796" width="218" height="216" rx="5" fill="none" stroke="#dc2626" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- BillSplit x=1510 y=796 w=228 NEW -->
+  <g filter="url(#cs)">
+    <rect x="1510" y="796" width="228" height="228" rx="5" fill="url(#cG)" stroke="#059669" stroke-width="1.2"/>
+    <rect x="1510" y="796" width="228" height="28" rx="5" fill="url(#hGr)"/>
+    <rect x="1510" y="812" width="228" height="12" fill="url(#hGr)"/>
+    <text x="1624" y="813" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">BillSplit ★ NEW</text>
+    <text x="1524" y="838" font-size="8" fill="#fbbf24">⬡ id</text><text x="1690" y="838" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1524" y1="841" x2="1734" y2="841" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="853" font-size="8" fill="#60a5fa">⤷ transactionId</text><text x="1690" y="853" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1524" y1="856" x2="1734" y2="856" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="868" font-size="8" fill="#94a3b8">debtorId</text><text x="1690" y="868" font-size="7.5" fill="#374151" text-anchor="end">String (who owes)</text>
+    <line x1="1524" y1="871" x2="1734" y2="871" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="883" font-size="8" fill="#94a3b8">debtorName</text><text x="1690" y="883" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="1524" y1="886" x2="1734" y2="886" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="898" font-size="8" fill="#94a3b8">amount</text><text x="1690" y="898" font-size="7.5" fill="#374151" text-anchor="end">Float (owed)</text>
+    <line x1="1524" y1="901" x2="1734" y2="901" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="913" font-size="8" fill="#94a3b8">isPaid / paidAt</text><text x="1690" y="913" font-size="7.5" fill="#374151" text-anchor="end">Bool/DateTime?</text>
+    <line x1="1524" y1="916" x2="1734" y2="916" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="928" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="1690" y="928" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1524" y1="931" x2="1734" y2="931" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1524" y="943" font-size="7" fill="#374151">@@index [transactionId] [debtorId]</text>
+    <text x="1524" y="955" font-size="7" fill="#374151">transaction: Transaction (cascade)</text>
+    <text x="1524" y="967" font-size="7.5" fill="#6ee7b7">NEW: Shared expense tracking</text>
+    <text x="1524" y="979" font-size="7" fill="#374151">Track who owes what per transaction</text>
+    <text x="1524" y="991" font-size="7" fill="#374151">debtorId: any user identifier string</text>
+    <text x="1524" y="1003" font-size="7" fill="#374151">No soft delete — financial record</text>
+    <text x="1524" y="1015" font-size="7" fill="#374151">isPaid tracks settlement status</text>
+    <rect x="1510" y="796" width="228" height="228" rx="5" fill="none" stroke="#059669" stroke-width="1.2" opacity="0.6"/>
+  </g>
+
+  <!-- ================================================================
+       ROW 3 — FINANCIAL PLANNING
+  ================================================================ -->
+
+  <!-- Budget x=20 y=1406 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="20" y="1406" width="228" height="240" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="20" y="1406" width="228" height="28" rx="5" fill="url(#hGr)"/>
+    <rect x="20" y="1422" width="228" height="12" fill="url(#hGr)"/>
+    <text x="134" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Budget</text>
+    <text x="34" y="1448" font-size="8" fill="#fbbf24">⬡ userId+category+month+year</text>
+    <line x1="34" y1="1451" x2="244" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1463" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="202" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="1466" x2="244" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1478" font-size="8" fill="#94a3b8">category / categoryIcon / amount</text><text x="202" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String/Float</text>
+    <line x1="34" y1="1481" x2="244" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1493" font-size="8" fill="#94a3b8">month / year</text><text x="202" y="1493" font-size="7.5" fill="#374151" text-anchor="end">Int</text>
+    <line x1="34" y1="1496" x2="244" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1508" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="202" y="1508" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="34" y1="1511" x2="244" y2="1511" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="1516" width="202" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="34" y="1525" font-size="8" fill="#f87171">deletedAt</text><text x="202" y="1525" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="1528" x2="244" y2="1528" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="1533" width="202" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="34" y="1542" font-size="8" fill="#6ee7b7">comments ★</text><text x="202" y="1542" font-size="7.5" fill="#6ee7b7" text-anchor="end">Comment[]</text>
+    <line x1="34" y1="1545" x2="244" y2="1545" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="34" y="1557" font-size="7" fill="#374151">@@id [userId, category, month, year]</text>
+    <text x="34" y="1569" font-size="7" fill="#374151">@@index [workspaceId, month, year, deletedAt]</text>
+    <text x="34" y="1581" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="34" y="1593" font-size="7.5" fill="#6ee7b7">comments relation added this version</text>
+    <text x="34" y="1605" font-size="7" fill="#374151">Allows discussion on budget items</text>
+    <text x="34" y="1617" font-size="7" fill="#374151">Complex FK via composite PK</text>
+    <text x="34" y="1629" font-size="7" fill="#374151">Budget PK = userId+category+month+yr</text>
+    <rect x="20" y="1406" width="228" height="240" rx="5" fill="none" stroke="#059669" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- MonthlyHistory x=270 y=1406 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="270" y="1406" width="228" height="168" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="270" y="1406" width="228" height="28" rx="5" fill="url(#hBl)"/>
+    <rect x="270" y="1422" width="228" height="12" fill="url(#hBl)"/>
+    <text x="384" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">MonthlyHistory</text>
+    <text x="284" y="1448" font-size="8" fill="#fbbf24">⬡ day+month+year+userId</text>
+    <line x1="284" y1="1451" x2="494" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="284" y="1463" font-size="8" fill="#94a3b8">userId</text><text x="454" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="284" y1="1466" x2="494" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="284" y="1478" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="454" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="284" y1="1481" x2="494" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="284" y="1493" font-size="8" fill="#94a3b8">day / month / year</text><text x="454" y="1493" font-size="7.5" fill="#374151" text-anchor="end">Int</text>
+    <line x1="284" y1="1496" x2="494" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="284" y="1508" font-size="8" fill="#94a3b8">income / expense / investment</text><text x="454" y="1508" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="284" y1="1511" x2="494" y2="1511" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="284" y="1523" font-size="7" fill="#374151">@@id [day, month, year, userId]</text>
+    <text x="284" y="1535" font-size="7" fill="#374151">@@index [userId, month, year]</text>
+    <text x="284" y="1547" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="284" y="1559" font-size="7.5" fill="#4b5d7a">No soft delete · Aggregate data</text>
+    <text x="284" y="1571" font-size="7" fill="#374151">Unchanged in this version</text>
+    <rect x="270" y="1406" width="228" height="168" rx="5" fill="none" stroke="#2563eb" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- YearHistory x=520 y=1406 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="520" y="1406" width="218" height="156" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="520" y="1406" width="218" height="28" rx="5" fill="url(#hPu)"/>
+    <rect x="520" y="1422" width="218" height="12" fill="url(#hPu)"/>
+    <text x="629" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">YearHistory</text>
+    <text x="534" y="1448" font-size="8" fill="#fbbf24">⬡ month+year+userId</text>
+    <line x1="534" y1="1451" x2="734" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="534" y="1463" font-size="8" fill="#94a3b8">userId</text><text x="694" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="534" y1="1466" x2="734" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="534" y="1478" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="694" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="534" y1="1481" x2="734" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="534" y="1493" font-size="8" fill="#94a3b8">month / year</text><text x="694" y="1493" font-size="7.5" fill="#374151" text-anchor="end">Int</text>
+    <line x1="534" y1="1496" x2="734" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="534" y="1508" font-size="8" fill="#94a3b8">income / expense / investment</text><text x="694" y="1508" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="534" y1="1511" x2="734" y2="1511" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="534" y="1523" font-size="7" fill="#374151">@@id [month, year, userId]</text>
+    <text x="534" y="1535" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="534" y="1547" font-size="7.5" fill="#4b5d7a">No soft delete · Aggregate</text>
+    <text x="534" y="1559" font-size="7" fill="#374151">Unchanged in this version</text>
+    <rect x="520" y="1406" width="218" height="156" rx="5" fill="none" stroke="#7c3aed" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- SavingsGoal x=758 y=1406 w=238 -->
+  <g filter="url(#cs)">
+    <rect x="758" y="1406" width="238" height="300" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="758" y="1406" width="238" height="28" rx="5" fill="url(#hOr)"/>
+    <rect x="758" y="1422" width="238" height="12" fill="url(#hOr)"/>
+    <text x="877" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">SavingsGoal</text>
+    <text x="772" y="1448" font-size="8" fill="#fbbf24">⬡ id</text><text x="948" y="1448" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="772" y1="1451" x2="992" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1463" font-size="8" fill="#94a3b8">userId</text><text x="948" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="772" y1="1466" x2="992" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1478" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="948" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="772" y1="1481" x2="992" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1493" font-size="8" fill="#94a3b8">name / description</text><text x="948" y="1493" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="772" y1="1496" x2="992" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1508" font-size="8" fill="#94a3b8">targetAmount / currentAmount</text><text x="948" y="1508" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="772" y1="1511" x2="992" y2="1511" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1523" font-size="8" fill="#94a3b8">targetDate</text><text x="948" y="1523" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="772" y1="1526" x2="992" y2="1526" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1538" font-size="8" fill="#94a3b8">category / icon / color</text><text x="948" y="1538" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="772" y1="1541" x2="992" y2="1541" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1553" font-size="8" fill="#94a3b8">isCompleted</text><text x="948" y="1553" font-size="7.5" fill="#374151" text-anchor="end">Boolean=false</text>
+    <line x1="772" y1="1556" x2="992" y2="1556" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="772" y="1568" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="948" y="1568" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="772" y1="1571" x2="992" y2="1571" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="772" y="1576" width="212" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="772" y="1585" font-size="8" fill="#f87171">deletedAt</text><text x="948" y="1585" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="772" y1="1588" x2="992" y2="1588" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="772" y="1593" width="212" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="772" y="1602" font-size="8" fill="#6ee7b7">contributions ★</text><text x="948" y="1602" font-size="7.5" fill="#6ee7b7" text-anchor="end">GoalContribution[]</text>
+    <line x1="772" y1="1605" x2="992" y2="1605" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="772" y="1610" width="212" height="12" rx="2" fill="#059669" opacity="0.13"/>
+    <text x="772" y="1619" font-size="8" fill="#6ee7b7">messages ★</text><text x="948" y="1619" font-size="7.5" fill="#6ee7b7" text-anchor="end">GoalMessage[]</text>
+    <line x1="772" y1="1622" x2="992" y2="1622" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="772" y="1634" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="772" y="1646" font-size="7" fill="#374151">@@index [workspaceId, isCompleted, deletedAt]</text>
+    <text x="772" y="1658" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="772" y="1670" font-size="7.5" fill="#6ee7b7">Contributions + Messages new this ver</text>
+    <text x="772" y="1682" font-size="7" fill="#374151">Collaborative saving with leaderboard</text>
+    <text x="772" y="1694" font-size="7" fill="#374151">and group chat per goal</text>
+    <rect x="758" y="1406" width="238" height="300" rx="5" fill="none" stroke="#d97706" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- GoalContribution x=1016 y=1406 w=228 NEW -->
+  <g filter="url(#cs)">
+    <rect x="1016" y="1406" width="228" height="204" rx="5" fill="url(#cG)" stroke="#059669" stroke-width="1.2"/>
+    <rect x="1016" y="1406" width="228" height="28" rx="5" fill="url(#hGr)"/>
+    <rect x="1016" y="1422" width="228" height="12" fill="url(#hGr)"/>
+    <text x="1130" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">GoalContribution ★</text>
+    <text x="1030" y="1448" font-size="8" fill="#fbbf24">⬡ id</text><text x="1196" y="1448" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1030" y1="1451" x2="1240" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1030" y="1463" font-size="8" fill="#60a5fa">⤷ goalId</text><text x="1196" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1030" y1="1466" x2="1240" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1030" y="1478" font-size="8" fill="#94a3b8">userId</text><text x="1196" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1030" y1="1481" x2="1240" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1030" y="1493" font-size="8" fill="#94a3b8">userName / userImage</text><text x="1196" y="1493" font-size="7.5" fill="#374151" text-anchor="end">String? (cached)</text>
+    <line x1="1030" y1="1496" x2="1240" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1030" y="1508" font-size="8" fill="#94a3b8">amount</text><text x="1196" y="1508" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="1030" y1="1511" x2="1240" y2="1511" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1030" y="1523" font-size="8" fill="#94a3b8">createdAt</text><text x="1196" y="1523" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1030" y1="1526" x2="1240" y2="1526" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1030" y="1538" font-size="7" fill="#374151">@@index [goalId] [userId]</text>
+    <text x="1030" y="1550" font-size="7" fill="#374151">goal: SavingsGoal (cascade)</text>
+    <text x="1030" y="1562" font-size="7.5" fill="#6ee7b7">NEW: Per-member contributions</text>
+    <text x="1030" y="1574" font-size="7" fill="#374151">Tracks contribution amounts per user</text>
+    <text x="1030" y="1586" font-size="7" fill="#374151">userName/userImage: leaderboard cache</text>
+    <text x="1030" y="1598" font-size="7" fill="#374151">No soft delete — financial record</text>
+    <rect x="1016" y="1406" width="228" height="204" rx="5" fill="none" stroke="#059669" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- GoalMessage x=1264 y=1406 w=228 NEW -->
+  <g filter="url(#cs)">
+    <rect x="1264" y="1406" width="228" height="204" rx="5" fill="url(#cG)" stroke="#059669" stroke-width="1.2"/>
+    <rect x="1264" y="1406" width="228" height="28" rx="5" fill="url(#hTe)"/>
+    <rect x="1264" y="1422" width="228" height="12" fill="url(#hTe)"/>
+    <text x="1378" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">GoalMessage ★</text>
+    <text x="1278" y="1448" font-size="8" fill="#fbbf24">⬡ id</text><text x="1444" y="1448" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1278" y1="1451" x2="1488" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1278" y="1463" font-size="8" fill="#60a5fa">⤷ goalId</text><text x="1444" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1278" y1="1466" x2="1488" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1278" y="1478" font-size="8" fill="#94a3b8">userId</text><text x="1444" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1278" y1="1481" x2="1488" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1278" y="1493" font-size="8" fill="#94a3b8">userName / userImage</text><text x="1444" y="1493" font-size="7.5" fill="#374151" text-anchor="end">String? (cached)</text>
+    <line x1="1278" y1="1496" x2="1488" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1278" y="1508" font-size="8" fill="#94a3b8">content</text><text x="1444" y="1508" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1278" y1="1511" x2="1488" y2="1511" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1278" y="1523" font-size="8" fill="#94a3b8">createdAt</text><text x="1444" y="1523" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1278" y1="1526" x2="1488" y2="1526" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1278" y="1538" font-size="7" fill="#374151">@@index [goalId]</text>
+    <text x="1278" y="1550" font-size="7" fill="#374151">goal: SavingsGoal (cascade)</text>
+    <text x="1278" y="1562" font-size="7.5" fill="#6ee7b7">NEW: Group chat per savings goal</text>
+    <text x="1278" y="1574" font-size="7" fill="#374151">Messages tied to goal lifecycle</text>
+    <text x="1278" y="1586" font-size="7" fill="#374151">userName/userImage: display cache</text>
+    <text x="1278" y="1598" font-size="7" fill="#374151">No soft delete — chat history</text>
+    <rect x="1264" y="1406" width="228" height="204" rx="5" fill="none" stroke="#059669" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- RecurringTransaction x=1510 y=1406 w=248 -->
+  <g filter="url(#cs)">
+    <rect x="1510" y="1406" width="248" height="278" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="1510" y="1406" width="248" height="28" rx="5" fill="url(#hRe)"/>
+    <rect x="1510" y="1422" width="248" height="12" fill="url(#hRe)"/>
+    <text x="1634" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">RecurringTransaction</text>
+    <text x="1524" y="1448" font-size="8" fill="#fbbf24">⬡ id</text><text x="1710" y="1448" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1524" y1="1451" x2="1754" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1463" font-size="8" fill="#94a3b8">userId</text><text x="1710" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1524" y1="1466" x2="1754" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1478" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="1710" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="1524" y1="1481" x2="1754" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1493" font-size="8" fill="#94a3b8">amount / description / type</text><text x="1710" y="1493" font-size="7.5" fill="#374151" text-anchor="end">Float/String</text>
+    <line x1="1524" y1="1496" x2="1754" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1508" font-size="8" fill="#94a3b8">category / categoryIcon</text><text x="1710" y="1508" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1524" y1="1511" x2="1754" y2="1511" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1523" font-size="8" fill="#94a3b8">date / interval</text><text x="1710" y="1523" font-size="7.5" fill="#374151" text-anchor="end">DateTime/String</text>
+    <line x1="1524" y1="1526" x2="1754" y2="1526" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1538" font-size="8" fill="#94a3b8">isAuto</text><text x="1710" y="1538" font-size="7.5" fill="#374151" text-anchor="end">Boolean=true</text>
+    <line x1="1524" y1="1541" x2="1754" y2="1541" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1553" font-size="8" fill="#94a3b8">lastProcessed</text><text x="1710" y="1553" font-size="7.5" fill="#374151" text-anchor="end">DateTime?</text>
+    <line x1="1524" y1="1556" x2="1754" y2="1556" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1524" y="1568" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="1710" y="1568" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1524" y1="1571" x2="1754" y2="1571" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="1524" y="1576" width="222" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="1524" y="1585" font-size="8" fill="#f87171">deletedAt</text><text x="1710" y="1585" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="1524" y1="1588" x2="1754" y2="1588" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1524" y="1600" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="1524" y="1612" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="1524" y="1624" font-size="7" fill="#374151">isAuto=true: cron auto-process</text>
+    <text x="1524" y="1636" font-size="7" fill="#374151">isAuto=false: manual approval req'd</text>
+    <text x="1524" y="1648" font-size="7" fill="#374151">Unchanged from previous version</text>
+    <text x="1524" y="1660" font-size="7" fill="#374151">isAuto was added in previous version</text>
+    <rect x="1510" y="1406" width="248" height="278" rx="5" fill="none" stroke="#dc2626" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- BudgetTemplate x=1776 y=1406 w=238 NEW -->
+  <g filter="url(#cs)">
+    <rect x="1776" y="1406" width="238" height="228" rx="5" fill="url(#cG)" stroke="#059669" stroke-width="1.2"/>
+    <rect x="1776" y="1406" width="238" height="28" rx="5" fill="url(#hCy)"/>
+    <rect x="1776" y="1422" width="238" height="12" fill="url(#hCy)"/>
+    <text x="1895" y="1423" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">BudgetTemplate ★</text>
+    <text x="1790" y="1448" font-size="8" fill="#fbbf24">⬡ id</text><text x="1966" y="1448" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1790" y1="1451" x2="2010" y2="1451" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1463" font-size="8" fill="#94a3b8">userId</text><text x="1966" y="1463" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1790" y1="1466" x2="2010" y2="1466" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1478" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="1966" y="1478" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="1790" y1="1481" x2="2010" y2="1481" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1493" font-size="8" fill="#94a3b8">name / description</text><text x="1966" y="1493" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1790" y1="1496" x2="2010" y2="1496" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1508" font-size="8" fill="#94a3b8">isSystem</text><text x="1966" y="1508" font-size="7.5" fill="#374151" text-anchor="end">Boolean=false</text>
+    <line x1="1790" y1="1511" x2="2010" y2="1511" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1523" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="1966" y="1523" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="1790" y1="1526" x2="2010" y2="1526" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="1790" y="1531" width="212" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="1790" y="1540" font-size="8" fill="#f87171">deletedAt</text><text x="1966" y="1540" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="1790" y1="1543" x2="2010" y2="1543" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1555" font-size="8" fill="#6ee7b7">⟶ entries (BudgetTemplateEntry[])</text>
+    <line x1="1790" y1="1558" x2="2010" y2="1558" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1790" y="1570" font-size="7" fill="#374151">@@index [userId, workspaceId, deletedAt]</text>
+    <text x="1790" y="1582" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="1790" y="1594" font-size="7.5" fill="#6ee7b7">NEW: Reusable budget templates</text>
+    <text x="1790" y="1606" font-size="7" fill="#374151">isSystem=true: system preset templates</text>
+    <text x="1790" y="1618" font-size="7" fill="#374151">User can create custom templates</text>
+    <text x="1790" y="1630" font-size="7" fill="#374151">and apply to create new budgets</text>
+    <rect x="1776" y="1406" width="238" height="228" rx="5" fill="none" stroke="#06b6d4" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- BudgetTemplateEntry x=1776 y=1654 w=238 NEW -->
+  <g filter="url(#cs)">
+    <rect x="1776" y="1654" width="238" height="162" rx="5" fill="url(#cG)" stroke="#059669" stroke-width="1.2"/>
+    <rect x="1776" y="1654" width="238" height="28" rx="5" fill="url(#hCy)"/>
+    <rect x="1776" y="1670" width="238" height="12" fill="url(#hCy)"/>
+    <text x="1895" y="1671" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">BudgetTemplateEntry ★</text>
+    <text x="1790" y="1696" font-size="8" fill="#fbbf24">⬡ id</text><text x="1966" y="1696" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="1790" y1="1699" x2="2010" y2="1699" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1711" font-size="8" fill="#60a5fa">⤷ templateId</text><text x="1966" y="1711" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1790" y1="1714" x2="2010" y2="1714" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1726" font-size="8" fill="#94a3b8">category / categoryIcon</text><text x="1966" y="1726" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="1790" y1="1729" x2="2010" y2="1729" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="1790" y="1741" font-size="8" fill="#94a3b8">amount</text><text x="1966" y="1741" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="1790" y1="1744" x2="2010" y2="1744" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="1790" y="1756" font-size="7" fill="#374151">@@index [templateId]</text>
+    <text x="1790" y="1768" font-size="7" fill="#374151">template: BudgetTemplate (cascade)</text>
+    <text x="1790" y="1780" font-size="7.5" fill="#6ee7b7">NEW: Per-category budget line items</text>
+    <text x="1790" y="1792" font-size="7" fill="#374151">Each entry = one budget category</text>
+    <text x="1790" y="1804" font-size="7" fill="#374151">with target amount for template</text>
+    <text x="1790" y="1816" font-size="7" fill="#374151">No soft delete on entries</text>
+    <rect x="1776" y="1654" width="238" height="162" rx="5" fill="none" stroke="#06b6d4" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- ================================================================
+       ROW 4 — ASSETS + GAMIFICATION
+  ================================================================ -->
+
+  <!-- Asset x=20 y=1700 w=248 -->
+  <g filter="url(#cs)">
+    <rect x="20" y="1700" width="248" height="264" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="20" y="1700" width="248" height="28" rx="5" fill="url(#hOr)"/>
+    <rect x="20" y="1716" width="248" height="12" fill="url(#hOr)"/>
+    <text x="144" y="1717" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Asset</text>
+    <text x="34" y="1742" font-size="8" fill="#fbbf24">⬡ id</text><text x="224" y="1742" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="34" y1="1745" x2="264" y2="1745" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1757" font-size="8" fill="#94a3b8">userId</text><text x="224" y="1757" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="1760" x2="264" y2="1760" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1772" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="224" y="1772" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="1775" x2="264" y2="1775" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1787" font-size="8" fill="#94a3b8">name / description</text><text x="224" y="1787" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="1790" x2="264" y2="1790" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1802" font-size="8" fill="#94a3b8">type</text><text x="224" y="1802" font-size="7.5" fill="#374151" text-anchor="end">asset | liability</text>
+    <line x1="34" y1="1805" x2="264" y2="1805" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1817" font-size="8" fill="#94a3b8">category</text><text x="224" y="1817" font-size="7.5" fill="#374151" text-anchor="end">stocks|crypto|...</text>
+    <line x1="34" y1="1820" x2="264" y2="1820" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1832" font-size="8" fill="#94a3b8">currentValue</text><text x="224" y="1832" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="34" y1="1835" x2="264" y2="1835" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1847" font-size="8" fill="#94a3b8">icon / color / notes</text><text x="224" y="1847" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="1850" x2="264" y2="1850" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1862" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="224" y="1862" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="34" y1="1865" x2="264" y2="1865" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="1870" width="222" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="34" y="1879" font-size="8" fill="#f87171">deletedAt</text><text x="224" y="1879" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="1882" x2="264" y2="1882" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="34" y="1894" font-size="7.5" fill="#d97706">⟶ history (AssetHistory[])</text>
+    <text x="34" y="1906" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="34" y="1918" font-size="7" fill="#374151">@@index [workspaceId, type, deletedAt]</text>
+    <text x="34" y="1930" font-size="7" fill="#374151">@@index [workspaceId, category, deletedAt]</text>
+    <text x="34" y="1942" font-size="7" fill="#374151">workspace + history: cascade</text>
+    <text x="34" y="1954" font-size="7" fill="#374151">Unchanged in this version</text>
+    <rect x="20" y="1700" width="248" height="264" rx="5" fill="none" stroke="#d97706" stroke-width="1.2" opacity="0.6"/>
+  </g>
+
+  <!-- AssetHistory x=290 y=1700 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="290" y="1700" width="218" height="168" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="290" y="1700" width="218" height="28" rx="5" fill="url(#hGr)"/>
+    <rect x="290" y="1716" width="218" height="12" fill="url(#hGr)"/>
+    <text x="399" y="1717" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">AssetHistory</text>
+    <text x="304" y="1742" font-size="8" fill="#fbbf24">⬡ id</text><text x="460" y="1742" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="304" y1="1745" x2="504" y2="1745" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="1757" font-size="8" fill="#60a5fa">⤷ assetId</text><text x="460" y="1757" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="304" y1="1760" x2="504" y2="1760" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="1772" font-size="8" fill="#94a3b8">value / date / notes</text><text x="460" y="1772" font-size="7.5" fill="#374151" text-anchor="end">Float/DateTime/Str</text>
+    <line x1="304" y1="1775" x2="504" y2="1775" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="1787" font-size="8" fill="#94a3b8">createdAt</text><text x="460" y="1787" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="304" y1="1790" x2="504" y2="1790" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="304" y="1802" font-size="7" fill="#374151">@@index [assetId] [assetId, date]</text>
+    <text x="304" y="1814" font-size="7" fill="#374151">asset: Asset (cascade)</text>
+    <text x="304" y="1826" font-size="7.5" fill="#4b5d7a">No soft delete · Immutable</text>
+    <text x="304" y="1838" font-size="7" fill="#374151">Unchanged in this version</text>
+    <rect x="290" y="1700" width="218" height="168" rx="5" fill="none" stroke="#059669" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- Achievement x=530 y=1700 w=228 -->
+  <g filter="url(#cs)">
+    <rect x="530" y="1700" width="228" height="216" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="530" y="1700" width="228" height="28" rx="5" fill="url(#hOr)"/>
+    <rect x="530" y="1716" width="228" height="12" fill="url(#hOr)"/>
+    <text x="644" y="1717" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Achievement</text>
+    <text x="544" y="1742" font-size="8" fill="#fbbf24">⬡ id</text><text x="710" y="1742" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="544" y1="1745" x2="754" y2="1745" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="544" y="1757" font-size="8" fill="#94a3b8">key @unique</text><text x="710" y="1757" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="544" y1="1760" x2="754" y2="1760" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="544" y="1772" font-size="8" fill="#94a3b8">name / description / icon</text><text x="710" y="1772" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="544" y1="1775" x2="754" y2="1775" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="544" y="1787" font-size="8" fill="#94a3b8">category</text><text x="710" y="1787" font-size="7.5" fill="#374151" text-anchor="end">streak|budget|savings</text>
+    <line x1="544" y1="1790" x2="754" y2="1790" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="544" y="1802" font-size="8" fill="#94a3b8">tier</text><text x="710" y="1802" font-size="7.5" fill="#374151" text-anchor="end">bronze|silver|gold|plat</text>
+    <line x1="544" y1="1805" x2="754" y2="1805" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="544" y="1817" font-size="8" fill="#94a3b8">points / requirement</text><text x="710" y="1817" font-size="7.5" fill="#374151" text-anchor="end">Int</text>
+    <line x1="544" y1="1820" x2="754" y2="1820" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="544" y="1832" font-size="8" fill="#94a3b8">createdAt</text><text x="710" y="1832" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="544" y1="1835" x2="754" y2="1835" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="544" y="1847" font-size="7.5" fill="#d97706">⟶ userAchievements[]</text>
+    <text x="544" y="1859" font-size="7" fill="#374151">Global catalog · Not workspace-scoped</text>
+    <text x="544" y="1871" font-size="7.5" fill="#4b5d7a">No soft delete · Unchanged</text>
+    <rect x="530" y="1700" width="228" height="216" rx="5" fill="none" stroke="#d97706" stroke-width="1.2" opacity="0.6"/>
+  </g>
+
+  <!-- UserAchievement x=778 y=1700 w=218 -->
+  <g filter="url(#cs)">
+    <rect x="778" y="1700" width="218" height="192" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="778" y="1700" width="218" height="28" rx="5" fill="url(#hPi)"/>
+    <rect x="778" y="1716" width="218" height="12" fill="url(#hPi)"/>
+    <text x="887" y="1717" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">UserAchievement</text>
+    <text x="792" y="1742" font-size="8" fill="#fbbf24">⬡ id</text><text x="948" y="1742" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="792" y1="1745" x2="992" y2="1745" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="792" y="1757" font-size="8" fill="#94a3b8">userId</text><text x="948" y="1757" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="792" y1="1760" x2="992" y2="1760" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="792" y="1772" font-size="8" fill="#60a5fa">⤷ achievementId</text><text x="948" y="1772" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="792" y1="1775" x2="992" y2="1775" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="792" y="1787" font-size="8" fill="#94a3b8">unlockedAt / progress</text><text x="948" y="1787" font-size="7.5" fill="#374151" text-anchor="end">DateTime/Int</text>
+    <line x1="792" y1="1790" x2="992" y2="1790" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="792" y="1802" font-size="7" fill="#374151">@@unique [userId, achievementId]</text>
+    <text x="792" y="1814" font-size="7" fill="#374151">@@index [userId] [userId, unlockedAt]</text>
+    <text x="792" y="1826" font-size="7" fill="#374151">achievement: Achievement (cascade)</text>
+    <text x="792" y="1838" font-size="7.5" fill="#4b5d7a">No soft delete · Unchanged</text>
+    <text x="792" y="1850" font-size="7" fill="#374151">Not workspace-scoped</text>
+    <text x="792" y="1862" font-size="7" fill="#374151">Global user progress tracking</text>
+    <text x="792" y="1874" font-size="7" fill="#374151">progress: unlocked towards target</text>
+    <rect x="778" y="1700" width="218" height="192" rx="5" fill="none" stroke="#db2777" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- ================================================================
+       ROW 5 — VAULT / SECURITY
+  ================================================================ -->
+
+  <!-- VaultEntry x=20 y=1918 w=248 -->
+  <g filter="url(#cs)">
+    <rect x="20" y="1918" width="248" height="270" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="20" y="1918" width="248" height="28" rx="5" fill="url(#hPu)"/>
+    <rect x="20" y="1934" width="248" height="12" fill="url(#hPu)"/>
+    <text x="144" y="1935" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">VaultEntry</text>
+    <text x="34" y="1960" font-size="8" fill="#fbbf24">⬡ id</text><text x="224" y="1960" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="34" y1="1963" x2="264" y2="1963" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1975" font-size="8" fill="#94a3b8">userId</text><text x="224" y="1975" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="1978" x2="264" y2="1978" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="1990" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="224" y="1990" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="1993" x2="264" y2="1993" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2005" font-size="8" fill="#94a3b8">title / content (encrypted)</text><text x="224" y="2005" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="2008" x2="264" y2="2008" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2020" font-size="8" fill="#94a3b8">category</text><text x="224" y="2020" font-size="7.5" fill="#374151" text-anchor="end">insurance|legal|crypto...</text>
+    <line x1="34" y1="2023" x2="264" y2="2023" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2035" font-size="8" fill="#94a3b8">icon / sensitivity / notes</text><text x="224" y="2035" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="2038" x2="264" y2="2038" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2050" font-size="8" fill="#94a3b8">lastVerified</text><text x="224" y="2050" font-size="7.5" fill="#374151" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="2053" x2="264" y2="2053" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2065" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="224" y="2065" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="34" y1="2068" x2="264" y2="2068" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="2073" width="222" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="34" y="2082" font-size="8" fill="#f87171">deletedAt</text><text x="224" y="2082" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="2085" x2="264" y2="2085" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="34" y="2097" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="34" y="2109" font-size="7" fill="#374151">@@index [userId, deletedAt]</text>
+    <text x="34" y="2121" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="34" y="2133" font-size="7.5" fill="#4b5d7a">Unchanged in this version</text>
+    <text x="34" y="2145" font-size="7" fill="#374151">sensitivity: low|medium|high|critical</text>
+    <text x="34" y="2157" font-size="7" fill="#374151">content encrypted via UserSettings.vaultPin</text>
+    <text x="34" y="2169" font-size="7" fill="#374151">DMS triggers on lastVaultActivity</text>
+    <rect x="20" y="1918" width="248" height="270" rx="5" fill="none" stroke="#7c3aed" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- Beneficiary x=290 y=1918 w=238 -->
+  <g filter="url(#cs)">
+    <rect x="290" y="1918" width="238" height="258" rx="5" fill="url(#cG)" stroke="#1e2d45" stroke-width="1"/>
+    <rect x="290" y="1918" width="238" height="28" rx="5" fill="url(#hTe)"/>
+    <rect x="290" y="1934" width="238" height="12" fill="url(#hTe)"/>
+    <text x="409" y="1935" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Beneficiary</text>
+    <text x="304" y="1960" font-size="8" fill="#fbbf24">⬡ id</text><text x="480" y="1960" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="304" y1="1963" x2="524" y2="1963" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="1975" font-size="8" fill="#94a3b8">userId</text><text x="480" y="1975" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="304" y1="1978" x2="524" y2="1978" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="1990" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="480" y="1990" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="304" y1="1993" x2="524" y2="1993" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="2005" font-size="8" fill="#94a3b8">name / email</text><text x="480" y="2005" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="304" y1="2008" x2="524" y2="2008" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="2020" font-size="8" fill="#94a3b8">relationship</text><text x="480" y="2020" font-size="7.5" fill="#374151" text-anchor="end">spouse|child|parent...</text>
+    <line x1="304" y1="2023" x2="524" y2="2023" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="2035" font-size="8" fill="#94a3b8">phone / notes</text><text x="480" y="2035" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="304" y1="2038" x2="524" y2="2038" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="2050" font-size="8" fill="#94a3b8">accessLevel</text><text x="480" y="2050" font-size="7.5" fill="#374151" text-anchor="end">full|partial|emergency</text>
+    <line x1="304" y1="2053" x2="524" y2="2053" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="2065" font-size="8" fill="#94a3b8">isVerified</text><text x="480" y="2065" font-size="7.5" fill="#374151" text-anchor="end">Boolean=false</text>
+    <line x1="304" y1="2068" x2="524" y2="2068" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="304" y="2080" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="480" y="2080" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="304" y1="2083" x2="524" y2="2083" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="304" y="2088" width="212" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="304" y="2097" font-size="8" fill="#f87171">deletedAt</text><text x="480" y="2097" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="304" y1="2100" x2="524" y2="2100" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="304" y="2112" font-size="7" fill="#374151">@@index [workspaceId, deletedAt]</text>
+    <text x="304" y="2124" font-size="7" fill="#374151">@@index [userId, deletedAt]</text>
+    <text x="304" y="2136" font-size="7" fill="#374151">workspace: Workspace? (cascade)</text>
+    <text x="304" y="2148" font-size="7.5" fill="#4b5d7a">Unchanged in this version</text>
+    <text x="304" y="2160" font-size="7" fill="#374151">DMS: Dead Man's Switch recipient</text>
+    <text x="304" y="2172" font-size="7" fill="#374151">accessLevel: controls vault access</text>
+    <rect x="290" y="1918" width="238" height="258" rx="5" fill="none" stroke="#0d9488" stroke-width="1.2" opacity="0.6"/>
+  </g>
+
+  <!-- ================================================================
+       ROW 6 — COLLABORATION (NEW MODELS)
+  ================================================================ -->
+
+  <!-- Comment x=20 y=2296 w=310 NEW -->
+  <g filter="url(#cs)">
+    <rect x="20" y="2296" width="310" height="378" rx="5" fill="url(#cG)" stroke="#06b6d4" stroke-width="1.5"/>
+    <rect x="20" y="2296" width="310" height="28" rx="5" fill="url(#hCy)"/>
+    <rect x="20" y="2312" width="310" height="12" fill="url(#hCy)"/>
+    <text x="175" y="2313" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">Comment ★ NEW</text>
+    <text x="34" y="2338" font-size="8" fill="#fbbf24">⬡ id</text><text x="280" y="2338" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="34" y1="2341" x2="326" y2="2341" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2353" font-size="8" fill="#94a3b8">content</text><text x="280" y="2353" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="34" y1="2356" x2="326" y2="2356" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2368" font-size="8" fill="#94a3b8">userId / userName / userImage</text><text x="280" y="2368" font-size="7.5" fill="#374151" text-anchor="end">String/String?</text>
+    <line x1="34" y1="2371" x2="326" y2="2371" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2383" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="280" y="2383" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="34" y1="2386" x2="326" y2="2386" stroke="#0e1a2e" stroke-width="0.5"/>
+    <rect x="34" y="2391" width="284" height="12" rx="2" fill="#dc2626" opacity="0.13"/>
+    <text x="34" y="2400" font-size="8" fill="#f87171">deletedAt</text><text x="280" y="2400" font-size="7.5" fill="#f87171" text-anchor="end">DateTime?</text>
+    <line x1="34" y1="2403" x2="326" y2="2403" stroke="#0e1a2e" stroke-width="0.5"/>
+    <!-- Polymorphic FKs -->
+    <text x="175" y="2417" text-anchor="middle" font-size="7.5" fill="#374151" letter-spacing="1">POLYMORPHIC TARGETS</text>
+    <text x="34" y="2429" font-size="8" fill="#60a5fa">⤷ transactionId?</text><text x="280" y="2429" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="2432" x2="326" y2="2432" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2444" font-size="8" fill="#60a5fa">⤷ budgetUserId + budgetCategory</text>
+    <line x1="34" y1="2447" x2="326" y2="2447" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2459" font-size="8" fill="#60a5fa">⤷ budgetMonth + budgetYear?</text><text x="280" y="2459" font-size="7.5" fill="#374151" text-anchor="end">Int?</text>
+    <line x1="34" y1="2462" x2="326" y2="2462" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2474" font-size="8" fill="#60a5fa">⤷ proposalId?</text><text x="280" y="2474" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="2477" x2="326" y2="2477" stroke="#0e1a2e" stroke-width="0.5"/>
+    <!-- Threading -->
+    <text x="175" y="2491" text-anchor="middle" font-size="7.5" fill="#374151" letter-spacing="1">SELF-REFERENTIAL THREADING</text>
+    <text x="34" y="2503" font-size="8" fill="#60a5fa">⤷ parentId?</text><text x="280" y="2503" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="34" y1="2506" x2="326" y2="2506" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="34" y="2518" font-size="8" fill="#94a3b8">replies</text><text x="280" y="2518" font-size="7.5" fill="#374151" text-anchor="end">Comment[] @relation</text>
+    <line x1="34" y1="2521" x2="326" y2="2521" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="34" y="2533" font-size="7" fill="#374151">@@index [transactionId]</text>
+    <text x="34" y="2545" font-size="7" fill="#374151">@@index [budgetUserId, budgetCategory, budgetMonth, budgetYear]</text>
+    <text x="34" y="2557" font-size="7" fill="#374151">@@index [proposalId] · @@index [parentId]</text>
+    <text x="34" y="2569" font-size="7.5" fill="#67e8f9">Polymorphic: attaches to Transaction,</text>
+    <text x="34" y="2581" font-size="7" fill="#374151">Budget (via composite FK), or BudgetProposal</text>
+    <text x="34" y="2593" font-size="7" fill="#374151">Threading: parent/replies self-relation</text>
+    <text x="34" y="2605" font-size="7" fill="#374151">cascade on all 3 parent targets</text>
+    <text x="34" y="2617" font-size="7" fill="#374151">userName/userImage: display cache</text>
+    <text x="34" y="2629" font-size="7" fill="#374151">Enables full comment tree per resource</text>
+    <text x="34" y="2641" font-size="7" fill="#374151">Replies can be nested arbitrarily deep</text>
+    <text x="34" y="2653" font-size="7" fill="#374151">Budget FK uses 4-part composite key</text>
+    <text x="34" y="2665" font-size="7" fill="#374151">matching Budget @@id definition</text>
+    <rect x="20" y="2296" width="310" height="378" rx="5" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.8"/>
+  </g>
+
+  <!-- MemberRestriction x=352 y=2296 w=238 NEW -->
+  <g filter="url(#cs)">
+    <rect x="352" y="2296" width="238" height="210" rx="5" fill="url(#cG)" stroke="#06b6d4" stroke-width="1.5"/>
+    <rect x="352" y="2296" width="238" height="28" rx="5" fill="url(#hGr)"/>
+    <rect x="352" y="2312" width="238" height="12" fill="url(#hGr)"/>
+    <text x="471" y="2313" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">MemberRestriction ★</text>
+    <text x="366" y="2338" font-size="8" fill="#fbbf24">⬡ id</text><text x="542" y="2338" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="366" y1="2341" x2="586" y2="2341" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="366" y="2353" font-size="8" fill="#60a5fa">⤷ memberId</text><text x="542" y="2353" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="366" y1="2356" x2="586" y2="2356" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="366" y="2368" font-size="8" fill="#94a3b8">resourceType</text><text x="542" y="2368" font-size="7.5" fill="#374151" text-anchor="end">CATEGORY | ASSET</text>
+    <line x1="366" y1="2371" x2="586" y2="2371" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="366" y="2383" font-size="8" fill="#94a3b8">resourceId</text><text x="542" y="2383" font-size="7.5" fill="#374151" text-anchor="end">String (name or id)</text>
+    <line x1="366" y1="2386" x2="586" y2="2386" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="366" y="2398" font-size="8" fill="#94a3b8">createdAt</text><text x="542" y="2398" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="366" y1="2401" x2="586" y2="2401" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="366" y="2413" font-size="7" fill="#374151">@@index [memberId]</text>
+    <text x="366" y="2425" font-size="7" fill="#374151">member: WorkspaceMember (cascade)</text>
+    <text x="366" y="2437" font-size="7.5" fill="#6ee7b7">NEW: Per-member resource access control</text>
+    <text x="366" y="2449" font-size="7" fill="#374151">resourceType=CATEGORY: restrict view</text>
+    <text x="366" y="2461" font-size="7" fill="#374151">of specific category from this member</text>
+    <text x="366" y="2473" font-size="7" fill="#374151">resourceType=ASSET: restrict asset</text>
+    <text x="366" y="2485" font-size="7" fill="#374151">visibility from this member</text>
+    <text x="366" y="2497" font-size="7" fill="#374151">No soft delete — access control</text>
+    <rect x="352" y="2296" width="238" height="210" rx="5" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.8"/>
+  </g>
+
+  <!-- BudgetProposal x=614 y=2296 w=248 NEW -->
+  <g filter="url(#cs)">
+    <rect x="614" y="2296" width="248" height="270" rx="5" fill="url(#cG)" stroke="#06b6d4" stroke-width="1.5"/>
+    <rect x="614" y="2296" width="248" height="28" rx="5" fill="url(#hLi)"/>
+    <rect x="614" y="2312" width="248" height="12" fill="url(#hLi)"/>
+    <text x="738" y="2313" text-anchor="middle" font-size="10" font-weight="bold" fill="#f1f5f9" letter-spacing="1.5">BudgetProposal ★ NEW</text>
+    <text x="628" y="2338" font-size="8" fill="#fbbf24">⬡ id</text><text x="814" y="2338" font-size="7.5" fill="#374151" text-anchor="end">String @id uuid</text>
+    <line x1="628" y1="2341" x2="858" y2="2341" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2353" font-size="8" fill="#60a5fa">⤷ workspaceId</text><text x="814" y="2353" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="628" y1="2356" x2="858" y2="2356" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2368" font-size="8" fill="#94a3b8">userId</text><text x="814" y="2368" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="628" y1="2371" x2="858" y2="2371" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2383" font-size="8" fill="#94a3b8">userName</text><text x="814" y="2383" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="628" y1="2386" x2="858" y2="2386" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2398" font-size="8" fill="#94a3b8">category / categoryIcon</text><text x="814" y="2398" font-size="7.5" fill="#374151" text-anchor="end">String</text>
+    <line x1="628" y1="2401" x2="858" y2="2401" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2413" font-size="8" fill="#94a3b8">amount</text><text x="814" y="2413" font-size="7.5" fill="#374151" text-anchor="end">Float</text>
+    <line x1="628" y1="2416" x2="858" y2="2416" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2428" font-size="8" fill="#94a3b8">month / year</text><text x="814" y="2428" font-size="7.5" fill="#374151" text-anchor="end">Int</text>
+    <line x1="628" y1="2431" x2="858" y2="2431" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2443" font-size="8" fill="#94a3b8">notes</text><text x="814" y="2443" font-size="7.5" fill="#374151" text-anchor="end">String?</text>
+    <line x1="628" y1="2446" x2="858" y2="2446" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2458" font-size="8" fill="#94a3b8">status</text><text x="814" y="2458" font-size="7.5" fill="#374151" text-anchor="end">PENDING|APPROVED|REJECTED</text>
+    <line x1="628" y1="2461" x2="858" y2="2461" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2473" font-size="8" fill="#94a3b8">createdAt / updatedAt</text><text x="814" y="2473" font-size="7.5" fill="#374151" text-anchor="end">DateTime</text>
+    <line x1="628" y1="2476" x2="858" y2="2476" stroke="#0e1a2e" stroke-width="0.5"/>
+    <text x="628" y="2488" font-size="8" fill="#94a3b8">comments</text><text x="814" y="2488" font-size="7.5" fill="#374151" text-anchor="end">Comment[]</text>
+    <line x1="628" y1="2491" x2="858" y2="2491" stroke="#1e3a5f" stroke-width="0.8"/>
+    <text x="628" y="2503" font-size="7" fill="#374151">@@index [workspaceId, month, year]</text>
+    <text x="628" y="2515" font-size="7" fill="#374151">@@index [userId]</text>
+    <text x="628" y="2527" font-size="7" fill="#374151">workspace: Workspace (cascade)</text>
+    <text x="628" y="2539" font-size="7.5" fill="#c4b5fd">NEW: Budget approval workflow</text>
+    <text x="628" y="2551" font-size="7" fill="#374151">Members propose budget changes</text>
+    <text x="628" y="2563" font-size="7" fill="#374151">ADMIN approves or rejects with comments</text>
+    <rect x="614" y="2296" width="248" height="270" rx="5" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.8"/>
+  </g>
+
+  <!-- ================================================================
+       RELATIONSHIP ARROWS
+  ================================================================ -->
+
+  <!-- Workspace → WorkspaceMember -->
+  <path d="M 568 240 L 575 240 L 575 200 L 592 200" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.6" marker-end="url(#a0)"/>
+  <!-- Workspace → Invite -->
+  <path d="M 568 256 L 820 256 L 820 206 L 852 206" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.55" marker-end="url(#a0)"/>
+  <!-- Workspace → Category -->
+  <path d="M 568 272 L 1080 272 L 1080 206 L 1102 206" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a0)"/>
+  <!-- Workspace → Activity -->
+  <path d="M 568 288 L 1340 288 L 1340 198 L 1360 198" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.45" marker-end="url(#a0)"/>
+  <!-- Workspace → Transaction (down) -->
+  <path d="M 425 616 L 425 770 L 155 770 L 155 796" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a1)"/>
+  <!-- Transaction → TransactionTag -->
+  <path d="M 290 900 L 530 900 L 530 830 L 558 830" fill="none" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a0)"/>
+  <!-- Transaction → Attachment -->
+  <path d="M 290 920 L 770 920 L 770 870 L 796 870" fill="none" stroke="#475569" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a0)"/>
+  <!-- Transaction → TransactionSplit -->
+  <path d="M 290 940 L 1010 940 L 1010 860 L 1034 860" fill="none" stroke="#0d9488" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a4)"/>
+  <!-- Transaction → TransactionHistory -->
+  <path d="M 290 960 L 1250 960 L 1250 876 L 1272 876" fill="none" stroke="#dc2626" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a3)"/>
+  <!-- Transaction → BillSplit (new) -->
+  <path d="M 290 975 L 1490 975 L 1490 870 L 1510 870" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.55" marker-end="url(#a1)"/>
+  <!-- Tag → TransactionTag -->
+  <path d="M 558 870 L 540 870 L 540 850 L 558 850" fill="none" stroke="#db2777" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.5" marker-end="url(#a5)"/>
+  <!-- SavingsGoal → GoalContribution -->
+  <path d="M 996 1540 L 1010 1540 L 1010 1480 L 1016 1480" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.6" marker-end="url(#a1)"/>
+  <!-- SavingsGoal → GoalMessage -->
+  <path d="M 996 1555 L 1254 1555 L 1254 1480 L 1264 1480" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.6" marker-end="url(#a1)"/>
+  <!-- Asset → AssetHistory -->
+  <path d="M 268 1800 L 280 1800 L 280 1778 L 290 1778" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.6" marker-end="url(#a1)"/>
+  <!-- Achievement → UserAchievement -->
+  <path d="M 758 1790 L 766 1790 L 766 1762 L 778 1762" fill="none" stroke="#d97706" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.6" marker-end="url(#a0)"/>
+  <!-- WorkspaceMember → MemberRestriction -->
+  <path d="M 700 390 L 700 420 L 471 420 L 471 2296" fill="none" stroke="#059669" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.4" marker-end="url(#a1)"/>
+  <!-- Workspace → BudgetProposal -->
+  <path d="M 282 370 L 262 370 L 262 400 L 738 400 L 738 2296" fill="none" stroke="#a855f7" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.35" marker-end="url(#a7)"/>
+  <!-- Workspace → BudgetTemplate -->
+  <path d="M 568 304 L 1760 304 L 1760 1480 L 1776 1480" fill="none" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.4" marker-end="url(#a6)"/>
+  <!-- BudgetTemplate → BudgetTemplateEntry -->
+  <line x1="1895" y1="1634" x2="1895" y2="1654" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.7" marker-end="url(#a6)"/>
+  <!-- Workspace → VaultEntry -->
+  <path d="M 282 340 L 8 340 L 8 2060 L 20 2060" fill="none" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.3" marker-end="url(#a2)"/>
+
+  <!-- ================================================================
+       BOTTOM: LEGEND + STATS
+  ================================================================ -->
+
+  <rect x="20" y="2696" width="800" height="72" rx="6" fill="#0a1020" stroke="#1e2d45" stroke-width="1"/>
+  <text x="420" y="2716" text-anchor="middle" font-size="9" font-weight="bold" fill="#64748b" letter-spacing="2">LEGEND</text>
+  <text x="36" y="2732" font-size="8" fill="#fbbf24">⬡</text><text x="50" y="2732" font-size="8" fill="#94a3b8">Primary Key (PK)</text>
+  <text x="180" y="2732" font-size="8" fill="#60a5fa">⤷</text><text x="194" y="2732" font-size="8" fill="#94a3b8">Foreign Key (FK)</text>
+  <rect x="330" y="2724" width="10" height="8" rx="1" fill="#dc2626" opacity="0.5"/>
+  <text x="344" y="2732" font-size="8" fill="#f87171">deletedAt — soft delete</text>
+  <rect x="510" y="2724" width="10" height="8" rx="1" fill="#059669" opacity="0.5"/>
+  <text x="524" y="2732" font-size="8" fill="#6ee7b7">★ New in this version</text>
+  <line x1="36" y1="2748" x2="76" y2="2748" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="82" y="2752" font-size="8" fill="#94a3b8">Relation (cascade)</text>
+  <text x="230" y="2752" font-size="8" fill="#94a3b8">★ NEW MODEL = colored border</text>
+  <text x="530" y="2752" font-size="8" fill="#94a3b8">All workspace children cascade-delete</text>
+  <rect x="36" y="2760" width="10" height="8" rx="1" fill="#2563eb"/><text x="50" y="2768" font-size="8" fill="#94a3b8">Core</text>
+  <rect x="106" y="2760" width="10" height="8" rx="1" fill="#059669"/><text x="120" y="2768" font-size="8" fill="#94a3b8">Financial</text>
+  <rect x="196" y="2760" width="10" height="8" rx="1" fill="#7c3aed"/><text x="210" y="2768" font-size="8" fill="#94a3b8">Vault/Security</text>
+  <rect x="306" y="2760" width="10" height="8" rx="1" fill="#06b6d4"/><text x="320" y="2768" font-size="8" fill="#94a3b8">Collaboration</text>
+  <rect x="416" y="2760" width="10" height="8" rx="1" fill="#d97706"/><text x="430" y="2768" font-size="8" fill="#94a3b8">Assets/Gamification</text>
+  <rect x="546" y="2760" width="10" height="8" rx="1" fill="#a855f7"/><text x="560" y="2768" font-size="8" fill="#94a3b8">Proposals/Budget</text>
+
+  <rect x="840" y="2696" width="1330" height="72" rx="6" fill="#0a1020" stroke="#1e2d45" stroke-width="1"/>
+  <text x="1505" y="2716" text-anchor="middle" font-size="9" font-weight="bold" fill="#64748b" letter-spacing="2">SCHEMA STATISTICS</text>
+  <text x="870" y="2746" font-size="28" font-weight="bold" fill="#2563eb">32</text><text x="870" y="2762" font-size="7.5" fill="#4b5d7a">MODELS</text>
+  <text x="970" y="2746" font-size="28" font-weight="bold" fill="#059669">8</text><text x="970" y="2762" font-size="7.5" fill="#4b5d7a">NEW MODELS</text>
+  <text x="1060" y="2746" font-size="28" font-weight="bold" fill="#dc2626">13</text><text x="1060" y="2762" font-size="7.5" fill="#4b5d7a">SOFT DELETE</text>
+  <text x="1160" y="2746" font-size="28" font-weight="bold" fill="#7c3aed">3</text><text x="1160" y="2762" font-size="7.5" fill="#4b5d7a">JUNCTIONS</text>
+  <text x="1230" y="2746" font-size="28" font-weight="bold" fill="#d97706">25+</text><text x="1230" y="2762" font-size="7.5" fill="#4b5d7a">RELATIONS</text>
+  <text x="1330" y="2746" font-size="28" font-weight="bold" fill="#06b6d4">1</text><text x="1330" y="2762" font-size="7.5" fill="#4b5d7a">POLYMORPHIC</text>
+  <text x="1420" y="2746" font-size="28" font-weight="bold" fill="#a855f7">1</text><text x="1420" y="2762" font-size="7.5" fill="#4b5d7a">SELF-REF</text>
+  <text x="1510" y="2746" font-size="28" font-weight="bold" fill="#f87171">12</text><text x="1510" y="2762" font-size="7.5" fill="#4b5d7a">COMPOSITE PKs</text>
+  <text x="1620" y="2746" font-size="28" font-weight="bold" fill="#94a3b8">PG</text><text x="1620" y="2762" font-size="7.5" fill="#4b5d7a">POSTGRESQL</text>
+  <text x="1710" y="2732" font-size="7" fill="#4b5d7a">Soft-delete pattern on 13 models</text>
+  <text x="1710" y="2746" font-size="7" fill="#4b5d7a">All queries: WHERE deletedAt IS NULL</text>
+  <text x="1710" y="2760" font-size="7" fill="#4b5d7a">Cascade hard-delete on workspace purge</text>
+  <text x="1710" y="2774" font-size="7" fill="#4b5d7a">v3: Collaboration + Approval + Branding</text>
+
+  <line x1="0" y1="2786" x2="2200" y2="2786" stroke="#1a2540" stroke-width="1"/>
+  <text x="1100" y="2808" text-anchor="middle" font-size="9" fill="#1e2d45" letter-spacing="4">PRISMA SCHEMA  ·  POSTGRESQL  ·  SOFT DELETE  ·  v3 COLLABORATION UPDATE</text>
+</svg>
