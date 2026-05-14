@@ -127,14 +127,17 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 
 		// Create bill splits if provided
 		if (billSplits && billSplits.length > 0) {
-			await tx.billSplit.createMany({
-				data: billSplits.map((bs) => ({
-					transactionId: transaction.id,
-					debtorId: bs.debtorId,
-					debtorName: bs.debtorName,
-					amount: bs.amount,
-				})),
-			});
+			const activeSplits = billSplits.filter(bs => bs.amount > 0);
+			if (activeSplits.length > 0) {
+				await tx.billSplit.createMany({
+					data: activeSplits.map((bs) => ({
+						transactionId: transaction.id,
+						debtorId: bs.debtorId,
+						debtorName: bs.debtorName,
+						amount: bs.amount,
+					})),
+				});
+			}
 		}
 
 		// Update aggregates ONLY if approved

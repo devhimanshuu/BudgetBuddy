@@ -113,11 +113,12 @@ export default function BudgetProgressCards({
                 )}
               >
                 <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center justify-between text-base">
+                  <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2 overflow-hidden">
                       <span className="text-2xl flex-shrink-0">{budget.categoryIcon}</span>
-                      <span className="truncate">{budget.category}</span>
+                      <span className="truncate text-heading-md">{budget.category}</span>
                     </span>
+
                     <div className="flex items-center gap-1">
                       {budget.isOverBudget && (
                         <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -175,7 +176,7 @@ export default function BudgetProgressCards({
                       />
 
                       {!isFrozen && (
-                        <PermissionGuard>
+                        <PermissionGuard allowedRoles={["ADMIN"]}>
                           <EditBudgetDialog
                             trigger={
                               <Button
@@ -215,29 +216,31 @@ export default function BudgetProgressCards({
                           />
                         </PermissionGuard>
                       )}
+
                     </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Spent</span>
+                    <div className="flex justify-between">
+                      <span className="text-heading-sm text-muted-foreground">Spent</span>
                       <span
                         className={cn(
-                          "font-semibold",
-                          budget.isOverBudget && "text-red-600 dark:text-red-400"
+                          "text-data-premium",
+                          budget.isOverBudget ? "text-red-600 dark:text-red-400" : "text-foreground"
                         )}
                       >
                         {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.spent)}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Budget</span>
-                      <span className="font-medium">
+                    <div className="flex justify-between">
+                      <span className="text-heading-sm text-muted-foreground">Budget</span>
+                      <span className="text-data-premium">
                         {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(budget.budgetAmount)}
                       </span>
                     </div>
                   </div>
+
 
                   <Progress
                     value={budget.percentage}
@@ -250,13 +253,13 @@ export default function BudgetProgressCards({
                     )}
                   />
 
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span className="text-heading-sm text-muted-foreground">
                       {budget.isOverBudget ? "Over budget" : "Remaining"}
                     </span>
                     <span
                       className={cn(
-                        "font-semibold",
+                        "text-data-premium",
                         budget.isOverBudget
                           ? "text-red-600 dark:text-red-400"
                           : budget.remaining < budget.budgetAmount * 0.2
@@ -267,6 +270,7 @@ export default function BudgetProgressCards({
                       {isPrivacyMode ? GetPrivacyMask(formatter) : formatter.format(Math.abs(budget.remaining))}
                     </span>
                   </div>
+
 
                   <div className="text-center text-xs text-muted-foreground">
                     {isPrivacyMode ? "**%" : `${budget.percentage.toFixed(0)}%`} of budget used

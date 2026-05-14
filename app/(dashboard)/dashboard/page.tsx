@@ -56,10 +56,10 @@ async function page() {
             <div className="border-b bg-card shadow-sm">
                 <div className="container flex flex-wrap items-center justify-between gap-6 py-4 sm:py-6 3xl:gap-8 4xl:py-8">
                     <div className="flex flex-col gap-1">
-                        <p className="text-3xl font-bold 3xl:text-4xl 4xl:text-5xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent italic">
+                        <p className="text-heading-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                             Hello, {user.firstName}
                         </p>
-                        <p className="text-sm text-muted-foreground font-medium">Welcome back to your financial control center.</p>
+                        <p className="text-body-premium">Welcome back to your financial control center.</p>
                     </div>
 
                     <div className="flex items-center gap-3 3xl:gap-4 4xl:gap-6">

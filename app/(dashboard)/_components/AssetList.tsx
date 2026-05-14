@@ -170,7 +170,7 @@ export default function AssetList({ userSettings, type }: AssetListProps) {
                                                 )}
                                             </div>
 
-                                            <PermissionGuard>
+                                            <PermissionGuard allowedRoles={["ADMIN"]}>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" size="icon">

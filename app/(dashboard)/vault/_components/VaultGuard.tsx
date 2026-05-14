@@ -121,63 +121,62 @@ export default function VaultGuard({ children }: VaultGuardProps) {
 	return (
 		<>
 			{/* PIN Management bar — shown to owner/admin */}
-			<PermissionGuard>
-				<div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 px-4 py-3 3xl:px-6 3xl:py-4">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground 3xl:text-base">
-						{isPinEnabled ? (
-							<>
-								<Lock className="h-4 w-4 text-violet-500 3xl:h-5 3xl:w-5" />
-								<span>
-									Vault is{" "}
-									<span className="font-medium text-violet-500">
-										PIN-protected
-									</span>
+			<div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 px-4 py-3 3xl:px-6 3xl:py-4">
+				<div className="flex flex-col sm:flex-row flex-wrap gap-2 text-sm text-muted-foreground 3xl:text-base">
+					{isPinEnabled ? (
+						<>
+							<Lock className="h-4 w-4 text-violet-500 3xl:h-5 3xl:w-5" />
+							<span>
+								Vault is{" "}
+								<span className="font-medium text-violet-500">
+									PIN-protected
 								</span>
-							</>
-						) : (
-							<>
-								<Unlock className="h-4 w-4 text-muted-foreground 3xl:h-5 3xl:w-5" />
-								<span>No PIN protection active</span>
-							</>
-						)}
-					</div>
-
-					<div className="flex items-center gap-2">
-						{!isPinEnabled ? (
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setGuardState("setting-up")}
-								className="gap-1.5 border-violet-500/30 text-violet-600 hover:bg-violet-500/10 hover:text-violet-700 3xl:text-base"
-							>
-								<Lock className="h-3.5 w-3.5 3xl:h-4 3xl:w-4" />
-								Enable PIN
-							</Button>
-						) : (
-							<>
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => setShowChangePin(true)}
-									className="gap-1.5 text-muted-foreground 3xl:text-base"
-								>
-									<Settings2 className="h-3.5 w-3.5 3xl:h-4 3xl:w-4" />
-									Change PIN
-								</Button>
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => setShowDisableConfirm(true)}
-									className="gap-1.5 text-red-500 hover:text-red-600 3xl:text-base"
-								>
-									<X className="h-3.5 w-3.5 3xl:h-4 3xl:w-4" />
-									Disable
-								</Button>
-							</>
-						)}
-					</div>
+							</span>
+						</>
+					) : (
+						<>
+							<Unlock className="h-4 w-4 text-muted-foreground 3xl:h-5 3xl:w-5" />
+							<span>No PIN protection active</span>
+						</>
+					)}
 				</div>
-			</PermissionGuard>
+
+				<div className="flex items-center gap-2">
+					{!isPinEnabled ? (
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setGuardState("setting-up")}
+							className="gap-1.5 border-violet-500/30 text-violet-600 hover:bg-violet-500/10 hover:text-violet-700 3xl:text-base"
+						>
+							<Lock className="h-3.5 w-3.5 3xl:h-4 3xl:w-4" />
+							Enable PIN
+						</Button>
+					) : (
+						<>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => setShowChangePin(true)}
+								className="gap-1.5 text-muted-foreground 3xl:text-base"
+							>
+								<Settings2 className="h-3.5 w-3.5 3xl:h-4 3xl:w-4" />
+								Change PIN
+							</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => setShowDisableConfirm(true)}
+								className="gap-1.5 text-red-500 hover:text-red-600 3xl:text-base"
+							>
+								<X className="h-3.5 w-3.5 3xl:h-4 3xl:w-4" />
+								Disable
+							</Button>
+						</>
+					)}
+				</div>
+			</div>
+
 
 			{/* Vault content */}
 			<AnimatePresence>

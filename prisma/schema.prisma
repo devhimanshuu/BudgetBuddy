@@ -72,6 +72,8 @@ model Workspace {
   avatar                String?   @default("🏢")
   description           String?
   type                  String    @default("PERSONAL") // PERSONAL, HOME, STARTUP, VACATION
+  notifications         Notification[]
+
 
 
   @@index([ownerId, deletedAt])
@@ -439,9 +441,26 @@ model Activity {
   metadata    Json?    // Optional extra info like transaction amount or member email
   createdAt   DateTime @default(now())
 
+  notifications Notification[]
+
   @@index([workspaceId])
   @@index([userId])
 }
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String   // Target user
+  workspaceId String
+  activityId  String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  activity  Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([userId, workspaceId, isRead])
+}
+
 
 model VaultEntry {
   id            String   @id @default(uuid())

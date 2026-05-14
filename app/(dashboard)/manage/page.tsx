@@ -303,7 +303,7 @@ function CategoryList({ type }: { type: TransactionType }) {
             </div>
 
             <div className="flex w-full flex-shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-nowrap">
-              <PermissionGuard>
+              <PermissionGuard allowedRoles={["ADMIN"]}>
                 <MergeCategoriesDialog
                   type={type}
                   categories={categoriesQuery.data || []}
@@ -325,6 +325,7 @@ function CategoryList({ type }: { type: TransactionType }) {
                   }
                 />
               </PermissionGuard>
+
             </div>
           </CardTitle>
         </CardHeader>
@@ -353,7 +354,7 @@ function CategoryList({ type }: { type: TransactionType }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <PermissionGuard>
+              <PermissionGuard allowedRoles={["ADMIN"]}>
                 <Button
                   variant={cleanupMode ? "destructive" : "outline"}
                   size="sm"
@@ -366,8 +367,9 @@ function CategoryList({ type }: { type: TransactionType }) {
                 </Button>
               </PermissionGuard>
 
+
               {cleanupMode && sortedCategories.length > 0 && (
-                <PermissionGuard>
+                <PermissionGuard allowedRoles={["ADMIN"]}>
                   <Button
                     variant="destructive"
                     size="sm"
@@ -407,6 +409,7 @@ function CategoryList({ type }: { type: TransactionType }) {
                     </AlertDialogContent>
                   </AlertDialog>
                 </PermissionGuard>
+
               )}
             </div>
           </div>
@@ -506,7 +509,7 @@ function CategoryCard({ category }: { category: any }) {
         "flex w-full gap-1 p-2",
         compactMode ? "flex-row border-t mt-1 pt-2" : "flex-row sm:flex-col"
       )}>
-        <PermissionGuard>
+        <PermissionGuard allowedRoles={["ADMIN"]}>
           <EditCategoryDialog
             category={category}
             trigger={
@@ -540,6 +543,7 @@ function CategoryCard({ category }: { category: any }) {
             }
           />
         </PermissionGuard>
+
       </div>
     </div>
   );
@@ -614,7 +618,7 @@ function TagList() {
               </div>
             </div>
 
-            <PermissionGuard>
+            <PermissionGuard allowedRoles={["ADMIN"]}>
               <CreateTagDialog
                 trigger={
                   <Button className="w-full gap-2 text-sm sm:w-auto" size="sm">
@@ -624,6 +628,7 @@ function TagList() {
                 }
               />
             </PermissionGuard>
+
           </CardTitle>
         </CardHeader>
         <Separator />
@@ -651,7 +656,7 @@ function TagList() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <PermissionGuard>
+              <PermissionGuard allowedRoles={["ADMIN"]}>
                 <Button
                   variant={cleanupMode ? "destructive" : "outline"}
                   size="sm"
@@ -664,8 +669,9 @@ function TagList() {
                 </Button>
               </PermissionGuard>
 
+
               {cleanupMode && sortedTags.length > 0 && (
-                <PermissionGuard>
+                <PermissionGuard allowedRoles={["ADMIN"]}>
                   <Button
                     variant="destructive"
                     size="sm"
@@ -705,6 +711,7 @@ function TagList() {
                     </AlertDialogContent>
                   </AlertDialog>
                 </PermissionGuard>
+
               )}
             </div>
           </div>

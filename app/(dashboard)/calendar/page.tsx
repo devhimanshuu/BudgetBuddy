@@ -25,8 +25,8 @@ async function CalendarPage() {
             <div className="border-b bg-card">
                 <div className="container flex flex-wrap items-center justify-between gap-6 py-4">
                     <div>
-                        <p className="text-3xl font-bold">Finance Calendar</p>
-                        <p className="text-muted-foreground">
+                        <p className="text-heading-xl">Finance Calendar</p>
+                        <p className="text-body-premium">
                             Visualize your income and expenses over time
                         </p>
                     </div>

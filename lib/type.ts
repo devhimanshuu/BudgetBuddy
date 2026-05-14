@@ -6,7 +6,7 @@ export interface CalendarTransaction {
 	id: string;
 	amount: number;
 	description: string;
-	notes: string | null;
+	notes?: string | null;
 	date: Date | string;
 	type: TransactionType;
 	category: string;
@@ -20,6 +20,11 @@ export interface CalendarDayData {
 	count: number;
 	isHighSpending: boolean;
 	transactions: CalendarTransaction[];
+	isGoalMilestone?: boolean;
+	milestoneDetails?: { name: string; targetAmount: number; icon: string }[];
+	projectedBalance?: number;
+	isRecurringDue?: boolean;
+	recurringItems?: CalendarTransaction[];
 }
 
 export interface CalendarMonthStats {

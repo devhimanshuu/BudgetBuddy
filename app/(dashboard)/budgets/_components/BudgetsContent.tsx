@@ -136,8 +136,8 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
       <div className="border-b bg-card">
         <div className="container flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Budget Goals</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-heading-xl">Budget Goals</h1>
+            <p className="text-body-premium">
               Set spending limits and track your progress
             </p>
           </div>
@@ -200,7 +200,10 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
               </div>
 
               <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
-                <ProposeBudgetDialog month={selectedMonth} year={selectedYear} />
+                <PermissionGuard allowedRoles={["EDITOR"]}>
+                  <ProposeBudgetDialog month={selectedMonth} year={selectedYear} />
+                </PermissionGuard>
+
                 
                 <PermissionGuard allowedRoles={["ADMIN"]}>
                   <BudgetProposalsDialog month={selectedMonth} year={selectedYear} />
@@ -228,7 +231,10 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                </PermissionGuard>
 
+
+                <PermissionGuard allowedRoles={["ADMIN"]}>
                   <Button
                     variant="outline"
                     onClick={() => setIsFrozen(!isFrozen)}
@@ -280,6 +286,7 @@ export default function BudgetsContent({ userSettings }: BudgetsContentProps) {
                     year={selectedYear}
                   />
                 </PermissionGuard>
+
               </div>
             </div>
           </div>

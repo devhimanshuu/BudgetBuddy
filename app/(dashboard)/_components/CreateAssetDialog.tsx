@@ -163,7 +163,7 @@ export default function CreateAssetDialog({ trigger, open: externalOpen, onOpenC
     };
 
     return (
-        <PermissionGuard>
+        <PermissionGuard allowedRoles={["ADMIN"]}>
             <Dialog open={open} onOpenChange={setOpen}>
                 {trigger !== null && (
                 <DialogTrigger asChild>

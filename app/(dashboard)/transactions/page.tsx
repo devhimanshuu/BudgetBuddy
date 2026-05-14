@@ -57,7 +57,7 @@ const TransactionPage = () => {
       <div className="border-b bg-card">
         <div className="container flex flex-wrap items-center justify-between gap-6 py-4">
           <div className="flex items-center gap-4">
-            <p className="text-3xl font-bold ">Transactions history</p>
+            <p className="text-heading-xl">Transactions history</p>
             <Link href="/transactions/trash">
               <Button variant="outline" size="sm" className="flex items-center gap-2 border-rose-500/20 text-rose-500 hover:bg-rose-500/10 transition-all duration-300">
                 <Trash2 className="h-4 w-4" />

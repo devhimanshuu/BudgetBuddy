@@ -17,14 +17,16 @@ import {
 	TrendingUp,
 	Eye,
 	EyeOff,
-	Pencil,
 	ShieldCheck,
+	HandCoins
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeCustomizer } from "./ThemeCustomizer";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { usePrivacyMode } from "./providers/PrivacyProvider";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { NotificationBell } from "./NotificationBell";
+
 
 const Navbar = () => {
 	return (
@@ -67,15 +69,17 @@ const items = [
 		icon: <LineChart className="h-4 w-4" />,
 	},
 	{
+		label: "Settlements",
+		link: "/settlements",
+		icon: <HandCoins className="h-4 w-4" />,
+	},
+	{
 		label: "Vault",
 		link: "/vault",
 		icon: <ShieldCheck className="h-4 w-4" />,
 	},
 	{ label: "Manage", link: "/manage", icon: <Settings className="h-4 w-4" /> },
 ];
-
-import { useWorkspaceRole } from "./PermissionGuard";
-import { Badge } from "./ui/badge";
 
 function NavbarActions() {
 	const [isMounted, setIsMounted] = useState(false);
@@ -97,6 +101,7 @@ function NavbarActions() {
 			<div className="hidden sm:block">
 				<ThemeCustomizer />
 			</div>
+			<NotificationBell />
 			<UserButton
 				afterSignOutUrl="/sign-in"
 				appearance={{
@@ -185,8 +190,8 @@ function MobileNavbar() {
 function DesktopNavbar() {
 	return (
 		<div className="hidden border-separate border-b bg-background/80 backdrop-blur-md xl:block">
-			<nav className="container flex items-center justify-between px-8 3xl:px-12 4xl:px-16">
-				<div className="flex h-[25px] min-h-[60px] items-center gap-x-4 3xl:h-[100px] 3xl:gap-x-6 4xl:h-[120px] 4xl:gap-x-8">
+			<nav className="container flex items-center justify-between px-4 3xl:px-8 4xl:px-12">
+				<div className="flex h-[25px] min-h-[60px] items-center gap-x-2 3xl:h-[100px] 3xl:gap-x-6 4xl:h-[120px] 4xl:gap-x-8">
 					<Logo />
 					<div className="flex h-full ">
 						{items.map((item) => (
@@ -224,7 +229,7 @@ function NavbarItem({
 				href={link}
 				className={cn(
 					buttonVariants({ variant: "ghost" }),
-					"w-full justify-start text-sm text-muted-foreground hover:text-foreground 3xl:text-base 4xl:text-lg gap-2",
+					"w-full justify-start text-sm text-muted-foreground hover:text-foreground 3xl:text-base 4xl:text-lg gap-2 px-2 2xl:px-4",
 					isActive && "text-foreground",
 				)}
 				onClick={() => {
