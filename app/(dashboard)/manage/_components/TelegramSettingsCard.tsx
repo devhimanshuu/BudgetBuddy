@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Send, CheckCircle2, Copy } from "lucide-react";
+import { MessageCircle, Send, CheckCircle2, Sparkles } from "lucide-react";
 import { LinkTelegramChat, UnlinkTelegramChat } from "../_actions/telegram";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -76,7 +76,7 @@ export function TelegramSettingsCard() {
                 <span className="font-medium text-sm">Your Telegram account is linked!</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                You can now send messages like <strong>"50 for lunch"</strong> to the bot to automatically add expenses.
+                You can now send messages like <strong>&quot;50 for lunch&quot;</strong> to the bot to automatically add expenses.
               </p>
               <Button variant="destructive" size="sm" onClick={handleUnlink} disabled={isLinking}>
                 Unlink Account
@@ -86,15 +86,15 @@ export function TelegramSettingsCard() {
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground space-y-2">
                 <p>1. Open Telegram and search for <strong className="text-foreground cursor-pointer" onClick={copyBotUsername}>@Budgetbuddy0bot</strong></p>
-                <p>2. Send any message to the bot (e.g. "hello")</p>
+                <p>2. Send any message to the bot (e.g. &quot;hello&quot;)</p>
                 <p>3. The bot will reply with your <strong>Chat ID</strong>.</p>
                 <p>4. Paste that ID below:</p>
               </div>
-              
+
               <div className="flex gap-2">
                 <div className="flex-1 space-y-1">
-                  <Input 
-                    placeholder="Enter Telegram Chat ID" 
+                  <Input
+                    placeholder="Enter Telegram Chat ID"
                     value={chatId}
                     onChange={(e) => setChatId(e.target.value)}
                   />
@@ -105,6 +105,13 @@ export function TelegramSettingsCard() {
               </div>
             </div>
           )}
+
+          <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              More app integrations coming soon — WhatsApp, Slack &amp; more.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </SkeletonWrapper>

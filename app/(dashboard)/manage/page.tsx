@@ -118,19 +118,26 @@ const ManagePage = () => {
           </div>
         </div>
       </div>
-      <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <WorkspaceSettingsCard />
-          <TelegramSettingsCard />
-          <AlertSettingsCard />
-          <VibeControls />
-          {workspace && (
-            <WorkspaceExport 
-              workspaceId={workspace.id} 
-              workspaceName={workspace.name} 
-              currency={workspace.currency} 
-            />
-          )}
+      <div className="container flex flex-col gap-6 px-4 py-6 sm:px-6 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {/* Left column */}
+          <div className="flex flex-col gap-6">
+            <WorkspaceSettingsCard />
+            <VibeControls />
+          </div>
+
+          {/* Right column */}
+          <div className="flex flex-col gap-6">
+            <AlertSettingsCard />
+            <TelegramSettingsCard />
+            {workspace && (
+              <WorkspaceExport 
+                workspaceId={workspace.id} 
+                workspaceName={workspace.name} 
+                currency={workspace.currency} 
+              />
+            )}
+          </div>
         </div>
 
         <WorkspaceMembers />

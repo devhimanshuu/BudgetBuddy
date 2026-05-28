@@ -31,6 +31,7 @@ import {
   Key,
   Landmark,
   Heart,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -1488,6 +1489,12 @@ export default function LandingPageContent() {
               icon={<Lock className="h-full w-full" />}
               title="Military-Grade Security"
               description="Your heritage is safe. PIN-protected Legacy Vault and bank-grade encryption ensure your data remains strictly yours."
+            />
+            <FeatureCard
+              delay={1.0}
+              icon={<Send className="h-full w-full" />}
+              title="Telegram Bot Integration"
+              description="Add expenses on the go by simply messaging our Telegram bot. Just type '50 for lunch' and it's logged instantly. More app integrations coming soon."
             />
           </div>
         </section>
