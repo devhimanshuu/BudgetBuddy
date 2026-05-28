@@ -249,7 +249,7 @@ export async function POST(req: Request) {
 
     if (state === "AWAITING_TAGS") {
       if (text.toLowerCase() !== "skip") {
-        const tagNames = text.split(",").map(t => t.trim()).filter(Boolean);
+        const tagNames = text.split(",").map((t: string) => t.trim()).filter(Boolean);
         context.tagIds = await ensureTags(workspaceId, userSettings.userId, tagNames);
       }
       await prisma.telegramSession.update({
