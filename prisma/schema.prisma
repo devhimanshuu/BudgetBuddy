@@ -621,3 +621,10 @@ model BillSplit {
   @@index([debtorId])
 }
 
+model TelegramSession {
+  chatId    String   @id
+  userId    String
+  state     String   @default("IDLE") // IDLE, AWAITING_NOTES, AWAITING_TAGS, CHATBOT
+  context   Json?    // Holds pending transaction draft or chat history
+  updatedAt DateTime @updatedAt
+}
