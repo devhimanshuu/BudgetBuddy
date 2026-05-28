@@ -1,19 +1,47 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import Groq from "groq-sdk";
+import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
+import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 // Helper: Send Telegram Message
-async function sendMessage(chatId: string | number, text: string) {
+async function sendMessage(chatId: string | number, text: string, reply_markup?: any) {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+  const body: any = { chat_id: chatId, text, parse_mode: "Markdown" };
+  if (reply_markup) body.reply_markup = reply_markup;
   await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
+    body: JSON.stringify(body),
   });
+}
+
+// Helper: Send Voice Note
+async function sendVoice(chatId: string | number, buffer: Buffer) {
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendVoice`;
+  const formData = new FormData();
+  formData.append("chat_id", chatId.toString());
+  formData.append("voice", new Blob([new Uint8Array(buffer)], { type: "audio/ogg" }), "voice.ogg");
+  await fetch(url, { method: "POST", body: formData });
+}
+
+// Helper: Download File from Telegram
+async function getTelegramFileBuffer(fileId: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/getFile?file_id=${fileId}`);
+    const data = await res.json();
+    if (!data.ok) return null;
+    const filePath = data.result.file_path;
+    const fileRes = await fetch(`https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${filePath}`);
+    const arrayBuffer = await fileRes.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (e) {
+    console.error("Failed to fetch telegram file", e);
+    return null;
+  }
 }
 
 // Helper: Ensure Category Exists
@@ -126,10 +154,20 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const message = body.message || body.edited_message;
-    if (!message || !message.text) return NextResponse.json({ ok: true });
+    const callbackQuery = body.callback_query;
+    if (!message && !callbackQuery) return NextResponse.json({ ok: true });
 
-    const chatId = message.chat.id.toString();
-    const text = message.text.trim();
+    const chatId = message ? message.chat.id.toString() : callbackQuery.message.chat.id.toString();
+    let text = message ? (message.text || "").trim() : callbackQuery.data;
+
+    // Acknowledge callback query to remove loading state on button
+    if (callbackQuery) {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/answerCallbackQuery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callback_query_id: callbackQuery.id })
+      });
+    }
 
     // 1. Verify User
     const userSettings = await prisma.userSettings.findUnique({
@@ -160,7 +198,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Handle Global Commands
-    if (text.toLowerCase() === "/cancel" || text.toLowerCase() === "/exit") {
+    if (text && (text.toLowerCase() === "/cancel" || text.toLowerCase() === "/exit")) {
       await prisma.telegramSession.update({
         where: { chatId }, data: { state: "IDLE", context: {} }
       });
@@ -168,7 +206,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    if (text.toLowerCase() === "/chatbot") {
+    if (text && text.toLowerCase() === "/chatbot") {
       await prisma.telegramSession.update({
         where: { chatId }, data: { state: "CHATBOT", context: { history: [] } }
       });
@@ -179,6 +217,44 @@ export async function POST(req: Request) {
     // 4. State Machine
     const state = session.state;
     const context: any = session.context || {};
+
+    // -- Handle Premium Media Inputs --
+    if (state === "IDLE" && message && message.photo && message.photo.length > 0) {
+      await sendMessage(chatId, "📸 Scanning receipt... please wait.");
+      const photo = message.photo[message.photo.length - 1]; // get highest resolution
+      const buffer = await getTelegramFileBuffer(photo.file_id);
+      if (buffer) {
+        const base64 = `data:image/jpeg;base64,${buffer.toString("base64")}`;
+        const extraction = await ExtractReceiptData(base64);
+        if (extraction.success && extraction.data) {
+          text = `${extraction.data.amount || 0} for ${extraction.data.category || "Other"} at ${extraction.data.merchant || "Store"}`;
+        } else {
+          await sendMessage(chatId, "❌ Sorry, I couldn't read the receipt clearly. Please type it manually.");
+          return NextResponse.json({ ok: true });
+        }
+      }
+    }
+
+    if (message && message.voice) {
+      await sendMessage(chatId, "🎙️ Transcribing voice note... please wait.");
+      const buffer = await getTelegramFileBuffer(message.voice.file_id);
+      if (buffer) {
+        try {
+          const file = await toFile(buffer, "audio.ogg", { type: "audio/ogg" });
+          const transcription = await groq.audio.transcriptions.create({
+            file: file,
+            model: "whisper-large-v3-turbo",
+          });
+          text = transcription.text.trim();
+        } catch (err) {
+          console.error("Voice transcription failed", err);
+          await sendMessage(chatId, "❌ Sorry, I couldn't transcribe the audio. Please type it out.");
+          return NextResponse.json({ ok: true });
+        }
+      }
+    }
+
+    if (!text && state === "IDLE") return NextResponse.json({ ok: true });
 
     if (state === "CHATBOT") {
       const history = context.history || [];
@@ -195,6 +271,22 @@ export async function POST(req: Request) {
       });
       
       await sendMessage(chatId, responseText);
+
+      // Feature 5: AI Voice Note Replies
+      try {
+        // Using Free Google Translate TTS as requested
+        const shortText = responseText.substring(0, 200);
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+        const res = await fetch(ttsUrl);
+        
+        if (res.ok) {
+          const audioBuffer = Buffer.from(await res.arrayBuffer());
+          await sendVoice(chatId, audioBuffer);
+        }
+      } catch (err) {
+        console.error("TTS failed", err);
+      }
+      
       return NextResponse.json({ ok: true });
     }
 
@@ -234,7 +326,9 @@ export async function POST(req: Request) {
         data: { state: "AWAITING_NOTES", context: parsedData }
       });
 
-      await sendMessage(chatId, `✅ Drafted: **${userSettings.currency} ${parsedData.amount}** for **${parsedData.category}**.\n\n📝 Would you like to add any **Notes**? (Reply with your note, or type \`skip\`)`);
+      await sendMessage(chatId, `✅ Drafted: **${userSettings.currency} ${parsedData.amount}** for **${parsedData.category}**.\n\n📝 Would you like to add any **Notes**? (Reply with your note, or tap Skip)`, {
+        inline_keyboard: [[{ text: "⏭️ Skip Notes", callback_data: "skip" }]]
+      });
       return NextResponse.json({ ok: true });
     }
 
@@ -243,7 +337,9 @@ export async function POST(req: Request) {
       await prisma.telegramSession.update({
         where: { chatId }, data: { state: "AWAITING_TAGS", context }
       });
-      await sendMessage(chatId, `🏷️ Would you like to add **Tags**? (Reply with tags separated by commas, e.g. "vacation, family", or type \`skip\`)`);
+      await sendMessage(chatId, `🏷️ Would you like to add **Tags**? (Reply with tags separated by commas, e.g. "vacation, family", or tap Skip)`, {
+        inline_keyboard: [[{ text: "⏭️ Skip Tags", callback_data: "skip" }]]
+      });
       return NextResponse.json({ ok: true });
     }
 
@@ -255,7 +351,9 @@ export async function POST(req: Request) {
       await prisma.telegramSession.update({
         where: { chatId }, data: { state: "AWAITING_SPLITS", context }
       });
-      await sendMessage(chatId, `✂️ Would you like to **Split** this across other categories? (Reply with amounts and categories, e.g. "10 to Drinks", or type \`skip\`)`);
+      await sendMessage(chatId, `✂️ Would you like to **Split** this across other categories? (Reply with amounts and categories, e.g. "10 to Drinks", or tap Skip)`, {
+        inline_keyboard: [[{ text: "⏭️ Skip Splits", callback_data: "skip" }]]
+      });
       return NextResponse.json({ ok: true });
     }
 
