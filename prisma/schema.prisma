@@ -39,6 +39,9 @@ model UserSettings{
   lastVaultActivity      DateTime @default(now())
   dmsEnabled             Boolean @default(false)
   dmsThresholdDays       Int     @default(30) // Initial threshold (30 days)
+
+  // TELEGRAM INTEGRATION
+  telegramChatId         String?  @unique
 }
 
 model Workspace {
