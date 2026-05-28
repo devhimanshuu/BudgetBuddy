@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
-const openai = new OpenAI();
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 // Function to send a message back to Telegram
@@ -57,17 +57,19 @@ export async function POST(req: Request) {
       Output ONLY a valid JSON object with those exact keys. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense"}
     `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // or whatever model is available
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
       temperature: 0,
     });
 
     const aiResultStr = response.choices[0].message.content;
     if (!aiResultStr) throw new Error("AI returned no output");
     
-    const parsedData = JSON.parse(aiResultStr);
+    // Extract JSON from the response (may contain markdown code fences)
+    const jsonMatch = aiResultStr.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("No JSON found in AI response");
+    const parsedData = JSON.parse(jsonMatch[0]);
     
     // Validate parsed data
     if (!parsedData.amount || !parsedData.category || !parsedData.type) {
