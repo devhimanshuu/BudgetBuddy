@@ -175,6 +175,10 @@ export async function POST(req: Request) {
     });
 
     if (!userSettings) {
+      if (text && text.toLowerCase() === "/start") {
+        await sendMessage(chatId, `👋 **Welcome to BudgetBuddy Bot!**\n\nTo get started, you need to link your account.\n1. Copy your Chat ID: \`${chatId}\`\n2. Go to BudgetBuddy Web -> Manage -> Telegram Integration\n3. Paste the ID and click Link.`);
+        return NextResponse.json({ ok: true });
+      }
       await sendMessage(chatId, `Welcome! Your Telegram Chat ID is: \`${chatId}\`\nPlease enter this in BudgetBuddy Settings to link your account.`);
       return NextResponse.json({ ok: true });
     }
@@ -198,6 +202,15 @@ export async function POST(req: Request) {
     }
 
     // 3. Handle Global Commands
+    const helpText = `🤖 **How to use BudgetBuddy Bot**\n\n📝 **Text:** Type "50 for food"\n🎙️ **Voice:** Send a voice note\n📸 **Receipt:** Send a photo of a receipt\n💬 **Chatbot:** Type \`/chatbot\` to talk to your AI advisor\n\nFollow the interactive buttons for notes and tags!`;
+
+    if (text && (text.toLowerCase() === "/start" || text.toLowerCase() === "/help")) {
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { state: "IDLE", context: {} }
+      });
+      await sendMessage(chatId, text.toLowerCase() === "/start" ? `✅ **Account Linked!**\n\n${helpText}` : helpText);
+      return NextResponse.json({ ok: true });
+    }
     if (text && (text.toLowerCase() === "/cancel" || text.toLowerCase() === "/exit")) {
       await prisma.telegramSession.update({
         where: { chatId }, data: { state: "IDLE", context: {} }

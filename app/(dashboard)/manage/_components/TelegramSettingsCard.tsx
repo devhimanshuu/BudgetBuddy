@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Send, CheckCircle2, Sparkles } from "lucide-react";
+import { Send, CheckCircle2, Sparkles, HelpCircle } from "lucide-react";
 import { LinkTelegramChat, UnlinkTelegramChat } from "../_actions/telegram";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export function TelegramSettingsCard() {
   const [chatId, setChatId] = useState("");
@@ -60,9 +60,51 @@ export function TelegramSettingsCard() {
     <SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
       <Card className="border-primary/20 bg-gradient-to-br from-card to-blue-500/5 shadow-xl">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-500">
-            <Send className="w-5 h-5" />
-            Telegram Integration
+          <CardTitle className="flex items-center justify-between text-blue-500">
+            <div className="flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              Telegram Integration
+            </div>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1 text-muted-foreground hover:text-foreground">
+                  <HelpCircle className="w-4 h-4" />
+                  How to Use
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>How to use BudgetBuddy Bot</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 text-sm mt-4">
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">📝 Text Logging</h4>
+                    <p className="text-muted-foreground">Type something like <strong>&quot;50 for food&quot;</strong> or <strong>&quot;100 income from salary&quot;</strong>.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🎙️ Voice Notes</h4>
+                    <p className="text-muted-foreground">Hold the mic icon and say <strong>&quot;I spent twenty dollars on taxi&quot;</strong>.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">📸 Receipt Scanning</h4>
+                    <p className="text-muted-foreground">Send a photo of a receipt and the bot will extract the details for you.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🤖 AI Chatbot</h4>
+                    <p className="text-muted-foreground">Send <strong>/chatbot</strong> to ask your financial persona questions. It replies with text and voice! Send <strong>/exit</strong> to leave.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🔘 Interactive Flow</h4>
+                    <p className="text-muted-foreground">The bot will ask for Notes, Tags, and Splits. You can use the buttons to quickly skip steps.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">⏰ Smart Bill Reminders</h4>
+                    <p className="text-muted-foreground">The bot automatically checks your Recurring Transactions and will message you the day before a bill is due!</p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardTitle>
           <CardDescription>
             Add expenses instantly by messaging our Telegram bot
