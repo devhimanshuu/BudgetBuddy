@@ -1493,8 +1493,8 @@ export default function LandingPageContent() {
             <FeatureCard
               delay={1.0}
               icon={<Send className="h-full w-full" />}
-              title="Telegram Bot Integration"
-              description="Add expenses on the go by simply messaging our Telegram bot. Just type '50 for lunch' and it's logged instantly. More app integrations coming soon."
+              title="Discord & Telegram Integration"
+              description="Add expenses on the go by simply messaging our Discord or Telegram bots. Just type '50 for lunch' and it's logged instantly. More app integrations like Slack, WhatsApp, and Google Sheets coming soon!"
             />
           </div>
         </section>
