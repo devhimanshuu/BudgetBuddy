@@ -5,7 +5,7 @@ import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const getGroqClient = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 const APP_ID = process.env.DISCORD_APP_ID || "1510015130547654717";
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
               await editInteractionResponse(interactionToken, "🎙️ Transcribing voice note... please wait.");
               const buffer = await downloadDiscordAttachment(attachmentObj.url);
               const file = await toFile(buffer, "audio.ogg", { type: "audio/ogg" });
-              const transcription = await groq.audio.transcriptions.create({
+              const transcription = await getGroqClient().audio.transcriptions.create({
                 file: file,
                 model: "whisper-large-v3-turbo",
               });
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
             }
 
             // Extract Data
-            const completion = await groq.chat.completions.create({
+            const completion = await getGroqClient().chat.completions.create({
               messages: [
                 { role: "system", content: `You are an AI that extracts transaction data from text. Output ONLY a JSON object: {"amount": number, "category": string, "type": "expense"|"income"|"investment", "description": string}` },
                 { role: "user", content: text }

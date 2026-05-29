@@ -4,7 +4,7 @@ import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const getGroqClient = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 // Helper: Send Telegram Message
@@ -254,7 +254,7 @@ export async function POST(req: Request) {
       if (buffer) {
         try {
           const file = await toFile(buffer, "audio.ogg", { type: "audio/ogg" });
-          const transcription = await groq.audio.transcriptions.create({
+          const transcription = await getGroqClient().audio.transcriptions.create({
             file: file,
             model: "whisper-large-v3-turbo",
           });
@@ -311,7 +311,7 @@ export async function POST(req: Request) {
         User's message: "${text}"
         Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense"}
       `;
-      const response = await groq.chat.completions.create({
+      const response = await getGroqClient().chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
         temperature: 0,
@@ -378,7 +378,7 @@ export async function POST(req: Request) {
           Extract the splits. User message: "${text}"
           Output ONLY a valid JSON array of objects. Example: [{"amount": 10, "category": "Drinks"}]
         `;
-        const response = await groq.chat.completions.create({
+        const response = await getGroqClient().chat.completions.create({
           model: "llama-3.3-70b-versatile",
           messages: [{ role: "user", content: prompt }],
           temperature: 0,
