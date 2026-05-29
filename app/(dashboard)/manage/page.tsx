@@ -75,7 +75,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Home } from "lucide-react";
-import { TelegramSettingsCard } from "./_components/TelegramSettingsCard";
+import { AppIntegrations } from "./_components/AppIntegrations";
 
 const ManagePage = () => {
   const { data: workspace } = useQuery({
@@ -129,7 +129,7 @@ const ManagePage = () => {
           {/* Right column */}
           <div className="flex flex-col gap-6">
             <AlertSettingsCard />
-            <TelegramSettingsCard />
+            <AppIntegrations />
             {workspace && (
               <WorkspaceExport 
                 workspaceId={workspace.id} 

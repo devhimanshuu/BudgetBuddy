@@ -42,6 +42,9 @@ model UserSettings{
 
   // TELEGRAM INTEGRATION
   telegramChatId         String?  @unique
+
+  // DISCORD INTEGRATION
+  discordUserId          String?  @unique
 }
 
 model Workspace {
@@ -626,5 +629,13 @@ model TelegramSession {
   userId    String
   state     String   @default("IDLE") // IDLE, AWAITING_NOTES, AWAITING_TAGS, CHATBOT
   context   Json?    // Holds pending transaction draft or chat history
+  updatedAt DateTime @updatedAt
+}
+
+model DiscordSession {
+  discordId String   @id
+  userId    String
+  state     String   @default("IDLE") // IDLE, AWAITING_NOTES, AWAITING_TAGS, CHATBOT
+  context   Json?    
   updatedAt DateTime @updatedAt
 }
