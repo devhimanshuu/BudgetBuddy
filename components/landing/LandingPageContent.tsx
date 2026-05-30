@@ -1496,7 +1496,7 @@ export default function LandingPageContent() {
               delay={1.0}
               icon={<Send className="h-full w-full" />}
               title="Omnichannel Chatbots"
-              description="Add expenses on the go by simply messaging our Discord or Telegram bots. Just type '50 for lunch' and it's logged instantly with AI."
+              description="Add expenses on the go by simply messaging our Slack, Discord, or Telegram bots. Just type '50 for lunch' and it's logged instantly with AI."
             />
             <FeatureCard
               delay={1.1}

@@ -47,31 +47,26 @@ async function getTelegramFileBuffer(fileId: string): Promise<Buffer | null> {
 
 // Helper: Ensure Category Exists
 async function ensureCategory(workspaceId: string, userId: string, categoryName: string, type: string) {
-  let category = await prisma.category.findFirst({
-    where: { workspaceId, name: categoryName }
-  });
-  if (!category) {
-    // Dynamic category creation!
-    let icon = "🏷️";
-    const nameLower = categoryName.toLowerCase();
-    if (nameLower.includes("food") || nameLower.includes("dining")) icon = "🍔";
-    else if (nameLower.includes("transport")) icon = "🚗";
-    else if (nameLower.includes("salary")) icon = "💰";
-    else if (nameLower.includes("grocery")) icon = "🛒";
-    else if (nameLower.includes("health")) icon = "💊";
+  let icon = "🏷️";
+  const nameLower = categoryName.toLowerCase();
+  if (nameLower.includes("food") || nameLower.includes("dining")) icon = "🍔";
+  else if (nameLower.includes("transport")) icon = "🚗";
+  else if (nameLower.includes("salary")) icon = "💰";
+  else if (nameLower.includes("grocery")) icon = "🛒";
+  else if (nameLower.includes("health")) icon = "💊";
 
-    category = await prisma.category.create({
-      data: {
-        name: categoryName,
-        userId,
-        workspaceId,
-        icon,
-        type,
-        color: "#3b82f6"
-      }
-    });
-  }
-  return category;
+  return await prisma.category.upsert({
+    where: { name_userId_type: { name: categoryName, userId, type } },
+    update: {},
+    create: {
+      name: categoryName,
+      userId,
+      workspaceId,
+      icon,
+      type,
+      color: "#3b82f6"
+    }
+  });
 }
 
 // Helper: Ensure Tags Exist and return their IDs
@@ -81,15 +76,12 @@ async function ensureTags(workspaceId: string, userId: string, tagNames: string[
     const cleanName = name.trim().replace(/^#/, '');
     if (!cleanName) continue;
     
-    let tag = await prisma.tag.findFirst({
-      where: { workspaceId, name: cleanName, userId }
+    const tag = await prisma.tag.upsert({
+      where: { name_userId: { name: cleanName, userId } },
+      update: {},
+      create: { name: cleanName, userId, workspaceId, color: "#8b5cf6" }
     });
     
-    if (!tag) {
-      tag = await prisma.tag.create({
-        data: { name: cleanName, userId, workspaceId, color: "#8b5cf6" }
-      });
-    }
     tagIds.push(tag.id);
   }
   return tagIds;

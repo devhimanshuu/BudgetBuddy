@@ -6,6 +6,7 @@ import { TelegramSettingsCard } from "./TelegramSettingsCard";
 import { DiscordSettingsCard } from "./DiscordSettingsCard";
 import { NotionSettingsCard } from "./NotionSettingsCard";
 import { SplitwiseSettingsCard } from "./SplitwiseSettingsCard";
+import { SlackSettingsCard } from "./SlackSettingsCard";
 import { Blocks } from "lucide-react";
 
 const TelegramIcon = ({ className }: { className?: string }) => (
@@ -29,7 +30,7 @@ export function AppIntegrations() {
       </div>
       
       <Tabs defaultValue="telegram" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-4">
+        <TabsList className="grid w-full grid-cols-5 mb-4 text-xs sm:text-sm">
           <TabsTrigger value="telegram" className="gap-2">
             <TelegramIcon className="w-4 h-4 text-[#229ED9]" /> Telegram
           </TabsTrigger>
@@ -45,6 +46,11 @@ export function AppIntegrations() {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#1CC29F]">
               <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9 4.03-9 9-9zm-1.89 12.83l-3.32-3.33 1.41-1.41 1.91 1.91 4.79-4.79 1.41 1.42-6.2 6.2z"/>
             </svg> Splitwise
+          </TabsTrigger>
+          <TabsTrigger value="slack" className="gap-1 sm:gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#4A154B]">
+              <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.523-2.522v-2.522h2.523zM15.165 17.688a2.527 2.527 0 0 1-2.523-2.523 2.526 2.526 0 0 1 2.523-2.52h6.312A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+            </svg> Slack
           </TabsTrigger>
         </TabsList>
         
@@ -62,6 +68,10 @@ export function AppIntegrations() {
 
         <TabsContent value="splitwise" className="mt-0">
           <SplitwiseSettingsCard />
+        </TabsContent>
+
+        <TabsContent value="slack" className="mt-0">
+          <SlackSettingsCard />
         </TabsContent>
       </Tabs>
     </div>

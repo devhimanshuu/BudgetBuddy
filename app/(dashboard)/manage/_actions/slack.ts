@@ -2,42 +2,42 @@
 
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 
-export async function LinkDiscordUser(discordId: string) {
+export async function LinkSlack(slackId: string) {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
 
-  // Check if discord ID is already in use by another user
+  // Verify the slack ID isn't already used by someone else
   const existing = await prisma.userSettings.findUnique({
-    where: { discordUserId: discordId }
+    where: { slackUserId: slackId }
   });
 
   if (existing && existing.userId !== user.id) {
-    throw new Error("This Discord account is already linked to another BudgetBuddy account.");
+    throw new Error("This Slack User ID is already linked to another account.");
   }
 
   // Update user settings
-  await prisma.userSettings.upsert({
+  await prisma.userSettings.update({
     where: { userId: user.id },
-    update: { discordUserId: discordId },
-    create: {
-      userId: user.id,
-      currency: "USD",
-      discordUserId: discordId
-    }
+    data: { slackUserId: slackId }
   });
 
+  revalidatePath("/manage");
+  
   return { success: true };
 }
 
-export async function UnlinkDiscordUser() {
+export async function UnlinkSlack() {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
 
   await prisma.userSettings.update({
     where: { userId: user.id },
-    data: { discordUserId: null }
+    data: { slackUserId: null }
   });
 
+  revalidatePath("/manage");
+  
   return { success: true };
 }

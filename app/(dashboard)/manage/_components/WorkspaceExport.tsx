@@ -173,40 +173,40 @@ export function WorkspaceExport({ workspaceId, workspaceName, currency }: {
           </div>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="group relative flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-primary/20 bg-background/50 hover:bg-primary/5 transition-all cursor-pointer"
+          <div className="group relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed border-primary/20 bg-background/50 hover:bg-primary/5 transition-all cursor-pointer"
                onClick={handleCSVExport}>
-            <div className="p-4 rounded-full bg-blue-500/10 text-blue-500 mb-4 group-hover:scale-110 transition-transform">
-              <FileSpreadsheet className="w-8 h-8" />
+            <div className="p-3 rounded-full bg-blue-500/10 text-blue-500 mb-2 group-hover:scale-110 transition-transform">
+              <FileSpreadsheet className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-lg">Detailed CSV</h3>
-            <p className="text-sm text-muted-foreground text-center mt-2 max-w-[200px]">
-              Raw transaction data formatted for Excel or Google Sheets.
+            <h3 className="font-bold text-base">Detailed CSV</h3>
+            <p className="text-xs text-muted-foreground text-center mt-1 max-w-[200px]">
+              Raw transaction data formatted for Excel or Sheets.
             </p>
             <Button 
                 variant="link" 
-                className="mt-4 text-blue-500"
+                className="mt-2 text-blue-500 h-8 text-xs"
                 disabled={isExportingCSV}
             >
-              {isExportingCSV ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+              {isExportingCSV ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Download className="w-3 h-3 mr-2" />}
               {isExportingCSV ? "Generating..." : "Download CSV"}
             </Button>
           </div>
 
-          <div className="group relative flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-primary/20 bg-background/50 hover:bg-emerald-500/5 transition-all cursor-pointer"
+          <div className="group relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed border-primary/20 bg-background/50 hover:bg-emerald-500/5 transition-all cursor-pointer"
                onClick={handlePDFExport}>
-            <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
-              <FileText className="w-8 h-8" />
+            <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-500 mb-2 group-hover:scale-110 transition-transform">
+              <FileText className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-lg">Professional PDF</h3>
-            <p className="text-sm text-muted-foreground text-center mt-2 max-w-[200px]">
-              Branded reports with summaries perfect for taxes or reimbursements.
+            <h3 className="font-bold text-base">Professional PDF</h3>
+            <p className="text-xs text-muted-foreground text-center mt-1 max-w-[200px]">
+              Branded reports perfect for taxes or reimbursements.
             </p>
             <Button 
                 variant="link" 
-                className="mt-4 text-emerald-500"
+                className="mt-2 text-emerald-500 h-8 text-xs"
                 disabled={isExportingPDF}
             >
-              {isExportingPDF ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
+              {isExportingPDF ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <ShieldCheck className="w-3 h-3 mr-2" />}
               {isExportingPDF ? "Generating..." : "Generate PDF"}
             </Button>
           </div>

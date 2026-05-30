@@ -32,15 +32,15 @@ Manage finances together in isolated, shared environments with role-based access
 - **Real-Time Activity Feed**: Track exactly who added, edited, or deleted transactions within the workspace.
 - **Workspace-Scoped Data**: Transactions, budgets, categories, and analytics are securely isolated per workspace.
 
-### 📱 Omnipresent Chat Bots (Discord & Telegram)
+### 📱 Omnipresent Chat Bots (Slack, Discord & Telegram)
 
-Manage your finances entirely from your favorite chat apps with 100% feature parity between Discord and Telegram.
+Manage your finances entirely from your favorite chat apps with 100% feature parity between Slack, Discord, and Telegram.
 
 - **Multi-Modal Receipt Scanning**: Snap a photo of a receipt or invoice and send it to the bot. Groq Vision instantly extracts the vendor, amount, and category.
 - **Whisper Voice Logging**: Just hold the microphone button and say "I spent 50 on an Uber". The AI perfectly transcribes and logs it.
-- **Interactive UI Flows**: The bots reply with native interactive buttons (Add Notes, Tags, Splits) that trigger seamless modal popups directly inside Discord and Telegram.
+- **Interactive UI Flows**: The bots reply with native interactive buttons (Add Notes, Tags, Splits) that trigger seamless modal popups directly inside Slack, Discord, and Telegram.
 - **AI Financial Advisor with TTS**: Ask the bot for financial advice (`/chat`) and it will generate a personalized response, complete with an **AI Voice Note (TTS)** reply that plays right in the chat.
-- **Smart Bill Reminders**: A background cron job checks your upcoming bills and securely DMs you a reminder 24 hours in advance on your linked Discord or Telegram account.
+- **Smart Bill Reminders**: A background cron job checks your upcoming bills and securely DMs you a reminder 24 hours in advance on your linked Slack, Discord, or Telegram account.
 
 ### 🔗 3rd-Party App Integrations (Splitwise & Notion)
 

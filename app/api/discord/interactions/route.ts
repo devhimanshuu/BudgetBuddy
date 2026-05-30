@@ -259,6 +259,9 @@ export async function POST(req: Request) {
         if (latestTx) {
           if (customId === "modal_add_notes") {
             await prisma.transaction.update({ where: { id: latestTx.id }, data: { notes: value }});
+          } else if (customId === "modal_add_tags") {
+            const tags = value.split(",").map((t: string) => t.trim()).filter(Boolean);
+            await prisma.transaction.update({ where: { id: latestTx.id }, data: { notes: `Tags: ${tags.join(", ")}` }});
           }
         }
       }

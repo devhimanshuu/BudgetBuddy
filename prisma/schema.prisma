@@ -46,6 +46,9 @@ model UserSettings{
   // DISCORD INTEGRATION
   discordUserId          String?  @unique
 
+  // SLACK INTEGRATION
+  slackUserId            String?  @unique
+
   // NOTION INTEGRATION
   notionApiKey           String?
   notionDatabaseId       String?
@@ -646,5 +649,24 @@ model DiscordSession {
   userId    String
   state     String   @default("IDLE") // IDLE, AWAITING_NOTES, AWAITING_TAGS, CHATBOT
   context   Json?    
+  updatedAt DateTime @updatedAt
+}
+
+model SlackSession {
+  slackId   String   @id
+  userId    String
+  state     String   @default("IDLE") // IDLE, AWAITING_NOTES, AWAITING_TAGS, CHATBOT
+  context   Json?    
+  updatedAt DateTime @updatedAt
+}
+
+model SlackInstallation {
+  id        String   @id @default(uuid())
+  teamId    String   @unique
+  teamName  String?
+  botToken  String
+  botUserId String?
+  userId    String   // BudgetBuddy user who installed it
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

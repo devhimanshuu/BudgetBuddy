@@ -18,13 +18,18 @@ export async function LinkTelegramChat(chatId: string) {
   }
 
   // Update user settings
-  await prisma.userSettings.update({
+  await prisma.userSettings.upsert({
     where: { userId: user.id },
-    data: { telegramChatId: chatId }
+    update: { telegramChatId: chatId },
+    create: {
+      userId: user.id,
+      currency: "USD",
+      telegramChatId: chatId
+    }
   });
 
   revalidatePath("/manage");
-  
+
   return { success: true };
 }
 
@@ -38,6 +43,6 @@ export async function UnlinkTelegramChat() {
   });
 
   revalidatePath("/manage");
-  
+
   return { success: true };
 }
