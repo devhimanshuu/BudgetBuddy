@@ -1,6 +1,6 @@
 # BudgetBuddy 💰
 
-BudgetBuddy is an AI-Powered Advanced Personal finance tracker aka wealth management app that helps users manage expenses and savings effectively. Built with modern web technologies, it offers a seamless experience for tracking financial transactions and generating insightful reports.
+BudgetBuddy is an AI-Native Advanced Personal Finance Tracker AKA Wealth Management Application that helps users manage expenses and savings effectively. Built with modern web technologies, it offers a seamless experience for tracking financial transactions and generating insightful reports.
 
 [![BudgetBuddy Dashboard Preview](https://res.cloudinary.com/djkqo49ip/image/upload/v1775292690/Dark_tkiyfr.png)](https://budget-buddy-lovat.vercel.app/)
 
@@ -50,6 +50,16 @@ Connect your favorite tools and let the background sync engines do the heavy lif
 - **Dynamic Bill Splitting**: Select your actual Splitwise friends from a dropdown when creating a transaction, and watch the background engine push the expense directly to Splitwise.
 - **Automated Settlement Sync**: A background cron job silently polls Splitwise every 4 hours, automatically logging settled debts back into BudgetBuddy as Income!
 - **Notion Database Sync**: Set up a seamless one-way sync to your personal Notion databases. Watch your transactions automatically populate your Notion workspaces as soon as you log them.
+
+### 🔌 Universal Webhooks (Zapier & Apple Shortcuts)
+
+Build custom automation pipelines without writing a single line of code.
+
+- **Unique Inbound URLs**: Generate a secure, user-specific webhook endpoint directly from your dashboard.
+- **No-Code Extensibility**: Paste your webhook URL into Zapier, Make.com, IFTTT, or Apple Shortcuts to automate expense logging.
+- **Multi-Modal Parsing**: The webhook accepts structured JSON, raw text ("I spent $5 on coffee"), or even image URLs (receipts), parsing them intelligently via Groq AI.
+- **Enterprise-Grade Hardening**: Protected against SSRF and DoS attacks with strict 5MB payload limits and active protocol validation.
+- **Live Activity Logs**: View a real-time dashboard of all incoming webhook requests, their payloads, and success/failure statuses.
 
 ### 🤖 AI Financial Command Center
 

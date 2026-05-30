@@ -1367,20 +1367,21 @@ export default function LandingPageContent() {
             {/* Dashboard Preview Mockup */}
             <div className="relative mx-auto mt-20 md:mt-32 3xl:mt-40 4xl:mt-52 w-full max-w-6xl 3xl:max-w-[1400px] 4xl:max-w-[1800px] perspective-1000 group">
               <div className="rounded-xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-md lg:p-4 3xl:p-8 4xl:p-12 transform transition-transform duration-700 hover:rotate-x-2">
-                <div className="aspect-[16/9] overflow-hidden rounded-lg border border-border/50 bg-background shadow-inner relative">
+                <div className="overflow-hidden rounded-lg border border-border/50 bg-background shadow-inner relative flex items-center justify-center">
                   {mounted && (
                     <Image
                       key={activeTheme}
                       src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:best,w_2000,c_limit,e_sharpen:100,e_improve/${currentThemeImage}`}
                       alt={`${activeTheme} Dashboard Preview`}
-                      fill
-                      className="object-cover transition-all duration-700 group-hover:scale-[1.02]"
+                      width={2000}
+                      height={1250}
+                      className="w-full h-auto scale-[1.03] object-cover transition-all duration-700 group-hover:scale-[1.05]"
                       priority
                       unoptimized
                     />
                   )}
                   {!mounted && (
-                    <div className="absolute inset-0 bg-muted animate-pulse" />
+                    <div className="w-full aspect-[16/10] bg-muted animate-pulse" />
                   )}
                 </div>
               </div>
@@ -1447,8 +1448,8 @@ export default function LandingPageContent() {
             <FeatureCard
               delay={0.2}
               icon={<Zap className="h-full w-full" />}
-              title="Smart Automation"
-              description="From recurring Netflix bills to monthly salary, BudgetBuddy automates the mundane so you can focus on building wealth."
+              title="Universal Webhooks"
+              description="Connect BudgetBuddy to the world. Use our secure inbound webhooks to automate expenses via Zapier, Make.com, or Apple Shortcuts."
             />
             <FeatureCard
               delay={0.3}
@@ -1472,7 +1473,7 @@ export default function LandingPageContent() {
               delay={0.6}
               icon={<Scan className="h-full w-full" />}
               title="Vision AI Scanner"
-              description="Powered by high-precision OCR technology. Upload receipts, invoices, or bank statements for instant transaction logging."
+              description="Powered by high-precision Groq AI. Upload receipts, invoices, or bank statements for instant transaction logging."
             />
             <FeatureCard
               delay={0.7}
@@ -2319,6 +2320,12 @@ export default function LandingPageContent() {
                     icon: <Brain className="w-5 h-5" />,
                   },
                   {
+                    f: "Extensibility",
+                    s: "Walled Garden",
+                    b: "Webhooks & Apple Shortcuts",
+                    icon: <Zap className="w-5 h-5" />,
+                  },
+                  {
                     f: "Access Reliability",
                     s: "Cloud Sync Only",
                     b: "Offline-First Sync Engine",
@@ -2408,8 +2415,8 @@ export default function LandingPageContent() {
                   features: [
                     "Unlimited Workspaces",
                     "Vision AI Scanning",
-                    "Assets & Liabilities",
-                    "Priority Sync",
+                    "Telegram & Slack Bots",
+                    "Universal Webhooks",
                   ],
                   cta: "Go Pro",
                   popular: true,
@@ -2420,9 +2427,9 @@ export default function LandingPageContent() {
                   desc: "The ultimate financial operating system.",
                   features: [
                     "All Pro Features",
-                    "Shared Vault Access",
+                    "Splitwise & Notion Sync",
+                    "The Legacy Vault",
                     "Custom AI Personas",
-                    "Estate Planning Tools",
                   ],
                   cta: "Unlock Legacy",
                   popular: false,
@@ -2591,6 +2598,11 @@ export default function LandingPageContent() {
                     q: "Is my financial data secure?",
                     a: "Absolutely. We use bank-grade AES-256 encryption. Your physical keys and legal documents in the Legacy Vault are further protected by your private PIN and never hit our servers in plain text.",
                     icon: <Shield className="w-5 h-5 text-emerald-500" />,
+                  },
+                  {
+                    q: "Can I automate my expenses with Zapier or iOS Shortcuts?",
+                    a: "Yes! BudgetBuddy features Universal Webhooks. You can generate a secure Inbound Webhook URL and instantly connect it to Zapier, Make.com, IFTTT, or Apple Shortcuts without writing any code.",
+                    icon: <Zap className="w-5 h-5 text-amber-500" />,
                   },
                   {
                     q: "How does the Vision AI work?",

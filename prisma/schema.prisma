@@ -56,6 +56,20 @@ model UserSettings{
   // SPLITWISE INTEGRATION
   splitwiseToken         String?
   splitwiseLastSync      DateTime?
+
+  // WEBHOOK INTEGRATION
+  webhookToken           String?  @unique
+}
+
+model WebhookLog {
+  id        String   @id @default(uuid())
+  userId    String
+  status    String   // "SUCCESS", "ERROR"
+  payload   Json     // The incoming request body
+  response  Json     // The parsed transaction or error message
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model Workspace {
