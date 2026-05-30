@@ -1192,7 +1192,7 @@ export default function LandingPageContent() {
     dark: "v1775292690/Dark_tkiyfr.png",
     light: "v1775292690/Light_uil8tn.png",
     solaris: "v1775292690/Solaris_yg2f3x.png",
-    cyberpunk: "v1775292690/CyberPunk_tpnkbe.png",
+    cyberpunk: "v1780152484/CyberPunk_tpnkbe.png",
     midnight: "v1775292690/Midnight_wyoaez.png",
     forest: "v1775292690/Forest_i14use.png",
   };
