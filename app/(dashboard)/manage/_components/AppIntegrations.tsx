@@ -4,6 +4,8 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TelegramSettingsCard } from "./TelegramSettingsCard";
 import { DiscordSettingsCard } from "./DiscordSettingsCard";
+import { NotionSettingsCard } from "./NotionSettingsCard";
+import { SplitwiseSettingsCard } from "./SplitwiseSettingsCard";
 import { Blocks } from "lucide-react";
 
 const TelegramIcon = ({ className }: { className?: string }) => (
@@ -27,12 +29,22 @@ export function AppIntegrations() {
       </div>
       
       <Tabs defaultValue="telegram" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
+        <TabsList className="grid w-full grid-cols-4 mb-4">
           <TabsTrigger value="telegram" className="gap-2">
             <TelegramIcon className="w-4 h-4 text-[#229ED9]" /> Telegram
           </TabsTrigger>
           <TabsTrigger value="discord" className="gap-2">
             <DiscordIcon className="w-5 h-4 text-[#5865F2]" /> Discord
+          </TabsTrigger>
+          <TabsTrigger value="notion" className="gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-zinc-900 dark:text-zinc-100">
+              <path d="M4.459 4.208c.746-.606 1.026-.562 2.422-.481l10.87.54c1.166.082 1.488.356 1.488 1.151v13.632c0 .883-.356 1.054-1.393 1.033l-10.934-.52c-1.307-.11-1.63-.332-1.63-1.424V4.208zm1.905 13.048l8.366.398V5.378l-8.366-.356v12.234z"/>
+            </svg> Notion
+          </TabsTrigger>
+          <TabsTrigger value="splitwise" className="gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#1CC29F]">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9 4.03-9 9-9zm-1.89 12.83l-3.32-3.33 1.41-1.41 1.91 1.91 4.79-4.79 1.41 1.42-6.2 6.2z"/>
+            </svg> Splitwise
           </TabsTrigger>
         </TabsList>
         
@@ -42,6 +54,14 @@ export function AppIntegrations() {
         
         <TabsContent value="discord" className="mt-0">
           <DiscordSettingsCard />
+        </TabsContent>
+
+        <TabsContent value="notion" className="mt-0">
+          <NotionSettingsCard />
+        </TabsContent>
+
+        <TabsContent value="splitwise" className="mt-0">
+          <SplitwiseSettingsCard />
         </TabsContent>
       </Tabs>
     </div>

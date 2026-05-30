@@ -45,6 +45,14 @@ model UserSettings{
 
   // DISCORD INTEGRATION
   discordUserId          String?  @unique
+
+  // NOTION INTEGRATION
+  notionApiKey           String?
+  notionDatabaseId       String?
+
+  // SPLITWISE INTEGRATION
+  splitwiseToken         String?
+  splitwiseLastSync      DateTime?
 }
 
 model Workspace {
@@ -159,6 +167,7 @@ model Transaction {
   status      String   @default("APPROVED") // PENDING, APPROVED, REJECTED
   workspace    Workspace?           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   comments     Comment[]
+  externalId   String?  @unique // Used to prevent duplicate syncs from 3rd party APIs (Splitwise, Plaid)
 
   @@index([workspaceId, date, deletedAt])
   @@index([workspaceId, category, deletedAt])

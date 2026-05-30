@@ -51,7 +51,7 @@ export function DiscordSettingsCard() {
   };
 
   return (
-    <SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
+    <SkeletonWrapper isLoading={userSettingsQuery.isLoading}>
       <Card className="border-primary/20 bg-gradient-to-br from-card to-indigo-500/5 shadow-xl h-full">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-indigo-500">

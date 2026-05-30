@@ -11,6 +11,7 @@ import { updateStreak, checkAchievements } from "@/lib/gamification";
 
 import { getActiveWorkspace, logActivity } from "@/lib/workspaces";
 import { GetFormatterForCurrency } from "@/lib/helper";
+import { syncTransactionToNotion } from "@/lib/notion";
 
 export async function CreateTransaction(form: CreateTransactionSchemaType) {
 	const parsedBody = CreateTransactionSchema.safeParse(form);
@@ -72,7 +73,7 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 		throw new Error("category not found in this workspace");
 	}
 
-	await prisma.$transaction(async (tx) => {
+	const createdTx = await prisma.$transaction(async (tx) => {
 		//create workspace transaction
 		const transaction = await tx.transaction.create({
 			data: {
@@ -208,7 +209,26 @@ export async function CreateTransaction(form: CreateTransactionSchemaType) {
 				},
 			});
 		}
+
+		return transaction;
 	});
+
+	// Await External Syncs to ensure they complete before Vercel freezes the serverless function
+	if (status === "APPROVED") {
+		try {
+			await syncTransactionToNotion(createdTx.id);
+		} catch (error) {
+			console.error("Notion Sync Error:", error);
+		}
+		
+		// Splitwise Sync
+		try {
+			const splitwiseModule = await import('@/lib/splitwise');
+			await splitwiseModule.pushExpenseToSplitwise(createdTx.id);
+		} catch (error) {
+			console.error("Splitwise Sync Error:", error);
+		}
+	}
 
 	// Update gamification (streaks and achievements)
 	let unlockedAchievements: any[] = [];

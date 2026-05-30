@@ -57,7 +57,7 @@ export function TelegramSettingsCard() {
   };
 
   return (
-    <SkeletonWrapper isLoading={userSettingsQuery.isFetching}>
+    <SkeletonWrapper isLoading={userSettingsQuery.isLoading}>
       <Card className="border-primary/20 bg-gradient-to-br from-card to-blue-500/5 shadow-xl">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-blue-500">

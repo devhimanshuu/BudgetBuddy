@@ -32,6 +32,8 @@ import {
   Landmark,
   Heart,
   Send,
+  Database,
+  Handshake,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -1493,8 +1495,20 @@ export default function LandingPageContent() {
             <FeatureCard
               delay={1.0}
               icon={<Send className="h-full w-full" />}
-              title="Discord & Telegram Integration"
-              description="Add expenses on the go by simply messaging our Discord or Telegram bots. Just type '50 for lunch' and it's logged instantly. More app integrations like Slack, WhatsApp, and Google Sheets coming soon!"
+              title="Omnichannel Chatbots"
+              description="Add expenses on the go by simply messaging our Discord or Telegram bots. Just type '50 for lunch' and it's logged instantly with AI."
+            />
+            <FeatureCard
+              delay={1.1}
+              icon={<Database className="h-full w-full" />}
+              title="Notion Integration"
+              description="Seamless one-way sync to your personal Notion databases. Watch your transactions automatically populate your Notion workspaces."
+            />
+            <FeatureCard
+              delay={1.2}
+              icon={<Handshake className="h-full w-full" />}
+              title="Splitwise Automated Sync"
+              description="Connect Splitwise to automatically push bill splits to friends, and sync settled debts back as income in the background!"
             />
           </div>
         </section>

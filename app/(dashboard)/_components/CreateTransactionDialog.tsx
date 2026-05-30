@@ -143,6 +143,41 @@ const CreateTransactionDialog = ({
     enabled: !!activeWorkspace?.id && isMemberSplit,
   });
 
+  const { data: splitwiseData } = useQuery({
+    queryKey: ["splitwise-friends"],
+    queryFn: () => fetch("/api/splitwise/friends").then((res) => res.json()),
+    enabled: isMemberSplit,
+  });
+  
+  const mergedSplitTargets = useMemo(() => {
+    const targets: any[] = [];
+    if (members) {
+      members
+        .filter((m) => m.userId !== user?.id)
+        .forEach((m) => {
+          targets.push({
+            id: m.userId,
+            name: m.name,
+            imageUrl: m.imageUrl,
+            source: "workspace"
+          });
+        });
+    }
+    
+    const splitwiseFriends = splitwiseData?.friends || [];
+    if (splitwiseFriends.length > 0) {
+      splitwiseFriends.forEach((f: any) => {
+        targets.push({
+          id: f.id.toString(), // Splitwise IDs are numbers
+          name: `${f.first_name} ${f.last_name || ""}`.trim(),
+          imageUrl: f.picture?.medium || "",
+          source: "splitwise"
+        });
+      });
+    }
+    return targets;
+  }, [members, splitwiseData?.friends, user?.id]);
+
   const handleCategoryChange = useCallback(
     (value: Category) => {
       form.setValue("category", value.name);
@@ -581,17 +616,15 @@ const CreateTransactionDialog = ({
                       can split by amount or divide equally.
                     </p>
                     <div className="space-y-3">
-                      {members
-                        ?.filter((m) => m.userId !== user?.id)
-                        .map((member) => {
+                      {mergedSplitTargets.map((member) => {
                           const split = form
                             .watch("billSplits")
-                            ?.find((s) => s.debtorId === member.userId);
+                            ?.find((s) => s.debtorId === member.id);
                           const isSelected = !!split;
 
                           return (
                             <div
-                              key={member.userId}
+                              key={member.id}
                               className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl hover:bg-background/40 transition-colors"
                             >
                               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -602,8 +635,13 @@ const CreateTransactionDialog = ({
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0">
-                                  <p className="text-sm font-bold leading-none truncate">
+                                  <p className="text-sm font-bold leading-none truncate flex items-center gap-2">
                                     {member.name}
+                                    {member.source === "splitwise" && (
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[#1CC29F]">
+                                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9 4.03-9 9-9zm-1.89 12.83l-3.32-3.33 1.41-1.41 1.91 1.91 4.79-4.79 1.41 1.42-6.2 6.2z"/>
+                                      </svg>
+                                    )}
                                   </p>
                                   <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-1">
                                     Owes you
@@ -629,7 +667,7 @@ const CreateTransactionDialog = ({
                                           form.setValue(
                                             "billSplits",
                                             currentSplits.map((s) =>
-                                              s.debtorId === member.userId
+                                              s.debtorId === member.id
                                                 ? { ...s, amount: val }
                                                 : s,
                                             ),
@@ -647,7 +685,7 @@ const CreateTransactionDialog = ({
                                         form.setValue(
                                           "billSplits",
                                           currentSplits.filter(
-                                            (s) => s.debtorId !== member.userId,
+                                            (s) => s.debtorId !== member.id,
                                           ),
                                         );
                                       }}
@@ -666,7 +704,7 @@ const CreateTransactionDialog = ({
                                       form.setValue("billSplits", [
                                         ...currentSplits,
                                         {
-                                          debtorId: member.userId,
+                                          debtorId: member.id,
                                           debtorName: member.name,
                                           amount: 0,
                                         },

@@ -42,6 +42,15 @@ Manage your finances entirely from your favorite chat apps with 100% feature par
 - **AI Financial Advisor with TTS**: Ask the bot for financial advice (`/chat`) and it will generate a personalized response, complete with an **AI Voice Note (TTS)** reply that plays right in the chat.
 - **Smart Bill Reminders**: A background cron job checks your upcoming bills and securely DMs you a reminder 24 hours in advance on your linked Discord or Telegram account.
 
+### 🔗 3rd-Party App Integrations (Splitwise & Notion)
+
+Connect your favorite tools and let the background sync engines do the heavy lifting.
+
+- **Splitwise OAuth Flow**: Securely connect Splitwise to BudgetBuddy without copy-pasting API keys.
+- **Dynamic Bill Splitting**: Select your actual Splitwise friends from a dropdown when creating a transaction, and watch the background engine push the expense directly to Splitwise.
+- **Automated Settlement Sync**: A background cron job silently polls Splitwise every 4 hours, automatically logging settled debts back into BudgetBuddy as Income!
+- **Notion Database Sync**: Set up a seamless one-way sync to your personal Notion databases. Watch your transactions automatically populate your Notion workspaces as soon as you log them.
+
 ### 🤖 AI Financial Command Center
 
 BudgetBuddy features a world-class **AI Financial Analyst** that evolves with your spending habits. It's not just a chatbot; it's a proactive intelligence engine.

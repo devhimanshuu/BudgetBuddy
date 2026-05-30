@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
+import { syncTransactionToNotion } from "@/lib/notion";
 
 const getGroqClient = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -98,7 +99,7 @@ async function ensureTags(workspaceId: string, userId: string, tagNames: string[
 async function saveDraftTransaction(userId: string, workspaceId: string, draft: any) {
   const date = new Date();
   
-  await prisma.$transaction(async (tx) => {
+  const createdTx = await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.create({
       data: {
         userId,
@@ -147,7 +148,23 @@ async function saveDraftTransaction(userId: string, workspaceId: string, draft: 
       create: { userId, workspaceId, month: date.getUTCMonth(), year: date.getUTCFullYear(), expense: draft.type === "expense" ? draft.amount : 0, income: draft.type === "income" ? draft.amount : 0, investment: draft.type === "investment" ? draft.amount : 0 },
       update: { expense: { increment: draft.type === "expense" ? draft.amount : 0 }, income: { increment: draft.type === "income" ? draft.amount : 0 }, investment: { increment: draft.type === "investment" ? draft.amount : 0 } }
     });
+    
+    return transaction;
   });
+
+  // Await External Syncs
+  try {
+    await syncTransactionToNotion(createdTx.id);
+  } catch (error) {
+    console.error("Notion Sync Error:", error);
+  }
+
+  try {
+    const splitwiseModule = await import('@/lib/splitwise');
+    await splitwiseModule.pushExpenseToSplitwise(createdTx.id);
+  } catch (error) {
+    console.error("Splitwise Sync Error:", error);
+  }
 }
 
 export async function POST(req: Request) {

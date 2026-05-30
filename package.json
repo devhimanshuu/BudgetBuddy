@@ -17,6 +17,7 @@
     "@emoji-mart/react": "^1.1.1",
     "@google/genai": "^1.39.0",
     "@hookform/resolvers": "^3.10.0",
+    "@notionhq/client": "^5.22.0",
     "@prisma/client": "^6.19.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

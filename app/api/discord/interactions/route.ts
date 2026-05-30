@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
+import { syncTransactionToNotion } from "@/lib/notion";
 
 const getGroqClient = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 const APP_ID = process.env.DISCORD_APP_ID || "1510015130547654717";
@@ -148,6 +149,19 @@ export async function POST(req: Request) {
                 status: "APPROVED"
               }
             });
+
+            // Await External Syncs
+            try {
+              await syncTransactionToNotion(transaction.id);
+            } catch (error) {
+              console.error("Notion Sync Error:", error);
+            }
+            try {
+              const splitwiseModule = await import('@/lib/splitwise');
+              await splitwiseModule.pushExpenseToSplitwise(transaction.id);
+            } catch (error) {
+              console.error("Splitwise Sync Error:", error);
+            }
 
             // Feature 3: Interactive Buttons!
             const components = [{

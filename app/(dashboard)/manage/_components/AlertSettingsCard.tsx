@@ -66,7 +66,7 @@ export default function AlertSettingsCard() {
         anomalyThreshold !== settingsQuery.data?.anomalyThreshold;
 
     return (
-        <SkeletonWrapper isLoading={settingsQuery.isFetching}>
+        <SkeletonWrapper isLoading={settingsQuery.isLoading}>
             <Card className="border-orange-500/20 bg-gradient-to-br from-card via-card to-orange-500/5 shadow-xl">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-orange-600">
