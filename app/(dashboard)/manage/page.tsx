@@ -291,7 +291,7 @@ function CategoryList({ type }: { type: TransactionType }) {
   ) || 0;
 
   return (
-    <SkeletonWrapper isLoading={categoriesQuery.isFetching}>
+    <SkeletonWrapper isLoading={categoriesQuery.isLoading}>
       <Card>
         <CardHeader>
           <CardTitle className="flex flex-col gap-4 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between">
@@ -613,7 +613,7 @@ function TagList() {
   ) || 0;
 
   return (
-    <SkeletonWrapper isLoading={tagsQuery.isFetching}>
+    <SkeletonWrapper isLoading={tagsQuery.isLoading}>
       <Card>
         <CardHeader>
           <CardTitle className="flex flex-col gap-4 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between">
