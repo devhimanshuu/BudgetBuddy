@@ -283,16 +283,16 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
     return (
         <Card className="border border-border bg-card/50 backdrop-blur-sm">
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <div className="h-10 w-10 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
                             <Users className="h-5 w-5 text-primary" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <CardTitle className="text-lg">
                                 Workspace & Family
                             </CardTitle>
-                            <CardDescription>
+                            <CardDescription className="truncate">
                                 {workspace?.name || "Personal Workspace"} •{" "}
                                 {members?.length || 0} member
                                 {(members?.length || 0) !== 1 ? "s" : ""}
@@ -445,7 +445,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
                                     return (
                                         <div
                                             key={member.id}
-                                            className={`flex items-center justify-between p-3 ${index !== 0
+                                            className={`flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between ${index !== 0
                                                 ? "border-t border-border"
                                                 : ""
                                                 } hover:bg-muted/30 transition-colors`}
@@ -485,17 +485,17 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                                 {isOwner && member.userId !== workspace.ownerId && member.role === "ADMIN" && (
                                                     <AlertDialog>
                                                         <AlertDialogTrigger asChild>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-8 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all"
+                                                                className="h-8 gap-1 sm:gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all"
                                                             >
                                                                 <Crown className="h-3.5 w-3.5" />
-                                                                <span className="text-xs">Transfer Ownership</span>
+                                                                <span className="text-xs hidden sm:inline">Transfer Ownership</span>
                                                             </Button>
                                                         </AlertDialogTrigger>
                                                         <AlertDialogContent className="w-[95vw] max-w-[400px] rounded-3xl border-emerald-200 bg-gradient-to-b from-background to-emerald-50/30 backdrop-blur-xl shadow-2xl p-6">
@@ -528,7 +528,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
 
                                                 {isAdmin &&
                                                     member.userId !== workspace.ownerId && (
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1 sm:gap-2">
                                                             <Select
                                                                 value={member.role}
                                                                 onValueChange={(
@@ -542,7 +542,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
                                                                     )
                                                                 }
                                                             >
-                                                                <SelectTrigger className="h-8 w-[110px]">
+                                                                <SelectTrigger className="h-8 w-[90px] sm:w-[110px]">
                                                                     <SelectValue />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
