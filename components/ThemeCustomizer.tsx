@@ -40,7 +40,7 @@ export function ThemeCustomizer() {
 
     if (!mounted) {
         return (
-            <Button variant="outline" size="icon" className="rounded-full h-9 w-9" disabled>
+            <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 border-none" disabled>
                 <Paintbrush className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Customize Theme</span>
             </Button>
@@ -50,7 +50,7 @@ export function ThemeCustomizer() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
+                <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 border-none">
                     <Paintbrush className="h-[1.2rem] w-[1.2rem]" />
                     <span className="sr-only">Customize Theme</span>
                 </Button>
