@@ -1305,7 +1305,7 @@ export default function LandingPageContent() {
                     </motion.span>
                   </MovingBorder>
                   <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl 3xl:text-8xl 4xl:text-[10rem] drop-shadow-sm text-foreground">
-                    The Financial OS <br />
+                    The Agentic Financial OS <br />
                     <motion.span
                       initial={{ backgroundPosition: "0% 50%" }}
                       animate={{
@@ -1318,7 +1318,7 @@ export default function LandingPageContent() {
                       }}
                       className="bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 bg-[length:200%_auto] bg-clip-text text-transparent"
                     >
-                      Powered by AI
+                      Built for Autonomy
                     </motion.span>
                   </h1>
                 </motion.div>
@@ -1331,10 +1331,10 @@ export default function LandingPageContent() {
                 >
                   BudgetBuddy isn&apos;t just a tracker — it&apos;s an{" "}
                   <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
-                    Enterprise-Grade Financial Command Center
+                    Agentic Financial Operating System
                   </span>
-                  . From Vision AI scanning to shared workspaces and offline
-                  sync, it&apos;s everything you need to build a legacy.
+                  . Voice commands, autonomous AI agents, cross-platform bots,
+                  and hands-free Drive Mode — your money works while you move.
                 </motion.p>
               </div>
               <motion.div
@@ -1404,30 +1404,30 @@ export default function LandingPageContent() {
               Everything you need to grow
             </h2>
             <p className="mt-4 text-xl 3xl:text-3xl 4xl:text-4xl text-muted-foreground max-w-2xl 3xl:max-w-4xl mx-auto pl-2 pr-2">
-              A complete suite of financial tools, built on top of
-              high-performance architecture.
+              A complete agentic financial platform — from autonomous AI workflows
+              to voice-first bot interactions across every channel.
             </p>
 
             {/* Impact Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12 max-w-4xl mx-auto">
               <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
-                <div className="text-3xl font-black text-foreground">99.9%</div>
+                <div className="text-3xl font-black text-foreground">3</div>
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">
-                  Sync Parity
+                  AI Agents
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
-                <div className="text-3xl font-black text-foreground">12s</div>
+                <div className="text-3xl font-black text-foreground">3</div>
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">
-                  Avg Logging
+                  Bot Platforms
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
                 <div className="text-3xl font-black text-foreground">
-                  Vision
+                  Voice
                 </div>
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-1">
-                  AI Engine
+                  First Engine
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-muted/20 border border-border/50">
@@ -1481,23 +1481,24 @@ export default function LandingPageContent() {
               title="Gamified Growth"
               description="Turn budgeting into a game. Earn points, maintain streaks, and unlock 17+ unique achievements as you hit your goals."
             />
+
             <FeatureCard
               delay={0.8}
-              icon={<FileText className="h-full w-full" />}
-              title="Professional Export"
-              description="Generate tax-ready PDF, CSV, or Excel reports with a single click. High-fidelity financial summaries for you or your accountant."
+              icon={<Send className="h-full w-full" />}
+              title="Omnichannel Bots"
+              description="Full-featured Telegram, Slack, and Discord bots with identical capabilities — voice notes, receipt scanning, agentic commands, and emotional intelligence on every platform."
             />
             <FeatureCard
               delay={0.9}
-              icon={<Lock className="h-full w-full" />}
-              title="Military-Grade Security"
-              description="Your heritage is safe. PIN-protected Legacy Vault and bank-grade encryption ensure your data remains strictly yours."
+              icon={<Radar className="h-full w-full" />}
+              title="Hands-Free Drive Mode"
+              description="Send a voice note while driving, cooking, or working out. BudgetBuddy transcribes it with Groq Whisper and logs your expense — zero screen time required."
             />
             <FeatureCard
               delay={1.0}
-              icon={<Send className="h-full w-full" />}
-              title="Omnichannel Chatbots"
-              description="Add expenses on the go by simply messaging our Slack, Discord, or Telegram bots. Just type '50 for lunch' and it's logged instantly with AI."
+              icon={<Brain className="h-full w-full" />}
+              title="Autonomous AI Agents"
+              description="Trigger multi-step LangGraph agents on demand: Tax Audit finds deductions automatically, Wealth Challenge benchmarks your spending against goals and fights back on overspending."
             />
             <FeatureCard
               delay={1.1}
@@ -2320,6 +2321,18 @@ export default function LandingPageContent() {
                     icon: <Brain className="w-5 h-5" />,
                   },
                   {
+                    f: "Bot Intelligence",
+                    s: "Simple Notifications",
+                    b: "Agentic LangGraph Workflows",
+                    icon: <Radar className="w-5 h-5" />,
+                  },
+                  {
+                    f: "Voice Interaction",
+                    s: "Not Supported",
+                    b: "Whisper STT + TTS Drive Mode",
+                    icon: <Sparkles className="w-5 h-5" />,
+                  },
+                  {
                     f: "Extensibility",
                     s: "Walled Garden",
                     b: "Webhooks & Apple Shortcuts",
@@ -2411,12 +2424,12 @@ export default function LandingPageContent() {
                 {
                   name: "Professional",
                   price: "$9",
-                  desc: "Powerful AI for active wealth builders.",
+                  desc: "Agentic AI for serious wealth builders.",
                   features: [
                     "Unlimited Workspaces",
                     "Vision AI Scanning",
-                    "Telegram & Slack Bots",
-                    "Universal Webhooks",
+                    "Telegram, Slack & Discord Bots",
+                    "Drive Mode & Voice Commands",
                   ],
                   cta: "Go Pro",
                   popular: true,
@@ -2427,9 +2440,9 @@ export default function LandingPageContent() {
                   desc: "The ultimate financial operating system.",
                   features: [
                     "All Pro Features",
+                    "Tax Audit & Wealth Challenge Agents",
                     "Splitwise & Notion Sync",
-                    "The Legacy Vault",
-                    "Custom AI Personas",
+                    "The Legacy Vault & Custom Personas",
                   ],
                   cta: "Unlock Legacy",
                   popular: false,
@@ -2619,6 +2632,16 @@ export default function LandingPageContent() {
                     a: "BudgetBuddy is architected as Offline-First. Log your expenses and assets in the most remote locations; our sync buffer ensures a seamless merge once you're back on grid.",
                     icon: <WifiOff className="w-5 h-5 text-orange-500" />,
                   },
+                  {
+                    q: "How does Drive Mode work?",
+                    a: "Send a voice note to any of our bots — Telegram, Slack, or Discord. Groq Whisper transcribes your audio, our AI extracts the amount and category, and the transaction is logged hands-free. The bot can even reply with a TTS voice confirmation so you never need to look at your phone.",
+                    icon: <Radar className="w-5 h-5 text-blue-500" />,
+                  },
+                  {
+                    q: "What are the autonomous AI agents?",
+                    a: "BudgetBuddy includes three LangGraph-powered agents: the Receipt Scanner auto-logs scanned documents, the Tax Audit Agent analyzes 90 days of transactions to find deductions and flags anomalies, and the Wealth Challenge Agent benchmarks your spending against your goals — then pushes back with a personalized report directly to your bot.",
+                    icon: <Brain className="w-5 h-5 text-purple-500" />,
+                  },
                 ].map((item, i) => (
                   <FAQItem key={i} item={item} />
                 ))}
@@ -2634,11 +2657,11 @@ export default function LandingPageContent() {
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl 3xl:text-7xl 4xl:text-8xl text-foreground">
-                Ready to take control?
+                Your AI financial co-pilot awaits.
               </h2>
               <p className="mx-auto max-w-[600px] 3xl:max-w-[900px] text-muted-foreground md:text-xl 3xl:text-3xl 4xl:text-4xl">
-                Be one of the first to master their financial life with Budget
-                Buddy.
+                Voice commands. Autonomous agents. Cross-platform bots.
+                Be one of the first to run your finances on autopilot.
               </p>
               <Link href="/sign-up">
                 <Button
