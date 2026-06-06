@@ -61,21 +61,24 @@ Build custom automation pipelines without writing a single line of code.
 - **Enterprise-Grade Hardening**: Protected against SSRF and DoS attacks with strict 5MB payload limits and active protocol validation.
 - **Live Activity Logs**: View a real-time dashboard of all incoming webhook requests, their payloads, and success/failure statuses.
 
-### 🤖 AI Financial Command Center
+### 🤖 LangGraph Agentic Financial Command Center
 
-BudgetBuddy features a world-class **AI Financial Analyst** that evolves with your spending habits. It's not just a chatbot; it's a proactive intelligence engine.
+BudgetBuddy is powered by a network of **Autonomous LangGraph Agents**. It's not just a stateless chatbot; it's a proactive intelligence engine with persistent memory and tool execution capabilities.
 
-#### 🧠 Smart Insights & Intelligence
+#### 🧠 The Agent Ecosystem
 
-- **Anomaly Detection**: Automatically scans your history to flag unusual spending spikes with **Smart Alerts** ⚠️.
-- **Predictive Forecasting**: Projects your end-of-month spending vs. budget with **Confidence Scores** 🔮.
-- **Automated Recaps**: Daily and Weekly summaries that track trends, savings growth, and provide actionable **Budget Buddy Tips** 🗓️.
-- **Persona-Driven Advice**: Adapts its personality based on your behavior—meet the **Squirrel** (Saver), **Peacock** (Spender), **Owl** (Strategist), or **Fox** (Balanced).
+- **Smart Receipt & Bill Splitter**: Snap a photo of a restaurant receipt. The agent uses multimodal AI to extract items, detects if it was a group meal, and autonomously asks if you'd like to split it—pushing the exact owed amounts directly to Splitwise or your internal debts.
+- **End-of-Year Tax Auditor**: Trigger `/taxaudit` to spin up a specialized agent that loops through your entire year of transactions. It flags borderline items (like a laptop purchase), asks you for business/personal clarification via Telegram, and generates a clean PDF report for your accountant.
+- **Savings Goal Planner**: Tell the agent you want to save for a vacation. It uses web search tools to find current flight and hotel costs, calculates a realistic target amount, and sets up a step-by-step milestone plan.
+- **Gamified Wealth Challenger**: Type `/challenge` and the Game Master agent will analyze your recent spending weak spots (e.g., dining out) and propose a tailored, time-bound challenge. It monitors your transactions in the background and awards XP if you succeed!
+- **"Good Cop / Bad Cop" Monthly Reviews**: Two interacting agents evaluate your monthly spending dynamically, providing engaging and memorable financial feedback.
+- **Subscription Negotiator**: The agent analyzes your recurring transactions, spots unused subscriptions, and drafts cancellation emails or guides you through the cancellation flow.
 
 #### 🎮 Gamification & Engagement
 
+- **Dynamic Wealth Challenges**: Autonomous agents propose custom challenges based on your actual spending data.
 - **Streak Tracking**: Stay motivated with **Budget Adherence Streaks** and level up your financial discipline 🔥.
-- **Achievement System**: Unlock literal achievements for hitting milestones, celebrated with **Dynamic Confetti** explosions 🎊.
+- **Achievement System**: Unlock literal achievements for hitting milestones and completing AI challenges, celebrated with **Dynamic Confetti** explosions 🎊.
 
 #### 🎙️ Voice & Accessibility
 
@@ -146,22 +149,43 @@ BudgetBuddy utilizes a robust relational schema designed for workspace isolation
 - **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
 - **Core**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/)
-- **Motion**: [Framer Motion](https://www.framer.com/motion/) (Animations & Drag-and-Drop)
-- **State/Fetching**: [TanStack Query](https://tanstack.com/query/latest)
-- **Visualization**: [Recharts](https://recharts.org/)
+- **Motion**: [Framer Motion](https://www.framer.com/motion/) (Fluid Animations & Drag-and-Drop layouts)
+- **State/Fetching**: [TanStack Query v5](https://tanstack.com/query/latest) (Server state synchronization), [Zustand](https://github.com/pmndrs/zustand) (Client UI state management)
+- **Visualization**: [Recharts](https://recharts.org/) (Interactive analytics & simulations)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Utilities**: [date-fns](https://date-fns.org/), [React CountUp](https://www.npmjs.com/package/react-countup)
-- **UI Components**: [cmdk](https://cmdk.paco.me/), [Sonner](https://sonner.emilkowal.ski/), [Vaul](https://vaul.emilkowal.ski/), [Emoji Mart](https://www.npmjs.com/package/emoji-mart)
+- **UI Components**: [cmdk](https://cmdk.paco.me/) (Command Menu), [Sonner](https://sonner.emilkowal.ski/) (Toast alerts), [Vaul](https://vaul.emilkowal.ski/) (Drawer overlays), [Emoji Mart](https://www.npmjs.com/package/emoji-mart), [React Markdown](https://react-markdown.github.io/) (Rich chatbot replies), [React Day Picker](https://react-day-picker.js.org/) (Date filters), [Input OTP](https://input-otp.pacocoursey.com/) (PIN verification), [Embla Carousel](https://www.embla-carousel.com/) (Sliders)
 - **Effects**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
+- **Utilities**: [QRCode React](https://www.npmjs.com/package/qrcode.react)
 
-### Backend
+### Backend & Database
 
-- **Database**: [PostgreSQL](https://www.postgresql.org/) (via [Prisma ORM](https://www.prisma.io/))
-- **Auth**: [Clerk](https://clerk.com/) (Secure User Management)
-- **AI Models**: [Groq (Llama 3.3)](https://groq.com/), [OpenRouter (GPT-4o)](https://openrouter.ai/)
-- **File Uploads**: [UploadThing](https://uploadthing.com/)
-- **Data Export**: [jspdf](https://github.com/parallax/jsPDF), [export-to-csv](https://www.npmjs.com/package/export-to-csv)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) (hosted via [Neon Serverless](https://neon.tech/))
+- **ORM**: [Prisma ORM](https://www.prisma.io/)
+- **Auth**: [Clerk](https://clerk.com/) (Secure Workspace Isolation & Role-based authentication)
+- **File Storage**: [UploadThing](https://uploadthing.com/) & [Cloudinary](https://cloudinary.com/) (Receipt image hosting & preview)
+- **Data Export/Import**: [jspdf](https://github.com/parallax/jsPDF) & [jspdf-autotable](https://github.com/simonbengtsson/jsPDF-AutoTable) (PDF reports), [export-to-csv](https://www.npmjs.com/package/export-to-csv) & [papaparse](https://www.npmjs.com/package/papaparse) (CSV files)
 - **Validation**: [Zod](https://zod.dev/)
+- **Mailing**: [SendGrid](https://sendgrid.com/) & [Resend](https://resend.com/) (Notification engine & Invite delivery)
+
+### AI & Agentic Orchestration
+
+- **Agent Framework**: [LangGraph JS](https://js.langchain.com/docs/concepts/langgraph/) (`@langchain/langgraph`) - State-based graph orchestration for autonomous multi-agent workflows (Tax Auditor, Receipt Scanner, Wealth Challenger, etc.) with persistent session states.
+- **AI Infrastructure**: [LangChain](https://js.langchain.com/docs/introduction/) (`@langchain/core`, `@langchain/community`) - Prompt builders, tool binding wrappers, and agent integrations.
+- **AI Models**: 
+  - **Groq SDK** (Llama 3.3 70B Versatile for core agents; Llama 3.2 Vision for receipt image parsing)
+  - **OpenRouter** (Gemini 2.0 Flash for strategic visual simulation & advice generation)
+- **Web Search Tools**: [Tavily AI Search API](https://tavily.com/) - Integrated agent search tool for real-time cost auditing (flights, hotels, etc.).
+- **Voice Transcription**: [Groq Whisper (whisper-large-v3-turbo)](https://groq.com/) - Ultra-fast voice logging processing.
+- **Voice Synthesis (TTS)**: [Google TTS](https://translate.google.com) - Empathetic audio replies for chatbot / Drive Mode.
+
+### Third-Party Integrations
+
+- **Splitwise API**: Secure OAuth 2.0 synchronization, dynamic user split assignments, and automatic background settlement matching.
+- **Notion SDK**: Automated one-way syncing of transactions straight into the user's Notion databases.
+- **Telegram Bot**: Native webhook handling with persistent session states, custom sentiment routing, Drive Mode conversational replies, and inline callback menus.
+- **Discord Bot**: Slash command webhook handler (`discord-interactions`) for chatbot query parity.
+- **Slack Bot**: Native events subscription and interactive modal feedback endpoints.
 
 ---
 
@@ -192,7 +216,7 @@ BudgetBuddy utilizes a robust relational schema designed for workspace isolation
    Create a `.env` file in the root directory:
 
    ```env
-   # Database
+   # Database (PostgreSQL / Neon)
    DATABASE_URL="postgresql://user:pass@localhost:5432/budgetbuddy"
 
    # Authentication (Clerk)
@@ -200,6 +224,37 @@ BudgetBuddy utilizes a robust relational schema designed for workspace isolation
    CLERK_SECRET_KEY=sk_test_...
    NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
    NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+
+   # AI & Agents Configuration
+   GROQ_API_KEY=gsk_...
+   OPENROUTER_API_KEY=sk-or-...
+   TAVILY_API_KEY=tvly-...
+
+   # Email Providers (SendGrid & Resend)
+   SENDGRID_API_KEY=SG....
+   RESEND_API_KEY=re_...
+   EMAIL_FROM=hello@budgetbuddy.app
+
+   # Telegram Bot Integration
+   TELEGRAM_BOT_TOKEN=...
+
+   # Discord Bot Integration
+   DISCORD_BOT_TOKEN=...
+   DISCORD_PUBLIC_KEY=...
+   DISCORD_APP_ID=...
+
+   # Slack Bot Integration
+   SLACK_CLIENT_ID=...
+   SLACK_CLIENT_SECRET=...
+   SLACK_SIGNING_SECRET=...
+
+   # Splitwise OAuth Integration
+   SPLITWISE_CLIENT_ID=...
+   SPLITWISE_CLIENT_SECRET=...
+
+   # UploadThing & Cloudinary Assets (Optional)
+   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=...
+   UPLOADTHING_TOKEN=...
    ```
 
 4. **Initialize Database:**
