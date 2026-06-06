@@ -287,6 +287,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    if (text && text.toLowerCase() === "/drive") {
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { state: "DRIVE_MODE", context: { history: [] } }
+      });
+      const welcomeText = "🚗 Drive Mode Activated! Hands-free. Just send me voice notes and I will reply with voice notes. Say '/exit' to leave.";
+      await sendMessage(chatId, welcomeText);
+      try {
+        const shortText = welcomeText.substring(0, 200);
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+        const res = await fetch(ttsUrl);
+        if (res.ok) {
+          const audioBuffer = Buffer.from(await res.arrayBuffer());
+          await sendVoice(chatId, audioBuffer);
+        }
+      } catch (e) {}
+      return NextResponse.json({ ok: true });
+    }
+
     if (text && text.toLowerCase().startsWith("/challenge")) {
       let agentSession = await prisma.agentSession.findFirst({
         where: { userId: userSettings.userId, workflowType: "WEALTH_CHALLENGER", status: "RUNNING" }
@@ -503,6 +521,35 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    if (state === "DRIVE_MODE") {
+      const history = context.history || [];
+      const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+      
+      history.push({ role: "user", content: text });
+      history.push({ role: "assistant", content: responseText });
+      const prunedHistory = history.slice(-10);
+      
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { context: { ...context, history: prunedHistory } }
+      });
+      
+      await sendMessage(chatId, responseText);
+
+      try {
+        const shortText = responseText.substring(0, 200);
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+        const res = await fetch(ttsUrl);
+        
+        if (res.ok) {
+          const audioBuffer = Buffer.from(await res.arrayBuffer());
+          await sendVoice(chatId, audioBuffer);
+        }
+      } catch (err) {
+        console.error("TTS failed", err);
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     if (state === "WEALTH_CHALLENGER") {
       const sessionId = context.sessionId;
       const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
@@ -540,8 +587,9 @@ export async function POST(req: Request) {
       const prompt = `
         You are an AI assistant parsing expense/income logs for a budgeting app.
         Extract: amount (number), category (string, capitalized), description (short string), type ("expense" or "income").
+        Also extract "sentiment" (positive, neutral, negative) and "empatheticResponse" (a short, comforting or encouraging 1-sentence response about their finances if sentiment is negative or highly positive. Otherwise null).
         User's message: "${text}"
-        Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense"}
+        Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense", "sentiment": "neutral", "empatheticResponse": null}
       `;
       const response = await getGroqClient().chat.completions.create({
         model: "llama-3.3-70b-versatile",
@@ -557,8 +605,38 @@ export async function POST(req: Request) {
       
       const parsedData = JSON.parse(jsonMatch[0]);
       if (!parsedData.amount || !parsedData.category || !parsedData.type) {
-        await sendMessage(chatId, "❌ Missing required fields. Try `50 for food`.");
+        // Feature B: Autonomous Investigation Fallback
+        const responseText = await ChatWithAIHeadless(userSettings.userId, text, []);
+        await sendMessage(chatId, responseText);
+        
+        if (message && message.voice) {
+          try {
+            const shortText = responseText.substring(0, 200);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+            const res = await fetch(ttsUrl);
+            if (res.ok) {
+              const audioBuffer = Buffer.from(await res.arrayBuffer());
+              await sendVoice(chatId, audioBuffer);
+            }
+          } catch (err) {}
+        }
         return NextResponse.json({ ok: true });
+      }
+
+      // Feature A: Emotional Intelligence (Empathetic Response)
+      if (parsedData.empatheticResponse) {
+        await sendMessage(chatId, `💡 ${parsedData.empatheticResponse}`);
+        if (message && message.voice) {
+          try {
+            const shortText = parsedData.empatheticResponse.substring(0, 200);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+            const res = await fetch(ttsUrl);
+            if (res.ok) {
+              const audioBuffer = Buffer.from(await res.arrayBuffer());
+              await sendVoice(chatId, audioBuffer);
+            }
+          } catch (err) {}
+        }
       }
 
       // Ensure dynamic category
