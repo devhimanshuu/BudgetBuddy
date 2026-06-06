@@ -86,6 +86,10 @@ export function SlackSettingsCard() {
                     <h4 className="font-semibold flex items-center gap-2 text-foreground">2. Message the Bot</h4>
                     <p className="text-muted-foreground">Go to your Slack workspace, search for BudgetBuddy in the Apps section, and send it a direct message like <strong>&quot;50 for lunch&quot;</strong>!</p>
                   </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground">3. Agentic Workflows</h4>
+                    <p className="text-muted-foreground">You can upload receipts, send Voice Notes (Drive Mode), or trigger the Tax Audit and Wealth Challenge agents right from your Slack DM!</p>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
@@ -114,9 +118,9 @@ export function SlackSettingsCard() {
                   <Sparkles className="w-4 h-4 text-primary" /> Features included
                 </h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">✨ Log expenses via text (&quot;50 for lunch&quot;)</li>
+                  <li className="flex items-center gap-2">✨ Log expenses via text or Whisper Voice Notes</li>
                   <li className="flex items-center gap-2">✨ Receipts scanning via image upload</li>
-                  <li className="flex items-center gap-2">✨ AI Chatbot commands (chat how much did I spend)</li>
+                  <li className="flex items-center gap-2">✨ Tax Audit &amp; Wealth Challenge LangGraph Agents</li>
                 </ul>
               </div>
             </div>

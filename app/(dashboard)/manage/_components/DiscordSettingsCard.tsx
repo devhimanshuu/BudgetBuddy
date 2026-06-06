@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, CheckCircle2, HelpCircle } from "lucide-react";
+import { MessageSquare, CheckCircle2, HelpCircle, FileText, Mic, Brain, Bot, MousePointerClick } from "lucide-react";
 import { LinkDiscordUser, UnlinkDiscordUser } from "../../_actions/discord";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -73,15 +73,23 @@ export function DiscordSettingsCard() {
                 </DialogHeader>
                 <div className="space-y-4 text-sm mt-4">
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">📝 Text Logging</h4>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><FileText className="w-4 h-4 text-primary" /> Text Logging</h4>
                     <p className="text-muted-foreground">DM the bot something like <strong>&quot;50 for food&quot;</strong> or <strong>&quot;100 income from salary&quot;</strong>.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🤖 AI Chatbot</h4>
-                    <p className="text-muted-foreground">Send <strong>/chatbot</strong> to ask your financial persona questions! Send <strong>/exit</strong> to leave.</p>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Mic className="w-4 h-4 text-primary" /> Hands-Free Drive Mode</h4>
+                    <p className="text-muted-foreground">Send a voice memo! The bot will transcribe it via Whisper, auto-log the expense, and reply with Voice TTS.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🔘 Interactive Flow</h4>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Brain className="w-4 h-4 text-primary" /> Emotional Intelligence</h4>
+                    <p className="text-muted-foreground">When logging, the bot analyzes your sentiment and responds with financial empathy based on your AI persona.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Bot className="w-4 h-4 text-primary" /> Autonomous AI Agents</h4>
+                    <p className="text-muted-foreground">Use the <strong>/taxaudit</strong> and <strong>/challenge</strong> slash commands to run LangGraph agents directly in Discord.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><MousePointerClick className="w-4 h-4 text-primary" /> Interactive Flow</h4>
                     <p className="text-muted-foreground">The bot will ask for Notes, Tags, and Splits using native Discord buttons.</p>
                   </div>
                 </div>

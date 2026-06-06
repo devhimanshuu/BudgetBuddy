@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, CheckCircle2, Sparkles, HelpCircle } from "lucide-react";
+import { Send, CheckCircle2, Sparkles, HelpCircle, FileText, Mic, Camera, Brain, Bot, Bell, MousePointerClick } from "lucide-react";
 import { LinkTelegramChat, UnlinkTelegramChat } from "../_actions/telegram";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -79,27 +79,31 @@ export function TelegramSettingsCard() {
                 </DialogHeader>
                 <div className="space-y-4 text-sm mt-4">
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">📝 Text Logging</h4>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><FileText className="w-4 h-4 text-primary" /> Text Logging</h4>
                     <p className="text-muted-foreground">Type something like <strong>&quot;50 for food&quot;</strong> or <strong>&quot;100 income from salary&quot;</strong>.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🎙️ Voice Notes</h4>
-                    <p className="text-muted-foreground">Hold the mic icon and say <strong>&quot;I spent twenty dollars on taxi&quot;</strong>.</p>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Mic className="w-4 h-4 text-primary" /> Hands-Free Drive Mode</h4>
+                    <p className="text-muted-foreground">Hold the mic icon and say <strong>&quot;I spent twenty dollars on taxi&quot;</strong>. The bot transcribes via Whisper and auto-logs hands-free.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">📸 Receipt Scanning</h4>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Camera className="w-4 h-4 text-primary" /> Receipt Scanning</h4>
                     <p className="text-muted-foreground">Send a photo of a receipt and the bot will extract the details for you.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🤖 AI Chatbot</h4>
-                    <p className="text-muted-foreground">Send <strong>/chatbot</strong> to ask your financial persona questions. It replies with text and voice! Send <strong>/exit</strong> to leave.</p>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Brain className="w-4 h-4 text-primary" /> Emotional Intelligence</h4>
+                    <p className="text-muted-foreground">When logging, the bot analyzes your sentiment and responds with financial empathy based on your AI persona.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">🔘 Interactive Flow</h4>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Bot className="w-4 h-4 text-primary" /> Autonomous AI Agents</h4>
+                    <p className="text-muted-foreground">Type <strong>/taxaudit</strong> to find hidden deductions, or <strong>/challenge</strong> to have the Wealth Agent review your recent spending against goals.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><MousePointerClick className="w-4 h-4 text-primary" /> Interactive Flow</h4>
                     <p className="text-muted-foreground">The bot will ask for Notes, Tags, and Splits. You can use the buttons to quickly skip steps.</p>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-foreground">⏰ Smart Bill Reminders</h4>
+                    <h4 className="font-semibold flex items-center gap-2 text-foreground"><Bell className="w-4 h-4 text-primary" /> Smart Bill Reminders</h4>
                     <p className="text-muted-foreground">The bot automatically checks your Recurring Transactions and will message you the day before a bill is due!</p>
                   </div>
                 </div>
