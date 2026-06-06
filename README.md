@@ -1,6 +1,6 @@
 # BudgetBuddy 💰
 
-BudgetBuddy is an AI-Native Advanced Personal Finance Tracker AKA Wealth Management Application that helps users manage expenses and savings effectively. Built with modern web technologies, it offers a seamless experience for tracking financial transactions and generating insightful reports.
+BudgetBuddy is an AI-Native/Agentic Advanced Personal Finance Tracker AKA Wealth Management Application that helps users manage expenses and savings effectively. Built with modern web technologies, it offers a seamless experience for tracking financial transactions and generating insightful reports.
 
 [![BudgetBuddy Dashboard Preview](https://res.cloudinary.com/djkqo49ip/image/upload/v1775292690/Dark_tkiyfr.png)](https://budget-buddy-lovat.vercel.app/)
 
