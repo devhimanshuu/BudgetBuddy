@@ -236,24 +236,175 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    if (text && text.toLowerCase().startsWith("/taxaudit")) {
+      const yearStr = text.split(" ")[1];
+      const year = yearStr ? parseInt(yearStr) : new Date().getFullYear();
+      
+      const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+      const initialState = {
+        userId: userSettings.userId,
+        workspaceId,
+        year,
+        transactions: [],
+        currentIndex: 0,
+        classifications: [],
+        awaitingUserInput: false,
+        questionToUser: null,
+        reportUrl: null,
+        messages: [],
+      };
+
+      const agentSession = await prisma.agentSession.create({
+        data: {
+          userId: userSettings.userId,
+          workflowType: "TAX_AUDIT",
+          state: JSON.parse(JSON.stringify(initialState)),
+        }
+      });
+
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { state: "TAX_AUDITOR", context: { sessionId: agentSession.id } }
+      });
+      await sendMessage(chatId, `🧑‍💼 **Tax Auditor Activated!**\nStarting audit for year ${year}. Let me review your transactions...`);
+      
+      const graph = createTaxAuditorGraph();
+      const finalState: any = await graph.invoke(initialState);
+      
+      await prisma.agentSession.update({
+        where: { id: agentSession.id },
+        data: { state: JSON.parse(JSON.stringify(finalState)) }
+      });
+
+      if (finalState.awaitingUserInput) {
+        await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+      } else if (finalState.reportUrl) {
+        // App URL should point to origin. But for local testing, just give the path or placeholder domain
+        await sendMessage(chatId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+        await prisma.telegramSession.update({
+          where: { chatId }, data: { state: "IDLE", context: {} }
+        });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (text && text.toLowerCase() === "/drive") {
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { state: "DRIVE_MODE", context: { history: [] } }
+      });
+      const welcomeText = "🚗 Drive Mode Activated! Hands-free. Just send me voice notes and I will reply with voice notes. Say '/exit' to leave.";
+      await sendMessage(chatId, welcomeText);
+      try {
+        const shortText = welcomeText.substring(0, 200);
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+        const res = await fetch(ttsUrl);
+        if (res.ok) {
+          const audioBuffer = Buffer.from(await res.arrayBuffer());
+          await sendVoice(chatId, audioBuffer);
+        }
+      } catch (e) {}
+      return NextResponse.json({ ok: true });
+    }
+
+    if (text && text.toLowerCase().startsWith("/challenge")) {
+      let agentSession = await prisma.agentSession.findFirst({
+        where: { userId: userSettings.userId, workflowType: "WEALTH_CHALLENGER", status: "RUNNING" }
+      });
+      
+      let action: "PROPOSE" | "CHECK" = "PROPOSE";
+      if (agentSession) {
+        action = "CHECK";
+      } else {
+        agentSession = await prisma.agentSession.create({
+          data: {
+            userId: userSettings.userId,
+            workflowType: "WEALTH_CHALLENGER",
+            state: JSON.parse(JSON.stringify({ userId: userSettings.userId, workspaceId, action: "PROPOSE", awaitingUserInput: false, messages: [] })),
+          }
+        });
+      }
+
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { state: "WEALTH_CHALLENGER", context: { sessionId: agentSession.id } }
+      });
+
+      const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+      const graph = createWealthChallengerGraph();
+      
+      let currentState = agentSession.state as any;
+      currentState.action = action;
+      
+      const finalState: any = await graph.invoke(currentState);
+      
+      await prisma.agentSession.update({
+        where: { id: agentSession.id },
+        data: { 
+          state: JSON.parse(JSON.stringify(finalState)),
+          status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+        }
+      });
+
+      if (finalState.awaitingUserInput) {
+        await sendMessage(chatId, finalState.questionToUser || "Do you accept this challenge?");
+      } else if (finalState.finalMessage) {
+        await sendMessage(chatId, finalState.finalMessage);
+        await prisma.telegramSession.update({
+          where: { chatId }, data: { state: "IDLE", context: {} }
+        });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     // 4. State Machine
     const state = session.state;
     const context: any = session.context || {};
 
     // -- Handle Premium Media Inputs --
     if (state === "IDLE" && message && message.photo && message.photo.length > 0) {
-      await sendMessage(chatId, "📸 Scanning receipt... please wait.");
+      await sendMessage(chatId, "📸 Scanning receipt and looking for splits... please wait.");
       const photo = message.photo[message.photo.length - 1]; // get highest resolution
       const buffer = await getTelegramFileBuffer(photo.file_id);
       if (buffer) {
         const base64 = `data:image/jpeg;base64,${buffer.toString("base64")}`;
-        const extraction = await ExtractReceiptData(base64);
-        if (extraction.success && extraction.data) {
-          text = `${extraction.data.amount || 0} for ${extraction.data.category || "Other"} at ${extraction.data.merchant || "Store"}`;
-        } else {
-          await sendMessage(chatId, "❌ Sorry, I couldn't read the receipt clearly. Please type it manually.");
-          return NextResponse.json({ ok: true });
+        
+        const initialState = {
+          userId: userSettings.userId,
+          workspaceId,
+          imageBase64: base64,
+          isGroupMeal: false,
+          awaitingUserInput: false,
+          messages: [],
+        };
+        
+        const agentSession = await prisma.agentSession.create({
+          data: {
+            userId: userSettings.userId,
+            workflowType: "RECEIPT_SCANNER",
+            state: JSON.parse(JSON.stringify(initialState)),
+          }
+        });
+        
+        await prisma.telegramSession.update({
+          where: { chatId }, data: { state: "RECEIPT_SCANNER", context: { sessionId: agentSession.id } }
+        });
+        
+        const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
+        const graph = createReceiptScannerGraph();
+        const finalState: any = await graph.invoke(initialState);
+        
+        await prisma.agentSession.update({
+          where: { id: agentSession.id },
+          data: { state: JSON.parse(JSON.stringify(finalState)) }
+        });
+
+        if (finalState.awaitingUserInput) {
+          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+        } else if (finalState.finalMessage) {
+          await sendMessage(chatId, finalState.finalMessage);
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "IDLE", context: {} }
+          });
         }
+        return NextResponse.json({ ok: true });
       }
     }
 
@@ -312,13 +463,133 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    if (state === "TAX_AUDITOR") {
+      const sessionId = context.sessionId;
+      const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+      if (agentSession) {
+        const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+        const graph = createTaxAuditorGraph();
+        
+        let currentState = agentSession.state as any;
+        currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+        
+        const finalState: any = await graph.invoke(currentState);
+        
+        await prisma.agentSession.update({
+          where: { id: sessionId },
+          data: { state: JSON.parse(JSON.stringify(finalState)) }
+        });
+
+        if (finalState.awaitingUserInput) {
+          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+        } else if (finalState.reportUrl) {
+          await sendMessage(chatId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "IDLE", context: {} }
+          });
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (state === "RECEIPT_SCANNER") {
+      const sessionId = context.sessionId;
+      const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+      if (agentSession) {
+        const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
+        const graph = createReceiptScannerGraph();
+        
+        let currentState = agentSession.state as any;
+        currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+        
+        const finalState: any = await graph.invoke(currentState);
+        
+        await prisma.agentSession.update({
+          where: { id: sessionId },
+          data: { state: JSON.parse(JSON.stringify(finalState)) }
+        });
+
+        if (finalState.awaitingUserInput) {
+          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+        } else if (finalState.finalMessage) {
+          await sendMessage(chatId, finalState.finalMessage);
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "IDLE", context: {} }
+          });
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (state === "DRIVE_MODE") {
+      const history = context.history || [];
+      const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+      
+      history.push({ role: "user", content: text });
+      history.push({ role: "assistant", content: responseText });
+      const prunedHistory = history.slice(-10);
+      
+      await prisma.telegramSession.update({
+        where: { chatId }, data: { context: { ...context, history: prunedHistory } }
+      });
+      
+      await sendMessage(chatId, responseText);
+
+      try {
+        const shortText = responseText.substring(0, 200);
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+        const res = await fetch(ttsUrl);
+        
+        if (res.ok) {
+          const audioBuffer = Buffer.from(await res.arrayBuffer());
+          await sendVoice(chatId, audioBuffer);
+        }
+      } catch (err) {
+        console.error("TTS failed", err);
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (state === "WEALTH_CHALLENGER") {
+      const sessionId = context.sessionId;
+      const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+      if (agentSession) {
+        const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+        const graph = createWealthChallengerGraph();
+        
+        let currentState = agentSession.state as any;
+        currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+        
+        const finalState: any = await graph.invoke(currentState);
+        
+        await prisma.agentSession.update({
+          where: { id: sessionId },
+          data: { 
+            state: JSON.parse(JSON.stringify(finalState)),
+            status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+          }
+        });
+
+        if (finalState.awaitingUserInput) {
+          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+        } else if (finalState.finalMessage) {
+          await sendMessage(chatId, finalState.finalMessage);
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "IDLE", context: {} }
+          });
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     if (state === "IDLE") {
       // Parse initial transaction
       const prompt = `
         You are an AI assistant parsing expense/income logs for a budgeting app.
         Extract: amount (number), category (string, capitalized), description (short string), type ("expense" or "income").
+        Also extract "sentiment" (positive, neutral, negative) and "empatheticResponse" (a short, comforting or encouraging 1-sentence response about their finances if sentiment is negative or highly positive. Otherwise null).
         User's message: "${text}"
-        Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense"}
+        Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense", "sentiment": "neutral", "empatheticResponse": null}
       `;
       const response = await getGroqClient().chat.completions.create({
         model: "llama-3.3-70b-versatile",
@@ -334,8 +605,38 @@ export async function POST(req: Request) {
       
       const parsedData = JSON.parse(jsonMatch[0]);
       if (!parsedData.amount || !parsedData.category || !parsedData.type) {
-        await sendMessage(chatId, "❌ Missing required fields. Try `50 for food`.");
+        // Feature B: Autonomous Investigation Fallback
+        const responseText = await ChatWithAIHeadless(userSettings.userId, text, []);
+        await sendMessage(chatId, responseText);
+        
+        if (message && message.voice) {
+          try {
+            const shortText = responseText.substring(0, 200);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+            const res = await fetch(ttsUrl);
+            if (res.ok) {
+              const audioBuffer = Buffer.from(await res.arrayBuffer());
+              await sendVoice(chatId, audioBuffer);
+            }
+          } catch (err) {}
+        }
         return NextResponse.json({ ok: true });
+      }
+
+      // Feature A: Emotional Intelligence (Empathetic Response)
+      if (parsedData.empatheticResponse) {
+        await sendMessage(chatId, `💡 ${parsedData.empatheticResponse}`);
+        if (message && message.voice) {
+          try {
+            const shortText = parsedData.empatheticResponse.substring(0, 200);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
+            const res = await fetch(ttsUrl);
+            if (res.ok) {
+              const audioBuffer = Buffer.from(await res.arrayBuffer());
+              await sendVoice(chatId, audioBuffer);
+            }
+          } catch (err) {}
+        }
       }
 
       // Ensure dynamic category
