@@ -37,10 +37,26 @@ Manage finances together in isolated, shared environments with role-based access
 Manage your finances entirely from your favorite chat apps with 100% feature parity between Slack, Discord, and Telegram.
 
 - **Multi-Modal Receipt Scanning**: Snap a photo of a receipt or invoice and send it to the bot. Groq Vision instantly extracts the vendor, amount, and category.
-- **Whisper Voice Logging**: Just hold the microphone button and say "I spent 50 on an Uber". The AI perfectly transcribes and logs it.
-- **Interactive UI Flows**: The bots reply with native interactive buttons (Add Notes, Tags, Splits) that trigger seamless modal popups directly inside Slack, Discord, and Telegram.
-- **AI Financial Advisor with TTS**: Ask the bot for financial advice (`/chat`) and it will generate a personalized response, complete with an **AI Voice Note (TTS)** reply that plays right in the chat.
-- **Smart Bill Reminders**: A background cron job checks your upcoming bills and securely DMs you a reminder 24 hours in advance on your linked Slack, Discord, or Telegram account.
+- **Whisper Voice Logging**: Send a voice note like "I spent $50 on an Uber." The AI transcribes and logs the transaction automatically.
+- **Interactive UI Flows**: The bots reply with native interactive buttons (Add Notes, Tags, Splits) that trigger seamless modal popups and session-based workflows.
+- **Unified Agent Commands**: All platforms support the same agent workflows and commands, including `/chatbot`, `/drive`, `/taxaudit`, `/challenge`, `/review`, and `/subscriptions`.
+- **AI Financial Advisor with TTS**: Ask the bot for financial advice and receive a personalized response, including optional voice playback when supported.
+- **Smart Bill Reminders**: A background cron job checks your upcoming bills and securely DMs you a reminder 24 hours in advance on Slack, Discord, or Telegram.
+
+#### ✅ Chatbot Agent Commands (Slack / Discord / Telegram)
+
+Use these commands across all supported chat integrations to trigger the same agent-powered experience:
+
+- `/chatbot` — open a conversational AI advisor session.
+- `/drive` — switch to hands-free voice / drive mode.
+- `/taxaudit [year]` — launch the Tax Auditor workflow for the given year.
+- `/challenge` — start a personalized Wealth Challenger / financial game mode.
+- `/review [month] [year]` — request a monthly spending review.
+- `/subscriptions` — audit recurring bills, highlight unused services, and suggest savings.
+- `send a photo` — upload receipts, invoices, or bills for intelligent parsing.
+- `send a voice message` — use speech input to log a transaction or ask a question.
+
+These commands are supported uniformly across Slack, Discord, and Telegram, and they all leverage the same LangGraph agent workflows in the backend.
 
 ### 🔗 3rd-Party App Integrations (Splitwise & Notion)
 

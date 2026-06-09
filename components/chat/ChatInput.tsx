@@ -97,7 +97,7 @@ export const ChatInput = ({
                     </Button>
                 </div>
                 <Input
-                    placeholder="Ask about your budget..."
+                    placeholder="Ask about your budget or use /chatbot, /taxaudit, /challenge, /review..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}

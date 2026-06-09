@@ -221,7 +221,7 @@ export async function POST(req: Request) {
             }
 
             // Global Commands
-            const helpText = `🤖 **How to use BudgetBuddy Slack Bot**\n\n📝 **Text:** "50 for food"\n🎙️ **Voice:** Upload an audio file\n📸 **Receipt:** Upload a photo\n💬 **Chat:** Type \`/chatbot\` to start talking to your advisor\n🚗 **Drive:** Type \`/drive\` for hands-free voice mode\n🧑‍💼 **Tax Audit:** Type \`/taxaudit [year]\`\n🎮 **Challenges:** Type \`/challenge\`\n\nType \`/exit\` or \`/cancel\` at any time.`;
+            const helpText = `🤖 **How to use BudgetBuddy Slack Bot**\n\n📝 **Text:** "50 for food"\n🎙️ **Voice:** Upload an audio file\n📸 **Receipt:** Upload a photo\n💬 **Chat:** Type \`/chatbot\` to start talking to your advisor\n🚗 **Drive:** Type \`/drive\` for hands-free voice mode\n🧑‍💼 **Tax Audit:** Type \`/taxaudit [year]\`\n🎮 **Challenges:** Type \`/challenge\`\n📊 **Review:** Type \`/review [month] [year]\` for monthly financial review\n💳 **Subscriptions:** Type \`/subscriptions\` to audit recurring bills\n\nType \`/exit\` or \`/cancel\` at any time.`;
 
             if (text && (text.toLowerCase() === "/start" || text.toLowerCase() === "/help" || text.toLowerCase() === "help")) {
               await prisma.slackSession.update({
@@ -352,6 +352,66 @@ export async function POST(req: Request) {
                 await prisma.slackSession.update({
                   where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
                 });
+              }
+              return;
+            }
+
+            if (text && text.toLowerCase().startsWith("/review")) {
+              const parts = text.split(" ");
+              const now = new Date();
+              const targetMonth = parts[1] ? parseInt(parts[1]) : now.getMonth() + 1;
+              const targetYear = parts[2] ? parseInt(parts[2]) : now.getFullYear();
+
+              await sendSlackMessage(botToken, channelId, `📊 **Monthly Review Activated!**\nGenerating your Good Cop / Bad Cop financial review for ${targetMonth}/${targetYear}... This may take a moment.`);
+
+              try {
+                const { createMonthlyReviewGraph } = await import("@/agent/workflows/monthly-review");
+                const graph = createMonthlyReviewGraph();
+                const finalState: any = await graph.invoke({
+                  userId: userSettings.userId,
+                  workspaceId,
+                  month: targetMonth,
+                  year: targetYear,
+                  financialData: "",
+                  accountantReport: "",
+                  coachReport: "",
+                  finalReport: "",
+                });
+
+                if (finalState.finalReport) {
+                  await sendSlackMessage(botToken, channelId, finalState.finalReport);
+                } else {
+                  await sendSlackMessage(botToken, channelId, "❌ Review completed but no report was generated. You may not have transactions for this period.");
+                }
+              } catch (error: any) {
+                console.error("Monthly Review Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Failed to generate monthly review: ${error.message}`);
+              }
+              return;
+            }
+
+            if (text && text.toLowerCase() === "/subscriptions") {
+              await sendSlackMessage(botToken, channelId, `💳 **Subscription Advisor Activated!**\nAnalyzing your recurring bills and researching better deals... This may take a moment.`);
+
+              try {
+                const { createSubscriptionAdvisorGraph } = await import("@/agent/workflows/subscription-advisor");
+                const graph = createSubscriptionAdvisorGraph();
+                const finalState: any = await graph.invoke({
+                  userId: userSettings.userId,
+                  workspaceId,
+                  subscriptions: [],
+                  researchResults: [],
+                  finalReport: null,
+                });
+
+                if (finalState.finalReport) {
+                  await sendSlackMessage(botToken, channelId, finalState.finalReport);
+                } else {
+                  await sendSlackMessage(botToken, channelId, "✅ No active subscriptions found. You're keeping your fixed costs low!");
+                }
+              } catch (error: any) {
+                console.error("Subscription Advisor Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Failed to analyze subscriptions: ${error.message}`);
               }
               return;
             }

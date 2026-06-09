@@ -211,7 +211,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Handle Global Commands
-    const helpText = `🤖 **How to use BudgetBuddy Bot**\n\n📝 **Text:** Type "50 for food"\n🎙️ **Voice:** Send a voice note\n📸 **Receipt:** Send a photo of a receipt\n💬 **Chatbot:** Type \`/chatbot\` to talk to your AI advisor\n\nFollow the interactive buttons for notes and tags!`;
+    const helpText = `🤖 **How to use BudgetBuddy Bot**\n\n📝 **Text:** Type "50 for food"\n🎙️ **Voice:** Send a voice note\n📸 **Receipt:** Send a photo of a receipt\n💬 **Chatbot:** Type \`/chatbot\` to talk to your AI advisor\n🚗 **Drive:** Type \`/drive\` for hands-free voice mode\n🧑‍💼 **Tax Audit:** Type \`/taxaudit [year]\` for tax classification\n🎮 **Challenge:** Type \`/challenge\` for wealth challenges\n📊 **Review:** Type \`/review [month] [year]\` for monthly financial review\n💳 **Subscriptions:** Type \`/subscriptions\` to audit recurring bills\n\nType \`/exit\` or \`/cancel\` at any time.`;
 
     if (text && (text.toLowerCase() === "/start" || text.toLowerCase() === "/help")) {
       await prisma.telegramSession.update({
@@ -350,6 +350,83 @@ export async function POST(req: Request) {
         await prisma.telegramSession.update({
           where: { chatId }, data: { state: "IDLE", context: {} }
         });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (text && text.toLowerCase().startsWith("/review")) {
+      const parts = text.split(" ");
+      const now = new Date();
+      const targetMonth = parts[1] ? parseInt(parts[1]) : now.getMonth() + 1;
+      const targetYear = parts[2] ? parseInt(parts[2]) : now.getFullYear();
+
+      await sendMessage(chatId, `📊 **Monthly Review Activated!**\nGenerating your Good Cop / Bad Cop financial review for ${targetMonth}/${targetYear}... This may take a moment.`);
+
+      try {
+        const { createMonthlyReviewGraph } = await import("@/agent/workflows/monthly-review");
+        const graph = createMonthlyReviewGraph();
+        const finalState: any = await graph.invoke({
+          userId: userSettings.userId,
+          workspaceId,
+          month: targetMonth,
+          year: targetYear,
+          financialData: "",
+          accountantReport: "",
+          coachReport: "",
+          finalReport: "",
+        });
+
+        if (finalState.finalReport) {
+          // Telegram has a 4096 char limit per message
+          const report = finalState.finalReport;
+          if (report.length > 4000) {
+            const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
+            for (const chunk of chunks) {
+              await sendMessage(chatId, chunk);
+            }
+          } else {
+            await sendMessage(chatId, report);
+          }
+        } else {
+          await sendMessage(chatId, "❌ Review completed but no report was generated. You may not have transactions for this period.");
+        }
+      } catch (error: any) {
+        console.error("Monthly Review Error:", error);
+        await sendMessage(chatId, `❌ Failed to generate monthly review: ${error.message}`);
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (text && text.toLowerCase() === "/subscriptions") {
+      await sendMessage(chatId, `💳 **Subscription Advisor Activated!**\nAnalyzing your recurring bills and researching better deals... This may take a moment.`);
+
+      try {
+        const { createSubscriptionAdvisorGraph } = await import("@/agent/workflows/subscription-advisor");
+        const graph = createSubscriptionAdvisorGraph();
+        const finalState: any = await graph.invoke({
+          userId: userSettings.userId,
+          workspaceId,
+          subscriptions: [],
+          researchResults: [],
+          finalReport: null,
+        });
+
+        if (finalState.finalReport) {
+          const report = finalState.finalReport;
+          if (report.length > 4000) {
+            const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
+            for (const chunk of chunks) {
+              await sendMessage(chatId, chunk);
+            }
+          } else {
+            await sendMessage(chatId, report);
+          }
+        } else {
+          await sendMessage(chatId, "✅ No active subscriptions found. You're keeping your fixed costs low!");
+        }
+      } catch (error: any) {
+        console.error("Subscription Advisor Error:", error);
+        await sendMessage(chatId, `❌ Failed to analyze subscriptions: ${error.message}`);
       }
       return NextResponse.json({ ok: true });
     }

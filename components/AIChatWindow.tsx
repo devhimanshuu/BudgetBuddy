@@ -411,6 +411,21 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
 
                     {!isMinimized && (
                         <>
+                            <div className="px-4 pt-4">
+                                <div className="rounded-2xl border border-border/70 bg-secondary/70 p-3 text-sm text-muted-foreground">
+                                    <p className="font-semibold text-foreground mb-2">Agent Chat Instructions</p>
+                                    <p className="mb-2">Use the AI chat for any finance question, or trigger the same agent workflows from Slack, Discord, and Telegram.</p>
+                                    <ul className="list-disc ml-5 space-y-1 text-xs sm:text-sm">
+                                        <li><span className="font-semibold">/chatbot</span> — open the advisor chat mode</li>
+                                        <li><span className="font-semibold">/drive</span> — hands-free voice mode</li>
+                                        <li><span className="font-semibold">/taxaudit</span> — run the tax auditor workflow</li>
+                                        <li><span className="font-semibold">/challenge</span> — start a wealth challenge</li>
+                                        <li><span className="font-semibold">/review</span> — request a monthly spending review</li>
+                                        <li><span className="font-semibold">/subscriptions</span> — audit recurring bills</li>
+                                        <li>Send a receipt photo or voice note for intelligent parsing and transaction logging.</li>
+                                    </ul>
+                                </div>
+                            </div>
                             <div className="flex-1 overflow-y-auto p-4 min-h-0 custom-scrollbar">
                                 <div className="space-y-4 pr-1">
                                     {messages.length === 0 && (
