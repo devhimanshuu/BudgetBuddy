@@ -34,7 +34,7 @@ export function createDebtNegotiatorGraph() {
       const friends = await getSplitwiseFriends(state.userId);
       return { friends };
     } catch (e: any) {
-      return { finalReport: `❌ ${e.message}` };
+      return { finalReport: `💰 **Debt Negotiator**\n\n❌ ${e.message}\n\nPlease link your Splitwise account in BudgetBuddy Settings to use this feature.` };
     }
   };
 

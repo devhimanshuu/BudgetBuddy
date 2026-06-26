@@ -56,15 +56,28 @@ export function createTaxAuditorGraph() {
   const classifyNode = async (state: TaxAuditorState) => {
     const { transactions, currentIndex, messages } = state;
     
+    // Guard: no transactions or already done
+    if (!transactions || transactions.length === 0 || currentIndex >= transactions.length) {
+      return {};
+    }
+    
+    // Helper to safely format date (handles both Date objects and serialized strings)
+    const formatDate = (d: any): string => {
+      if (d && typeof d.toISOString === "function") return d.toISOString().split("T")[0];
+      if (typeof d === "string") return d.split("T")[0];
+      return String(d);
+    };
+    
     // If the user just replied to an ambiguous transaction, process their reply
     if (state.awaitingUserInput && messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
-      if (lastMsg instanceof HumanMessage) {
+      if (lastMsg && ((lastMsg as any)._type === "human" || (lastMsg as any).type === "human" || lastMsg instanceof HumanMessage)) {
         const tx = transactions[currentIndex];
         
         // Use AI to determine if the user said it was business or personal
+        const userReply = typeof lastMsg.content === "string" ? lastMsg.content : String(lastMsg.content);
         const evalPrompt = new SystemMessage(`The user was asked about this transaction: ${tx.description} ($${tx.amount} on ${tx.date}).
-User replied: "${lastMsg.content}".
+User replied: "${userReply}".
 Determine if this should be classified as "business" or "personal".
 Output ONLY the exact word "business" or "personal".`);
         
@@ -73,7 +86,7 @@ Output ONLY the exact word "business" or "personal".`);
         
         const classification = {
           id: tx.id,
-          date: tx.date.toISOString().split("T")[0],
+          date: formatDate(tx.date),
           amount: tx.amount,
           description: tx.description,
           category: tx.category,
@@ -87,6 +100,24 @@ Output ONLY the exact word "business" or "personal".`);
           questionToUser: null,
         };
       }
+    }
+    // If we were awaiting input but couldn't parse the message, treat as personal and continue
+    if (state.awaitingUserInput && messages.length > 0) {
+      const tx = transactions[currentIndex];
+      const classification = {
+        id: tx.id,
+        date: formatDate(tx.date),
+        amount: tx.amount,
+        description: tx.description,
+        category: tx.category,
+        type: "personal" as const,
+      };
+      return {
+        classifications: [...state.classifications, classification],
+        currentIndex: currentIndex + 1,
+        awaitingUserInput: false,
+        questionToUser: null,
+      };
     }
 
     // Otherwise, classify the next transaction
@@ -125,7 +156,7 @@ Output your response in valid JSON format ONLY:
         } else {
           const classification = {
             id: tx.id,
-            date: tx.date.toISOString().split("T")[0],
+            date: formatDate(tx.date),
             amount: tx.amount,
             description: tx.description,
             category: tx.category,
@@ -144,7 +175,7 @@ Output your response in valid JSON format ONLY:
     // Fallback to personal if parsing fails
     const classification = {
       id: tx.id,
-      date: tx.date.toISOString().split("T")[0],
+      date: formatDate(tx.date),
       amount: tx.amount,
       description: tx.description,
       category: tx.category,

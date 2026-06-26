@@ -52,6 +52,73 @@ const commands = [
         required: true
       }
     ]
+  },
+  {
+    name: "help",
+    description: "Show how to use BudgetBuddy Discord Bot",
+    type: 1
+  },
+  {
+    name: "cancel",
+    description: "Cancel current operation and return to idle mode",
+    type: 1
+  },
+  {
+    name: "exit",
+    description: "Exit current mode and return to idle",
+    type: 1
+  },
+  {
+    name: "chatbot",
+    description: "Start the AI chatbot advisor mode",
+    type: 1
+  },
+  {
+    name: "drive",
+    description: "Activate hands-free voice mode",
+    type: 1
+  },
+  {
+    name: "taxaudit",
+    description: "Run a tax audit on your transactions",
+    type: 1,
+    options: [
+      {
+        name: "year",
+        description: "Year to audit (default: current year)",
+        type: 4,
+        required: false
+      }
+    ]
+  },
+  {
+    name: "challenge",
+    description: "Get a savings challenge or check progress",
+    type: 1
+  },
+  {
+    name: "review",
+    description: "Generate a monthly financial review",
+    type: 1,
+    options: [
+      {
+        name: "month",
+        description: "Month to review (1-12, default: current)",
+        type: 4,
+        required: false
+      },
+      {
+        name: "year",
+        description: "Year to review (default: current year)",
+        type: 4,
+        required: false
+      }
+    ]
+  },
+  {
+    name: "subscriptions",
+    description: "Audit your recurring bills and find better deals",
+    type: 1
   }
 ];
 

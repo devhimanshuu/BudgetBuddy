@@ -62,8 +62,8 @@ export function createReceiptScannerGraph() {
     // If the user just replied with friends
     if (state.awaitingUserInput && state.messages.length > 0) {
       const lastMsg = state.messages[state.messages.length - 1];
-      if (lastMsg instanceof HumanMessage) {
-        const text = lastMsg.content as string;
+      if (lastMsg && ((lastMsg as any)._type === "human" || (lastMsg as any).type === "human" || lastMsg instanceof HumanMessage)) {
+        const text = typeof lastMsg.content === "string" ? lastMsg.content : String(lastMsg.content);
         if (text.toLowerCase() === "no" || text.toLowerCase() === "nope") {
           return {
             isGroupMeal: false,
@@ -93,6 +93,15 @@ Output ONLY valid JSON like: ["Alice", "Bob"]`);
           questionToUser: undefined,
         };
       }
+    }
+    // If we were awaiting input but couldn't parse the message, default to no split
+    if (state.awaitingUserInput && state.messages.length > 0) {
+      return {
+        isGroupMeal: false,
+        friendsToSplitWith: [],
+        awaitingUserInput: false,
+        questionToUser: undefined,
+      };
     }
 
     // Determine if it looks like a group meal based on items

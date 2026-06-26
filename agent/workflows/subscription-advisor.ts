@@ -41,14 +41,20 @@ export function createSubscriptionAdvisorGraph() {
   const researchNode = async (state: SubscriptionAdvisorState) => {
     if (state.finalReport || state.subscriptions.length === 0) return {};
 
-    const tool = new TavilySearch({
-      maxResults: 2,
-    });
-
-    const researchResults = [];
-
-    // Only research the top 3 most expensive subscriptions to save API calls
+    const researchResults: { service: string; data: string }[] = [];
     const topSubs = state.subscriptions.slice(0, 3);
+
+    // Only use Tavily if the API key is configured
+    const tavilyKey = process.env.TAVILY_API_KEY;
+    if (!tavilyKey) {
+      // No Tavily key - skip web research and proceed with local data only
+      for (const sub of topSubs) {
+        researchResults.push({ service: sub.description, data: `Current cost: $${sub.amount} per ${sub.interval}. Web research unavailable.` });
+      }
+      return { researchResults };
+    }
+
+    const tool = new TavilySearch({ maxResults: 2 });
 
     for (const sub of topSubs) {
       const query = `Current price and best promotions or cheaper alternatives for ${sub.description} subscription`;
@@ -57,6 +63,7 @@ export function createSubscriptionAdvisorGraph() {
         researchResults.push({ service: sub.description, data: result });
       } catch (e) {
         console.error(`Tavily search failed for ${sub.description}`, e);
+        researchResults.push({ service: sub.description, data: `Current cost: $${sub.amount} per ${sub.interval}. Web research failed.` });
       }
     }
 

@@ -58,8 +58,8 @@ export function createWealthChallengerGraph() {
     // User replied to our proposal
     if (state.awaitingUserInput && state.messages.length > 0) {
       const lastMsg = state.messages[state.messages.length - 1];
-      if (lastMsg instanceof HumanMessage) {
-        const text = (lastMsg.content as string).toLowerCase();
+      if (lastMsg && ((lastMsg as any)._type === "human" || (lastMsg as any).type === "human" || lastMsg instanceof HumanMessage)) {
+        const text = (typeof lastMsg.content === "string" ? lastMsg.content : String(lastMsg.content)).toLowerCase();
         if (text.includes("yes") || text.includes("accept") || text.includes("sure")) {
           // They accepted!
           return {
@@ -73,10 +73,20 @@ export function createWealthChallengerGraph() {
           };
         } else {
           return {
+            awaitingUserInput: false,
+            questionToUser: undefined,
             finalMessage: "No problem! You can ask for a new challenge anytime with /challenge."
           };
         }
       }
+    }
+    // If we were awaiting input but couldn't parse the message, default to decline
+    if (state.awaitingUserInput && state.messages.length > 0) {
+      return {
+        awaitingUserInput: false,
+        questionToUser: undefined,
+        finalMessage: "No problem! You can ask for a new challenge anytime with /challenge."
+      };
     }
 
     // Propose a new challenge

@@ -72,14 +72,23 @@ Output ONLY valid JSON:
   const researchNode = async (state: SavingsPlannerState): Promise<any> => {
     if (!state.parsedGoal) return {};
     
-    const tool = new TavilySearch({
-      maxResults: 3,
-    });
+    const tavilyKey = process.env.TAVILY_API_KEY;
+    if (!tavilyKey) {
+      // No Tavily key - use placeholder estimates
+      const fallbackData = `Estimated costs for a ${state.parsedGoal.durationDays}-day trip to ${state.parsedGoal.destination}:\n- Flights: ~$500-1500 (varies by origin)\n- Hotel: ~$80-200/night = $${state.parsedGoal.durationDays * 120} avg\n- Food: ~$30-60/day = $${state.parsedGoal.durationDays * 45} avg\nTotal estimate: $${1000 + state.parsedGoal.durationDays * 165}`;
+      return { researchData: fallbackData };
+    }
     
-    const query = `Average cost of a ${state.parsedGoal.durationDays}-day trip to ${state.parsedGoal.destination} including flights, hotel, and food`;
-    const searchResults = await tool.invoke({ query });
-    
-    return { researchData: searchResults };
+    try {
+      const tool = new TavilySearch({ maxResults: 3 });
+      const query = `Average cost of a ${state.parsedGoal.durationDays}-day trip to ${state.parsedGoal.destination} including flights, hotel, and food`;
+      const searchResults = await tool.invoke({ query });
+      return { researchData: searchResults };
+    } catch (e: any) {
+      console.error("Tavily search failed", e);
+      const fallbackData = `Estimated costs for a ${state.parsedGoal.durationDays}-day trip to ${state.parsedGoal.destination}:\n- Flights: ~$500-1500\n- Hotel: ~$80-200/night\n- Food: ~$30-60/day`;
+      return { researchData: fallbackData };
+    }
   };
 
   const calculateNode = async (state: SavingsPlannerState): Promise<any> => {

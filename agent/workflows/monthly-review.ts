@@ -66,27 +66,50 @@ export function createMonthlyReviewGraph() {
   };
 
   const accountantNode = async (state: MonthlyReviewState) => {
-    const res = await model.invoke([
-      new SystemMessage(STRICT_ACCOUNTANT_PROMPT),
-      new HumanMessage(`Data for ${state.month}/${state.year}:\n${state.financialData}`)
-    ]);
-    return { accountantReport: res.content as string };
+    try {
+      const res = await model.invoke([
+        new SystemMessage(STRICT_ACCOUNTANT_PROMPT),
+        new HumanMessage(`Data for ${state.month}/${state.year}:\n${state.financialData}`)
+      ]);
+      return { accountantReport: res.content as string };
+    } catch (e: any) {
+      console.error("Accountant node error:", e);
+      return { accountantReport: `Unable to generate accountant report: ${e.message}` };
+    }
   };
 
   const coachNode = async (state: MonthlyReviewState) => {
-    const res = await model.invoke([
-      new SystemMessage(LIFESTYLE_COACH_PROMPT),
-      new HumanMessage(`Data for ${state.month}/${state.year}:\n${state.financialData}`)
-    ]);
-    return { coachReport: res.content as string };
+    try {
+      const res = await model.invoke([
+        new SystemMessage(LIFESTYLE_COACH_PROMPT),
+        new HumanMessage(`Data for ${state.month}/${state.year}:\n${state.financialData}`)
+      ]);
+      return { coachReport: res.content as string };
+    } catch (e: any) {
+      console.error("Coach node error:", e);
+      return { coachReport: `Unable to generate coach report: ${e.message}` };
+    }
   };
 
   const synthesizeNode = async (state: MonthlyReviewState) => {
-    const res = await model.invoke([
-      new SystemMessage(MODERATOR_PROMPT),
-      new HumanMessage(`Strict Accountant's Report:\n${state.accountantReport}\n\nLifestyle Coach's Report:\n${state.coachReport}`)
-    ]);
-    return { finalReport: res.content as string };
+    try {
+      const res = await model.invoke([
+        new SystemMessage(MODERATOR_PROMPT),
+        new HumanMessage(`Strict Accountant's Report:\n${state.accountantReport}\n\nLifestyle Coach's Report:\n${state.coachReport}`)
+      ]);
+      return { finalReport: res.content as string };
+    } catch (e: any) {
+      console.error("Synthesize node error:", e);
+      // Fallback: combine both reports manually
+      const fallback = `📊 **Monthly Financial Review - ${state.month}/${state.year}**
+
+**Accountant's Analysis:**
+${state.accountantReport}
+
+**Coach's Analysis:**
+${state.coachReport}`;
+      return { finalReport: fallback };
+    }
   };
 
   const workflow = new StateGraph<MonthlyReviewState>({ channels: reviewStateChannels })
@@ -95,12 +118,11 @@ export function createMonthlyReviewGraph() {
     .addNode("coach", coachNode)
     .addNode("synthesize", synthesizeNode)
     
-    // In LangGraph, to run nodes in parallel, we can add edges from a single node to multiple nodes
-    // and then gather them in the synthesize node.
+    // Run sequentially: gather -> accountant -> coach -> synthesize
+    // This avoids parallel edge issues in LangGraph where state updates can conflict
     .addEdge("__start__", "gather")
     .addEdge("gather", "accountant")
-    .addEdge("gather", "coach")
-    .addEdge("accountant", "synthesize")
+    .addEdge("accountant", "coach")
     .addEdge("coach", "synthesize")
     .addEdge("synthesize", "__end__");
 

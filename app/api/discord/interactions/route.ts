@@ -199,7 +199,7 @@ export async function POST(req: Request) {
         });
       }
 
-      const helpText = `🤖 **How to use BudgetBuddy Discord Bot**\n\nUse \`/log\` to record transactions.\nUse \`/chat\` to converse, answer wizard questions, or use chatbot/agent modes.\nUse \`/chatbot\` to start the advisor.\nUse \`/drive\` for hands-free voice mode.\nUse \`/taxaudit\` for taxes.\nUse \`/challenge\` for gamification.`;
+      const helpText = `🤖 **How to use BudgetBuddy Discord Bot**\n\nUse \`/log\` to record transactions.\nUse \`/chat\` to converse, answer wizard questions, or use chatbot/agent modes.\nUse \`/chatbot\` to start the advisor.\nUse \`/drive\` for hands-free voice mode.\nUse \`/taxaudit\` for taxes.\nUse \`/challenge\` for gamification.\nUse \`/review\` for monthly financial review.\nUse \`/subscriptions\` to audit recurring bills.`;
 
       if (commandName === "help") {
         await prisma.discordSession.update({
@@ -293,9 +293,15 @@ export async function POST(req: Request) {
               await prisma.discordSession.update({
                 where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
               });
+            } else {
+              await editInteractionResponse(interactionToken, "✅ Tax audit completed. No report was generated - you may not have expenses for this year.");
+              await prisma.discordSession.update({
+                where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+              });
             }
           } catch(e) {
-            await editInteractionResponse(interactionToken, "❌ Failed to start Tax Auditor.");
+            console.error("Discord Tax Audit Error:", e);
+            await editInteractionResponse(interactionToken, `❌ Failed to start Tax Auditor: ${(e as Error).message}.`);
           }
         })();
 
@@ -349,9 +355,82 @@ export async function POST(req: Request) {
               await prisma.discordSession.update({
                 where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
               });
+            } else {
+              await editInteractionResponse(interactionToken, "🎮 Challenge processed! Use /challenge again to check status.");
+              await prisma.discordSession.update({
+                where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+              });
             }
           } catch(e) {
-            await editInteractionResponse(interactionToken, "❌ Failed to run challenge.");
+            console.error("Discord Challenge Error:", e);
+            await editInteractionResponse(interactionToken, `❌ Failed to run challenge: ${(e as Error).message}.`);
+          }
+        })();
+
+        return NextResponse.json({ type: 5 });
+      }
+
+      if (commandName === "review") {
+        const monthOption = body.data.options?.find((o: any) => o.name === "month");
+        const yearOption = body.data.options?.find((o: any) => o.name === "year");
+        const now = new Date();
+        const targetMonth = monthOption ? monthOption.value : now.getMonth() + 1;
+        const targetYear = yearOption ? yearOption.value : now.getFullYear();
+
+        (async () => {
+          try {
+            await editInteractionResponse(interactionToken, `📊 **Monthly Review Activated!**\nGenerating your Good Cop / Bad Cop financial review for ${targetMonth}/${targetYear}... This may take a moment.`);
+
+            const { createMonthlyReviewGraph } = await import("@/agent/workflows/monthly-review");
+            const graph = createMonthlyReviewGraph();
+            const finalState: any = await graph.invoke({
+              userId: userSettings.userId,
+              workspaceId,
+              month: targetMonth,
+              year: targetYear,
+              financialData: "",
+              accountantReport: "",
+              coachReport: "",
+              finalReport: "",
+            });
+
+            if (finalState.finalReport) {
+              await editInteractionResponse(interactionToken, finalState.finalReport);
+            } else {
+              await editInteractionResponse(interactionToken, "❌ Review completed but no report was generated. You may not have transactions for this period.");
+            }
+          } catch (error: any) {
+            console.error("Discord Monthly Review Error:", error);
+            await editInteractionResponse(interactionToken, `❌ Failed to generate monthly review: ${error.message}`);
+          }
+        })();
+
+        return NextResponse.json({ type: 5 });
+      }
+
+      if (commandName === "subscriptions") {
+        (async () => {
+          try {
+            await editInteractionResponse(interactionToken, `💳 **Subscription Advisor Activated!**\nAnalyzing your recurring bills and researching better deals... This may take a moment.`);
+
+            const { createSubscriptionAdvisorGraph } = await import("@/agent/workflows/subscription-advisor");
+            const graph = createSubscriptionAdvisorGraph();
+            const finalState: any = await graph.invoke({
+              userId: userSettings.userId,
+              workspaceId,
+              subscriptions: [],
+              researchResults: [],
+              finalReport: null,
+            });
+
+            if (finalState.finalReport) {
+              await editInteractionResponse(interactionToken, finalState.finalReport);
+            } else {
+              await editInteractionResponse(interactionToken, "✅ No active subscriptions found. You're keeping your fixed costs low!");
+            }
+          } catch (error: any) {
+            console.error("Discord Subscription Advisor Error:", error);
+            await editInteractionResponse(interactionToken, `❌ Failed to analyze subscriptions: ${error.message}`);
           }
         })();
 
@@ -527,51 +606,89 @@ export async function POST(req: Request) {
             }
 
             if (state === "TAX_AUDITOR") {
-              const sessionId = context.sessionId;
-              const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-              if (agentSession) {
-                const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
-                const graph = createTaxAuditorGraph();
-                let currentState = agentSession.state as any;
-                currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-                const finalState: any = await graph.invoke(currentState);
-                await prisma.agentSession.update({
-                  where: { id: sessionId },
-                  data: { state: JSON.parse(JSON.stringify(finalState)) }
-                });
-                if (finalState.awaitingUserInput) {
-                  await editInteractionResponse(interactionToken, finalState.questionToUser || "Please clarify.");
-                } else if (finalState.reportUrl) {
-                  await editInteractionResponse(interactionToken, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+              try {
+                const sessionId = context.sessionId;
+                const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+                if (agentSession) {
+                  const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+                  const graph = createTaxAuditorGraph();
+                  let currentState = agentSession.state as any;
+                  if (!currentState.messages) currentState.messages = [];
+                  currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+                  const finalState: any = await graph.invoke(currentState);
+                  await prisma.agentSession.update({
+                    where: { id: sessionId },
+                    data: { state: JSON.parse(JSON.stringify(finalState)) }
+                  });
+                  if (finalState.awaitingUserInput) {
+                    await editInteractionResponse(interactionToken, finalState.questionToUser || "Please clarify.");
+                  } else if (finalState.reportUrl) {
+                    await editInteractionResponse(interactionToken, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+                    await prisma.discordSession.update({
+                      where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  } else {
+                    await editInteractionResponse(interactionToken, "✅ Tax audit completed.");
+                    await prisma.discordSession.update({
+                      where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  }
+                } else {
+                  await editInteractionResponse(interactionToken, "❌ Session expired. Please start again with /taxaudit.");
                   await prisma.discordSession.update({
                     where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
                   });
                 }
+              } catch (error: any) {
+                console.error("Discord Tax Auditor State Error:", error);
+                await editInteractionResponse(interactionToken, `❌ Tax audit error: ${error.message}. Use /taxaudit to restart.`);
+                await prisma.discordSession.update({
+                  where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                });
               }
               return;
             }
 
             if (state === "RECEIPT_SCANNER") {
-              const sessionId = context.sessionId;
-              const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-              if (agentSession) {
-                const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
-                const graph = createReceiptScannerGraph();
-                let currentState = agentSession.state as any;
-                currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-                const finalState: any = await graph.invoke(currentState);
-                await prisma.agentSession.update({
-                  where: { id: sessionId },
-                  data: { state: JSON.parse(JSON.stringify(finalState)) }
-                });
-                if (finalState.awaitingUserInput) {
-                  await editInteractionResponse(interactionToken, finalState.questionToUser || "Please clarify.");
-                } else if (finalState.finalMessage) {
-                  await editInteractionResponse(interactionToken, finalState.finalMessage);
+              try {
+                const sessionId = context.sessionId;
+                const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+                if (agentSession) {
+                  const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
+                  const graph = createReceiptScannerGraph();
+                  let currentState = agentSession.state as any;
+                  if (!currentState.messages) currentState.messages = [];
+                  currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+                  const finalState: any = await graph.invoke(currentState);
+                  await prisma.agentSession.update({
+                    where: { id: sessionId },
+                    data: { state: JSON.parse(JSON.stringify(finalState)) }
+                  });
+                  if (finalState.awaitingUserInput) {
+                    await editInteractionResponse(interactionToken, finalState.questionToUser || "Please clarify.");
+                  } else if (finalState.finalMessage) {
+                    await editInteractionResponse(interactionToken, finalState.finalMessage);
+                    await prisma.discordSession.update({
+                      where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  } else {
+                    await editInteractionResponse(interactionToken, "✅ Receipt processed.");
+                    await prisma.discordSession.update({
+                      where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  }
+                } else {
+                  await editInteractionResponse(interactionToken, "❌ Session expired. Please upload a new receipt.");
                   await prisma.discordSession.update({
                     where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
                   });
                 }
+              } catch (error: any) {
+                console.error("Discord Receipt Scanner Error:", error);
+                await editInteractionResponse(interactionToken, `❌ Receipt processing error: ${error.message}. Please try uploading again.`);
+                await prisma.discordSession.update({
+                  where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                });
               }
               return;
             }
@@ -599,29 +716,48 @@ export async function POST(req: Request) {
             }
 
             if (state === "WEALTH_CHALLENGER") {
-              const sessionId = context.sessionId;
-              const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-              if (agentSession) {
-                const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
-                const graph = createWealthChallengerGraph();
-                let currentState = agentSession.state as any;
-                currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-                const finalState: any = await graph.invoke(currentState);
-                await prisma.agentSession.update({
-                  where: { id: sessionId },
-                  data: { 
-                    state: JSON.parse(JSON.stringify(finalState)),
-                    status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+              try {
+                const sessionId = context.sessionId;
+                const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+                if (agentSession) {
+                  const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+                  const graph = createWealthChallengerGraph();
+                  let currentState = agentSession.state as any;
+                  if (!currentState.messages) currentState.messages = [];
+                  currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+                  const finalState: any = await graph.invoke(currentState);
+                  await prisma.agentSession.update({
+                    where: { id: sessionId },
+                    data: { 
+                      state: JSON.parse(JSON.stringify(finalState)),
+                      status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+                    }
+                  });
+                  if (finalState.awaitingUserInput) {
+                    await editInteractionResponse(interactionToken, finalState.questionToUser || "Please clarify.");
+                  } else if (finalState.finalMessage) {
+                    await editInteractionResponse(interactionToken, finalState.finalMessage);
+                    await prisma.discordSession.update({
+                      where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  } else {
+                    await editInteractionResponse(interactionToken, "🎮 Challenge processed.");
+                    await prisma.discordSession.update({
+                      where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                    });
                   }
-                });
-                if (finalState.awaitingUserInput) {
-                  await editInteractionResponse(interactionToken, finalState.questionToUser || "Please clarify.");
-                } else if (finalState.finalMessage) {
-                  await editInteractionResponse(interactionToken, finalState.finalMessage);
+                } else {
+                  await editInteractionResponse(interactionToken, "❌ Session expired. Use /challenge to start a new one.");
                   await prisma.discordSession.update({
                     where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
                   });
                 }
+              } catch (error: any) {
+                console.error("Discord Wealth Challenger Error:", error);
+                await editInteractionResponse(interactionToken, `❌ Challenge error: ${error.message}. Use /challenge to restart.`);
+                await prisma.discordSession.update({
+                  where: { discordId: discordUserId }, data: { state: "IDLE", context: {} }
+                });
               }
               return;
             }

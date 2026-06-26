@@ -251,45 +251,58 @@ export async function POST(req: Request) {
               const yearStr = text.split(" ")[1];
               const year = yearStr ? parseInt(yearStr) : new Date().getFullYear();
               
-              const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
-              const initialState = {
-                userId: userSettings.userId,
-                workspaceId,
-                year,
-                transactions: [],
-                currentIndex: 0,
-                classifications: [],
-                awaitingUserInput: false,
-                questionToUser: null,
-                reportUrl: null,
-                messages: [],
-              };
-
-              const agentSession = await prisma.agentSession.create({
-                data: {
+              try {
+                const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+                const initialState = {
                   userId: userSettings.userId,
-                  workflowType: "TAX_AUDIT",
-                  state: JSON.parse(JSON.stringify(initialState)),
+                  workspaceId,
+                  year,
+                  transactions: [],
+                  currentIndex: 0,
+                  classifications: [],
+                  awaitingUserInput: false,
+                  questionToUser: null,
+                  reportUrl: null,
+                  messages: [],
+                };
+
+                const agentSession = await prisma.agentSession.create({
+                  data: {
+                    userId: userSettings.userId,
+                    workflowType: "TAX_AUDIT",
+                    state: JSON.parse(JSON.stringify(initialState)),
+                  }
+                });
+
+                await prisma.slackSession.update({
+                  where: { slackId: slackUserId }, data: { state: "TAX_AUDITOR", context: { sessionId: agentSession.id } }
+                });
+                await sendSlackMessage(botToken, channelId, `🧑‍💼 **Tax Auditor Activated!** Reviewing transactions for ${year}...`);
+                
+                const graph = createTaxAuditorGraph();
+                const finalState: any = await graph.invoke(initialState);
+                
+                await prisma.agentSession.update({
+                  where: { id: agentSession.id },
+                  data: { state: JSON.parse(JSON.stringify(finalState)) }
+                });
+
+                if (finalState.awaitingUserInput) {
+                  await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
+                } else if (finalState.reportUrl) {
+                  await sendSlackMessage(botToken, channelId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+                  await prisma.slackSession.update({
+                    where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                  });
+                } else {
+                  await sendSlackMessage(botToken, channelId, "✅ Tax audit completed. No report was generated - you may not have expenses for this year.");
+                  await prisma.slackSession.update({
+                    where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                  });
                 }
-              });
-
-              await prisma.slackSession.update({
-                where: { slackId: slackUserId }, data: { state: "TAX_AUDITOR", context: { sessionId: agentSession.id } }
-              });
-              await sendSlackMessage(botToken, channelId, `🧑‍💼 **Tax Auditor Activated!** Reviewing transactions for ${year}...`);
-              
-              const graph = createTaxAuditorGraph();
-              const finalState: any = await graph.invoke(initialState);
-              
-              await prisma.agentSession.update({
-                where: { id: agentSession.id },
-                data: { state: JSON.parse(JSON.stringify(finalState)) }
-              });
-
-              if (finalState.awaitingUserInput) {
-                await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
-              } else if (finalState.reportUrl) {
-                await sendSlackMessage(botToken, channelId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+              } catch (error: any) {
+                console.error("Slack Tax Audit Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Tax audit failed: ${error.message}. Please try again later.`);
                 await prisma.slackSession.update({
                   where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
                 });
@@ -308,47 +321,60 @@ export async function POST(req: Request) {
             }
 
             if (text && text.toLowerCase().startsWith("/challenge")) {
-              let agentSession = await prisma.agentSession.findFirst({
-                where: { userId: userSettings.userId, workflowType: "WEALTH_CHALLENGER", status: "RUNNING" }
-              });
-              
-              let action: "PROPOSE" | "CHECK" = "PROPOSE";
-              if (agentSession) {
-                action = "CHECK";
-              } else {
-                agentSession = await prisma.agentSession.create({
-                  data: {
-                    userId: userSettings.userId,
-                    workflowType: "WEALTH_CHALLENGER",
-                    state: JSON.parse(JSON.stringify({ userId: userSettings.userId, workspaceId, action: "PROPOSE", awaitingUserInput: false, messages: [] })),
+              try {
+                let agentSession = await prisma.agentSession.findFirst({
+                  where: { userId: userSettings.userId, workflowType: "WEALTH_CHALLENGER", status: "RUNNING" }
+                });
+                
+                let action: "PROPOSE" | "CHECK" = "PROPOSE";
+                if (agentSession) {
+                  action = "CHECK";
+                } else {
+                  agentSession = await prisma.agentSession.create({
+                    data: {
+                      userId: userSettings.userId,
+                      workflowType: "WEALTH_CHALLENGER",
+                      state: JSON.parse(JSON.stringify({ userId: userSettings.userId, workspaceId, action: "PROPOSE", awaitingUserInput: false, messages: [] })),
+                    }
+                  });
+                }
+
+                await prisma.slackSession.update({
+                  where: { slackId: slackUserId }, data: { state: "WEALTH_CHALLENGER", context: { sessionId: agentSession.id } }
+                });
+
+                const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+                const graph = createWealthChallengerGraph();
+                
+                let currentState = agentSession.state as any;
+                currentState.action = action;
+                
+                const finalState: any = await graph.invoke(currentState);
+                
+                await prisma.agentSession.update({
+                  where: { id: agentSession.id },
+                  data: { 
+                    state: JSON.parse(JSON.stringify(finalState)),
+                    status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
                   }
                 });
-              }
 
-              await prisma.slackSession.update({
-                where: { slackId: slackUserId }, data: { state: "WEALTH_CHALLENGER", context: { sessionId: agentSession.id } }
-              });
-
-              const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
-              const graph = createWealthChallengerGraph();
-              
-              let currentState = agentSession.state as any;
-              currentState.action = action;
-              
-              const finalState: any = await graph.invoke(currentState);
-              
-              await prisma.agentSession.update({
-                where: { id: agentSession.id },
-                data: { 
-                  state: JSON.parse(JSON.stringify(finalState)),
-                  status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+                if (finalState.awaitingUserInput) {
+                  await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Do you accept this challenge?");
+                } else if (finalState.finalMessage) {
+                  await sendSlackMessage(botToken, channelId, finalState.finalMessage);
+                  await prisma.slackSession.update({
+                    where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                  });
+                } else {
+                  await sendSlackMessage(botToken, channelId, "🎮 Challenge processed! Use /challenge again to check status.");
+                  await prisma.slackSession.update({
+                    where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                  });
                 }
-              });
-
-              if (finalState.awaitingUserInput) {
-                await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Do you accept this challenge?");
-              } else if (finalState.finalMessage) {
-                await sendSlackMessage(botToken, channelId, finalState.finalMessage);
+              } catch (error: any) {
+                console.error("Slack Challenge Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Challenge failed: ${error.message}. Please try again.`);
                 await prisma.slackSession.update({
                   where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
                 });
@@ -496,51 +522,89 @@ export async function POST(req: Request) {
             }
 
             if (state === "TAX_AUDITOR") {
-              const sessionId = context.sessionId;
-              const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-              if (agentSession) {
-                const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
-                const graph = createTaxAuditorGraph();
-                let currentState = agentSession.state as any;
-                currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-                const finalState: any = await graph.invoke(currentState);
-                await prisma.agentSession.update({
-                  where: { id: sessionId },
-                  data: { state: JSON.parse(JSON.stringify(finalState)) }
-                });
-                if (finalState.awaitingUserInput) {
-                  await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
-                } else if (finalState.reportUrl) {
-                  await sendSlackMessage(botToken, channelId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+              try {
+                const sessionId = context.sessionId;
+                const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+                if (agentSession) {
+                  const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+                  const graph = createTaxAuditorGraph();
+                  let currentState = agentSession.state as any;
+                  if (!currentState.messages) currentState.messages = [];
+                  currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+                  const finalState: any = await graph.invoke(currentState);
+                  await prisma.agentSession.update({
+                    where: { id: sessionId },
+                    data: { state: JSON.parse(JSON.stringify(finalState)) }
+                  });
+                  if (finalState.awaitingUserInput) {
+                    await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
+                  } else if (finalState.reportUrl) {
+                    await sendSlackMessage(botToken, channelId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+                    await prisma.slackSession.update({
+                      where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  } else {
+                    await sendSlackMessage(botToken, channelId, "✅ Tax audit completed.");
+                    await prisma.slackSession.update({
+                      where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  }
+                } else {
+                  await sendSlackMessage(botToken, channelId, "❌ Session expired. Please start again with /taxaudit.");
                   await prisma.slackSession.update({
                     where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
                   });
                 }
+              } catch (error: any) {
+                console.error("Slack Tax Auditor Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Tax audit error: ${error.message}. Use /taxaudit to restart.`);
+                await prisma.slackSession.update({
+                  where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                });
               }
               return;
             }
 
             if (state === "RECEIPT_SCANNER") {
-              const sessionId = context.sessionId;
-              const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-              if (agentSession) {
-                const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
-                const graph = createReceiptScannerGraph();
-                let currentState = agentSession.state as any;
-                currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-                const finalState: any = await graph.invoke(currentState);
-                await prisma.agentSession.update({
-                  where: { id: sessionId },
-                  data: { state: JSON.parse(JSON.stringify(finalState)) }
-                });
-                if (finalState.awaitingUserInput) {
-                  await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
-                } else if (finalState.finalMessage) {
-                  await sendSlackMessage(botToken, channelId, finalState.finalMessage);
+              try {
+                const sessionId = context.sessionId;
+                const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+                if (agentSession) {
+                  const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
+                  const graph = createReceiptScannerGraph();
+                  let currentState = agentSession.state as any;
+                  if (!currentState.messages) currentState.messages = [];
+                  currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+                  const finalState: any = await graph.invoke(currentState);
+                  await prisma.agentSession.update({
+                    where: { id: sessionId },
+                    data: { state: JSON.parse(JSON.stringify(finalState)) }
+                  });
+                  if (finalState.awaitingUserInput) {
+                    await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
+                  } else if (finalState.finalMessage) {
+                    await sendSlackMessage(botToken, channelId, finalState.finalMessage);
+                    await prisma.slackSession.update({
+                      where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  } else {
+                    await sendSlackMessage(botToken, channelId, "✅ Receipt processed.");
+                    await prisma.slackSession.update({
+                      where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  }
+                } else {
+                  await sendSlackMessage(botToken, channelId, "❌ Session expired. Please upload a new receipt.");
                   await prisma.slackSession.update({
                     where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
                   });
                 }
+              } catch (error: any) {
+                console.error("Slack Receipt Scanner Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Receipt processing error: ${error.message}. Please try uploading again.`);
+                await prisma.slackSession.update({
+                  where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                });
               }
               return;
             }
@@ -560,29 +624,48 @@ export async function POST(req: Request) {
             }
 
             if (state === "WEALTH_CHALLENGER") {
-              const sessionId = context.sessionId;
-              const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-              if (agentSession) {
-                const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
-                const graph = createWealthChallengerGraph();
-                let currentState = agentSession.state as any;
-                currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-                const finalState: any = await graph.invoke(currentState);
-                await prisma.agentSession.update({
-                  where: { id: sessionId },
-                  data: { 
-                    state: JSON.parse(JSON.stringify(finalState)),
-                    status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+              try {
+                const sessionId = context.sessionId;
+                const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+                if (agentSession) {
+                  const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+                  const graph = createWealthChallengerGraph();
+                  let currentState = agentSession.state as any;
+                  if (!currentState.messages) currentState.messages = [];
+                  currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+                  const finalState: any = await graph.invoke(currentState);
+                  await prisma.agentSession.update({
+                    where: { id: sessionId },
+                    data: { 
+                      state: JSON.parse(JSON.stringify(finalState)),
+                      status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+                    }
+                  });
+                  if (finalState.awaitingUserInput) {
+                    await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
+                  } else if (finalState.finalMessage) {
+                    await sendSlackMessage(botToken, channelId, finalState.finalMessage);
+                    await prisma.slackSession.update({
+                      where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                    });
+                  } else {
+                    await sendSlackMessage(botToken, channelId, "🎮 Challenge processed.");
+                    await prisma.slackSession.update({
+                      where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                    });
                   }
-                });
-                if (finalState.awaitingUserInput) {
-                  await sendSlackMessage(botToken, channelId, finalState.questionToUser || "Please clarify.");
-                } else if (finalState.finalMessage) {
-                  await sendSlackMessage(botToken, channelId, finalState.finalMessage);
+                } else {
+                  await sendSlackMessage(botToken, channelId, "❌ Session expired. Use /challenge to start a new one.");
                   await prisma.slackSession.update({
                     where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
                   });
                 }
+              } catch (error: any) {
+                console.error("Slack Wealth Challenger Error:", error);
+                await sendSlackMessage(botToken, channelId, `❌ Challenge error: ${error.message}. Use /challenge to restart.`);
+                await prisma.slackSession.update({
+                  where: { slackId: slackUserId }, data: { state: "IDLE", context: {} }
+                });
               }
               return;
             }

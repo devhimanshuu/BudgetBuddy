@@ -8,16 +8,48 @@ import { syncTransactionToNotion } from "@/lib/notion";
 const getGroqClient = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
-// Helper: Send Telegram Message
+// Abort mechanism: track which chats have requested to stop all operations
+const abortedChats = new Set<string>();
+
+function isAborted(chatId: string): boolean {
+  return abortedChats.has(chatId);
+}
+
+function clearAbort(chatId: string): void {
+  abortedChats.delete(chatId);
+}
+
+function abortChat(chatId: string): void {
+  abortedChats.add(chatId);
+}
+
+// Helper: Send Telegram Message with Markdown fallback
 async function sendMessage(chatId: string | number, text: string, reply_markup?: any) {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-  const body: any = { chat_id: chatId, text, parse_mode: "Markdown" };
+  
+  // Try Markdown first
+  let body: any = { chat_id: chatId, text, parse_mode: "Markdown" };
   if (reply_markup) body.reply_markup = reply_markup;
-  await fetch(url, {
+  
+  let res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+  
+  // If Markdown fails (bad entities), retry without parse_mode
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    if (errorData.description && errorData.description.includes("can't parse entities")) {
+      body = { chat_id: chatId, text };
+      if (reply_markup) body.reply_markup = reply_markup;
+      await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    }
+  }
 }
 
 // Helper: Send Voice Note
@@ -221,10 +253,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
     if (text && (text.toLowerCase() === "/cancel" || text.toLowerCase() === "/exit")) {
+      // Abort all running background operations for this chat
+      abortChat(chatId);
+      
+      // Reset session state
       await prisma.telegramSession.update({
         where: { chatId }, data: { state: "IDLE", context: {} }
       });
-      await sendMessage(chatId, "✅ Action cancelled. I am back to normal mode. Send me an expense, or type `/chatbot` to chat.");
+      
+      // Also cancel any running agent sessions (tax audit, challenge, etc.)
+      await prisma.agentSession.updateMany({
+        where: { userId: userSettings.userId, status: "RUNNING" },
+        data: { status: "CANCELLED" }
+      });
+      
+      await sendMessage(chatId, "✅ All operations cancelled. I am back to normal mode. Send me an expense, or type `/chatbot` to chat.");
       return NextResponse.json({ ok: true });
     }
 
@@ -237,53 +280,73 @@ export async function POST(req: Request) {
     }
 
     if (text && text.toLowerCase().startsWith("/taxaudit")) {
+      clearAbort(chatId);
       const yearStr = text.split(" ")[1];
       const year = yearStr ? parseInt(yearStr) : new Date().getFullYear();
       
-      const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
-      const initialState = {
-        userId: userSettings.userId,
-        workspaceId,
-        year,
-        transactions: [],
-        currentIndex: 0,
-        classifications: [],
-        awaitingUserInput: false,
-        questionToUser: null,
-        reportUrl: null,
-        messages: [],
-      };
-
-      const agentSession = await prisma.agentSession.create({
-        data: {
-          userId: userSettings.userId,
-          workflowType: "TAX_AUDIT",
-          state: JSON.parse(JSON.stringify(initialState)),
-        }
-      });
-
-      await prisma.telegramSession.update({
-        where: { chatId }, data: { state: "TAX_AUDITOR", context: { sessionId: agentSession.id } }
-      });
       await sendMessage(chatId, `🧑‍💼 **Tax Auditor Activated!**\nStarting audit for year ${year}. Let me review your transactions...`);
       
-      const graph = createTaxAuditorGraph();
-      const finalState: any = await graph.invoke(initialState);
-      
-      await prisma.agentSession.update({
-        where: { id: agentSession.id },
-        data: { state: JSON.parse(JSON.stringify(finalState)) }
-      });
+      // Fire-and-forget: return 200 OK immediately to prevent Telegram webhook retries
+      (async () => {
+        try {
+          const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+          const initialState = {
+            userId: userSettings.userId,
+            workspaceId,
+            year,
+            transactions: [],
+            currentIndex: 0,
+            classifications: [],
+            awaitingUserInput: false,
+            questionToUser: null,
+            reportUrl: null,
+            messages: [],
+          };
 
-      if (finalState.awaitingUserInput) {
-        await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
-      } else if (finalState.reportUrl) {
-        // App URL should point to origin. But for local testing, just give the path or placeholder domain
-        await sendMessage(chatId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
-        await prisma.telegramSession.update({
-          where: { chatId }, data: { state: "IDLE", context: {} }
-        });
-      }
+          const agentSession = await prisma.agentSession.create({
+            data: {
+              userId: userSettings.userId,
+              workflowType: "TAX_AUDIT",
+              state: JSON.parse(JSON.stringify(initialState)),
+            }
+          });
+
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "TAX_AUDITOR", context: { sessionId: agentSession.id } }
+          });
+          
+          const graph = createTaxAuditorGraph();
+          const finalState: any = await graph.invoke(initialState);
+          
+          if (isAborted(chatId)) return;
+          
+          await prisma.agentSession.update({
+            where: { id: agentSession.id },
+            data: { state: JSON.parse(JSON.stringify(finalState)) }
+          });
+
+          if (finalState.awaitingUserInput) {
+            await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+          } else if (finalState.reportUrl) {
+            await sendMessage(chatId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          } else {
+            await sendMessage(chatId, "✅ Tax audit completed. No report was generated - you may not have expenses for this year.");
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          }
+        } catch (error: any) {
+          if (isAborted(chatId)) return;
+          console.error("Tax Audit Error:", error);
+          await sendMessage(chatId, `❌ Tax audit failed: ${error.message}. Please try again later.`);
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "IDLE", context: {} }
+          });
+        }
+      })();
       return NextResponse.json({ ok: true });
     }
 
@@ -306,55 +369,76 @@ export async function POST(req: Request) {
     }
 
     if (text && text.toLowerCase().startsWith("/challenge")) {
-      let agentSession = await prisma.agentSession.findFirst({
-        where: { userId: userSettings.userId, workflowType: "WEALTH_CHALLENGER", status: "RUNNING" }
-      });
-      
-      let action: "PROPOSE" | "CHECK" = "PROPOSE";
-      if (agentSession) {
-        action = "CHECK";
-      } else {
-        agentSession = await prisma.agentSession.create({
-          data: {
-            userId: userSettings.userId,
-            workflowType: "WEALTH_CHALLENGER",
-            state: JSON.parse(JSON.stringify({ userId: userSettings.userId, workspaceId, action: "PROPOSE", awaitingUserInput: false, messages: [] })),
+      clearAbort(chatId);
+      // Fire-and-forget: return 200 OK immediately to prevent Telegram webhook retries
+      (async () => {
+        try {
+          let agentSession = await prisma.agentSession.findFirst({
+            where: { userId: userSettings.userId, workflowType: "WEALTH_CHALLENGER", status: "RUNNING" }
+          });
+          
+          let action: "PROPOSE" | "CHECK" = "PROPOSE";
+          if (agentSession) {
+            action = "CHECK";
+          } else {
+            agentSession = await prisma.agentSession.create({
+              data: {
+                userId: userSettings.userId,
+                workflowType: "WEALTH_CHALLENGER",
+                state: JSON.parse(JSON.stringify({ userId: userSettings.userId, workspaceId, action: "PROPOSE", awaitingUserInput: false, messages: [] })),
+              }
+            });
           }
-        });
-      }
 
-      await prisma.telegramSession.update({
-        where: { chatId }, data: { state: "WEALTH_CHALLENGER", context: { sessionId: agentSession.id } }
-      });
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "WEALTH_CHALLENGER", context: { sessionId: agentSession.id } }
+          });
 
-      const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
-      const graph = createWealthChallengerGraph();
-      
-      let currentState = agentSession.state as any;
-      currentState.action = action;
-      
-      const finalState: any = await graph.invoke(currentState);
-      
-      await prisma.agentSession.update({
-        where: { id: agentSession.id },
-        data: { 
-          state: JSON.parse(JSON.stringify(finalState)),
-          status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+          const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+          const graph = createWealthChallengerGraph();
+          
+          let currentState = agentSession.state as any;
+          currentState.action = action;
+          
+          const finalState: any = await graph.invoke(currentState);
+          
+          if (isAborted(chatId)) return;
+          
+          await prisma.agentSession.update({
+            where: { id: agentSession.id },
+            data: { 
+              state: JSON.parse(JSON.stringify(finalState)),
+              status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+            }
+          });
+
+          if (finalState.awaitingUserInput) {
+            await sendMessage(chatId, finalState.questionToUser || "Do you accept this challenge?");
+          } else if (finalState.finalMessage) {
+            await sendMessage(chatId, finalState.finalMessage);
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          } else {
+            await sendMessage(chatId, "🎮 Challenge processed! Use /challenge again to check status.");
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          }
+        } catch (error: any) {
+          if (isAborted(chatId)) return;
+          console.error("Challenge Error:", error);
+          await sendMessage(chatId, `❌ Challenge failed: ${error.message}. Please try again.`);
+          await prisma.telegramSession.update({
+            where: { chatId }, data: { state: "IDLE", context: {} }
+          });
         }
-      });
-
-      if (finalState.awaitingUserInput) {
-        await sendMessage(chatId, finalState.questionToUser || "Do you accept this challenge?");
-      } else if (finalState.finalMessage) {
-        await sendMessage(chatId, finalState.finalMessage);
-        await prisma.telegramSession.update({
-          where: { chatId }, data: { state: "IDLE", context: {} }
-        });
-      }
+      })();
       return NextResponse.json({ ok: true });
     }
 
     if (text && text.toLowerCase().startsWith("/review")) {
+      clearAbort(chatId);
       const parts = text.split(" ");
       const now = new Date();
       const targetMonth = parts[1] ? parseInt(parts[1]) : now.getMonth() + 1;
@@ -362,72 +446,100 @@ export async function POST(req: Request) {
 
       await sendMessage(chatId, `📊 **Monthly Review Activated!**\nGenerating your Good Cop / Bad Cop financial review for ${targetMonth}/${targetYear}... This may take a moment.`);
 
-      try {
-        const { createMonthlyReviewGraph } = await import("@/agent/workflows/monthly-review");
-        const graph = createMonthlyReviewGraph();
-        const finalState: any = await graph.invoke({
-          userId: userSettings.userId,
-          workspaceId,
-          month: targetMonth,
-          year: targetYear,
-          financialData: "",
-          accountantReport: "",
-          coachReport: "",
-          finalReport: "",
-        });
+      // Fire-and-forget: return 200 OK immediately to prevent Telegram webhook retries
+      (async () => {
+        try {
+          const { createMonthlyReviewGraph } = await import("@/agent/workflows/monthly-review");
+          const graph = createMonthlyReviewGraph();
+          
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Monthly review timed out after 120 seconds.")), 120000)
+          );
+          
+          const finalState: any = await Promise.race([
+            graph.invoke({
+              userId: userSettings.userId,
+              workspaceId,
+              month: targetMonth,
+              year: targetYear,
+              financialData: "",
+              accountantReport: "",
+              coachReport: "",
+              finalReport: "",
+            }),
+            timeoutPromise
+          ]);
 
-        if (finalState.finalReport) {
-          // Telegram has a 4096 char limit per message
-          const report = finalState.finalReport;
-          if (report.length > 4000) {
-            const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
-            for (const chunk of chunks) {
-              await sendMessage(chatId, chunk);
+          if (isAborted(chatId)) return;
+
+          if (finalState?.finalReport) {
+            const report = finalState.finalReport;
+            if (report.length > 4000) {
+              const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
+              for (const chunk of chunks) {
+                await sendMessage(chatId, chunk);
+              }
+            } else {
+              await sendMessage(chatId, report);
             }
           } else {
-            await sendMessage(chatId, report);
+            await sendMessage(chatId, "❌ Review completed but no report was generated. You may not have transactions for this period.");
           }
-        } else {
-          await sendMessage(chatId, "❌ Review completed but no report was generated. You may not have transactions for this period.");
+        } catch (error: any) {
+          if (isAborted(chatId)) return;
+          console.error("Monthly Review Error:", error);
+          await sendMessage(chatId, `❌ Failed to generate monthly review: ${error.message}`);
         }
-      } catch (error: any) {
-        console.error("Monthly Review Error:", error);
-        await sendMessage(chatId, `❌ Failed to generate monthly review: ${error.message}`);
-      }
+      })();
       return NextResponse.json({ ok: true });
     }
 
     if (text && text.toLowerCase() === "/subscriptions") {
+      clearAbort(chatId);
       await sendMessage(chatId, `💳 **Subscription Advisor Activated!**\nAnalyzing your recurring bills and researching better deals... This may take a moment.`);
 
-      try {
-        const { createSubscriptionAdvisorGraph } = await import("@/agent/workflows/subscription-advisor");
-        const graph = createSubscriptionAdvisorGraph();
-        const finalState: any = await graph.invoke({
-          userId: userSettings.userId,
-          workspaceId,
-          subscriptions: [],
-          researchResults: [],
-          finalReport: null,
-        });
+      // Fire-and-forget: return 200 OK immediately to prevent Telegram webhook retries
+      (async () => {
+        try {
+          const { createSubscriptionAdvisorGraph } = await import("@/agent/workflows/subscription-advisor");
+          const graph = createSubscriptionAdvisorGraph();
+          
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Subscription analysis timed out after 90 seconds.")), 90000)
+          );
+          
+          const finalState: any = await Promise.race([
+            graph.invoke({
+              userId: userSettings.userId,
+              workspaceId,
+              subscriptions: [],
+              researchResults: [],
+              finalReport: null,
+            }),
+            timeoutPromise
+          ]);
 
-        if (finalState.finalReport) {
-          const report = finalState.finalReport;
-          if (report.length > 4000) {
-            const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
-            for (const chunk of chunks) {
-              await sendMessage(chatId, chunk);
+          if (isAborted(chatId)) return;
+
+          if (finalState?.finalReport) {
+            const report = finalState.finalReport;
+            if (report.length > 4000) {
+              const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
+              for (const chunk of chunks) {
+                await sendMessage(chatId, chunk);
+              }
+            } else {
+              await sendMessage(chatId, report);
             }
           } else {
-            await sendMessage(chatId, report);
+            await sendMessage(chatId, "✅ No active subscriptions found. You're keeping your fixed costs low!");
           }
-        } else {
-          await sendMessage(chatId, "✅ No active subscriptions found. You're keeping your fixed costs low!");
+        } catch (error: any) {
+          if (isAborted(chatId)) return;
+          console.error("Subscription Advisor Error:", error);
+          await sendMessage(chatId, `❌ Failed to analyze subscriptions: ${error.message}`);
         }
-      } catch (error: any) {
-        console.error("Subscription Advisor Error:", error);
-        await sendMessage(chatId, `❌ Failed to analyze subscriptions: ${error.message}`);
-      }
+      })();
       return NextResponse.json({ ok: true });
     }
 
@@ -541,59 +653,97 @@ export async function POST(req: Request) {
     }
 
     if (state === "TAX_AUDITOR") {
-      const sessionId = context.sessionId;
-      const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-      if (agentSession) {
-        const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
-        const graph = createTaxAuditorGraph();
-        
-        let currentState = agentSession.state as any;
-        currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-        
-        const finalState: any = await graph.invoke(currentState);
-        
-        await prisma.agentSession.update({
-          where: { id: sessionId },
-          data: { state: JSON.parse(JSON.stringify(finalState)) }
-        });
+      try {
+        const sessionId = context.sessionId;
+        const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+        if (agentSession) {
+          const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
+          const graph = createTaxAuditorGraph();
+          
+          let currentState = agentSession.state as any;
+          if (!currentState.messages) currentState.messages = [];
+          currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+          
+          const finalState: any = await graph.invoke(currentState);
+          
+          await prisma.agentSession.update({
+            where: { id: sessionId },
+            data: { state: JSON.parse(JSON.stringify(finalState)) }
+          });
 
-        if (finalState.awaitingUserInput) {
-          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
-        } else if (finalState.reportUrl) {
-          await sendMessage(chatId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+          if (finalState.awaitingUserInput) {
+            await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+          } else if (finalState.reportUrl) {
+            await sendMessage(chatId, `✅ Audit Complete! Download your Tax Report here:\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}${finalState.reportUrl}`);
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          } else {
+            await sendMessage(chatId, "✅ Tax audit completed.");
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          }
+        } else {
+          await sendMessage(chatId, "❌ Session expired. Please start again with /taxaudit.");
           await prisma.telegramSession.update({
             where: { chatId }, data: { state: "IDLE", context: {} }
           });
         }
+      } catch (error: any) {
+        console.error("Tax Auditor State Error:", error);
+        await sendMessage(chatId, `❌ Tax audit error: ${error.message}. Use /taxaudit to restart.`);
+        await prisma.telegramSession.update({
+          where: { chatId }, data: { state: "IDLE", context: {} }
+        });
       }
       return NextResponse.json({ ok: true });
     }
 
     if (state === "RECEIPT_SCANNER") {
-      const sessionId = context.sessionId;
-      const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-      if (agentSession) {
-        const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
-        const graph = createReceiptScannerGraph();
-        
-        let currentState = agentSession.state as any;
-        currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-        
-        const finalState: any = await graph.invoke(currentState);
-        
-        await prisma.agentSession.update({
-          where: { id: sessionId },
-          data: { state: JSON.parse(JSON.stringify(finalState)) }
-        });
+      try {
+        const sessionId = context.sessionId;
+        const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+        if (agentSession) {
+          const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
+          const graph = createReceiptScannerGraph();
+          
+          let currentState = agentSession.state as any;
+          if (!currentState.messages) currentState.messages = [];
+          currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+          
+          const finalState: any = await graph.invoke(currentState);
+          
+          await prisma.agentSession.update({
+            where: { id: sessionId },
+            data: { state: JSON.parse(JSON.stringify(finalState)) }
+          });
 
-        if (finalState.awaitingUserInput) {
-          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
-        } else if (finalState.finalMessage) {
-          await sendMessage(chatId, finalState.finalMessage);
+          if (finalState.awaitingUserInput) {
+            await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+          } else if (finalState.finalMessage) {
+            await sendMessage(chatId, finalState.finalMessage);
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          } else {
+            await sendMessage(chatId, "✅ Receipt processed.");
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          }
+        } else {
+          await sendMessage(chatId, "❌ Session expired. Please send a new receipt photo.");
           await prisma.telegramSession.update({
             where: { chatId }, data: { state: "IDLE", context: {} }
           });
         }
+      } catch (error: any) {
+        console.error("Receipt Scanner Error:", error);
+        await sendMessage(chatId, `❌ Receipt processing error: ${error.message}. Please try sending the photo again.`);
+        await prisma.telegramSession.update({
+          where: { chatId }, data: { state: "IDLE", context: {} }
+        });
       }
       return NextResponse.json({ ok: true });
     }
@@ -628,33 +778,52 @@ export async function POST(req: Request) {
     }
 
     if (state === "WEALTH_CHALLENGER") {
-      const sessionId = context.sessionId;
-      const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
-      if (agentSession) {
-        const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
-        const graph = createWealthChallengerGraph();
-        
-        let currentState = agentSession.state as any;
-        currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
-        
-        const finalState: any = await graph.invoke(currentState);
-        
-        await prisma.agentSession.update({
-          where: { id: sessionId },
-          data: { 
-            state: JSON.parse(JSON.stringify(finalState)),
-            status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
-          }
-        });
+      try {
+        const sessionId = context.sessionId;
+        const agentSession = await prisma.agentSession.findUnique({ where: { id: sessionId } });
+        if (agentSession) {
+          const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
+          const graph = createWealthChallengerGraph();
+          
+          let currentState = agentSession.state as any;
+          if (!currentState.messages) currentState.messages = [];
+          currentState.messages.push({ _type: "human", content: text, type: "human", role: "user" });
+          
+          const finalState: any = await graph.invoke(currentState);
+          
+          await prisma.agentSession.update({
+            where: { id: sessionId },
+            data: { 
+              state: JSON.parse(JSON.stringify(finalState)),
+              status: finalState.challengeResult ? "COMPLETED" : "RUNNING"
+            }
+          });
 
-        if (finalState.awaitingUserInput) {
-          await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
-        } else if (finalState.finalMessage) {
-          await sendMessage(chatId, finalState.finalMessage);
+          if (finalState.awaitingUserInput) {
+            await sendMessage(chatId, finalState.questionToUser || "Please clarify.");
+          } else if (finalState.finalMessage) {
+            await sendMessage(chatId, finalState.finalMessage);
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          } else {
+            await sendMessage(chatId, "🎮 Challenge processed.");
+            await prisma.telegramSession.update({
+              where: { chatId }, data: { state: "IDLE", context: {} }
+            });
+          }
+        } else {
+          await sendMessage(chatId, "❌ Session expired. Use /challenge to start a new one.");
           await prisma.telegramSession.update({
             where: { chatId }, data: { state: "IDLE", context: {} }
           });
         }
+      } catch (error: any) {
+        console.error("Wealth Challenger Error:", error);
+        await sendMessage(chatId, `❌ Challenge error: ${error.message}. Use /challenge to restart.`);
+        await prisma.telegramSession.update({
+          where: { chatId }, data: { state: "IDLE", context: {} }
+        });
       }
       return NextResponse.json({ ok: true });
     }
