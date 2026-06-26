@@ -13,7 +13,7 @@ async function testTaxAuditor() {
   try {
     const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
     const graph = createTaxAuditorGraph();
-    const result = await graph.invoke({
+    const result: any = await graph.invoke({
       userId, workspaceId, year: 2025,
       transactions: [], currentIndex: 0, classifications: [],
       awaitingUserInput: false, questionToUser: null, reportUrl: null, messages: [],
@@ -28,7 +28,7 @@ async function testMonthlyReview() {
   try {
     const { createMonthlyReviewGraph } = await import("@/agent/workflows/monthly-review");
     const graph = createMonthlyReviewGraph();
-    const result = await graph.invoke({
+    const result: any = await graph.invoke({
       userId, workspaceId, month: 5, year: 2025,
       financialData: "", accountantReport: "", coachReport: "", finalReport: "",
     });
@@ -43,7 +43,7 @@ async function testSubscriptionAdvisor() {
   try {
     const { createSubscriptionAdvisorGraph } = await import("@/agent/workflows/subscription-advisor");
     const graph = createSubscriptionAdvisorGraph();
-    const result = await graph.invoke({
+    const result: any = await graph.invoke({
       userId, workspaceId, subscriptions: [], researchResults: [], finalReport: null,
     });
     console.log(`✅ Subscription Advisor: report length=${(result.finalReport || "").length}`);
@@ -57,7 +57,7 @@ async function testWealthChallenger() {
   try {
     const { createWealthChallengerGraph } = await import("@/agent/workflows/wealth-challenger");
     const graph = createWealthChallengerGraph();
-    const result = await graph.invoke({
+    const result: any = await graph.invoke({
       userId, workspaceId, action: "PROPOSE",
       awaitingUserInput: false, messages: [],
     });
@@ -76,7 +76,7 @@ async function testChatbot() {
   console.log("\n=== Testing Chatbot (runAgent) ===");
   try {
     const { runAgent } = await import("@/agent");
-    const result = await runAgent(userId, "What is my financial summary?", []);
+    const result = await runAgent(userId, "What is my financial summary?", [], workspaceId);
     console.log(`✅ Chatbot: response length=${result.length}`);
     console.log(`   Preview: ${result.substring(0, 150)}...`);
     return true;

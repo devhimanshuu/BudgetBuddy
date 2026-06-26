@@ -532,7 +532,7 @@ export async function POST(req: Request) {
 
             const parsedData = JSON.parse(jsonMatch[0]);
             if (!parsedData.amount || !parsedData.category || !parsedData.type) {
-              const responseText = await ChatWithAIHeadless(userSettings.userId, text, []);
+              const responseText = await ChatWithAIHeadless(userSettings.userId, text, [], workspaceId);
               const shortText = responseText.substring(0, 200);
               const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
               const res = await fetch(ttsUrl);
@@ -585,7 +585,7 @@ export async function POST(req: Request) {
 
             if (state === "CHATBOT") {
               const history = context.history || [];
-              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history, workspaceId);
               history.push({ role: "user", content: text });
               history.push({ role: "assistant", content: responseText });
               const prunedHistory = history.slice(-10);
@@ -695,7 +695,7 @@ export async function POST(req: Request) {
 
             if (state === "DRIVE_MODE") {
               const history = context.history || [];
-              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history, workspaceId);
               history.push({ role: "user", content: text });
               history.push({ role: "assistant", content: responseText });
               const prunedHistory = history.slice(-10);
@@ -833,7 +833,7 @@ export async function POST(req: Request) {
 
             // Fallback for IDLE chat
             if (state === "IDLE") {
-              const responseText = await ChatWithAIHeadless(userSettings.userId, text, []);
+              const responseText = await ChatWithAIHeadless(userSettings.userId, text, [], workspaceId);
               await editInteractionResponse(interactionToken, responseText);
             }
           } catch (e) {

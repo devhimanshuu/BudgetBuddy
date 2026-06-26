@@ -620,35 +620,19 @@ export async function POST(req: Request) {
 
     if (state === "CHATBOT") {
       const history = context.history || [];
-      const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
-      
+      const responseText = await ChatWithAIHeadless(userSettings.userId, text, history, workspaceId);
+
       // Update history
       history.push({ role: "user", content: text });
       history.push({ role: "assistant", content: responseText });
       // Keep last 10 messages
       const prunedHistory = history.slice(-10);
-      
+
       await prisma.telegramSession.update({
         where: { chatId }, data: { context: { ...context, history: prunedHistory } }
       });
-      
-      await sendMessage(chatId, responseText);
 
-      // Feature 5: AI Voice Note Replies
-      try {
-        // Using Free Google Translate TTS as requested
-        const shortText = responseText.substring(0, 200);
-        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(shortText)}&tl=en&client=tw-ob`;
-        const res = await fetch(ttsUrl);
-        
-        if (res.ok) {
-          const audioBuffer = Buffer.from(await res.arrayBuffer());
-          await sendVoice(chatId, audioBuffer);
-        }
-      } catch (err) {
-        console.error("TTS failed", err);
-      }
-      
+      await sendMessage(chatId, responseText);
       return NextResponse.json({ ok: true });
     }
 
@@ -750,7 +734,7 @@ export async function POST(req: Request) {
 
     if (state === "DRIVE_MODE") {
       const history = context.history || [];
-      const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+      const responseText = await ChatWithAIHeadless(userSettings.userId, text, history, workspaceId);
       
       history.push({ role: "user", content: text });
       history.push({ role: "assistant", content: responseText });
@@ -852,9 +836,9 @@ export async function POST(req: Request) {
       const parsedData = JSON.parse(jsonMatch[0]);
       if (!parsedData.amount || !parsedData.category || !parsedData.type) {
         // Feature B: Autonomous Investigation Fallback
-        const responseText = await ChatWithAIHeadless(userSettings.userId, text, []);
+        const responseText = await ChatWithAIHeadless(userSettings.userId, text, [], workspaceId);
         await sendMessage(chatId, responseText);
-        
+
         if (message && message.voice) {
           try {
             const shortText = responseText.substring(0, 200);

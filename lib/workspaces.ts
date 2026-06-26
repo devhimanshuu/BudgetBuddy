@@ -11,9 +11,14 @@ export async function getActiveWorkspace(userId?: string) {
 		finalUserId = user.id;
 	}
 
-	// Try to get workspaceId from cookies
-	const cookieStore = await cookies(); // Note: cookies() is now async in some Next versions, or returns a promise
-	const workspaceCookie = cookieStore.get("active_workspace_id")?.value;
+	// Try to get workspaceId from cookies (only works in browser request contexts)
+	let workspaceCookie: string | undefined;
+	try {
+		const cookieStore = await cookies();
+		workspaceCookie = cookieStore.get("active_workspace_id")?.value;
+	} catch {
+		// cookies() throws in non-request contexts (webhooks, background tasks)
+	}
 
 	if (workspaceCookie) {
 		// Verify user is a member of this workspace

@@ -7,12 +7,25 @@ import { runAgentGraph } from "./graph";
 export async function runAgent(
   userId: string,
   message: string,
-  history: { role: "user" | "assistant"; content: string }[] = []
+  history: { role: "user" | "assistant"; content: string }[] = [],
+  workspaceId?: string
 ): Promise<string> {
   // 1. Fetch User Context
-  const workspace = await getActiveWorkspace(userId);
+  let wsId = workspaceId;
+  if (!wsId) {
+    try {
+      const workspace = await getActiveWorkspace(userId);
+      wsId = workspace?.id;
+    } catch {
+      // getActiveWorkspace may fail in webhook contexts (no cookies)
+      const membership = await prisma.workspaceMember.findFirst({
+        where: { userId, deletedAt: null },
+      });
+      wsId = membership?.workspaceId;
+    }
+  }
   const [personaData, userSettings] = await Promise.all([
-    getPersona(userId, workspace?.id),
+    getPersona(userId, wsId),
     prisma.userSettings.findUnique({ where: { userId } }),
   ]);
 
@@ -35,7 +48,7 @@ export async function runAgent(
   try {
     const response = await runAgentGraph(
       userId,
-      workspace?.id,
+      wsId,
       lcHistory,
       personaPrompt,
       currency

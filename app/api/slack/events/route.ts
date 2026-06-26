@@ -509,7 +509,7 @@ export async function POST(req: Request) {
 
             if (state === "CHATBOT") {
               const history = context.history || [];
-              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history, workspaceId);
               history.push({ role: "user", content: text });
               history.push({ role: "assistant", content: responseText });
               const prunedHistory = history.slice(-10);
@@ -611,7 +611,7 @@ export async function POST(req: Request) {
 
             if (state === "DRIVE_MODE") {
               const history = context.history || [];
-              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history);
+              const responseText = await ChatWithAIHeadless(userSettings.userId, text, history, workspaceId);
               history.push({ role: "user", content: text });
               history.push({ role: "assistant", content: responseText });
               const prunedHistory = history.slice(-10);
@@ -789,7 +789,7 @@ export async function POST(req: Request) {
               
               const parsedData = JSON.parse(jsonMatch[0]);
               if (!parsedData.amount || !parsedData.category || !parsedData.type) {
-                const responseText = await ChatWithAIHeadless(userSettings.userId, text, []);
+                const responseText = await ChatWithAIHeadless(userSettings.userId, text, [], workspaceId);
                 const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(responseText.substring(0, 200))}&tl=en&client=tw-ob`;
                 await sendSlackMessage(botToken, channelId, `${responseText}\n🔊 Listen: ${ttsUrl}`);
                 return;

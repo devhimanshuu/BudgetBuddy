@@ -41,7 +41,7 @@ If you cannot find a field, use null. Be precise with the amount.`;
 			const groq = new Groq({ apiKey: groqApiKey });
 
 			const completion = await groq.chat.completions.create({
-				model: "llama-3.2-90b-vision-preview",
+				model: "llama-3.2-11b-vision-preview",
 				messages: [
 					{
 						role: "user",

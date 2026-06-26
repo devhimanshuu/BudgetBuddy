@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { HumanMessage } from "@langchain/core/messages";
+import type { TaxAuditorState } from "@/agent/workflows/tax-auditor";
 import { getAnnualTransactions } from "@/agent/tools/tax-tools";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 
@@ -20,6 +21,7 @@ vi.mock("@/lib/prisma", () => ({
     },
     category: {
       findFirst: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({ id: "cat-1", name: "Food", icon: "🧾", color: "#3b82f6", type: "expense" }),
       upsert: vi.fn().mockResolvedValue({ id: "cat-1", name: "Test", icon: "🏷️" }),
     },
     $transaction: vi.fn((fn: any) => fn({
@@ -53,7 +55,7 @@ vi.mock("@langchain/tavily", () => ({
 
 // Mock tax tools
 vi.mock("@/agent/tools/tax-tools", () => ({
-  getAnnualTransactions: vi.fn().mockResolvedValue([]),
+  getAnnualTransactions: vi.fn().mockResolvedValue([] as any[]),
   generateTaxPDF: vi.fn().mockResolvedValue("/reports/test.pdf"),
 }));
 
@@ -114,8 +116,8 @@ describe("Tax Auditor Workflow", () => {
 
   it("should classify transactions and generate report", async () => {
     vi.mocked(getAnnualTransactions).mockResolvedValue([
-      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 150, description: "AWS Hosting", category: "Software" },
-      { id: "tx-2", date: new Date("2026-01-20T00:00:00.000Z"), amount: 12, description: "Netflix", category: "Entertainment" },
+      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 150, description: "AWS Hosting", category: "Software" } as any,
+      { id: "tx-2", date: new Date("2026-01-20T00:00:00.000Z"), amount: 12, description: "Netflix", category: "Entertainment" } as any,
     ]);
 
     mockInvoke
@@ -125,7 +127,7 @@ describe("Tax Auditor Workflow", () => {
     const { createTaxAuditorGraph } = await import("@/agent/workflows/tax-auditor");
     const graph = createTaxAuditorGraph();
 
-    const result = await graph.invoke({
+    const result: any = await graph.invoke({
       userId: "user-1",
       workspaceId: "ws-1",
       year: 2026,
@@ -146,7 +148,7 @@ describe("Tax Auditor Workflow", () => {
 
   it("should handle deserialized state with plain object messages (not instanceof HumanMessage)", async () => {
     vi.mocked(getAnnualTransactions).mockResolvedValue([
-      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 150, description: "AWS Hosting", category: "Software" },
+      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 150, description: "AWS Hosting", category: "Software" } as any,
     ]);
 
     // Classify as ambiguous → asks user
@@ -182,14 +184,14 @@ describe("Tax Auditor Workflow", () => {
     mockInvoke.mockResolvedValueOnce({ content: "business" });
 
     // The graph should handle the plain object message correctly
-    const finalState = await graph.invoke(deserialized);
+    const finalState: any = await graph.invoke(deserialized);
 
     expect(finalState.classifications.length).toBeGreaterThanOrEqual(1);
   });
 
   it("should handle awaitingUserInput with unparseable message by defaulting to personal", async () => {
     vi.mocked(getAnnualTransactions).mockResolvedValue([
-      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 150, description: "AWS Hosting", category: "Software" },
+      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 150, description: "AWS Hosting", category: "Software" } as any,
     ]);
 
     // Classify as ambiguous
@@ -219,7 +221,7 @@ describe("Tax Auditor Workflow", () => {
     const deserialized = serializeAndDeserialize(pausedState);
     deserialized.messages.push(plainAIMessage("some response"));
 
-    const finalState = await graph.invoke(deserialized);
+    const finalState: any = await graph.invoke(deserialized);
 
     // Should default to personal and continue (not hang)
     expect(finalState.awaitingUserInput).toBe(false);
@@ -252,7 +254,7 @@ describe("Tax Auditor Workflow", () => {
 
   it("should route to generate_report when all transactions are classified", async () => {
     vi.mocked(getAnnualTransactions).mockResolvedValue([
-      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 50, description: "Lunch", category: "Food" },
+      { id: "tx-1", date: new Date("2026-01-15T00:00:00.000Z"), amount: 50, description: "Lunch", category: "Food" } as any,
     ]);
 
     mockInvoke.mockResolvedValueOnce({
@@ -402,7 +404,7 @@ describe("Receipt Scanner Workflow", () => {
   });
 
   it("should handle failed receipt extraction", async () => {
-    vi.mocked(ExtractReceiptData).mockResolvedValueOnce({ success: false, data: null });
+    vi.mocked(ExtractReceiptData).mockResolvedValueOnce({ success: false, data: undefined });
 
     const { createReceiptScannerGraph } = await import("@/agent/workflows/receipt-scanner");
     const graph = createReceiptScannerGraph();

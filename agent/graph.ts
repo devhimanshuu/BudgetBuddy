@@ -63,8 +63,16 @@ Be concise and helpful, since you are chatting on Telegram/Discord/Slack. Use pl
 DO NOT use custom React tags like [BAR_CHART: ...]. If the user asks for a chart or summary, provide a beautiful text-based summary using bullet points or emojis.`
     });
 
-    const response = await modelWithTools.invoke([systemMessage, ...state.messages]);
-    return { messages: [response] };
+    try {
+      const response = await modelWithTools.invoke([systemMessage, ...state.messages]);
+      return { messages: [response] };
+    } catch (error: any) {
+      console.error("Agent model invocation error:", error);
+      const errorMsg = new AIMessage({
+        content: `I'm having trouble processing your request right now. Please try again in a moment. (${error.message || "Unknown error"})`,
+      });
+      return { messages: [errorMsg] };
+    }
   };
 
   const callToolsNode = async (state: AgentState) => {
@@ -126,6 +134,11 @@ DO NOT use custom React tags like [BAR_CHART: ...]. If the user asks for a chart
     currency,
   });
 
-  const lastMsg = (finalState as any).messages[(finalState as any).messages.length - 1];
-  return lastMsg.content as string;
+  const messages = (finalState as any).messages;
+  const lastMsg = messages[messages.length - 1];
+  const content = lastMsg?.content;
+  if (!content || (typeof content === "string" && content.trim() === "")) {
+    return "I processed your request but couldn't generate a response. Please try rephrasing your question.";
+  }
+  return typeof content === "string" ? content : JSON.stringify(content);
 }

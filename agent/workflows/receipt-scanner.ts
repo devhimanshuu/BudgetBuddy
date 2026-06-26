@@ -128,21 +128,68 @@ Output ONLY 'yes' or 'no'.`);
   const executeNode = async (state: ReceiptScannerState): Promise<any> => {
     if (!state.extractedData) return {};
     const { amount, category, merchant } = state.extractedData;
-    
+
     const txnCategory = category || "Other";
     const txnAmount = amount || 0;
     const txnMerchant = merchant || "Store";
 
-    let finalMsg = `✅ Recorded $${txnAmount} for ${txnCategory} at ${txnMerchant}.`;
-
-    if (state.isGroupMeal && state.friendsToSplitWith && state.friendsToSplitWith.length > 0) {
-      const numPeople = state.friendsToSplitWith.length + 1; // user + friends
-      const splitAmount = (txnAmount / numPeople).toFixed(2);
-      
-      finalMsg += `\n\nI also marked that you split this with ${state.friendsToSplitWith.join(", ")}. They each owe you $${splitAmount}. (Recorded in BudgetBuddy debts!)`;
+    if (txnAmount <= 0) {
+      return { finalMessage: "❌ Could not determine a valid amount from the receipt. Please log it manually." };
     }
 
-    return { finalMessage: finalMsg };
+    try {
+      // Auto-create category if needed
+      let categoryRow = await prisma.category.findFirst({
+        where: { userId: state.userId, name: { equals: txnCategory, mode: "insensitive" }, deletedAt: null },
+      });
+      if (!categoryRow) {
+        categoryRow = await prisma.category.create({
+          data: { userId: state.userId, workspaceId: state.workspaceId || null, name: txnCategory, icon: "🧾", color: "#3b82f6", type: "expense" },
+        });
+      }
+
+      const date = new Date();
+      await prisma.$transaction(async (tx) => {
+        await tx.transaction.create({
+          data: {
+            userId: state.userId,
+            workspaceId: state.workspaceId || null,
+            amount: txnAmount,
+            description: `${txnMerchant} (receipt scan)`,
+            date,
+            type: "expense",
+            category: categoryRow!.name,
+            categoryIcon: categoryRow!.icon,
+            status: "APPROVED",
+          },
+        });
+
+        await tx.monthlyHistory.upsert({
+          where: { day_month_year_userId: { userId: state.userId, day: date.getUTCDate(), month: date.getUTCMonth(), year: date.getUTCFullYear() } },
+          create: { userId: state.userId, workspaceId: state.workspaceId || null, day: date.getUTCDate(), month: date.getUTCMonth(), year: date.getUTCFullYear(), expense: txnAmount, income: 0, investment: 0 },
+          update: { expense: { increment: txnAmount } },
+        });
+
+        await tx.yearHistory.upsert({
+          where: { month_year_userId: { userId: state.userId, month: date.getUTCMonth(), year: date.getUTCFullYear() } },
+          create: { userId: state.userId, workspaceId: state.workspaceId || null, month: date.getUTCMonth(), year: date.getUTCFullYear(), expense: txnAmount, income: 0, investment: 0 },
+          update: { expense: { increment: txnAmount } },
+        });
+      });
+
+      let finalMsg = `✅ Recorded $${txnAmount} for ${txnCategory} at ${txnMerchant}.`;
+
+      if (state.isGroupMeal && state.friendsToSplitWith && state.friendsToSplitWith.length > 0) {
+        const numPeople = state.friendsToSplitWith.length + 1;
+        const splitAmount = (txnAmount / numPeople).toFixed(2);
+        finalMsg += `\n\nI also marked that you split this with ${state.friendsToSplitWith.join(", ")}. They each owe you $${splitAmount}.`;
+      }
+
+      return { finalMessage: finalMsg };
+    } catch (error: any) {
+      console.error("Receipt transaction save error:", error);
+      return { finalMessage: `⚠️ Receipt read: $${txnAmount} for ${txnCategory} at ${txnMerchant}, but failed to save: ${error.message}` };
+    }
   };
 
   const shouldContinue = (state: ReceiptScannerState) => {
