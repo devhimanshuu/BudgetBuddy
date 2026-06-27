@@ -1,8 +1,8 @@
 import { StateGraph } from "@langchain/langgraph";
-import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import prisma from "@/lib/prisma";
 import { STRICT_ACCOUNTANT_PROMPT, LIFESTYLE_COACH_PROMPT, MODERATOR_PROMPT } from "../prompts/review-prompts";
+import { createChatModel } from "../model";
 
 export interface MonthlyReviewState {
   userId: string;
@@ -27,14 +27,11 @@ const reviewStateChannels = {
 };
 
 export function createMonthlyReviewGraph() {
-  const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) throw new Error("GROQ_API_KEY is missing");
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) {
+    throw new Error("No LLM provider configured (set GROQ_API_KEY or OPENROUTER_API_KEY)");
+  }
 
-  const model = new ChatGroq({
-    apiKey: groqApiKey,
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.5,
-  });
+  const model = createChatModel({ temperature: 0.5 });
 
   const gatherDataNode = async (state: MonthlyReviewState) => {
     // 0-indexed for Date constructor, so month - 1

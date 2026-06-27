@@ -1,8 +1,8 @@
 import { StateGraph } from "@langchain/langgraph";
-import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage, BaseMessage } from "@langchain/core/messages";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 import prisma from "@/lib/prisma";
+import { createChatModel } from "../model";
 
 export interface ReceiptScannerState {
   userId: string;
@@ -36,14 +36,11 @@ const receiptStateChannels = {
 };
 
 export function createReceiptScannerGraph() {
-  const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) throw new Error("GROQ_API_KEY is missing");
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) {
+    throw new Error("No LLM provider configured (set GROQ_API_KEY or OPENROUTER_API_KEY)");
+  }
 
-  const model = new ChatGroq({
-    apiKey: groqApiKey,
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.1,
-  });
+  const model = createChatModel({ temperature: 0.1 });
 
   const extractNode = async (state: ReceiptScannerState): Promise<any> => {
     if (state.extractedData) return {}; // Already extracted

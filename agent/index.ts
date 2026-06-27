@@ -56,6 +56,10 @@ export async function runAgent(
     return response;
   } catch (error: any) {
     console.error("Agent Error:", error);
+    const msg = String(error?.message || "");
+    if (msg.includes("429") || msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("rate_limit")) {
+      return "⏳ I've hit my AI usage limit for now (all providers are busy or rate-limited). Please try again in a little while.";
+    }
     return `❌ Sorry, I encountered an error while processing your request: ${error.message}`;
   }
 }

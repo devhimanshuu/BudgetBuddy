@@ -1,7 +1,7 @@
 import { StateGraph } from "@langchain/langgraph";
-import { ChatGroq } from "@langchain/groq";
 import { SystemMessage, HumanMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 import { getAnnualTransactions, generateTaxPDF } from "../tools/tax-tools";
+import { createChatModel } from "../model";
 
 // The state of the Tax Auditor workflow
 export interface TaxAuditorState {
@@ -34,14 +34,11 @@ const taxStateChannels = {
  * Creates and returns the Tax Auditor StateGraph application.
  */
 export function createTaxAuditorGraph() {
-  const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) throw new Error("GROQ_API_KEY is missing");
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) {
+    throw new Error("No LLM provider configured (set GROQ_API_KEY or OPENROUTER_API_KEY)");
+  }
 
-  const model = new ChatGroq({
-    apiKey: groqApiKey,
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.1,
-  });
+  const model = createChatModel({ temperature: 0.1 });
 
   // Node 1: Fetch transactions if not already fetched
   const fetchTransactionsNode = async (state: TaxAuditorState) => {

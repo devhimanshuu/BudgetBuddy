@@ -1,7 +1,7 @@
 import { StateGraph } from "@langchain/langgraph";
-import { ChatGroq } from "@langchain/groq";
 import { BaseMessage, AIMessage, ToolMessage, SystemMessage } from "@langchain/core/messages";
 import { createTools } from "./tools";
+import { createToolModel } from "./model";
 
 // Define the state interface
 export interface AgentState {
@@ -20,20 +20,13 @@ export async function runAgentGraph(
   personaPrompt: string,
   currency: string
 ): Promise<string> {
-  const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) {
-    throw new Error("GROQ_API_KEY is not defined");
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) {
+    throw new Error("No LLM provider configured (set GROQ_API_KEY or OPENROUTER_API_KEY)");
   }
 
-  // 1. Initialize tools and model
+  // 1. Initialize tools and model (with automatic Groq -> OpenRouter fallback)
   const tools = createTools(userId, workspaceId);
-  const model = new ChatGroq({
-    apiKey: groqApiKey,
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.5,
-  });
-
-  const modelWithTools = model.bindTools(tools);
+  const modelWithTools = createToolModel(tools, { temperature: 0.5 });
 
   // 2. Define graph state channels
   const agentStateChannels = {

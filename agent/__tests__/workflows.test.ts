@@ -34,15 +34,19 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-// Mock Groq LLM — must be a proper constructor (class)
+// Mock the shared model factory so workflows get a fake, invokable model.
+// (createChatModel/createToolModel wrap Groq with an OpenRouter fallback; we
+// bypass all of that here and just return an object exposing `invoke`.)
 const mockInvoke = vi.fn();
-vi.mock("@langchain/groq", () => {
+vi.mock("@/agent/model", () => {
+  const fakeModel = {
+    invoke: mockInvoke,
+    bindTools() { return this; },
+    withFallbacks() { return this; },
+  };
   return {
-    ChatGroq: class MockChatGroq {
-      constructor() {}
-      invoke = mockInvoke;
-      bindTools() { return this; }
-    },
+    createChatModel: () => fakeModel,
+    createToolModel: () => fakeModel,
   };
 });
 

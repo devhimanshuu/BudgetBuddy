@@ -4,6 +4,7 @@ import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 import { syncTransactionToNotion } from "@/lib/notion";
+import { completeChat } from "@/lib/llm";
 
 const getGroqClient = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -821,13 +822,12 @@ export async function POST(req: Request) {
         User's message: "${text}"
         Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense", "sentiment": "neutral", "empatheticResponse": null}
       `;
-      const response = await getGroqClient().chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0,
-      });
+      const responseContent = await completeChat(
+        [{ role: "user", content: prompt }],
+        { temperature: 0 }
+      );
 
-      const jsonMatch = (response.choices[0].message.content || "").match(/\{[\s\S]*\}/);
+      const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         await sendMessage(chatId, "❌ I couldn't understand that. Try `50 for food`.");
         return NextResponse.json({ ok: true });
@@ -918,12 +918,11 @@ export async function POST(req: Request) {
           Extract the splits. User message: "${text}"
           Output ONLY a valid JSON array of objects. Example: [{"amount": 10, "category": "Drinks"}]
         `;
-        const response = await getGroqClient().chat.completions.create({
-          model: "llama-3.3-70b-versatile",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0,
-        });
-        const jsonMatch = (response.choices[0].message.content || "").match(/\[[\s\S]*\]/);
+        const splitContent = await completeChat(
+          [{ role: "user", content: prompt }],
+          { temperature: 0 }
+        );
+        const jsonMatch = splitContent.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           const splits = JSON.parse(jsonMatch[0]);
           for (const s of splits) {

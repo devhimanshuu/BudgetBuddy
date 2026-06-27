@@ -1,7 +1,7 @@
 import { StateGraph } from "@langchain/langgraph";
-import { ChatGroq } from "@langchain/groq";
 import { SystemMessage } from "@langchain/core/messages";
 import { getSplitwiseFriends, SplitwiseFriend } from "../tools/splitwise-tools";
+import { createChatModel } from "../model";
 
 export interface DebtNegotiatorState {
   userId: string;
@@ -20,14 +20,11 @@ const debtStateChannels = {
 };
 
 export function createDebtNegotiatorGraph() {
-  const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) throw new Error("GROQ_API_KEY is missing");
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) {
+    throw new Error("No LLM provider configured (set GROQ_API_KEY or OPENROUTER_API_KEY)");
+  }
 
-  const model = new ChatGroq({
-    apiKey: groqApiKey,
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.4,
-  });
+  const model = createChatModel({ temperature: 0.4 });
 
   const fetchNode = async (state: DebtNegotiatorState) => {
     try {
