@@ -494,7 +494,6 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                 pendingReceipt={pendingReceipt}
                                 onConfirmReceipt={handleConfirmReceipt}
                                 onCancelReceipt={() => setPendingReceipt(null)}
-                                onSelectCommand={handleSelectAgentCommand}
                             />
                         </>
                     )}
