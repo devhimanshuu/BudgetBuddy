@@ -1,10 +1,11 @@
 "use client";
 
 import React, { RefObject } from "react";
-import { Mic, MicOff, ImagePlus, Send } from "lucide-react";
+import { Mic, MicOff, ImagePlus, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { AgentFeaturesMenu } from "./AgentFeaturesMenu";
 
 interface ChatInputProps {
     input: string;
@@ -19,6 +20,7 @@ interface ChatInputProps {
     pendingReceipt: any;
     onConfirmReceipt: () => void;
     onCancelReceipt: () => void;
+    onSelectCommand?: (command: string) => void;
 }
 
 export const ChatInput = ({
@@ -34,6 +36,7 @@ export const ChatInput = ({
     pendingReceipt,
     onConfirmReceipt,
     onCancelReceipt,
+    onSelectCommand,
 }: ChatInputProps) => {
     return (
         <div className="p-4 border-t border-border bg-background/50">
@@ -72,6 +75,13 @@ export const ChatInput = ({
                     className="hidden"
                 />
                 <div className="flex gap-1">
+                    {onSelectCommand && (
+                        <AgentFeaturesMenu
+                            onSelectCommand={onSelectCommand}
+                            variant="dropdown"
+                            className="h-10 px-2.5 rounded-xl border-border bg-background hover:bg-muted"
+                        />
+                    )}
                     <Button
                         type="button"
                         variant="ghost"
@@ -92,6 +102,7 @@ export const ChatInput = ({
                             "h-10 w-10 shrink-0",
                             isListening && "text-red-500 animate-pulse bg-red-500/10"
                         )}
+                        title={isListening ? "Stop listening" : "Voice input"}
                     >
                         {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4 text-muted-foreground" />}
                     </Button>

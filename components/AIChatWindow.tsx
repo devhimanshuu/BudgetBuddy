@@ -29,6 +29,7 @@ import { ChatInput } from "./chat/ChatInput";
 import { MessageItem } from "./chat/MessageItem";
 import { HealthScoreBar } from "./chat/HealthScoreBar";
 import { detectVoiceCommand } from "./chat/utils";
+import { AgentFeaturesMenu } from "./chat/AgentFeaturesMenu";
 
 import { usePersonaTheme } from "./providers/PersonaThemeProvider";
 
@@ -219,6 +220,17 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
             setIsLoading(false);
         }
     }, [input, isLoading, messages, router, typeMessage, refreshPersona]);
+
+    const handleSelectAgentCommand = useCallback((cmd: string) => {
+        if (cmd === "/drive") {
+            const newState = !isAutoSpeak;
+            setIsAutoSpeak(newState);
+            toast.success(`Hands-free Voice Mode: ${newState ? "Enabled" : "Disabled"}`, { icon: "🎙️" });
+            return;
+        }
+        setInput(cmd);
+        handleSend(cmd);
+    }, [isAutoSpeak, handleSend]);
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -412,38 +424,29 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                     {!isMinimized && (
                         <>
                             {messages.length === 0 && (
-                                <div className="px-4 pt-4">
-                                    <div className="rounded-2xl border border-border/70 bg-secondary/70 p-3 text-sm text-muted-foreground">
-                                        <p className="font-semibold text-foreground mb-2">Agent Chat Instructions</p>
-                                        <p className="mb-2">Use the AI chat for any finance question, or trigger the same agent workflows from Slack, Discord, and Telegram.</p>
-                                        <ul className="list-disc ml-5 space-y-1 text-xs sm:text-sm">
-                                            <li><span className="font-semibold">/chatbot</span> — open the advisor chat mode</li>
-                                            <li><span className="font-semibold">/drive</span> — hands-free voice mode</li>
-                                            <li><span className="font-semibold">/taxaudit</span> — run the tax auditor workflow</li>
-                                            <li><span className="font-semibold">/challenge</span> — start a wealth challenge</li>
-                                            <li><span className="font-semibold">/review</span> — request a monthly spending review</li>
-                                            <li><span className="font-semibold">/subscriptions</span> — audit recurring bills</li>
-                                            <li>Send a receipt photo or voice note for intelligent parsing and transaction logging.</li>
-                                        </ul>
-                                    </div>
+                                <div className="px-4 pt-3">
+                                    <AgentFeaturesMenu onSelectCommand={handleSelectAgentCommand} variant="collapsible" />
                                 </div>
                             )}
                             <div className="flex-1 overflow-y-auto p-4 min-h-0 custom-scrollbar">
                                 <div className="space-y-4 pr-1">
                                     {messages.length === 0 && (
-                                        <div className="text-center py-6">
+                                        <div className="text-center py-4">
                                             <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
-                                                <Bot className="w-6 h-6" />
+                                                <Bot className="w-6 h-6 text-amber-500" />
                                             </div>
-                                            <p className="text-sm text-balance text-muted-foreground px-4">
+                                            <p className="text-sm text-balance text-muted-foreground px-4 font-medium">
                                                 Hello! I&apos;m your AI Financial Analyst. Ask me anything about your spending, budgets, or savings goals!
                                             </p>
-                                            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                                            <div className="mt-3 flex flex-wrap gap-2 justify-center">
                                                 {["Spending analysis", "Budget status", "Savings tips"].map((tip) => (
                                                     <button
                                                         key={tip}
-                                                        onClick={() => setInput(tip)}
-                                                        className="text-xs px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 border border-border transition-colors text-muted-foreground"
+                                                        onClick={() => {
+                                                            setInput(tip);
+                                                            handleSend(tip);
+                                                        }}
+                                                        className="text-xs px-3 py-1.5 rounded-full bg-secondary hover:bg-amber-500/10 hover:border-amber-500/30 border border-border transition-all text-muted-foreground hover:text-amber-500"
                                                     >
                                                         {tip}
                                                     </button>
@@ -491,6 +494,7 @@ export function AIChatWindow({ isOpen, onClose }: AIChatWindowProps) {
                                 pendingReceipt={pendingReceipt}
                                 onConfirmReceipt={handleConfirmReceipt}
                                 onCancelReceipt={() => setPendingReceipt(null)}
+                                onSelectCommand={handleSelectAgentCommand}
                             />
                         </>
                     )}
