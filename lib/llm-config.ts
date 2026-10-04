@@ -16,7 +16,17 @@
 export const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
-export const GROQ_MODEL = "llama-3.3-70b-versatile";
+export const GROQ_MODEL = "openai/gpt-oss-120b";
+
+/**
+ * Extra Groq models tried in order if `GROQ_MODEL` fails (same API key,
+ * verified to be present in this account's /models list and tool-calling
+ * capable). Keep in sync with https://console.groq.com/docs/models.
+ */
+export const GROQ_FALLBACK_MODELS: string[] = [
+  "openai/gpt-oss-20b",
+  "qwen/qwen3.8-27b",
+];
 
 export const REQUEST_TIMEOUT_MS = 30000;
 
@@ -25,9 +35,9 @@ export const REQUEST_TIMEOUT_MS = 30000;
  * paid model last. Edit this list to add/remove fallbacks in one place.
  */
 export const OPENROUTER_FALLBACK_MODELS: string[] = [
-  "openai/gpt-oss-120b:free",
-  "openai/gpt-oss-20b:free",
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "qwen/qwen3-next-80b-a3b-instruct:free",
+  "qwen/qwen3.8-27b:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "openai/gpt-oss-120b",
+  "openrouter/free",
   "meta-llama/llama-3.1-8b-instruct", // paid, reliable final fallback
 ];

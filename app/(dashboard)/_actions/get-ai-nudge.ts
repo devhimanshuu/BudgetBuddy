@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
+import { GROQ_MODEL, OPENROUTER_FALLBACK_MODELS } from "@/lib/llm-config";
 
 export interface AiNudgeResult {
     message: string;
@@ -158,7 +159,7 @@ export async function GetAiNudge(): Promise<AiNudgeResult | null> {
             const groq = new Groq({ apiKey: groqApiKey });
             const completion = await groq.chat.completions.create({
                 messages: [{ role: "user", content: prompt }],
-                model: "llama-3.3-70b-versatile",
+                model: GROQ_MODEL,
             });
             message = completion.choices[0]?.message?.content || "";
         } else if (openRouterApiKey) {
@@ -167,7 +168,7 @@ export async function GetAiNudge(): Promise<AiNudgeResult | null> {
                 apiKey: openRouterApiKey,
             });
             const completion = await client.chat.completions.create({
-                model: "meta-llama/llama-3.3-70b-instruct:free",
+                model: OPENROUTER_FALLBACK_MODELS[0],
                 messages: [{ role: "user", content: prompt }],
             });
             message = completion.choices[0]?.message?.content || "";

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import Groq from "groq-sdk";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
+import { GROQ_MODEL } from "@/lib/llm-config";
 
 // Helper: Ensure Category Exists
 async function ensureCategory(workspaceId: string, userId: string, categoryName: string, type: string) {
@@ -132,7 +133,7 @@ Return JSON ONLY with:
       try {
         const completion = await groq.chat.completions.create({
           messages: [{ role: "user", content: prompt }],
-          model: "llama-3.3-70b-versatile",
+          model: GROQ_MODEL,
           temperature: 0.1,
           response_format: { type: "json_object" }
         });

@@ -11,6 +11,12 @@ import { DeleteTransaction } from "../transactions/_actions/deleteTransaction";
 import { calculateLevel } from "@/lib/gamification";
 import { getPersona } from "@/lib/persona";
 import { getActiveWorkspace } from "@/lib/workspaces";
+import {
+	GROQ_MODEL,
+	GROQ_FALLBACK_MODELS,
+	OPENROUTER_FALLBACK_MODELS,
+	REQUEST_TIMEOUT_MS,
+} from "@/lib/llm-config";
 
 export type ChatAIResponse = {
 	text?: string;
@@ -45,6 +51,11 @@ export async function ChatWithAI(
 	let contextData = "";
 	let currency = "USD";
 	let availableCategories: string[] = [];
+
+	// Every provider/model endpoint we will try, in order, plus the reason
+	// each one failed (surfaced to the user instead of being swallowed).
+	const attempts: { label: string; run: () => Promise<any> }[] = [];
+	const providerErrors: string[] = [];
 
 	try {
 		const workspace = await getActiveWorkspace(user.id);
@@ -329,141 +340,36 @@ ${contextData}`;
 			});
 		}
 
-		// Attempt 1: Groq
-		if (groqApiKey) {
-			try {
-				const groq = new Groq({ apiKey: groqApiKey });
-				const messages: any[] = [
-					{ role: "system", content: systemInstruction },
-					...history.map((msg) => ({
-						role: (msg.role === "model" ? "assistant" : "user") as any,
-						content: msg.parts.map((p) => p.text || "").join(" "),
-					})),
-					{ role: "user", content: message },
-				];
+		// --- Shared response handling for every provider/model attempt ---
+		const buildMessages = () => [
+			{ role: "system", content: systemInstruction },
+			...history
+				.map((msg) => ({
+					role: (msg.role === "model" ? "assistant" : "user") as any,
+					content: msg.parts.map((p) => p.text || "").join(" "),
+				}))
+				// Providers reject empty user/assistant turns; dropping them keeps
+				// a stray blank history entry from failing the whole request.
+				.filter((msg) => (msg.content || "").trim().length > 0),
+			{ role: "user", content: message },
+		];
 
-				const groqModels = ["llama-3.3-70b-versatile", "llama3-70b-8192"];
+		// Executes any requested tool calls and builds the payload returned to
+		// the chat window. Returns null when the model gave neither tools nor
+		// text, so the caller can move on to the next model.
+		const buildReply = async (
+			responseMessage: any,
+		): Promise<ChatAIResponse | null> => {
+			let toolSummary = "";
+			let filter: any = undefined;
+			let component: any = undefined;
 
-				for (const model of groqModels) {
+			if (responseMessage?.tool_calls?.length > 0) {
+				for (const toolCall of responseMessage.tool_calls) {
+					// A malformed tool payload or a failed DB write must not be
+					// treated as a provider outage: it used to bubble up, retry
+					// every model, and surface as "AI Service Unavailable."
 					try {
-						const completion = await groq.chat.completions.create({
-							messages,
-							model,
-							tools,
-							tool_choice: "auto",
-						});
-
-						const responseMessage = completion.choices[0].message;
-
-						if (
-							responseMessage.tool_calls &&
-							responseMessage.tool_calls.length > 0
-						) {
-							let toolSummary = "";
-							let filter = undefined;
-							let component = undefined;
-
-							for (const toolCall of responseMessage.tool_calls) {
-								const tCall = toolCall as any;
-								const args = JSON.parse(tCall.function?.arguments || "{}");
-								const name = tCall.function?.name;
-
-								if (name === "create_transaction") {
-									await CreateTransaction({
-										amount: args.amount,
-										description: args.description || "AI Created",
-										date: new Date(args.date),
-										category: args.category,
-										type: args.type,
-									});
-									toolSummary += `✅ Created ${args.type} of ${currency}${args.amount} for "${args.description}"\n`;
-								} else if (name === "search_transactions") {
-									filter = args;
-									toolSummary += `🔍 Filtering transactions...\n`;
-								} else if (name === "simulate_future") {
-									const months = args.months || 12;
-									const totalImpact =
-										args.monthlyImpact * months - (args.initialCost || 0);
-									toolSummary += `📈 Simulation: "${args.description}" total impact ${currency}${totalImpact.toFixed(2)}.\n`;
-									component = `[SIMULATION_CARD: ${JSON.stringify({
-										description: args.description,
-										initialCost: args.initialCost || 0,
-										monthlyImpact: args.monthlyImpact,
-										totalImpact,
-										months,
-										currency,
-									})}]`;
-								} else if (name === "edit_transaction") {
-									const cleanId = args.id.replace("ID[", "").replace("]", "");
-									await UpdateTransaction(cleanId, {
-										amount: args.amount,
-										description: args.description,
-										date: new Date(args.date),
-										category: args.category,
-										type: args.type,
-									});
-									toolSummary += `✏️ Updated transaction "${args.description}".\n`;
-								} else if (name === "delete_transaction") {
-									const cleanId = args.id.replace("ID[", "").replace("]", "");
-									await DeleteTransaction(cleanId);
-									toolSummary += `🗑️ Transaction deleted.\n`;
-								}
-							}
-
-							return {
-								text: toolSummary.trim() || responseMessage.content || "",
-								persona,
-								healthScore,
-								level: levelInfo.currentLevel.level,
-								filter,
-								component,
-							};
-						}
-						return {
-							text: responseMessage.content || "",
-							persona,
-							healthScore,
-							level: levelInfo.currentLevel.level,
-						};
-					} catch (e) {
-						continue;
-					}
-				}
-			} catch (e) {
-				console.error("Groq Error", e);
-			}
-		}
-
-		// Attempt 2: OpenRouter
-		if (openRouterApiKey) {
-			try {
-				const openai = new OpenAI({
-					baseURL: "https://openrouter.ai/api/v1",
-					apiKey: openRouterApiKey,
-				});
-				const response = await openai.chat.completions.create({
-					model: "google/gemini-2.0-flash-exp:free",
-					messages: [
-						{ role: "system", content: systemInstruction },
-						...history.map((msg) => ({
-							role: (msg.role === "model" ? "assistant" : "user") as any,
-							content: msg.parts.map((p) => p.text || "").join(" "),
-						})),
-						{ role: "user", content: message },
-					],
-					tools,
-				});
-
-				const responseMessage = response.choices[0].message;
-				if (
-					responseMessage.tool_calls &&
-					responseMessage.tool_calls.length > 0
-				) {
-					let toolSummary = "";
-					let filter = undefined;
-					let component = undefined;
-
-					for (const toolCall of responseMessage.tool_calls) {
 						const tCall = toolCall as any;
 						const args = JSON.parse(tCall.function?.arguments || "{}");
 						const name = tCall.function?.name;
@@ -508,31 +414,104 @@ ${contextData}`;
 							await DeleteTransaction(cleanId);
 							toolSummary += `🗑️ Transaction deleted.\n`;
 						}
+					} catch (toolError: any) {
+						console.error("Chat tool execution error", toolError);
+						toolSummary += `⚠️ I couldn't complete that action: ${toolError?.message || toolError}\n`;
 					}
-
-					return {
-						text: toolSummary.trim() || responseMessage.content || "",
-						persona,
-						healthScore,
-						level: levelInfo.currentLevel.level,
-						filter,
-						component,
-					};
 				}
-				return {
-					text: responseMessage.content || "",
-					persona,
-					healthScore,
-					level: levelInfo.currentLevel.level,
-				};
-			} catch (e) {
-				console.error("OpenRouter Error", e);
+			}
+
+			const text = toolSummary.trim() || responseMessage?.content || "";
+			// An empty completion is a failed attempt, not a valid reply.
+			if (!text.trim()) return null;
+
+			return {
+				text,
+				persona,
+				healthScore,
+				level: levelInfo.currentLevel.level,
+				filter,
+				component,
+			};
+		};
+
+		// --- Provider chain: every endpoint we will try, in order ---
+		// Groq first, then the shared OpenRouter fallback chain. Model ids come
+		// from lib/llm-config so every feature moves together when a provider
+		// retires a model (this used to hardcode models Groq no longer serves,
+		// which is what made the chatbot report "AI Service Unavailable.").
+		if (groqApiKey) {
+			const groq = new Groq({
+				apiKey: groqApiKey,
+				// Fail fast: Groq 429s carry a long Retry-After. The OpenRouter
+				// chain below is the retry strategy.
+				maxRetries: 0,
+				timeout: REQUEST_TIMEOUT_MS,
+			});
+			for (const model of [GROQ_MODEL, ...GROQ_FALLBACK_MODELS]) {
+				attempts.push({
+					label: `groq/${model}`,
+					run: () =>
+						groq.chat.completions.create({
+							messages: buildMessages(),
+							model,
+							tools,
+							tool_choice: "auto",
+						}),
+				});
 			}
 		}
+
+		if (openRouterApiKey) {
+			const openai = new OpenAI({
+				baseURL: "https://openrouter.ai/api/v1",
+				apiKey: openRouterApiKey,
+				maxRetries: 0,
+				timeout: REQUEST_TIMEOUT_MS,
+			});
+			for (const model of OPENROUTER_FALLBACK_MODELS) {
+				attempts.push({
+					label: `openrouter/${model}`,
+					run: () =>
+						openai.chat.completions.create({
+							model,
+							messages: buildMessages(),
+							tools,
+						}),
+				});
+			}
+		}
+
+		for (const attempt of attempts) {
+			try {
+				const completion = await attempt.run();
+				const reply = await buildReply(completion?.choices?.[0]?.message);
+				if (reply) return reply;
+				providerErrors.push(`${attempt.label}: empty response`);
+			} catch (e: any) {
+				const reason = `${e?.status ?? ""} ${
+					e?.error?.message || e?.message || String(e)
+				}`
+					.replace(/\s+/g, " ")
+					.trim();
+				providerErrors.push(`${attempt.label}: ${reason.slice(0, 200)}`);
+				console.error(`[ChatWithAI] ${attempt.label} failed:`, reason);
+			}
+		}
+
 	} catch (error) {
 		console.error("AI Flow Error", error);
 		return { error: "Failed to process AI request." };
 	}
 
-	return { error: "AI Service Unavailable." };
+	// Every configured model endpoint failed. Report why instead of hiding
+	// the cause behind a bare "AI Service Unavailable.".
+	console.error("[ChatWithAI] all model attempts failed:", providerErrors);
+	return {
+		error: providerErrors.length
+			? `AI Service Unavailable. Tried ${providerErrors.length} endpoint(s): ${providerErrors
+					.slice(0, 3)
+					.join(" | ")}`
+			: "AI Service Unavailable (no model endpoint configured).",
+	};
 }

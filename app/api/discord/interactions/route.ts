@@ -3,6 +3,7 @@ import { verifyKey } from "discord-interactions";
 import prisma from "@/lib/prisma";
 import Groq, { toFile } from "groq-sdk";
 import { ChatWithAIHeadless } from "@/lib/telegram-ai";
+import { GROQ_MODEL } from "@/lib/llm-config";
 import { ExtractReceiptData } from "@/app/(dashboard)/_actions/extractReceipt";
 import { syncTransactionToNotion } from "@/lib/notion";
 
@@ -520,7 +521,7 @@ export async function POST(req: Request) {
               Output ONLY a valid JSON object. Example: {"amount": 50, "category": "Food", "description": "lunch", "type": "expense", "sentiment": "neutral", "empatheticResponse": null}
             `;
             const response = await getGroqClient().chat.completions.create({
-              model: "llama-3.3-70b-versatile",
+              model: GROQ_MODEL,
               messages: [{ role: "user", content: prompt }],
               temperature: 0,
             });
@@ -805,7 +806,7 @@ export async function POST(req: Request) {
                   Output ONLY a valid JSON array of objects. Example: [{"amount": 10, "category": "Drinks"}]
                 `;
                 const response = await getGroqClient().chat.completions.create({
-                  model: "llama-3.3-70b-versatile",
+                  model: GROQ_MODEL,
                   messages: [{ role: "user", content: prompt }],
                   temperature: 0,
                 });
